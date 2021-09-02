@@ -1,12 +1,13 @@
-from indexMethod import *
+# from indexMethod import *
+from mainMethod import *
 from sqlMethod import create_table, insert_values
 
 
 if __name__ == '__main__':
-    sheetName = 'bs'
-    stockCode = '600004'
+    table = 'bs'
+    stockCode = '600006'
 
-    headerList, bsList = res2list(sheetName, stockCode)
+    headerList = get_header(root='pkl', table=table)
 
     header = list()
 
@@ -21,7 +22,7 @@ if __name__ == '__main__':
         'database': 'fsIndex',
     }
 
-    table = '%sIndex2' % sheetName
+    tableName = '%sIndex3' % table
 
     headList = [
         ('id', 'INT'),
@@ -30,16 +31,15 @@ if __name__ == '__main__':
         ('dataType', 'VARCHAR(20)'),
     ]
 
-    res = create_table(
+    create_table(
         config=config,
-        table=table,
+        table=tableName,
         head_list=headList,
     )
-    print(res)
 
-    res = insert_values(
+    insert_values(
         config=config,
-        table=table,
+        table=tableName,
         data_list=header,
     )
-    print(res)
+

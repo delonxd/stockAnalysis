@@ -1,16 +1,28 @@
-from indexMethod import *
+# from indexMethod import *
+from mainMethod import *
 from sqlMethod import *
-import pandas as pd
 
 
 if __name__ == '__main__':
-    nameList = ['bs', 'ps', 'cfs', 'm']
-    for sheetName in nameList:
-        stockCode = '600007'
-        headList, dataList = res2list(sheetName, stockCode)
-        header = [("id_%s" % index, value[2]) for index, value in enumerate(headList)]
+    tableList = ['bs', 'ps', 'cfs', 'm']
+    for table in tableList:
+        stockCode = '600017'
 
-        database = '%sData' % sheetName
+        headerList = get_header(root='pkl', table=table)
+
+        fileName = 'FinancialSheet_%s.pkl' % stockCode
+        res = read_pkl(root='SecurityData', file_name=fileName)
+
+        dataList = format_res(
+            res=res,
+            table=table,
+            head_list=headerList,
+        )
+
+        header = [("id_%s" % index, value[2]) for index, value in enumerate(headerList)]
+
+        database = '%sData' % table
+
         config = {
             'user': 'root',
             'password': 'aQLZciNTq4sx',
@@ -19,20 +31,18 @@ if __name__ == '__main__':
             'database': database,
         }
 
-        table = '%s_%s' % (sheetName, stockCode)
+        tableName = '%s_%s' % (table, stockCode)
 
         create_table(
             config=config,
-            table=table,
+            table=tableName,
             head_list=header,
         )
-        # print(res)
 
         insert_values(
             config=config,
-            table=table,
+            table=tableName,
             data_list=dataList,
         )
-        # print(res)
 
 
