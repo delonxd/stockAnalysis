@@ -5,7 +5,7 @@ from method.mainMethod import *
 
 if __name__ == '__main__':
 
-    with open('../SecurityData/nfCodeList.pkl', 'rb') as pk_f:
+    with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
         codeList = pickle.load(pk_f)
 
     tables = ['bs', 'ps', 'cfs', 'm']

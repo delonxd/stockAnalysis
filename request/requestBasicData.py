@@ -13,6 +13,6 @@ req = urllib.request.Request(url, data=bytes(post_data, 'gbk'), headers=header_d
 res = urllib.request.urlopen(req).read().decode()
 print(res)
 
-with open('../SecurityData/BasicData.pkl', 'wb') as pk_f:
+with open('../basicData/BasicData.pkl', 'wb') as pk_f:
     pickle.dump(res, pk_f)
 
