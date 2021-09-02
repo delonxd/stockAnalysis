@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     subs = get_api_names(
         tables=tables,
-        root='../',
+        root='../basicData',
     )
 
     apiAll = config_api_names(
@@ -26,7 +26,7 @@ if __name__ == '__main__':
         length=100,
     )
 
-    for index, stockCode in enumerate(codeList[:1]):
+    for index, stockCode in enumerate(codeList[333:334]):
 
         # 显示时间戳
 

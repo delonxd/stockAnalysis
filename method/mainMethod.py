@@ -7,7 +7,7 @@ def get_api_names(tables, root):
 
     api_list = list()
     for table in tables:
-        path = '%spkl/Ns%sText.pkl' % (root, table.capitalize())
+        path = '%s/Ns%sText.pkl' % (root, table.capitalize())
         with open(path, 'rb') as pk_f:
             text = pickle.load(pk_f)
 
