@@ -406,14 +406,14 @@ mList = """
 经营活动产生的现金流量净额对固定资产的比率 : m.ncffoa_fa_r"""
 
 
-with open('../pkl/NsBsText.pkl', 'wb') as pk_f:
+with open('../basicData/NsBsText.pkl', 'wb') as pk_f:
     pickle.dump(bsList, pk_f)
 
-with open('../pkl/NsPsText.pkl', 'wb') as pk_f:
+with open('../basicData/NsPsText.pkl', 'wb') as pk_f:
     pickle.dump(psList, pk_f)
 
-with open('../pkl/NsCfsText.pkl', 'wb') as pk_f:
+with open('../basicData/NsCfsText.pkl', 'wb') as pk_f:
     pickle.dump(cfsList, pk_f)
 
-with open('../pkl/NsMText.pkl', 'wb') as pk_f:
+with open('../basicData/NsMText.pkl', 'wb') as pk_f:
     pickle.dump(mList, pk_f)
