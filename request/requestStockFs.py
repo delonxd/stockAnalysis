@@ -1,66 +1,69 @@
-import urllib.request
-import json
-import pickle
 import time
-from indexMethod import *
+from urlMethod import *
+from mainMethod import *
+
 
 if __name__ == '__main__':
 
     with open('../SecurityData/nfCodeList.pkl', 'rb') as pk_f:
         codeList = pickle.load(pk_f)
 
-    # for item in codeList:
-    #     print(item)
+    tables = ['bs', 'ps', 'cfs', 'm']
 
-    pathList = [
-        '../pkl/NsBsText.pkl',
-        '../pkl/NsPsText.pkl',
-        '../pkl/NsCfsText.pkl',
-        '../pkl/NsMText.pkl',
-    ]
+    subs = get_api_names(
+        tables=tables,
+        root='../',
+    )
 
-    MetricsList = get_metrics_list(path_list=pathList, q='q', t='t')
-    s_list = split_list(MetricsList)
-    # print(s_list)
+    apiAll = config_api_names(
+        infix_list=subs,
+        prefix='q',
+        postfix='t',
+    )
 
-    allList = list()
+    metricsList = split_list(
+        source=apiAll,
+        length=100,
+    )
 
-    url = 'https://open.lixinger.com/api/a/company/fs/non_financial'
-    # stockCode = "000065"
-    # codeList = codeList[:2]
-    # print(codeList)
+    for index, stockCode in enumerate(codeList[:1]):
 
-    newList = list(enumerate(codeList))
+        # 显示时间戳
 
-    print(newList)
-    for index, stockCode in newList[:10]:
+        startTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        print(startTime)
+        print(index, stockCode)
+
         resList = list()
 
-        for item in s_list:
-            data = {"token": "e7a7f2e5-181b-4caa-9142-592ab6787871",
-                    "startDate": "1970-01-01",
-                    "stockCodes": [stockCode],
-                    "metricsList": item,
-                    }
+        for metrics in metricsList:
 
-            post_data = json.dumps(data)
+            url = 'https://open.lixinger.com/api/a/company/fs/non_financial'
+            api = {
+                "token": "e7a7f2e5-181b-4caa-9142-592ab6787871",
+                "startDate": "1970-01-01",
+                "stockCodes": [stockCode],
+                "metricsList": metrics,
+            }
 
-            # print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-            # print(post_data)
-            header_dict = {'Content-Type': 'application/json'}
-
-            req = urllib.request.Request(url, data=bytes(post_data, 'gbk'), headers=header_dict)
-            res = urllib.request.urlopen(req).read()
-
+            res = data_request(url=url, api_dict=api)
             resList.append(res)
 
             time.sleep(0.2)
 
-        print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-        print(index, stockCode)
+        endTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        print(endTime)
 
-        outputPath = '../SecurityData/FinancialSheet_%s.pkl' % stockCode
-        with open(outputPath, 'wb') as pk_f:
-            pickle.dump(resList, pk_f)
-            # print(resList)
-            print('')
+        bufferData = {
+            'startTime': startTime,
+            'endTime': endTime,
+            'resList': resList,
+        }
+
+        fileName = 'Fs_%s' % stockCode
+        value2pkl(
+            root='../bufferData',
+            file_name=fileName,
+            value=bufferData,
+        )
+
