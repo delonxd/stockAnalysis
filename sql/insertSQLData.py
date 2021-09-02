@@ -1,6 +1,6 @@
 # from indexMethod import *
-from mainMethod import *
-from sqlMethod import *
+from method.mainMethod import *
+from method.sqlMethod import *
 
 
 if __name__ == '__main__':

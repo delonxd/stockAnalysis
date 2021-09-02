@@ -1,6 +1,6 @@
 import time
-from urlMethod import *
-from mainMethod import *
+from method.urlMethod import *
+from method.mainMethod import *
 
 
 if __name__ == '__main__':

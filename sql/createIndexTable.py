@@ -1,6 +1,5 @@
-# from indexMethod import *
-from mainMethod import *
-from sqlMethod import create_table, insert_values
+from method.mainMethod import *
+from method.sqlMethod import create_table, insert_values
 
 
 if __name__ == '__main__':
