@@ -6,7 +6,7 @@ if __name__ == '__main__':
     table = 'bs'
     stockCode = '600006'
 
-    headerList = get_header(root=r'..\pkl', table=table)
+    headerList = get_header(root=r'..\basicData', table=table)
 
     header = list()
 

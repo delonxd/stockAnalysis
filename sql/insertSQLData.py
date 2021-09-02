@@ -1,4 +1,3 @@
-# from indexMethod import *
 from method.mainMethod import *
 from method.sqlMethod import *
 
@@ -8,10 +7,10 @@ if __name__ == '__main__':
     for table in tableList:
         stockCode = '600012'
 
-        headerList = get_header(root=r'..\pkl', table=table)
+        headerList = get_header(root=r'..\basicData', table=table)
 
         fileName = 'FinancialSheet_%s.pkl' % stockCode
-        res = read_pkl(root=r'..\SecurityData', file_name=fileName)
+        res = read_pkl(root=r'..\bufferData', file_name=fileName)
 
         dataList = format_res(
             res=res,
