@@ -1,8 +1,14 @@
 import mysql.connector
 import json
+import time
 
 
 def insert_values(config, table, data_list):
+    print('inserting data:')
+    print('    database: %s' % config['database'])
+    print('    table: %s' % table)
+    print('    influenced row: %s\n' % len(data_list))
+
     sub_str = list()
     for index, value in enumerate(data_list):
         tmp_str = json.dumps(value, ensure_ascii=False)
@@ -24,10 +30,16 @@ def insert_values(config, table, data_list):
     db.commit()
     db.close()
 
+    print('data insertion complete.\n')
     return instruct
 
 
 def create_table(config, table, head_list):
+    print('creating table:')
+    print('    database: %s' % config['database'])
+    print('    table: %s' % table)
+    print('    influenced column: %s\n' % len(head_list))
+
     sub_str = list()
     for value in head_list:
         tmp_str = ' '.join(value)
@@ -44,6 +56,7 @@ def create_table(config, table, head_list):
     db.commit()
     db.close()
 
+    print('table creation complete.\n')
     return instruct
 
 
