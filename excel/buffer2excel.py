@@ -1,5 +1,4 @@
 from method.mainMethod import *
-from method.sqlMethod import create_table, insert_values
 from method.excelMethod import *
 import pandas as pd
 
@@ -43,5 +42,3 @@ if __name__ == '__main__':
         index=True,
         header=header,
     )
-
-

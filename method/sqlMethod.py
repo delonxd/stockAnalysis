@@ -1,6 +1,5 @@
 import mysql.connector
 import json
-import time
 
 
 def insert_values(config, table, data_list):
