@@ -7,7 +7,7 @@ if __name__ == '__main__':
     table = 'bs'
     stockCode = '600006'
 
-    headerList = get_header(root='pkl', table=table)
+    headerList = get_header(root=r'..\pkl', table=table)
 
     header = list()
 
@@ -22,7 +22,7 @@ if __name__ == '__main__':
         'database': 'fsIndex',
     }
 
-    tableName = '%sIndex3' % table
+    tableName = '%sIndex4' % table
 
     headList = [
         ('id', 'INT'),
