@@ -26,43 +26,51 @@ if __name__ == '__main__':
         length=100,
     )
 
-    for index, stockCode in enumerate(codeList[333:334]):
+    index = 0
+    while index < 4393:
+        stockCode = codeList[index]
 
-        # 显示时间戳
+        try:
 
-        startTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        print(startTime)
-        print(index, stockCode)
+            # 显示时间戳
+            startTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+            print(startTime)
+            print(index, stockCode)
 
-        resList = list()
+            resList = list()
 
-        for metrics in metricsList:
+            for metrics in metricsList:
 
-            url = 'https://open.lixinger.com/api/a/company/fs/non_financial'
-            api = {
-                "token": "e7a7f2e5-181b-4caa-9142-592ab6787871",
-                "startDate": "1970-01-01",
-                "stockCodes": [stockCode],
-                "metricsList": metrics,
+                url = 'https://open.lixinger.com/api/a/company/fs/non_financial'
+                api = {
+                    "token": "e7a7f2e5-181b-4caa-9142-592ab6787871",
+                    "startDate": "1970-01-01",
+                    "stockCodes": [stockCode],
+                    "metricsList": metrics,
+                }
+
+                res = data_request(url=url, api_dict=api)
+                resList.append(res)
+
+                time.sleep(0.2)
+
+            endTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+            print(endTime)
+
+            bufferData = {
+                'startTime': startTime,
+                'endTime': endTime,
+                'resList': resList,
             }
 
-            res = data_request(url=url, api_dict=api)
-            resList.append(res)
+            fileName = 'Fs_%s' % stockCode
+            value2pkl(
+                root='../bufferData',
+                file_name=fileName,
+                value=bufferData,
+            )
+            index += 1
 
-            time.sleep(0.2)
-
-        endTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        print(endTime)
-
-        bufferData = {
-            'startTime': startTime,
-            'endTime': endTime,
-            'resList': resList,
-        }
-
-        fileName = 'Fs_%s' % stockCode
-        value2pkl(
-            root='../bufferData',
-            file_name=fileName,
-            value=bufferData,
-        )
+        except BaseException as r:
+            print(r)
+            time.sleep(1)

@@ -5,12 +5,12 @@ from method.sqlMethod import *
 if __name__ == '__main__':
     tableList = ['bs', 'ps', 'cfs', 'm']
     for table in tableList:
-        stockCode = '600012'
+        stockCode = '600004'
 
         headerList = get_header(root=r'..\basicData', table=table)
 
         fileName = 'FinancialSheet_%s.pkl' % stockCode
-        res = read_pkl(root=r'..\bufferData', file_name=fileName)
+        res = read_pkl(root=r'..\bufferData\financialData', file_name=fileName)
 
         dataList = format_res(
             res=res,
