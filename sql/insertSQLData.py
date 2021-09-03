@@ -3,43 +3,68 @@ from method.sqlMethod import *
 
 
 if __name__ == '__main__':
-    tableList = ['bs', 'ps', 'cfs', 'm']
-    for table in tableList:
-        stockCode = '600004'
+    # infixList = ['bs', 'ps', 'cfs', 'm']
+    infixList = ['bs']
+    for infix in infixList:
+        stockCode = '600008'
 
-        headerList = get_header(root=r'..\basicData', table=table)
+        tFile = 'Ns%sText.pkl' % infix.capitalize()
+        dataHeader = get_header(root=r'..\basicData', file=tFile)
 
-        fileName = 'FinancialSheet_%s.pkl' % stockCode
-        res = read_pkl(root=r'..\bufferData\financialData', file_name=fileName)
+        tFile = 'FinancialSheet_%s.pkl' % stockCode
+        res = read_pkl(root=r'..\bufferData\financialData', file=tFile)
 
         dataList = format_res(
             res=res,
-            table=table,
-            head_list=headerList,
+            prefix='q',
+            infix=infix,
+            postfix='t',
+            head_list=dataHeader,
         )
 
-        header = [("id_%s" % index, value[2]) for index, value in enumerate(headerList)]
+        # header = [("id_%s" % index, value[2]) for index, value in enumerate(sql_header)]
 
-        database = '%sData' % table
+        iniHeader = [
+            ('first_update', 'VARCHAR(50)'),
+            ('last_update', 'VARCHAR(50)'),
+        ]
+        sqlHeader = get_sql_header(dataHeader, iniHeader)
+
+        print(sqlHeader)
+        print(dataHeader)
 
         config = {
             'user': 'root',
             'password': 'aQLZciNTq4sx',
             'host': 'localhost',
             'port': '3306',
-            'database': database,
+            'database': '%sData' % infix,
         }
 
-        tableName = '%s_%s' % (table, stockCode)
+        table = '%s_%s' % (infix, stockCode)
 
-        create_table(
-            config=config,
-            table=tableName,
-            head_list=header,
-        )
+        db = mysql.connector.connect(**config)
 
-        insert_values(
-            config=config,
-            table=tableName,
-            data_list=dataList,
-        )
+        # if not sql_check_table_exists(db, table):
+        #     sql_create_table(db, table, sqlHeader)
+        #
+        # for data in dataList:
+        #     tmp = [1, 1]
+        #     tmp.extend(data)
+        #     sql_insert_value(db, table, tuple(tmp))
+
+        for data in dataList:
+            tmp = [4, 4]
+            tmp.extend(data)
+
+            date = data[2]
+            sql_update_value(
+                db=db,
+                table=table,
+                value=tmp,
+                sift_field='standardDate',
+                sift_key=date,
+
+                )
+
+        db.close()

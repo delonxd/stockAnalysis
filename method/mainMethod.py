@@ -44,23 +44,22 @@ def value2pkl(root, file_name, value):
         pickle.dump(value, pk_f)
 
 
-def read_pkl(root, file_name):
-    path = '%s/%s' % (root, file_name)
+def read_pkl(root, file):
+    path = '%s/%s' % (root, file)
     with open(path, 'rb') as pk_f:
         res = pickle.load(pk_f)
     return res
 
 
-def get_header(root, table):
-    file_name = 'Ns%sText.pkl' % table.capitalize()
-    path = '%s/%s' % (root, file_name)
+def get_header(root, file):
+    path = '%s/%s' % (root, file)
     with open(path, 'rb') as pk_f:
         res = pickle.load(pk_f)
 
-    head_list = [
+    data_header = [
         ('代码', 'stockCode', 'VARCHAR(6)'),
         ('货币', 'currency', 'VARCHAR(10)'),
-        ('标准日期', 'standardDate', 'VARCHAR(30)'),
+        ('标准日期', 'standardDate', 'VARCHAR(30) PRIMARY KEY'),
         ('报告日期', 'reportDate', 'VARCHAR(30)'),
         ('报告类型', 'reportType', 'VARCHAR(30)'),
         ('日期', 'date', 'VARCHAR(30)'),
@@ -70,14 +69,14 @@ def get_header(root, table):
         tmp = re.findall(r'(.*):(.*)\.(.*)', rowText)
 
         if len(tmp) == 0:
-            head_list.append((rowText, None, 'VARCHAR(1)'))
+            data_header.append((rowText, None, 'VARCHAR(1)'))
         else:
-            head_list.append((tmp[0][0], tmp[0][2], 'DOUBLE'))
+            data_header.append((tmp[0][0], tmp[0][2], 'DOUBLE'))
 
-    return head_list
+    return data_header
 
 
-def format_res(res, table, head_list):
+def format_res(res, prefix, infix, postfix, head_list):
 
     index_dict = dict()
     for index, item in enumerate(head_list):
@@ -96,11 +95,11 @@ def format_res(res, table, head_list):
                 tmp_dict[date] = [None] * len(head_list)
 
             for key, value in tmp.items():
-                if key == 'q':
-                    if table in value.keys():
-                        sub_dict = value[table]
+                if key == prefix:
+                    if infix in value.keys():
+                        sub_dict = value[infix]
                         for subKey, subValue in sub_dict.items():
-                            tmp_dict[date][index_dict[subKey]] = subValue.get('t')
+                            tmp_dict[date][index_dict[subKey]] = subValue.get(postfix)
                 else:
 
                     tmp_dict[date][index_dict[key]] = value

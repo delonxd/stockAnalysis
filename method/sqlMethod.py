@@ -1,5 +1,6 @@
 import mysql.connector
 import json
+import time
 
 
 def insert_values(config, table, data_list):
@@ -57,6 +58,216 @@ def create_table(config, table, head_list):
 
     print('table creation complete.\n')
     return instruct
+
+
+def sql_condition(left, sign, right):
+    condition = '%s %s %s' % (left, sign, right)
+    return condition
+
+
+def sql_select(db, select: str, table, where=None):
+    cursor = db.cursor()
+
+    if where is None:
+        where = '1 = 1'
+
+    tmp_str = """
+        SELECT
+            %s 
+        FROM
+            %s
+        WHERE %s;
+    """ % (select, table, where)
+
+    cursor.execute(tmp_str)
+    result = cursor.fetchall()
+
+    return result
+
+
+def sql_insert_value(db, table, value):
+    cursor = db.cursor()
+
+    data = json.dumps(value, ensure_ascii=False)
+
+    data = '(%s)' % data[1:-1]
+    tmp_str = """
+        INSERT INTO
+            %s
+        VALUES
+            %s;
+    """ % (table, data)
+
+    cursor.execute(tmp_str)
+    db.commit()
+
+    return tmp_str
+
+
+def sql_alter_value(db, table, value, sift_field, sift_key):
+    cursor = db.cursor()
+
+    data = json.dumps(value, ensure_ascii=False)
+
+    data = '(%s)' % data[1:-1]
+    tmp_str = """
+        INSERT INTO
+            %s
+        VALUES
+            %s;
+    """ % (table, data)
+
+    cursor.execute(tmp_str)
+    db.commit()
+
+    return tmp_str
+
+
+def sql_update_value(db, table, value, sift_field, sift_key, alter=True, timestamp=True):
+
+    res = sql_check_primary_key_exists(db, table, sift_field, sift_key)
+
+    if res:
+        value[0] = res[0][1]
+        print(value)
+        # print(value)
+
+    # if flag:
+    #
+    #     sql_alter_value()
+    #
+    #
+    #
+    #
+    # else:
+    #     sql_insert_value()
+
+
+
+    # if timestamp is True:
+    #     first_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+    #     last_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+    #
+    # data = json.dumps(value, ensure_ascii=False)
+    #
+    # data = '(%s)' % data[1:-1]
+    # tmp_str = """
+    #     INSERT INTO
+    #         %s
+    #     VALUES
+    #         %s;
+    # """ % (table, data)
+    #
+    # cursor.execute(tmp_str)
+    # db.commit()
+    #
+    # return tmp_str
+
+
+def sql_check_primary_key_exists(db, table, field, key):
+    cursor = db.cursor()
+    instruct = """
+        SELECT 
+            * 
+        FROM 
+            %s
+        WHERE 
+            %s = "%s";
+    """ % (table, field, key)
+
+    cursor.execute(instruct)
+
+    return cursor.fetchall()
+
+
+def sql_format_header(header: list):
+    if not isinstance(header, list):
+        raise KeyboardInterrupt('header格式需为列表')
+
+    if len(header) == 0:
+        raise KeyboardInterrupt('header至少拥有一个字段')
+
+    sub_str = list()
+    for item in header:
+        if len(item) != 2:
+            raise KeyboardInterrupt('字段需要两种参数：字段名、字段类型')
+
+        if not isinstance(item[0], str):
+            raise KeyboardInterrupt('字段名需要为字符串类型')
+        else:
+            if item[0].isdigit():
+                raise KeyboardInterrupt('字段名需要为非数值字符串类型')
+
+        if not isinstance(item[1], str):
+            raise KeyboardInterrupt('字段类型需要为字符串类型')
+
+        tmp_str = ' '.join(item)
+        sub_str.append(tmp_str)
+
+    res_str = ',\n'.join(sub_str)
+
+    return res_str
+
+
+def sql_create_table(db, table, header):
+
+    if sql_check_table_exists(db, table):
+        raise KeyboardInterrupt('table已存在')
+
+    cursor = db.cursor()
+
+    header_str = sql_format_header(header)
+    instruct = """
+        CREATE TABLE %s (
+            %s
+        );
+        """ % (table, header_str)
+
+    print(instruct)
+    cursor.execute(instruct)
+    db.commit()
+
+
+def sql_check_table_exists(db, table):
+    cursor = db.cursor()
+    instruct = """
+        SELECT 
+            * 
+        FROM 
+            information_schema.TABLES 
+        WHERE 
+            table_name = '%s';
+    """ % table
+
+    cursor.execute(instruct)
+
+    if not cursor.fetchall():
+        return False
+    else:
+        return True
+
+
+def get_sql_header(data_header, ini_header):
+
+    special_header = [
+        "stockCode",
+        "currency",
+        "standardDate" ,
+        "reportDate",
+        "reportType",
+        "date"
+     ]
+
+    sql_header = ini_header
+    for index, item in enumerate(data_header):
+        if item[1] in special_header:
+            tmp = (item[1], item[2])
+        else:
+            tmp = ('id_%s' % index, item[2])
+
+        sql_header.append(tmp)
+
+    return sql_header
 
 
 if __name__ == '__main__':
