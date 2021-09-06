@@ -1,63 +1,64 @@
 import mysql.connector
 import json
 import time
+import pandas as pd
 
 
-def insert_values(config, table, data_list):
-    print('inserting data:')
-    print('    database: %s' % config['database'])
-    print('    table: %s' % table)
-    print('    influenced row: %s\n' % len(data_list))
-
-    sub_str = list()
-    for index, value in enumerate(data_list):
-        tmp_str = json.dumps(value, ensure_ascii=False)
-        tmp_str = "(%s)" % tmp_str[1:-1]
-
-        sub_str.append(tmp_str)
-
-    column_str = ',\n'.join(sub_str)
-
-    db = mysql.connector.connect(**config)
-
-    cursor = db.cursor()
-
-    instruct = """
-    INSERT INTO %s VALUES \n%s;
-    """ % (table, column_str)
-
-    cursor.execute(instruct)
-    db.commit()
-    db.close()
-
-    print('data insertion complete.\n')
-    return instruct
-
-
-def create_table(config, table, head_list):
-    print('creating table:')
-    print('    database: %s' % config['database'])
-    print('    table: %s' % table)
-    print('    influenced column: %s\n' % len(head_list))
-
-    sub_str = list()
-    for value in head_list:
-        tmp_str = ' '.join(value)
-        sub_str.append(tmp_str)
-
-    column_str = ',\n'.join(sub_str)
-    db = mysql.connector.connect(**config)
-    cursor = db.cursor()
-
-    instruct = """CREATE TABLE IF NOT EXISTS %s (\n%s\n);""" \
-               % (table, column_str)
-
-    cursor.execute(instruct)
-    db.commit()
-    db.close()
-
-    print('table creation complete.\n')
-    return instruct
+# def insert_values(config, table, data_list):
+#     print('inserting data:')
+#     print('    database: %s' % config['database'])
+#     print('    table: %s' % table)
+#     print('    influenced row: %s\n' % len(data_list))
+#
+#     sub_str = list()
+#     for index, value in enumerate(data_list):
+#         tmp_str = json.dumps(value, ensure_ascii=False)
+#         tmp_str = "(%s)" % tmp_str[1:-1]
+#
+#         sub_str.append(tmp_str)
+#
+#     column_str = ',\n'.join(sub_str)
+#
+#     db = mysql.connector.connect(**config)
+#
+#     cursor = db.cursor()
+#
+#     instruct = """
+#     INSERT INTO %s VALUES \n%s;
+#     """ % (table, column_str)
+#
+#     cursor.execute(instruct)
+#     db.commit()
+#     db.close()
+#
+#     print('data insertion complete.\n')
+#     return instruct
+#
+#
+# def create_table(config, table, head_list):
+#     print('creating table:')
+#     print('    database: %s' % config['database'])
+#     print('    table: %s' % table)
+#     print('    influenced column: %s\n' % len(head_list))
+#
+#     sub_str = list()
+#     for value in head_list:
+#         tmp_str = ' '.join(value)
+#         sub_str.append(tmp_str)
+#
+#     column_str = ',\n'.join(sub_str)
+#     db = mysql.connector.connect(**config)
+#     cursor = db.cursor()
+#
+#     instruct = """CREATE TABLE IF NOT EXISTS %s (\n%s\n);""" \
+#                % (table, column_str)
+#
+#     cursor.execute(instruct)
+#     db.commit()
+#     db.close()
+#
+#     print('table creation complete.\n')
+#     return instruct
 
 
 def sql_condition(left, sign, right):
@@ -85,6 +86,32 @@ def sql_select(db, select: str, table, where=None):
     return result
 
 
+def sql_insert_values(db, table, values):
+    cursor = db.cursor()
+
+    sub_str = list()
+    for value in values:
+        tmp_str = json.dumps(value, ensure_ascii=False)
+        tmp_str = "(%s)" % tmp_str[1:-1]
+
+        sub_str.append(tmp_str)
+
+    column_str = ',\n'.join(sub_str)
+
+    tmp_str = """
+        INSERT INTO
+            %s
+        VALUES
+            %s;
+    """ % (table, column_str)
+
+    cursor.execute(tmp_str)
+    db.commit()
+    time.sleep(1)
+
+    return tmp_str
+
+
 def sql_insert_value(db, table, value):
     cursor = db.cursor()
 
@@ -104,80 +131,49 @@ def sql_insert_value(db, table, value):
     return tmp_str
 
 
-def sql_alter_value(db, table, value, sift_field, sift_key):
-    cursor = db.cursor()
+def sql_update_value(db, table, df, check_field, alter=True):
 
-    data = json.dumps(value, ensure_ascii=False)
+    if alter:
+        condition = sql_condition(check_field, '=', '"%s"' % df.loc[check_field][0])
+        tmp_res = sql_select(db, '*', table, where=condition)
 
-    data = '(%s)' % data[1:-1]
-    tmp_str = """
-        INSERT INTO
-            %s
-        VALUES
-            %s;
-    """ % (table, data)
+        if tmp_res:
+            df_res = pd.DataFrame(tmp_res[0], index=df.index)
+            df.loc['first_update'][0] = df_res.loc['first_update'][0]
 
-    cursor.execute(tmp_str)
-    db.commit()
+            cursor = db.cursor()
 
-    return tmp_str
+            data = json.dumps(list(df[0]), ensure_ascii=False)
 
+            data = '(%s)' % data[1:-1]
+            insert_str = """
+                INSERT INTO
+                    %s
+                VALUES
+                    %s;
+            """ % (table, data)
 
-def sql_update_value(db, table, value, sift_field, sift_key, alter=True, timestamp=True):
+            delete_str = """
+                DELETE FROM
+                    %s
+                WHERE
+                    %s;
+            """ % (table, condition)
 
-    res = sql_check_primary_key_exists(db, table, sift_field, sift_key)
+            tmp_str = delete_str + insert_str
 
-    if res:
-        value[0] = res[0][1]
-        print(value)
-        # print(value)
+            for _ in cursor.execute(tmp_str, multi=True):
+                pass
 
-    # if flag:
-    #
-    #     sql_alter_value()
-    #
-    #
-    #
-    #
-    # else:
-    #     sql_insert_value()
+            db.commit()
 
+        else:
+            value = list(df[0])
+            sql_insert_value(db, table, value)
 
-
-    # if timestamp is True:
-    #     first_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-    #     last_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-    #
-    # data = json.dumps(value, ensure_ascii=False)
-    #
-    # data = '(%s)' % data[1:-1]
-    # tmp_str = """
-    #     INSERT INTO
-    #         %s
-    #     VALUES
-    #         %s;
-    # """ % (table, data)
-    #
-    # cursor.execute(tmp_str)
-    # db.commit()
-    #
-    # return tmp_str
-
-
-def sql_check_primary_key_exists(db, table, field, key):
-    cursor = db.cursor()
-    instruct = """
-        SELECT 
-            * 
-        FROM 
-            %s
-        WHERE 
-            %s = "%s";
-    """ % (table, field, key)
-
-    cursor.execute(instruct)
-
-    return cursor.fetchall()
+    else:
+        value = list(df[0])
+        sql_insert_value(db, table, value)
 
 
 def sql_format_header(header: list):
@@ -223,7 +219,6 @@ def sql_create_table(db, table, header):
         );
         """ % (table, header_str)
 
-    print(instruct)
     cursor.execute(instruct)
     db.commit()
 
@@ -284,9 +279,3 @@ if __name__ == '__main__':
         ('name', 'VARCHAR(20)'),
     ]
 
-    res = create_table(
-        config=sql_config,
-        table='test02',
-        head_list=tmpList,
-    )
-    print(res)

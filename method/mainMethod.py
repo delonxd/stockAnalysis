@@ -51,7 +51,7 @@ def read_pkl(root, file):
     return res
 
 
-def get_header(root, file):
+def get_header_fs(root, file):
     path = '%s/%s' % (root, file)
     with open(path, 'rb') as pk_f:
         res = pickle.load(pk_f)
@@ -72,6 +72,27 @@ def get_header(root, file):
             data_header.append((rowText, None, 'VARCHAR(1)'))
         else:
             data_header.append((tmp[0][0], tmp[0][2], 'DOUBLE'))
+
+    return data_header
+
+
+def get_header_price(root, file):
+    path = '%s/%s' % (root, file)
+    with open(path, 'rb') as pk_f:
+        res = pickle.load(pk_f)
+
+    data_header = [
+        ('代码', 'stockCode', 'VARCHAR(6)'),
+        ('日期', 'date', 'VARCHAR(30)'),
+    ]
+
+    for rowText in re.findall(r'\n(.*)', res):
+        tmp = re.findall(r'(.*) :(.*)', rowText)
+
+        if len(tmp) == 0:
+            data_header.append((rowText, None, 'VARCHAR(1)'))
+        else:
+            data_header.append((tmp[0][0], tmp[0][1], 'DOUBLE'))
 
     return data_header
 
@@ -111,5 +132,34 @@ def format_res(res, prefix, infix, postfix, head_list):
         # print(value)
 
     # header = [value[0] for value in head_list]
+
+    return tmp_list
+
+
+def format_res_price(res, head_list):
+    index_dict = dict()
+    for index, item in enumerate(head_list):
+        if item[1] in index_dict.keys():
+            raise InterruptedError('error')
+        if item[1] is not None:
+            index_dict[item[1]] = index
+
+    list0 = json.loads(res.decode())['data']
+
+    tmp_dict = dict()
+    for tmp in list0:
+        date = tmp['date']
+
+        if date not in tmp_dict.keys():
+            tmp_dict[date] = [None] * len(head_list)
+
+        for key, value in tmp.items():
+
+            if key in index_dict.keys():
+                tmp_dict[date][index_dict[key]] = value
+
+    tmp_list = list()
+    for key, value in tmp_dict.items():
+        tmp_list.append(value)
 
     return tmp_list
