@@ -10,9 +10,12 @@ if __name__ == '__main__':
 
     tables = ['bs', 'ps', 'cfs', 'm']
 
+    files = [''.join(['Ns', value.capitalize(), 'Text.pkl']) for value in tables]
+
     subs = get_api_names(
-        tables=tables,
+        files=files,
         root='../basicData',
+        regular=r'\n.* : (.*)',
     )
 
     apiAll = config_api_names(
@@ -26,8 +29,8 @@ if __name__ == '__main__':
         length=100,
     )
 
-    index = 0
-    while index < 4393:
+    index = 400
+    while index < 402:
         stockCode = codeList[index]
 
         try:
@@ -63,9 +66,9 @@ if __name__ == '__main__':
                 'resList': resList,
             }
 
-            fileName = 'Fs_%s' % stockCode
+            fileName = 'FinancialSheet_%s' % stockCode
             value2pkl(
-                root='../bufferData',
+                root='../bufferData/financialData',
                 file_name=fileName,
                 value=bufferData,
             )
