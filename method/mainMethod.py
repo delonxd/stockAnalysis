@@ -18,7 +18,7 @@ def get_api_names(root, files, regular):
     return api_list
 
 
-def config_api_names(infix_list, prefix, postfix):
+def config_api_names(infix_list, prefix=None, postfix=None):
     res_list = list()
     for infix in infix_list:
         tmp = list()
