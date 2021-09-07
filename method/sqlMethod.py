@@ -1,179 +1,156 @@
-import mysql.connector
 import json
 import time
-import pandas as pd
 
 
-# def insert_values(config, table, data_list):
-#     print('inserting data:')
-#     print('    database: %s' % config['database'])
-#     print('    table: %s' % table)
-#     print('    influenced row: %s\n' % len(data_list))
-#
-#     sub_str = list()
-#     for index, value in enumerate(data_list):
-#         tmp_str = json.dumps(value, ensure_ascii=False)
-#         tmp_str = "(%s)" % tmp_str[1:-1]
-#
-#         sub_str.append(tmp_str)
-#
-#     column_str = ',\n'.join(sub_str)
-#
-#     db = mysql.connector.connect(**config)
-#
-#     cursor = db.cursor()
-#
-#     instruct = """
-#     INSERT INTO %s VALUES \n%s;
-#     """ % (table, column_str)
-#
-#     cursor.execute(instruct)
-#     db.commit()
-#     db.close()
-#
-#     print('data insertion complete.\n')
-#     return instruct
-#
-#
-# def create_table(config, table, head_list):
-#     print('creating table:')
-#     print('    database: %s' % config['database'])
-#     print('    table: %s' % table)
-#     print('    influenced column: %s\n' % len(head_list))
-#
-#     sub_str = list()
-#     for value in head_list:
-#         tmp_str = ' '.join(value)
-#         sub_str.append(tmp_str)
-#
-#     column_str = ',\n'.join(sub_str)
-#     db = mysql.connector.connect(**config)
-#     cursor = db.cursor()
-#
-#     instruct = """CREATE TABLE IF NOT EXISTS %s (\n%s\n);""" \
-#                % (table, column_str)
-#
-#     cursor.execute(instruct)
-#     db.commit()
-#     db.close()
-#
-#     print('table creation complete.\n')
-#     return instruct
+def sql_update_data_list(cursor, table, data_list, check_field, ini=False):
+
+    prefix = """
+        SET autocommit = 0;
+        START TRANSACTION;
+    """
+    postfix = """
+        COMMIT;
+        SET autocommit = 1;
+    """
+    infix = ""
+
+    if ini:
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+
+        for data in data_list:
+            row_data = [timestamp, timestamp]
+            row_data.extend(data)
+
+            insert_str = sql_format_insert(table, values=row_data)
+            infix = ''.join([infix, insert_str])
+
+        instruct = ''.join([prefix, infix, postfix])
+
+        cursor.execute(instruct, multi=True)
+
+        return instruct
+
+    else:
+        check_str = sql_format_select(
+            select='COLUMN_name',
+            table='information_schema.COLUMNS',
+            where='table_name = "%s"' % table,
+            order_by='ordinal_position',
+        )
+        cursor.execute(check_str)
+        res = cursor.fetchall()
+
+        header = [value[0] for value in res][2:]
+        index = header.index(check_field)
+
+        for data in data_list:
+            condition = sql_format_condition(check_field, '=', '"%s"' % data[index])
+            select_str = sql_format_select('*', table, where=condition)
+            cursor.execute(select_str)
+            tmp_res = cursor.fetchall()
+
+            sql_data = list(tmp_res[0])[2:]
+
+            if sql_data == data:
+                pass
+            else:
+                timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+                row_data = [tmp_res[0][0], timestamp]
+                row_data.extend(data)
+
+                delete_str = sql_format_delete(table=table, where=condition)
+                insert_str = sql_format_insert(table=table, values=row_data)
+
+                infix = ''.join([infix, delete_str, insert_str])
+
+        instruct = ''.join([prefix, infix, postfix])
+        cursor.execute(instruct, multi=True)
 
 
-def sql_condition(left, sign, right):
+def sql_format_condition(left, sign, right):
     condition = '%s %s %s' % (left, sign, right)
     return condition
 
 
-def sql_select(db, select: str, table, where=None):
-    cursor = db.cursor()
+def sql_format_insert(table, values):
+    data_str = json.dumps(values, ensure_ascii=False)
+    data_str = '(%s)' % data_str[1:-1]
 
-    if where is None:
-        where = '1 = 1'
+    result = """
+        INSERT INTO
+            %s
+        VALUES
+            %s;
+    """ % (table, data_str)
+    return result
 
-    tmp_str = """
+
+def sql_format_delete(table, where=None):
+
+    result = """
+        DELETE FROM
+            %s
+    """ % table
+
+    if where is not None:
+        postfix = """
+        WHERE
+            %s;
+    """ % where
+        result = ''.join([result, postfix])
+    return result
+
+
+def sql_format_select(select, table, where=None, order_by=None):
+
+    result = """
         SELECT
             %s 
         FROM
             %s
-        WHERE %s;
-    """ % (select, table, where)
+    """ % (select, table)
 
-    cursor.execute(tmp_str)
-    result = cursor.fetchall()
+    if where is not None:
+        postfix = """
+        WHERE
+            %s 
+    """ % where
+        result = ''.join([result, postfix])
+
+    if order_by is not None:
+        postfix = """
+        ORDER BY
+            %s 
+    """ % where
+        result = ''.join([result, postfix])
 
     return result
 
 
-def sql_insert_values(db, table, values):
-    cursor = db.cursor()
+def sql_format_create_table(table, header, if_not_exists=True):
+    infix = ''
+    if if_not_exists:
+        infix = 'IF NOT EXISTS'
 
-    sub_str = list()
-    for value in values:
-        tmp_str = json.dumps(value, ensure_ascii=False)
-        tmp_str = "(%s)" % tmp_str[1:-1]
-
-        sub_str.append(tmp_str)
-
-    column_str = ',\n'.join(sub_str)
-
-    tmp_str = """
-        INSERT INTO
+    result = """
+        CREATE TABLE %s %s (
             %s
-        VALUES
-            %s;
-    """ % (table, column_str)
+        );
+    """ % (infix, table, header)
 
-    cursor.execute(tmp_str)
-    db.commit()
-    time.sleep(1)
-
-    return tmp_str
+    return result
 
 
-def sql_insert_value(db, table, value):
-    cursor = db.cursor()
+def sql_format_drop_table(table, if_exists=True):
+    infix = ''
+    if if_exists:
+        infix = 'IF EXISTS'
 
-    data = json.dumps(value, ensure_ascii=False)
+    result = """
+        DROP TABLE %s %s;
+    """ % (infix, table, )
 
-    data = '(%s)' % data[1:-1]
-    tmp_str = """
-        INSERT INTO
-            %s
-        VALUES
-            %s;
-    """ % (table, data)
-
-    cursor.execute(tmp_str)
-    db.commit()
-
-    return tmp_str
-
-
-def sql_update_value(db, table, df, check_field, alter=True):
-
-    if alter:
-        condition = sql_condition(check_field, '=', '"%s"' % df.loc[check_field][0])
-        tmp_res = sql_select(db, '*', table, where=condition)
-
-        if tmp_res:
-            df_res = pd.DataFrame(tmp_res[0], index=df.index)
-            df.loc['first_update'][0] = df_res.loc['first_update'][0]
-
-            cursor = db.cursor()
-
-            data = json.dumps(list(df[0]), ensure_ascii=False)
-
-            data = '(%s)' % data[1:-1]
-            insert_str = """
-                INSERT INTO
-                    %s
-                VALUES
-                    %s;
-            """ % (table, data)
-
-            delete_str = """
-                DELETE FROM
-                    %s
-                WHERE
-                    %s;
-            """ % (table, condition)
-
-            tmp_str = delete_str + insert_str
-
-            for _ in cursor.execute(tmp_str, multi=True):
-                pass
-
-            db.commit()
-
-        else:
-            value = list(df[0])
-            sql_insert_value(db, table, value)
-
-    else:
-        value = list(df[0])
-        sql_insert_value(db, table, value)
+    return result
 
 
 def sql_format_header(header: list):
@@ -205,49 +182,12 @@ def sql_format_header(header: list):
     return res_str
 
 
-def sql_create_table(db, table, header):
-
-    if sql_check_table_exists(db, table):
-        raise KeyboardInterrupt('table已存在')
-
-    cursor = db.cursor()
-
-    header_str = sql_format_header(header)
-    instruct = """
-        CREATE TABLE %s (
-            %s
-        );
-        """ % (table, header_str)
-
-    cursor.execute(instruct)
-    db.commit()
-
-
-def sql_check_table_exists(db, table):
-    cursor = db.cursor()
-    instruct = """
-        SELECT 
-            * 
-        FROM 
-            information_schema.TABLES 
-        WHERE 
-            table_name = '%s';
-    """ % table
-
-    cursor.execute(instruct)
-
-    if not cursor.fetchall():
-        return False
-    else:
-        return True
-
-
 def get_sql_header(data_header, ini_header):
 
     special_header = [
         "stockCode",
         "currency",
-        "standardDate" ,
+        "standardDate",
         "reportDate",
         "reportType",
         "date"
@@ -278,4 +218,3 @@ if __name__ == '__main__':
         ('id', 'INT'),
         ('name', 'VARCHAR(20)'),
     ]
-
