@@ -1,6 +1,6 @@
 from method.mainMethod import *
 from method.sqlMethod import *
-import pandas as pd
+import mysql.connector
 
 
 if __name__ == '__main__':
@@ -21,11 +21,13 @@ if __name__ == '__main__':
         }
         db = mysql.connector.connect(**config)
 
-        for stockCode in codeList[:5]:
+        cursor = db.cursor()
+
+        # for stockCode in codeList[:5]:
+        for stockCode in ['600372']:
 
             print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
             print(stockCode)
-            # stockCode = '600008'
 
             tFile = 'Ns%sText.pkl' % infix.capitalize()
             dataHeader = get_header_fs(root=r'..\basicData', file=tFile)
@@ -34,7 +36,8 @@ if __name__ == '__main__':
             res = read_pkl(root=r'..\bufferData\financialData', file=tFile)
 
             dataList = format_res(
-                res=res,
+                res=res['resList'],
+                # res=res,
                 prefix='q',
                 infix=infix,
                 postfix='t',
@@ -45,32 +48,23 @@ if __name__ == '__main__':
                 ('first_update', 'VARCHAR(50)'),
                 ('last_update', 'VARCHAR(50)'),
             ]
-            sqlHeader = get_sql_header(dataHeader, iniHeader)
+            headerList = get_sql_header(dataHeader, iniHeader)
+            headerStr = sql_format_header(headerList)
 
             table = '%s_%s' % (infix, stockCode)
 
-            # # DROP
-            # db.cursor().execute('DROP TABLE if EXISTS %s;' % table)
+            # cursor.execute(sql_format_drop_table(table, if_exists=True))
             # db.commit()
 
-            if not sql_check_table_exists(db, table):
-                sql_create_table(db, table, sqlHeader)
+            cursor.execute(sql_format_create_table(table, headerStr))
+            db.commit()
 
-            header = list(zip(*sqlHeader))[0]
-
-            for data in dataList:
-                timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-                tmp = [timestamp, timestamp]
-                tmp.extend(data)
-
-                df = pd.DataFrame(tmp, index=header)
-
-                sql_update_value(
-                    db=db,
-                    table=table,
-                    df=df,
-                    check_field='standardDate',
-                    alter=True,
-                )
+            sql_update_data_list(
+                cursor=cursor,
+                table=table,
+                data_list=dataList,
+                check_field='standardDate',
+                ini=True,
+            )
 
         db.close()
