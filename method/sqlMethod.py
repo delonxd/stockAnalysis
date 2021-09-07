@@ -1,5 +1,6 @@
 import json
 import time
+import pandas as pd
 
 
 def sql_update_data_list(cursor, table, data_list, check_field, ini=False):
@@ -10,25 +11,26 @@ def sql_update_data_list(cursor, table, data_list, check_field, ini=False):
     """
     postfix = """
         COMMIT;
-        SET autocommit = 1;
     """
     infix = ""
 
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+
     if ini:
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        for _ in cursor.execute(prefix, multi=True):
+            pass
 
         for data in data_list:
             row_data = [timestamp, timestamp]
             row_data.extend(data)
 
             insert_str = sql_format_insert(table, values=row_data)
-            infix = ''.join([infix, insert_str])
 
-        instruct = ''.join([prefix, infix, postfix])
+            for _ in cursor.execute(insert_str, multi=True):
+                pass
 
-        cursor.execute(instruct, multi=True)
-
-        return instruct
+        for _ in cursor.execute(postfix, multi=True):
+            pass
 
     else:
         check_str = sql_format_select(
@@ -40,31 +42,77 @@ def sql_update_data_list(cursor, table, data_list, check_field, ini=False):
         cursor.execute(check_str)
         res = cursor.fetchall()
 
-        header = [value[0] for value in res][2:]
+        header1 = [value[0] for value in res]
+        header = header1[2:]
         index = header.index(check_field)
 
+        select_str = sql_format_select('*', table)
+        cursor.execute(select_str, multi=True)
+        tmp_res = cursor.fetchall()
+
+        df = pd.DataFrame(tmp_res, columns=header1)
+        df = df.set_index(check_field, drop=False)
+
+        date_list = list(df[check_field].values)
+        date_str = json.dumps(date_list, ensure_ascii=False)
+        date_str = '(%s)' % date_str[1:-1]
+
+        for _ in cursor.execute(prefix, multi=True):
+            pass
+
+        all_list = list()
         for data in data_list:
-            condition = sql_format_condition(check_field, '=', '"%s"' % data[index])
-            select_str = sql_format_select('*', table, where=condition)
-            cursor.execute(select_str)
-            tmp_res = cursor.fetchall()
+            row_data = [timestamp, timestamp]
+            row_data.extend(data)
 
-            sql_data = list(tmp_res[0])[2:]
+            date = data[index]
+            if date in date_list:
+                row_data[0] = df.loc[date, 'first_update']
 
-            if sql_data == data:
+            all_list.append(row_data)
+
+        condition = sql_format_condition(check_field, 'in', date_str)
+        delete_str = sql_format_delete(table=table, where=condition)
+
+        for _ in cursor.execute(delete_str, multi=True):
+            pass
+
+        for _ in cursor.execute(postfix, multi=True):
+            pass
+
+        for _ in cursor.execute(prefix, multi=True):
+            pass
+
+        for row_data in all_list:
+            insert_str = sql_format_insert(table, values=row_data)
+
+            for _ in cursor.execute(insert_str, multi=True):
                 pass
-            else:
-                timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-                row_data = [tmp_res[0][0], timestamp]
-                row_data.extend(data)
 
-                delete_str = sql_format_delete(table=table, where=condition)
-                insert_str = sql_format_insert(table=table, values=row_data)
+        for _ in cursor.execute(postfix, multi=True):
+            pass
 
-                infix = ''.join([infix, delete_str, insert_str])
+            # insert_str = sql_format_insert(table=table, values=row_data)
+        #     for _ in cursor.execute(insert_str, multi=True):
+        #         pass
+        #
+        # for _ in cursor.execute(postfix, multi=True):
+        #     pass
 
-        instruct = ''.join([prefix, infix, postfix])
-        cursor.execute(instruct, multi=True)
+
+        # timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        # row_data = [tmp_res[0][0], timestamp]
+        # row_data.extend(data)
+        #
+        # delete_str = sql_format_delete(table=table, where=condition)
+        # insert_str = sql_format_insert(table=table, values=row_data)
+        #
+        # infix = ''.join([infix, delete_str, insert_str])
+        #
+
+
+        # instruct = ''.join([prefix, infix, postfix])
+        # cursor.execute(instruct, multi=True)
 
 
 def sql_format_condition(left, sign, right):
@@ -121,7 +169,7 @@ def sql_format_select(select, table, where=None, order_by=None):
         postfix = """
         ORDER BY
             %s 
-    """ % where
+    """ % order_by
         result = ''.join([result, postfix])
 
     return result
