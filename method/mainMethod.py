@@ -3,15 +3,15 @@ import re
 import json
 
 
-def get_api_names(tables, root):
+def get_api_names(root, files, regular):
 
     api_list = list()
-    for table in tables:
-        path = '%s/Ns%sText.pkl' % (root, table.capitalize())
+    for file in files:
+        path = '%s/%s' % (root, file)
         with open(path, 'rb') as pk_f:
             text = pickle.load(pk_f)
 
-        tmp = re.findall(r'\n.* : (.*)', text)
+        tmp = re.findall(regular, text)
 
         api_list.extend(tmp)
 
@@ -21,8 +21,15 @@ def get_api_names(tables, root):
 def config_api_names(infix_list, prefix, postfix):
     res_list = list()
     for infix in infix_list:
-        tmp = "%s.%s.%s" % (prefix, infix, postfix)
-        res_list.append(tmp)
+        tmp = list()
+        if prefix:
+            tmp.append(prefix)
+        tmp.append(infix)
+        if postfix:
+            tmp.append(postfix)
+
+        tmp_str = '.'.join(tmp)
+        res_list.append(tmp_str)
     return res_list
 
 
