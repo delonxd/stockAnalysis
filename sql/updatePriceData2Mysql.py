@@ -2,17 +2,12 @@ from method.mainMethod import *
 from method.sqlMethod import *
 import mysql.connector
 import pandas as pd
-import numpy as np
 
 
 if __name__ == '__main__':
 
     with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
         codeList = pickle.load(pk_f)
-
-    # # infixList = ['bs', 'ps', 'cfs', 'm']
-    # infixList = ['bs']
-    # for infix in infixList:
 
     config = {
         'user': 'root',
@@ -26,7 +21,7 @@ if __name__ == '__main__':
     cursor = db.cursor()
 
     # for stockCode in codeList[:5]:
-    for stockCode in ['600004']:
+    for stockCode in ['600008']:
 
         print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
         print('start update...')

@@ -18,8 +18,8 @@ if __name__ == '__main__':
 
     apiAll = config_api_names(infix_list=subs)
 
-    index = 0
-    while index < 1:
+    index = 3
+    while index < 4:
         stockCode = codeList[index]
 
         try:
