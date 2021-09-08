@@ -90,7 +90,7 @@ def get_header_price(root, file):
 
     data_header = [
         ('代码', 'stockCode', 'VARCHAR(6)'),
-        ('日期', 'date', 'VARCHAR(30)'),
+        ('日期', 'date', 'VARCHAR(30) PRIMARY KEY'),
     ]
 
     for rowText in re.findall(r'\n(.*)', res):

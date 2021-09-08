@@ -1,36 +1,14 @@
 import json
 import time
 import pandas as pd
+import numpy as np
 
 
-def sql_update_data_list(cursor, table, data_list, check_field, ini=False):
-
-    prefix = """
-        SET autocommit = 0;
-        START TRANSACTION;
-    """
-    postfix = """
-        COMMIT;
-    """
-    infix = ""
-
-    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+def sql_update_data_list(cursor, table, df_data, check_field, ini=False):
+    df_data.insert(0, "last_update", np.NAN)
 
     if ini:
-        for _ in cursor.execute(prefix, multi=True):
-            pass
-
-        for data in data_list:
-            row_data = [timestamp, timestamp]
-            row_data.extend(data)
-
-            insert_str = sql_format_insert(table, values=row_data)
-
-            for _ in cursor.execute(insert_str, multi=True):
-                pass
-
-        for _ in cursor.execute(postfix, multi=True):
-            pass
+        pass
 
     else:
         check_str = sql_format_select(
@@ -42,77 +20,56 @@ def sql_update_data_list(cursor, table, data_list, check_field, ini=False):
         cursor.execute(check_str)
         res = cursor.fetchall()
 
-        header1 = [value[0] for value in res]
-        header = header1[2:]
-        index = header.index(check_field)
+        header_sql = [value[0] for value in res]
 
         select_str = sql_format_select('*', table)
         cursor.execute(select_str, multi=True)
         tmp_res = cursor.fetchall()
 
-        df = pd.DataFrame(tmp_res, columns=header1)
-        df = df.set_index(check_field, drop=False)
+        df_sql = pd.DataFrame(tmp_res, columns=header_sql)
+        df_first = df_sql.set_index(check_field, drop=False).loc[:, ['first_update']]
+        df_data = pd.concat([df_first, df_data], axis=1, sort=True).reindex(df_data.index)
 
-        date_list = list(df[check_field].values)
-        date_str = json.dumps(date_list, ensure_ascii=False)
-        date_str = '(%s)' % date_str[1:-1]
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
 
-        for _ in cursor.execute(prefix, multi=True):
-            pass
+    df_data.loc[:, 'first_update'].fillna(value=timestamp, inplace=True)
+    df_data.loc[:, 'last_update'].fillna(value=timestamp, inplace=True)
 
-        all_list = list()
-        for data in data_list:
-            row_data = [timestamp, timestamp]
-            row_data.extend(data)
+    sql_execute_multi(cursor, 'SET autocommit = 0;')
+    sql_execute_multi(cursor, 'START TRANSACTION;')
 
-            date = data[index]
-            if date in date_list:
-                row_data[0] = df.loc[date, 'first_update']
+    # DELETE
+    date_list = list(df_data[check_field].values)
+    date_str = json.dumps(date_list, ensure_ascii=False)
+    date_str = '(%s)' % date_str[1:-1]
+    condition = sql_format_condition(check_field, 'in', date_str)
+    delete_str = sql_format_delete(table=table, where=condition)
 
-            all_list.append(row_data)
+    sql_execute_multi(cursor, delete_str)
 
-        condition = sql_format_condition(check_field, 'in', date_str)
-        delete_str = sql_format_delete(table=table, where=condition)
+    df_data = sql_format_df(df_data)
 
-        for _ in cursor.execute(delete_str, multi=True):
-            pass
+    for index in range(df_data.shape[0]):
+        row_data = list(df_data.iloc[index, :].values)
+        insert_str = sql_format_insert(table, values=row_data)
 
-        for _ in cursor.execute(postfix, multi=True):
-            pass
+        sql_execute_multi(cursor, insert_str)
 
-        for _ in cursor.execute(prefix, multi=True):
-            pass
-
-        for row_data in all_list:
-            insert_str = sql_format_insert(table, values=row_data)
-
-            for _ in cursor.execute(insert_str, multi=True):
-                pass
-
-        for _ in cursor.execute(postfix, multi=True):
-            pass
-
-            # insert_str = sql_format_insert(table=table, values=row_data)
-        #     for _ in cursor.execute(insert_str, multi=True):
-        #         pass
-        #
-        # for _ in cursor.execute(postfix, multi=True):
-        #     pass
+    sql_execute_multi(cursor, 'COMMIT;')
 
 
-        # timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        # row_data = [tmp_res[0][0], timestamp]
-        # row_data.extend(data)
-        #
-        # delete_str = sql_format_delete(table=table, where=condition)
-        # insert_str = sql_format_insert(table=table, values=row_data)
-        #
-        # infix = ''.join([infix, delete_str, insert_str])
-        #
+def sql_execute_multi(cursor, instruct):
+    for _ in cursor.execute(instruct, multi=True):
+        pass
 
 
-        # instruct = ''.join([prefix, infix, postfix])
-        # cursor.execute(instruct, multi=True)
+def sql_format_df(df):
+    for column in list(df.columns):
+        if df.dtypes[column] == 'int64':
+            df[column] = df[column].astype('float64')
+
+    result = df.where(df.notnull(), None)
+    return result
 
 
 def sql_format_condition(left, sign, right):

@@ -1,6 +1,8 @@
 from method.mainMethod import *
 from method.sqlMethod import *
 import mysql.connector
+import pandas as pd
+import numpy as np
 
 
 if __name__ == '__main__':
@@ -27,7 +29,8 @@ if __name__ == '__main__':
     for stockCode in ['600004']:
 
         print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-        print(stockCode)
+        print('start update...')
+        print('stockCode: %s' % stockCode)
 
         tFile = 'priceText.pkl'
         dataHeader = get_header_price(root=r'..\basicData', file=tFile)
@@ -48,7 +51,13 @@ if __name__ == '__main__':
         headerList = get_sql_header(dataHeader, iniHeader)
         headerStr = sql_format_header(headerList)
 
-        print(headerList)
+        columns = list(zip(*headerList))[0]
+        primaryKey = 'date'
+
+        df = pd.DataFrame(dataList, columns=columns[2:])
+        df.set_index('date', drop=False, inplace=True)
+
+        print('affected rows: %s' % df.shape[0])
 
         table = 'pr_%s' % stockCode
 
@@ -61,7 +70,7 @@ if __name__ == '__main__':
         sql_update_data_list(
             cursor=cursor,
             table=table,
-            data_list=dataList,
+            df_data=df,
             check_field='date',
             ini=False,
         )
@@ -69,3 +78,4 @@ if __name__ == '__main__':
         db.close()
 
         print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
+        print('update complete.\n')
