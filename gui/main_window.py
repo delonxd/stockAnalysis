@@ -41,7 +41,7 @@ def get_px(df, width, height, date_start, date_end):
 
         if tup[1]:
             x = int(width * delta / date_width)
-            y = int(height - 30 * np.log2(tup[1] / 1e8))
+            y = int(height - 60 * np.log2(tup[1] / 1e8))
             df_px.loc[date] = [x,  y]
     return df_px
 
@@ -54,18 +54,21 @@ class MainWindow(QWidget):
         self.resize(800, 600)
 
         layout = QVBoxLayout()
-
+        sp1 = QSplitter(Qt.Vertical)
         self.label = QLabel(self)
         # self.label = PixWidget()
         self.label.setFixedWidth(800)
         self.label.setFixedHeight(600)
 
         self.button = QPushButton('button')
+        self.button.setObjectName('button')
 
-        layout.addWidget(self.label, 0, Qt.AlignCenter)
-        layout.addStretch()
-        layout.addWidget(self.button, 0, Qt.AlignCenter)
+        sp1.addWidget(self.label)
+        # sp1.addStretch()
+        sp1.addWidget(self.button)
+        sp1.addWidget(QPushButton('button2'))
 
+        layout.addWidget(sp1)
         self.setLayout(layout)
 
         self.df = sql2df(['id_115'])
@@ -81,8 +84,35 @@ class MainWindow(QWidget):
         self.cross = False
         self.setMouseTracking(True)
         self.label.setMouseTracking(True)
+        sp1.setMouseTracking(True)
+        sp1.setObjectName('sp1')
 
         self.button.clicked.connect(self.on_button_clicked)
+
+        self.setObjectName('MainWindow')
+
+        style = '''
+        #MainWindow{
+            background-color:black;
+        }
+        #sp1{
+            background-color:black;
+        }
+        # #button{
+        #     border-width:2px;
+        #     border-color:red;
+        #     border-style: solid;
+        #     background-color: white;
+        # }
+        '''
+        # # #边框     !!边框长度与label控件一致（如果要修改长度，只需要修改上方的setGeometry的第三个参数
+        # # 设置边框样式
+        # self.button.setFrameShape(QFrame.Box)
+        # # 设置阴影 据说只有加了这步才能设置边框颜色。 可选样式有Raised、Sunken、Plain（这个无法设置颜色）等
+        # self.button.setFrameShadow(QFrame.Raised)
+        # # 设置背景颜色，包括边框颜色
+
+        self.setStyleSheet(style)
 
     def draw_pix(self):
         pix_painter = QPainter(self.pix)
@@ -109,6 +139,14 @@ class MainWindow(QWidget):
             if point1:
                 pix_painter.drawLine(point1, point2)
             point1 = point2
+
+        pen = QPen(Qt.red, 1, Qt.DotLine)
+        pix_painter.setPen(pen)
+
+        for y in range(60, 600, 60):
+            point1 = QPoint(0, y)
+            point2 = QPoint(800, y)
+            pix_painter.drawLine(point1, point2)
 
     def draw_cross(self, x, y):
 
@@ -141,7 +179,7 @@ class MainWindow(QWidget):
         self.label.setPixmap(self.pix_show)
 
     def on_button_clicked(self):
-        self.draw_cross(400, 300)
+        self.cross = not self.cross
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
