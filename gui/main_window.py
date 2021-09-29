@@ -29,106 +29,58 @@ def sql2df(columns):
     return df1
 
 
-def get_px(df, width, height, date_start, date_end):
-    date_width = (date_end - date_start).days
-    df_px = pd.DataFrame(columns=['x', 'y'], dtype=int)
-
-    for tup in df.itertuples():
-        time_str = tup[0]
-        datetime = dt.datetime.strptime(time_str, "%Y-%m-%dT00:00:00+08:00")
-        date = datetime.date()
-        delta = (date - date_start).days
-
-        if tup[1]:
-            x = int(width * delta / date_width)
-            y = int(height - 60 * np.log2(tup[1] / 1e8))
-            df_px.loc[date] = [x,  y]
-    return df_px
-
-
-class MainWindow(QWidget):
+class DataPix:
     def __init__(self):
-        super().__init__()
-
-        self.setWindowTitle('绘制图形')
-        self.resize(800, 600)
-
-        layout = QVBoxLayout()
-        sp1 = QSplitter(Qt.Vertical)
-        self.label = QLabel(self)
-        # self.label = PixWidget()
-        self.label.setFixedWidth(800)
-        self.label.setFixedHeight(600)
-
-        self.button = QPushButton('button')
-        self.button.setObjectName('button')
-
-        sp1.addWidget(self.label)
-        # sp1.addStretch()
-        sp1.addWidget(self.button)
-        sp1.addWidget(QPushButton('button2'))
-
-        layout.addWidget(sp1)
-        self.setLayout(layout)
+        # self.parent = parent
 
         self.df = sql2df(['id_115'])
         self.df.sort_index(inplace=True)
 
-        self.pix = QPixmap(800, 600)
+        self.value_y_max = 10
+        self.value_y_min = 0
+
+        self.date_max = dt.date(2022, 7, 20)
+        self.date_min = dt.date(1996, 7, 20)
+
+        d_width = 800
+        d_height = 600
+        side_blank = 50
+        bottom_blank = 50
+
+        self.main_rect = QRect(0, 0, d_width + 2 * side_blank, d_height + bottom_blank)
+        self.data_rect = QRect(side_blank, 0, d_width, d_height)
+
+        self.pix = QPixmap(self.main_rect.width(), self.main_rect.height())
         self.pix.fill(Qt.black)
 
+        self.draw_struct()
         self.draw_pix()
 
-        self.pix_show = QPixmap(self.pix)
+    def get_px(self, df, start_date, end_date):
+        date_width = (end_date - start_date).days + 1
+        df_px = pd.DataFrame(columns=['x', 'y'], dtype=int)
 
-        self.cross = False
-        self.setMouseTracking(True)
-        self.label.setMouseTracking(True)
-        sp1.setMouseTracking(True)
-        sp1.setObjectName('sp1')
+        for tup in df.itertuples():
+            time_str = tup[0]
+            date = dt.datetime.strptime(time_str, "%Y-%m-%dT00:00:00+08:00").date()
+            delta = (date - start_date).days + 1
 
-        self.button.clicked.connect(self.on_button_clicked)
-
-        self.setObjectName('MainWindow')
-
-        style = '''
-        #MainWindow{
-            background-color:black;
-        }
-        #sp1{
-            background-color:black;
-        }
-        # #button{
-        #     border-width:2px;
-        #     border-color:red;
-        #     border-style: solid;
-        #     background-color: white;
-        # }
-        '''
-        # # #边框     !!边框长度与label控件一致（如果要修改长度，只需要修改上方的setGeometry的第三个参数
-        # # 设置边框样式
-        # self.button.setFrameShape(QFrame.Box)
-        # # 设置阴影 据说只有加了这步才能设置边框颜色。 可选样式有Raised、Sunken、Plain（这个无法设置颜色）等
-        # self.button.setFrameShadow(QFrame.Raised)
-        # # 设置背景颜色，包括边框颜色
-
-        self.setStyleSheet(style)
+            if tup[1]:
+                x = self.data_rect.width() * delta / date_width - 1 + self.data_rect.x()
+                y = self.data_rect.height() - 60 * np.log2(tup[1] / 1e8) + self.data_rect.y()
+                df_px.loc[date] = [int(x), int(y)]
+        return df_px
 
     def draw_pix(self):
         pix_painter = QPainter(self.pix)
 
-        # pix_painter.setPen(QColor(Qt.blue))
-        # pix_painter.setFont(QFont('SimSun', 25))
-
         pen = QPen(Qt.red, 2, Qt.SolidLine)
         pix_painter.setPen(pen)
 
-        df_px = get_px(
+        df_px = self.get_px(
             df=self.df,
-            date_start=dt.date(1996, 7, 20),
-            date_end=dt.date(2022, 7, 20),
-            width=800,
-            height=600,
+            start_date=self.date_min,
+            end_date=self.date_max,
         )
 
         point1 = None
@@ -140,64 +92,128 @@ class MainWindow(QWidget):
                 pix_painter.drawLine(point1, point2)
             point1 = point2
 
+    def draw_struct(self):
+        pix_painter = QPainter(self.pix)
+
+        pen = QPen(Qt.red, 1, Qt.SolidLine)
+        pix_painter.setPen(pen)
+
+        pix_painter.drawRect(
+            self.main_rect.x(),
+            self.main_rect.y(),
+            self.main_rect.width()-1,
+            self.main_rect.height()-1)
+        # pix_painter.drawRect(QRect(0, 0, 999, 799))
+        pix_painter.drawRect(
+            self.data_rect.x()-1,
+            self.data_rect.y(),
+            self.data_rect.width()+1,
+            self.data_rect.height())
+
         pen = QPen(Qt.red, 1, Qt.DotLine)
         pix_painter.setPen(pen)
 
+        x1 = self.data_rect.x()
+        x2 = self.data_rect.right()
         for y in range(60, 600, 60):
-            point1 = QPoint(0, y)
-            point2 = QPoint(800, y)
+            point1 = QPoint(x1, y)
+            point2 = QPoint(x2, y)
             pix_painter.drawLine(point1, point2)
 
+    def px2value_x(self, x):
+        px_max = self.data_rect.right()
+        px_min = self.data_rect.left()
+        val_max = (self.date_max - self.date_min).days
+        val_min = 0
+
+        val = (x - px_min) * (val_max - val_min) / (px_max - px_min) + val_min
+        return val
+
+    def px2value_y(self, y):
+        px_max = 0
+        px_min = self.data_rect.height()
+        val_max = self.value_y_max
+        val_min = self.value_y_min
+
+        val = (y - px_max) * (val_max - val_min) / (px_max - px_min) + val_max
+        return val
+
+
+class MainWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('绘制图形')
+
+        self.label = QLabel(self)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.label, 0, Qt.AlignCenter)
+        self.setLayout(layout)
+
+        # self.df = sql2df(['id_115'])
+        # self.df.sort_index(inplace=True)
+
+        self.data_pix = DataPix()
+
+        self.cross = False
+        self.setMouseTracking(True)
+        self.label.setMouseTracking(True)
+
+        self.pix_show = QPixmap(self.data_pix.pix)
+
     def draw_cross(self, x, y):
+        if x is None and y is None:
+            self.pix_show = QPixmap(self.data_pix.pix)
+            self.update()
+            return
 
-        if x < 0:
-            x = 0
+        d_left = self.data_pix.data_rect.left()
+        d_right = self.data_pix.data_rect.right()
+        d_top = self.data_pix.data_rect.top()
+        d_bottom = self.data_pix.data_rect.bottom()+1
 
-        if y < 0:
-            y = 0
+        if x < d_left:
+            x = d_left
+        elif x > d_right:
+            x = d_right
+        if y < d_top:
+            y = d_top
+        elif y > d_bottom:
+            y = d_bottom
 
-        pix = QPixmap(self.pix)
+        pix = QPixmap(self.data_pix.pix)
         pix_painter = QPainter(pix)
-
-        # pix_painter.setPen(QColor(Qt.blue))
-        # pix_painter.setFont(QFont('SimSun', 25))
 
         pen = QPen(Qt.gray, 1, Qt.SolidLine)
         pix_painter.setPen(pen)
 
-        point1 = QPoint(x, 0)
-        point2 = QPoint(x, pix.height())
-        pix_painter.drawLine(point1, point2)
+        pix_painter.drawLine(QPoint(x, d_top), QPoint(x, d_bottom))
+        pix_painter.drawLine(QPoint(d_left, y), QPoint(d_right, y))
 
-        point1 = QPoint(0, y)
-        point2 = QPoint(pix.width(), y)
-        pix_painter.drawLine(point1, point2)
+        x_val = self.data_pix.px2value_x(x)
+        date_tmp = self.data_pix.date_min + dt.timedelta(days=x_val)
+        y_val = self.data_pix.px2value_y(y)
+        print(date_tmp, x_val, y_val)
+
         self.pix_show = pix
         self.update()
 
     def paintEvent(self, e):
         self.label.setPixmap(self.pix_show)
 
-    def on_button_clicked(self):
-        self.cross = not self.cross
-
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.cross:
-                self.draw_cross(0, 0)
+                self.draw_cross(None, None)
                 self.cross = False
             else:
                 pos = event.pos() - self.label.pos()
                 self.draw_cross(pos.x(), pos.y())
                 self.cross = True
 
-        if event.button() == Qt.RightButton:
+        elif event.button() == Qt.RightButton:
             self.close()
-
-    # def mouseReleaseEvent(self, event):
-    #     if event.button() == Qt.LeftButton:
-    #         self.m_drag = False
-    #         self.setCursor(QCursor(Qt.ArrowCursor))
 
     def mouseMoveEvent(self, event):
         if self.cross:

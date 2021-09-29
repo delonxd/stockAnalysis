@@ -223,7 +223,8 @@ def get_data_frame(cursor, table):
     header_sql = [value[0] for value in res]
 
     select_str = sql_format_select('*', table)
-    cursor.execute(select_str, multi=True)
+    # cursor.execute(select_str, multi=True)
+    cursor.execute(select_str)
     tmp_res = cursor.fetchall()
 
     df = pd.DataFrame(tmp_res, columns=header_sql)
