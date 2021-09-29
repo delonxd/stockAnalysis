@@ -210,6 +210,26 @@ def get_sql_header(data_header, ini_header):
     return sql_header
 
 
+def get_data_frame(cursor, table):
+    check_str = sql_format_select(
+        select='COLUMN_name',
+        table='information_schema.COLUMNS',
+        where='table_name = "%s"' % table,
+        order_by='ordinal_position',
+    )
+    cursor.execute(check_str)
+    res = cursor.fetchall()
+
+    header_sql = [value[0] for value in res]
+
+    select_str = sql_format_select('*', table)
+    cursor.execute(select_str, multi=True)
+    tmp_res = cursor.fetchall()
+
+    df = pd.DataFrame(tmp_res, columns=header_sql)
+    return df
+
+
 if __name__ == '__main__':
     sql_config = {
         'user': 'root',
