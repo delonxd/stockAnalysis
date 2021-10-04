@@ -1,4 +1,4 @@
-from method.mainMethod import get_header_df, transpose_df
+from method.mainMethod import get_header_df, transpose_df, show_df
 from method.sqlMethod import get_data_frame
 import mysql.connector
 import datetime as dt
@@ -104,8 +104,32 @@ def get_tree_df2():
     df.insert(8, "logarithmic", True)
     df.insert(9, "format_fun", lambda x: '%i亿' % (x / 1e8))
 
-    df.loc['id_001_bs_ta', 'color'] = QColor(Qt.yellow)
+    df.insert(10, "info_priority", 0)
+
+    df.insert(2, "show_name", '')
+
+    # show_df(df)
+
+    return df
+
+
+def get_default_style_df():
+    df = get_tree_df2()
+
+    df.loc['id_001_bs_ta', 'color'] = QColor(Qt.green)
     df.loc['id_001_bs_ta', 'selected'] = True
+    df.loc['id_001_bs_ta', 'show_name'] = '资产合计'
+    df.loc['id_001_bs_ta', 'info_priority'] = 3
+
+    df.loc['id_062_bs_tl', 'color'] = QColor(Qt.red)
+    df.loc['id_062_bs_tl', 'selected'] = True
+    df.loc['id_062_bs_tl', 'show_name'] = '负债合计'
+    df.loc['id_062_bs_tl', 'info_priority'] = 2
+
+    df.loc['id_110_bs_toe', 'color'] = QColor(Qt.yellow)
+    df.loc['id_110_bs_toe', 'selected'] = True
+    df.loc['id_110_bs_toe', 'show_name'] = '所有者权益'
+    df.loc['id_110_bs_toe', 'info_priority'] = 1
 
     return df
 
