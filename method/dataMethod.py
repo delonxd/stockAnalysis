@@ -1,16 +1,15 @@
-import pandas as pd
-
-from method.mainMethod import *
-from method.sqlMethod import *
+from method.mainMethod import get_header_df, transpose_df
+from method.sqlMethod import get_data_frame
 import mysql.connector
 import datetime as dt
-import numpy as np
-
-from dateutil.rrule import *
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+
+from dateutil.rrule import *
+import pandas as pd
+import numpy as np
 import sys
 
 
@@ -20,12 +19,13 @@ def sql2df():
         'password': 'aQLZciNTq4sx',
         'host': 'localhost',
         'port': '3306',
-        'database': 'bsdata',
+        'database': 'fsdata',
+        # 'database': 'bsdata',
     }
     db = mysql.connector.connect(**config)
 
     cursor = db.cursor()
-    sql_df = get_data_frame(cursor=cursor, table='bs_600008')
+    sql_df = get_data_frame(cursor=cursor, table='fs_600008')
 
     sql_df = sql_df.set_index('standardDate', drop=False)
 
@@ -44,12 +44,13 @@ def data_by_dates(df: pd.DataFrame, dates: list):
     ps_src = list()
     for tup in df.itertuples():
         if tup[1]:
-            date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
-            offset = (date - date0).days
-            ps_src.append((offset, tup[1]))
+            if isinstance(tup[1], (int, float)):
+                date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
+                offset = (date - date0).days
+                ps_src.append((offset, tup[1]))
 
     if len(ps_src) < 2:
-        return None
+        return res_df
 
     it = iter(ps_src)
     p1 = it.__next__()
@@ -66,7 +67,7 @@ def data_by_dates(df: pd.DataFrame, dates: list):
             except StopIteration:
                 break
 
-        if x >= p1[0]:
+        if p1[0] <= x <= p2[0]:
             y = get_y_from_points(x, p1, p2)
             # ps_res.append((x, y))
 
@@ -85,6 +86,29 @@ def get_y_from_points(x: int, point1, point2):
     return res
 
 
+def get_tree_df2():
+    header_df = get_header_df()
+
+    df = transpose_df(header_df)
+
+    df.insert(0, "index_name", df.index)
+    df.insert(1, "selected", False)
+
+    df.insert(2, "color", QColor(Qt.red))
+    df.insert(3, "line_thick", 2)
+    df.insert(4, "pen_style", Qt.SolidLine)
+
+    df.insert(5, "scale_min", 2e8)
+    df.insert(6, "scale_max", 2048*1e8)
+    df.insert(7, "scale_div", 10)
+    df.insert(8, "logarithmic", True)
+    df.insert(9, "format_fun", lambda x: '%i亿' % (x / 1e8))
+
+    df.loc['id_001_bs_ta', 'color'] = QColor(Qt.yellow)
+    df.loc['id_001_bs_ta', 'selected'] = True
+
+    return df
+
+
 if __name__ == '__main__':
-    res = sql2df()
-    print(res)
+    pass
