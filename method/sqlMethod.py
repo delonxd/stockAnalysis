@@ -2,31 +2,16 @@ import json
 import time
 import pandas as pd
 import numpy as np
+from method.mainMethod import transpose_df, show_df
 
 
-def sql_update_data_list(cursor, table, df_data, check_field, ini=False):
+def update_df2sql(cursor, table, df_data, check_field, ini=False):
     df_data.insert(0, "last_update", np.NAN)
 
     if ini:
-        pass
-
+        df_data.insert(0, "first_update", np.NAN)
     else:
-        check_str = sql_format_select(
-            select='COLUMN_name',
-            table='information_schema.COLUMNS',
-            where='table_name = "%s"' % table,
-            order_by='ordinal_position',
-        )
-        cursor.execute(check_str)
-        res = cursor.fetchall()
-
-        header_sql = [value[0] for value in res]
-
-        select_str = sql_format_select('*', table)
-        cursor.execute(select_str, multi=True)
-        tmp_res = cursor.fetchall()
-
-        df_sql = pd.DataFrame(tmp_res, columns=header_sql)
+        df_sql = get_data_frame(cursor, table)
         df_first = df_sql.set_index(check_field, drop=False).loc[:, ['first_update']]
         df_data = pd.concat([df_first, df_data], axis=1, sort=True).reindex(df_data.index)
 
@@ -34,6 +19,8 @@ def sql_update_data_list(cursor, table, df_data, check_field, ini=False):
 
     df_data.loc[:, 'first_update'].fillna(value=timestamp, inplace=True)
     df_data.loc[:, 'last_update'].fillna(value=timestamp, inplace=True)
+
+    show_df(df_data)
 
     sql_execute_multi(cursor, 'SET autocommit = 0;')
     sql_execute_multi(cursor, 'START TRANSACTION;')
@@ -158,32 +145,49 @@ def sql_format_drop_table(table, if_exists=True):
     return result
 
 
-def sql_format_header(header: list):
-    if not isinstance(header, list):
-        raise KeyboardInterrupt('header格式需为列表')
+# def sql_format_header(header: list):
+#     if not isinstance(header, list):
+#         raise KeyboardInterrupt('header格式需为列表')
+#
+#     if len(header) == 0:
+#         raise KeyboardInterrupt('header至少拥有一个字段')
+#
+#     sub_str = list()
+#     for item in header:
+#         if len(item) != 2:
+#             raise KeyboardInterrupt('字段需要两种参数：字段名、字段类型')
+#
+#         if not isinstance(item[0], str):
+#             raise KeyboardInterrupt('字段名需要为字符串类型')
+#         else:
+#             if item[0].isdigit():
+#                 raise KeyboardInterrupt('字段名需要为非数值字符串类型')
+#
+#         if not isinstance(item[1], str):
+#             raise KeyboardInterrupt('字段类型需要为字符串类型')
+#
+#         tmp_str = ' '.join(item)
+#         sub_str.append(tmp_str)
+#
+#     res_str = ',\n'.join(sub_str)
+#
+#     return res_str
 
-    if len(header) == 0:
+
+def sql_format_header_df(header: pd.DataFrame):
+    if not isinstance(header, pd.DataFrame):
+        raise KeyboardInterrupt('header格式需为DataFrame')
+
+    if len(header.columns) == 0:
         raise KeyboardInterrupt('header至少拥有一个字段')
 
+    df = transpose_df(header)
+
     sub_str = list()
-    for item in header:
-        if len(item) != 2:
-            raise KeyboardInterrupt('字段需要两种参数：字段名、字段类型')
-
-        if not isinstance(item[0], str):
-            raise KeyboardInterrupt('字段名需要为字符串类型')
-        else:
-            if item[0].isdigit():
-                raise KeyboardInterrupt('字段名需要为非数值字符串类型')
-
-        if not isinstance(item[1], str):
-            raise KeyboardInterrupt('字段类型需要为字符串类型')
-
-        tmp_str = ' '.join(item)
+    for index, row in df.iterrows():
+        tmp_str = ' '.join([index, row['sql_type']])
         sub_str.append(tmp_str)
-
     res_str = ',\n'.join(sub_str)
-
     return res_str
 
 
