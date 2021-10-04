@@ -2,6 +2,9 @@ import pickle
 import re
 import json
 
+import pandas as pd
+import numpy as np
+
 
 def get_api_names(root, files, regular):
 
@@ -58,115 +61,236 @@ def read_pkl(root, file):
     return res
 
 
-def get_header_fs(root, file):
-    path = '%s/%s' % (root, file)
-    with open(path, 'rb') as pk_f:
-        res = pickle.load(pk_f)
+# def get_header_fs(root, file):
+#     path = '%s/%s' % (root, file)
+#     with open(path, 'rb') as pk_f:
+#         res = pickle.load(pk_f)
+#
+#     data_header = [
+#         ('代码', 'stockCode', 'VARCHAR(6)'),
+#         ('货币', 'currency', 'VARCHAR(10)'),
+#         ('标准日期', 'standardDate', 'VARCHAR(30) PRIMARY KEY'),
+#         ('报告日期', 'reportDate', 'VARCHAR(30)'),
+#         ('报告类型', 'reportType', 'VARCHAR(30)'),
+#         ('日期', 'date', 'VARCHAR(30)'),
+#     ]
+#
+#     for rowText in re.findall(r'\n(.*)', res):
+#         tmp = re.findall(r'(.*):(.*)\.(.*)', rowText)
+#
+#         if len(tmp) == 0:
+#             data_header.append((rowText, None, 'VARCHAR(1)'))
+#         else:
+#             data_header.append((tmp[0][0], tmp[0][2], 'DOUBLE'))
+#
+#     return data_header
+#
+#
+# def get_header_price(root, file):
+#     path = '%s/%s' % (root, file)
+#     with open(path, 'rb') as pk_f:
+#         res = pickle.load(pk_f)
+#
+#     data_header = [
+#         ('代码', 'stockCode', 'VARCHAR(6)'),
+#         ('日期', 'date', 'VARCHAR(30) PRIMARY KEY'),
+#     ]
+#
+#     for rowText in re.findall(r'\n(.*)', res):
+#         tmp = re.findall(r'(.*) :(.*)', rowText)
+#
+#         if len(tmp) == 0:
+#             data_header.append((rowText, None, 'VARCHAR(1)'))
+#         else:
+#             data_header.append((tmp[0][0], tmp[0][1], 'DOUBLE'))
+#
+#     return data_header
+#
+#
+# def format_res(res, prefix, infix, postfix, head_list):
+#
+#     index_dict = dict()
+#     for index, item in enumerate(head_list):
+#         if item[1] in index_dict.keys():
+#             raise InterruptedError('error')
+#         if item[1] is not None:
+#             index_dict[item[1]] = index
+#
+#     tmp_dict = dict()
+#     for subRes in res:
+#         sub_list = json.loads(subRes.decode())['data']
+#         for tmp in sub_list:
+#             date = tmp['standardDate']
+#
+#             if date not in tmp_dict.keys():
+#                 tmp_dict[date] = [None] * len(head_list)
+#
+#             for key, value in tmp.items():
+#                 if key == prefix:
+#                     if infix in value.keys():
+#                         sub_dict = value[infix]
+#                         for subKey, subValue in sub_dict.items():
+#                             tmp_dict[date][index_dict[subKey]] = subValue.get(postfix)
+#                 else:
+#
+#                     tmp_dict[date][index_dict[key]] = value
+#
+#     tmp_list = list()
+#     for key, value in tmp_dict.items():
+#         tmp_list.append(value)
+#         # print(key)
+#         # print(value)
+#
+#     # header = [value[0] for value in head_list]
+#
+#     return tmp_list
 
-    data_header = [
-        ('代码', 'stockCode', 'VARCHAR(6)'),
-        ('货币', 'currency', 'VARCHAR(10)'),
-        ('标准日期', 'standardDate', 'VARCHAR(30) PRIMARY KEY'),
-        ('报告日期', 'reportDate', 'VARCHAR(30)'),
-        ('报告类型', 'reportType', 'VARCHAR(30)'),
-        ('日期', 'date', 'VARCHAR(30)'),
-    ]
 
-    for rowText in re.findall(r'\n(.*)', res):
-        tmp = re.findall(r'(.*):(.*)\.(.*)', rowText)
-
-        if len(tmp) == 0:
-            data_header.append((rowText, None, 'VARCHAR(1)'))
-        else:
-            data_header.append((tmp[0][0], tmp[0][2], 'DOUBLE'))
-
-    return data_header
-
-
-def get_header_price(root, file):
-    path = '%s/%s' % (root, file)
-    with open(path, 'rb') as pk_f:
-        res = pickle.load(pk_f)
-
-    data_header = [
-        ('代码', 'stockCode', 'VARCHAR(6)'),
-        ('日期', 'date', 'VARCHAR(30) PRIMARY KEY'),
-    ]
-
-    for rowText in re.findall(r'\n(.*)', res):
-        tmp = re.findall(r'(.*) :(.*)', rowText)
-
-        if len(tmp) == 0:
-            data_header.append((rowText, None, 'VARCHAR(1)'))
-        else:
-            data_header.append((tmp[0][0], tmp[0][1], 'DOUBLE'))
-
-    return data_header
+# def format_res_price(res, head_list):
+#     index_dict = dict()
+#     for index, item in enumerate(head_list):
+#         if item[1] in index_dict.keys():
+#             raise InterruptedError('error')
+#         if item[1] is not None:
+#             index_dict[item[1]] = index
+#
+#     list0 = json.loads(res.decode())['data']
+#
+#     tmp_dict = dict()
+#     for tmp in list0:
+#         date = tmp['date']
+#
+#         if date not in tmp_dict.keys():
+#             tmp_dict[date] = [None] * len(head_list)
+#
+#         for key, value in tmp.items():
+#
+#             if key in index_dict.keys():
+#                 tmp_dict[date][index_dict[key]] = value
+#
+#     tmp_list = list()
+#     for key, value in tmp_dict.items():
+#         tmp_list.append(value)
+#
+#     return tmp_list
 
 
-def format_res(res, prefix, infix, postfix, head_list):
-
+def res2df_fs(res, header_df, prefix='q', postfix='t'):
     index_dict = dict()
-    for index, item in enumerate(head_list):
-        if item[1] in index_dict.keys():
-            raise InterruptedError('error')
-        if item[1] is not None:
-            index_dict[item[1]] = index
+    tmp_df = transpose_df(header_df)
 
-    tmp_dict = dict()
+    counter = -1
+    for index, row in tmp_df.iterrows():
+        counter += 1
+        sheet = row['sheet_name']
+        api = row['api']
+        if sheet and api:
+            key = '.'.join([sheet, api])
+            index_dict[key] = counter
+        else:
+            index_dict[index] = counter
+
+    columns = header_df.columns
+    length = len(columns)
+
+    data_dict = dict()
     for subRes in res:
         sub_list = json.loads(subRes.decode())['data']
         for tmp in sub_list:
             date = tmp['standardDate']
 
-            if date not in tmp_dict.keys():
-                tmp_dict[date] = [None] * len(head_list)
+            if date not in data_dict.keys():
+                data_dict[date] = [None] * length
 
             for key, value in tmp.items():
                 if key == prefix:
-                    if infix in value.keys():
+                    for infix in value.keys():
                         sub_dict = value[infix]
                         for subKey, subValue in sub_dict.items():
-                            tmp_dict[date][index_dict[subKey]] = subValue.get(postfix)
+                            field = '.'.join([infix, subKey])
+                            data_dict[date][index_dict[field]] = subValue.get(postfix)
                 else:
+                    data_dict[date][index_dict[key]] = value
 
-                    tmp_dict[date][index_dict[key]] = value
+    data_list = list()
+    for key, value in data_dict.items():
+        data_list.append(value)
 
-    tmp_list = list()
-    for key, value in tmp_dict.items():
-        tmp_list.append(value)
-        # print(key)
-        # print(value)
+    res_df = pd.DataFrame(data_list, columns=columns)
+    res_df.set_index('standardDate', drop=False, inplace=True)
 
-    # header = [value[0] for value in head_list]
-
-    return tmp_list
+    # res_df.replace(to_replace=[None], value=np.NAN, inplace=True)
+    return res_df
 
 
-def format_res_price(res, head_list):
-    index_dict = dict()
-    for index, item in enumerate(head_list):
-        if item[1] in index_dict.keys():
-            raise InterruptedError('error')
-        if item[1] is not None:
-            index_dict[item[1]] = index
+def show_type(value):
+    print(type(value), '-->', value)
 
-    list0 = json.loads(res.decode())['data']
 
-    tmp_dict = dict()
-    for tmp in list0:
-        date = tmp['date']
+def show_df(df):
+    # print(df.columns)
+    for tup in df.itertuples():
+        print(tup)
 
-        if date not in tmp_dict.keys():
-            tmp_dict[date] = [None] * len(head_list)
 
-        for key, value in tmp.items():
+def get_header_df():
+    bs_list = read_pkl(root='../basicData/', file='NsBsText.pkl')
+    ps_list = read_pkl(root='../basicData/', file='NsPsText.pkl')
+    cfs_list = read_pkl(root='../basicData/', file='NsCfsText.pkl')
+    m_list = read_pkl(root='../basicData/', file='NsMText.pkl')
 
-            if key in index_dict.keys():
-                tmp_dict[date][index_dict[key]] = value
+    index = ['txt_CN', 'sql_type', 'sheet_name', 'api']
 
-    tmp_list = list()
-    for key, value in tmp_dict.items():
-        tmp_list.append(value)
+    res_df = pd.DataFrame(index=index)
 
-    return tmp_list
+    res_df['first_update'] = ['首次上传日期', 'VARCHAR(30)', None, None]
+    res_df['last_update'] = ['最近上传日期', 'VARCHAR(30)', None, None]
+    res_df['stockCode'] = ['代码', 'VARCHAR(6)', None, None]
+    res_df['currency'] = ['货币', 'VARCHAR(10)', None, None]
+    res_df['standardDate'] = ['标准日期', 'VARCHAR(30) PRIMARY KEY', None, None]
+    res_df['reportDate'] = ['报告日期', 'VARCHAR(30)', None, None]
+    res_df['reportType'] = ['报告类型', 'VARCHAR(30)', None, None]
+    res_df['date'] = ['日期', 'VARCHAR(30)', None, None]
+
+    list1 = ['bs', 'ps', 'cfs', 'm']
+    list2 = [bs_list, ps_list, cfs_list, m_list]
+
+    counter = 0
+    for infix, txt in zip(list1, list2):
+        for rowText in re.findall(r'\n(.*)', txt):
+            tmp = re.findall(r'(.*) : (.*)\.(.*)', rowText)
+            counter += 1
+
+            if len(tmp) == 0:
+                sql_name = 'id_{:0>3}'.format(counter)
+                res_df[sql_name] = [rowText, 'VARCHAR(1)', infix, None]
+            else:
+                sql_name = 'id_{:0>3}_{}_{}'.format(counter, infix, tmp[0][2])
+                res_df[sql_name] = [tmp[0][0], 'DOUBLE', infix, tmp[0][2]]
+
+    return res_df
+
+
+def transpose_df(df):
+    res = pd.DataFrame(df.values.T, index=df.columns, columns=df.index)
+    return res
+
+
+def write_header2txt():
+    hd = get_header_df()
+    tmp = transpose_df(hd)
+    str1 = ''
+    for tup in tmp.itertuples():
+        sub_list = list(tup)
+        sub_list.pop(1)
+        sub_str = '%s_%s: %s' % (tup[3], tup[1], repr(sub_list))
+        str1 = '\n'.join([str1, sub_str])
+    print(str1)
+
+    with open("../comparisonTable/fs_table.txt", "w", encoding="utf-8") as f:
+        f.write(str1)
+
+
+if __name__ == '__main__':
+    pass
+
