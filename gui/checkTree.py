@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from method.mainMethod import get_units_dict
 import pandas as pd
 
 
@@ -75,8 +76,26 @@ class DataCheckBox(QCheckBox):
         self.clicked.connect(self.self_clicked)
 
     def self_clicked(self):
-        self.df.loc[self.row, self.column] = self.isChecked()
-        self.update_tree()
+        flag = self.isChecked()
+
+        if self.column == 'selected' and flag:
+            # df0 = self.df[self.df['selected'] == True]
+            if not self.df.loc[self.row, 'show_name']:
+                self.df.loc[self.row, 'show_name'] = self.df.loc[self.row, 'txt_CN']
+                a = self.df.loc[self.row]
+                # print(type(a), '-->', a)
+
+            self.df.loc[self.row, 'info_priority'] = self.df['info_priority'].max() + 1
+            self.df.loc[self.row, self.column] = flag
+            child = self.df.loc[self.row, 'child']
+            self.tree.init_child(child, self.row)
+        elif self.column == 'selected' and not flag:
+            self.df.loc[self.row, 'info_priority'] = 0
+            self.df.loc[self.row, self.column] = flag
+            self.update_tree()
+        else:
+            self.df.loc[self.row, self.column] = flag
+            self.update_tree()
 
     def update_tree(self):
         self.tree.update_signal.emit()
@@ -92,22 +111,28 @@ class CheckTree(QTreeWidget):
             'index_name',
             'selected',
             'show_name',
+
             'color',
             'line_thick',
             'pen_style',
+
             'scale_min',
             'scale_max',
             'scale_div',
             'logarithmic',
-            # 'format_fun',
+            'units',
+
             'txt_CN',
+
+            'default_ds',
+            'info_priority',
         ]
 
         self.column_names = columns
 
         self.setColumnCount(len(columns))
 
-        width_list = [200, 20, 70, 10, 40, 90, 70, 70, 40, 10, 200]
+        width_list = [180, 20, 70, 10, 40, 90, 50, 50, 40, 10, 30, 200, 20, 40]
         for idx, val in enumerate(width_list):
             self.setColumnWidth(idx, val)
 
@@ -116,29 +141,46 @@ class CheckTree(QTreeWidget):
         root.df = df
         self.df = df
 
-        for index, row in self.df.iterrows():
+        for index, _ in self.df.iterrows():
             child = QItemDf(root)
-
-            # child.setText(0, row['index_name'])
-            self.init_str_item(child, index, 'index_name')
-            self.init_checkbox_item(child, index, 'selected')
-            self.init_str_item(child, index, 'show_name')
-            self.init_color_item(child, index, 'color')
-            self.init_digit_item(child, index, 'line_thick')
-            self.init_combobox_item(child, index, 'pen_style', combobox=PenStyleComboBox)
-
-            self.init_format_item(child, index, 'scale_min', '{:.3e}')
-            self.init_format_item(child, index, 'scale_max', '{:.3e}')
-            self.init_digit_item(child, index, 'scale_div')
-            self.init_checkbox_item(child, index, 'logarithmic')
-            # self.init_repr_item(child, index, 'format_fun')
-            self.init_str_item(child, index, 'txt_CN')
+            self.init_child(child, index)
+            self.df.loc[index, 'child'] = child
 
         self.setHeaderLabels(columns)
         self.expandAll()
         self.setSelectionBehavior(QAbstractItemView.SelectItems)
 
         self.clicked.connect(self.tree_clicked)
+
+    def update_tree(self):
+        for index, _ in self.df.iterrows():
+            child = self.df.loc[index, 'child']
+            self.init_digit_item(child, index, 'scale_min')
+            self.init_digit_item(child, index, 'scale_max')
+            self.init_digit_item(child, index, 'scale_div')
+            self.init_checkbox_item(child, index, 'logarithmic')
+            self.init_digit_item(child, index, 'info_priority')
+
+    def init_child(self, child, index):
+        self.init_str_item(child, index, 'index_name')
+
+        self.init_checkbox_item(child, index, 'selected')
+        self.init_str_item(child, index, 'show_name')
+
+        self.init_color_item(child, index, 'color')
+        self.init_digit_item(child, index, 'line_thick')
+        self.init_combobox_item(child, index, 'pen_style', combobox=PenStyleComboBox)
+
+        self.init_digit_item(child, index, 'scale_min')
+        self.init_digit_item(child, index, 'scale_max')
+        self.init_digit_item(child, index, 'scale_div')
+        self.init_checkbox_item(child, index, 'logarithmic')
+        self.init_str_item(child, index, 'units')
+
+        self.init_str_item(child, index, 'txt_CN')
+
+        self.init_digit_item(child, index, 'info_priority')
+        self.init_checkbox_item(child, index, 'default_ds')
 
     def init_color_item(self, child, index, column):
         pix = QPixmap(64, 64)
@@ -216,7 +258,7 @@ class CheckTree(QTreeWidget):
                 df.loc[index_name, column_name] = color
                 self.update_signal.emit()
 
-            elif column_name in ['line_thick', "scale_div"]:
+            elif column_name in ['line_thick', "scale_div", "info_priority"]:
                 text, _ = QInputDialog.getText(self, column_name, column_name + ': ')
                 if text.isdigit():
                     df.loc[index_name, column_name] = int(text)
@@ -239,6 +281,14 @@ class CheckTree(QTreeWidget):
                 df.loc[index_name, column_name] = text
                 item.setText(column, text)
                 self.update_signal.emit()
+
+            elif column_name in ["units"]:
+                text, _ = QInputDialog.getText(self, column_name, column_name + ': ')
+
+                if text in get_units_dict().keys():
+                    df.loc[index_name, column_name] = text
+                    item.setText(column, text)
+                    self.update_signal.emit()
 
 
 if __name__ == '__main__':
