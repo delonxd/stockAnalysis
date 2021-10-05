@@ -48,7 +48,7 @@ class InformationBox:
         pix.fill(QColor(0, 0, 0, 30))
 
         pix_painter = QPainter(pix)
-        pix_painter.setFont(QFont('Consolas', 10))
+        pix_painter.setFont(QFont('Consolas', 14))
 
         metrics = pix_painter.fontMetrics()
 
