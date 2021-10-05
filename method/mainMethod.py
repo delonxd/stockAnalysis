@@ -291,6 +291,20 @@ def write_header2txt():
         f.write(str1)
 
 
+def get_units_dict():
+    res = {
+        '亿': 1e8,
+        '万': 1e4,
+        '元': 1,
+        '人': 1,
+        '百万': 1e6,
+        '千': 1e3,
+        '百': 1e2,
+        '%': 1e-2,
+    }
+    return res
+
+
 if __name__ == '__main__':
     pass
 
