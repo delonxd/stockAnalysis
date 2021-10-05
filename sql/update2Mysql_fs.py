@@ -23,14 +23,12 @@ if __name__ == '__main__':
         db = mysql.connector.connect(**config)
         cursor = db.cursor()
 
-        # for stockCode in codeList[:5]:
-        for stockCode in ['600008']:
+        e_list = list(enumerate(codeList))
+        for i, stockCode in e_list[4114:]:
+            # for stockCode in ['600008']:
 
             print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-            print(stockCode)
-
-            # tFile = 'Ns%sText.pkl' % infix.capitalize()
-            # dataHeader = get_header_fs(root=r'..\basicData', file=tFile)
+            print(i, '-->', stockCode)
 
             tFile = 'FinancialSheet_%s.pkl' % stockCode
             res = read_pkl(root=r'..\bufferData\financialData', file=tFile)
@@ -58,8 +56,8 @@ if __name__ == '__main__':
                 table=table,
                 df_data=df,
                 check_field='standardDate',
-                # ini=True,
-                ini=False,
+                ini=True,
+                # ini=False,
             )
 
         db.close()
