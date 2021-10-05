@@ -1,4 +1,5 @@
 from PyQt5.QtCore import *
+from method.mainMethod import get_units_dict
 import numpy as np
 
 
@@ -8,16 +9,20 @@ class DataSource:
             df,
             name=None,
             show_name=None,
-            units='None',
             color=Qt.red,
             line_thick=2,
             pen_type=Qt.SolidLine,
-            scale_min=2e8,
-            scale_max=2048*1e8,
+            scale_min=1,
+            scale_max=1024,
             scale_div=10,
             logarithmic=True,
             info_priority=0,
+            units='亿',
+            ds_type='digit',
+            default_ds=True,
     ):
+        self.ds_type = ds_type
+        self.default_ds = default_ds
         self.df = df
         if name is None:
             self.name = df.columns.tolist()[0]
@@ -27,14 +32,15 @@ class DataSource:
         self.index_name = name
         self.show_name = show_name
 
-        self.units = units
-
         self.color = color
         self.line_thick = line_thick
         self.pen_type = pen_type
 
-        self.scale_min = scale_min
-        self.scale_max = scale_max
+        self.units = units
+        self.ratio = get_units_dict()[units]
+
+        self.scale_min = scale_min * self.ratio
+        self.scale_max = scale_max * self.ratio
 
         self.scale_div = scale_div
         self.logarithmic = logarithmic
@@ -45,11 +51,13 @@ class DataSource:
         self.val_delta = None
         self.metrics = None
 
-        self.format_fun = lambda x: '%i亿' % (x / 1e8)
+        if self.ds_type == 'digit':
+            self.format_fun = lambda x: '%.2f%s' % (x / self.ratio, units)
+            self.check_logarithmic()
+        else:
+            self.format_fun = lambda x: '%s' % x
 
         self.set_val_scale()
-
-        self.check_logarithmic()
 
     def format(self, value):
         if value is None:
@@ -75,7 +83,6 @@ class DataSource:
     def check_logarithmic(self):
         df = self.df
         column = self.df.columns.tolist()[0]
-        print(column)
         if self.logarithmic is True:
             df.loc[df[column] <= 0, column] = None
 
