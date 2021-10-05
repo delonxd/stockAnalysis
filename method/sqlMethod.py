@@ -20,19 +20,18 @@ def update_df2sql(cursor, table, df_data, check_field, ini=False):
     df_data.loc[:, 'first_update'].fillna(value=timestamp, inplace=True)
     df_data.loc[:, 'last_update'].fillna(value=timestamp, inplace=True)
 
-    show_df(df_data)
-
     sql_execute_multi(cursor, 'SET autocommit = 0;')
     sql_execute_multi(cursor, 'START TRANSACTION;')
 
     # DELETE
     date_list = list(df_data[check_field].values)
-    date_str = json.dumps(date_list, ensure_ascii=False)
-    date_str = '(%s)' % date_str[1:-1]
-    condition = sql_format_condition(check_field, 'in', date_str)
-    delete_str = sql_format_delete(table=table, where=condition)
+    if date_list:
+        date_str = json.dumps(date_list, ensure_ascii=False)
+        date_str = '(%s)' % date_str[1:-1]
+        condition = sql_format_condition(check_field, 'in', date_str)
+        delete_str = sql_format_delete(table=table, where=condition)
 
-    sql_execute_multi(cursor, delete_str)
+        sql_execute_multi(cursor, delete_str)
 
     df_data = sql_format_df(df_data)
 
