@@ -10,16 +10,14 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 
-class DataPix:
+class DataPix(QObject):
+    update_signal = pyqtSignal()
 
-    def __init__(self, m_width, m_height, style_df: pd.DataFrame, data_df: pd.DataFrame):
+    def __init__(self, parent, m_width, m_height, style_df: pd.DataFrame, data_df: pd.DataFrame):
         super().__init__()
-        self.style_df = style_df
-        # self.df = sql2df()
-        self.df = data_df
+        self.parent = parent
 
-        # self.data_dict = get_data_source(self.df)
-        # self.default_ds = self.data_dict['所有者权益']
+        self.style_df = style_df
 
         self.data_dict = None
         self.default_ds = None
@@ -37,7 +35,7 @@ class DataPix:
         self.m_height = m_height
 
         self.d_width = d_width = 800
-        self.d_height = d_height = 600
+        self.d_height = d_height = 700
 
         left_blank = 130
         right_blank = 80
@@ -47,25 +45,36 @@ class DataPix:
         self.data_rect = QRect(left_blank, 0, d_width, d_height)
 
         # px_list
-        self.date_list = self.get_date_list('MONTHLY')
+        # self.date_list = self.get_date_list('MONTHLY')
+        self.date_list = self.get_date_list('SEASON')
         self.px_list, self.px_dict = self.get_px_list()
-        # print(len(self.date_list))
 
         # pix
         self.pix = QPixmap()
         self.pix_show = QPixmap()
 
-        # self.format_data_source()
-        # self.draw_pix()
         self.get_data_source()
-        # '2012-09-30T00:00:00+08:00'
+
+    @property
+    def df(self):
+        return self.parent.df
 
     def get_data_source(self):
         style_df = self.style_df[self.style_df['selected'] == True]
+
+        for index, row in style_df.iterrows():
+            ds_type = row['ds_type']
+            if ds_type == 'digit':
+                series = self.df.loc[:, row['index_name']]
+                self.scale_data(index, series)
+        self.update_signal.emit()
+
+        style_df = self.style_df[self.style_df['selected'] == True]
         res = dict()
-        for _, row in style_df.iterrows():
+        for index, row in style_df.iterrows():
+            data = self.df.loc[:, [row['index_name']]]
             ds = DataSource(
-                self.df.loc[:, [row['index_name']]],
+                data,
                 name=row['index_name'],
                 show_name=row['show_name'],
                 color=row['color'],
@@ -76,20 +85,46 @@ class DataPix:
                 scale_div=row['scale_div'],
                 logarithmic=row['logarithmic'],
                 info_priority=row['info_priority'],
+                units=row['units'],
+                ds_type=row['ds_type'],
+                default_ds=row['default_ds']
             )
             res[ds.name] = ds
 
         self.data_dict = res
         for value in res.values():
-            self.default_ds = value
-            break
+            if value.default_ds is True:
+                # print('default_ds ---> ', value.name)
+                self.default_ds = value
+                break
 
         self.format_data_source()
         self.draw_pix()
 
+    def scale_data(self, index, series):
+        d_max = series.max()
+        d_min = series.min()
+
+        if 0 <= d_min <= 1 and 0 <= d_max <= 1:
+            scale_max = 100
+            scale_min = 0
+            units = '%'
+            logarithmic = False
+        # else:
+        #     # scale_max = 1024
+        #     # scale_min = 1
+        #     # units = '亿'
+        #     # logarithmic = True
+
+            self.style_df.loc[index, 'scale_min'] = scale_min
+            self.style_df.loc[index, 'scale_max'] = scale_max
+            self.style_df.loc[index, 'units'] = units
+            self.style_df.loc[index, 'logarithmic'] = logarithmic
+
     def format_data_source(self):
         for ds in self.data_dict.values():
-            ds.df = data_by_dates(ds.df, self.date_list)
+            if ds.ds_type == 'digit':
+                ds.df = data_by_dates(ds.df, self.date_list)
 
     def draw_pix(self):
 
@@ -110,6 +145,8 @@ class DataPix:
             res = list(rrule(YEARLY, byyearday=-1, dtstart=self.date_min, until=self.date_max))
         elif mode == 'INTERIM':
             res = list(rrule(YEARLY, bymonthday=-1, bymonth=6, dtstart=self.date_min, until=self.date_max))
+        elif mode == 'SEASON':
+            res = list(rrule(YEARLY, bymonthday=-1, bymonth=[3, 6, 9, 12], dtstart=self.date_min, until=self.date_max))
         return res
 
     def get_px_list(self):
@@ -240,24 +277,25 @@ class DataPix:
             self.draw_data(data)
 
     def draw_data(self, data: DataSource):
-        pix_painter = QPainter(self.pix)
+        if data.ds_type == 'digit':
+            pix_painter = QPainter(self.pix)
 
-        pen = QPen(data.color, data.line_thick, data.pen_type)
-        pix_painter.setPen(pen)
+            pen = QPen(data.color, data.line_thick, data.pen_type)
+            pix_painter.setPen(pen)
 
-        point1 = None
-        for tup in data.df.itertuples():
-            if tup[1]:
-                date = dt.datetime.strptime(tup[0], "%Y-%m-%d").date()
-                value = tup[1]
-                if isinstance(value, (int, float)):
+            point1 = None
+            for tup in data.df.itertuples():
+                if tup[1]:
+                    date = dt.datetime.strptime(tup[0], "%Y-%m-%d").date()
+                    value = tup[1]
+                    if isinstance(value, (int, float)):
 
-                    x, y = self.data2px(date, value, data)
-                    point2 = QPoint(x, y)
-                    if point1:
-                        pix_painter.drawLine(point1, point2)
-                    point1 = point2
-        pix_painter.end()
+                        x, y = self.data2px(date, value, data)
+                        point2 = QPoint(x, y)
+                        if point1:
+                            pix_painter.drawLine(point1, point2)
+                        point1 = point2
+            pix_painter.end()
 
     def data2value(self, date, value, data: DataSource):
         x, y = None, None
