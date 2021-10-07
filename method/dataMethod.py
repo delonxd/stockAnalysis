@@ -214,7 +214,7 @@ def get_default_style_df():
     # # print(df.quantile(0.5))
 
     # path = '../gui/style_df_standard3.pkl'
-    path = '../gui/style_df_20211006113519.pkl'
+    path = '../gui/style_df_standard2.pkl'
     with open(path, 'rb') as pk_f:
         df = pickle.load(pk_f)
 
