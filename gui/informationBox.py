@@ -17,13 +17,13 @@ class InformationBox:
         for ds in self.parent.data_dict.values():
             index_list = ds.df.index.tolist()
             if date_index in index_list:
-                box_df.loc[ds.name, 'value'] = ds.df.loc[date_index][0]
+                box_df.loc[ds.index_name, 'value'] = ds.df.loc[date_index][0]
             else:
-                box_df.loc[ds.name, 'value'] = None
+                box_df.loc[ds.index_name, 'value'] = None
 
-            box_df.loc[ds.name, 'priority'] = ds.info_priority
-            box_df.loc[ds.name, 'data_source'] = ds
-            box_df.loc[ds.name, 'show_name'] = ds.show_name
+            box_df.loc[ds.index_name, 'priority'] = ds.info_priority
+            box_df.loc[ds.index_name, 'data_source'] = ds
+            box_df.loc[ds.index_name, 'show_name'] = ds.show_name
 
         box_df.sort_values('priority', inplace=True)
 
@@ -44,7 +44,7 @@ class InformationBox:
     def draw_pix(self, date):
         text_list = self.load_value(date)
 
-        pix = QPixmap(400, 400)
+        pix = QPixmap(400, 800)
         pix.fill(QColor(0, 0, 0, 30))
 
         pix_painter = QPainter(pix)

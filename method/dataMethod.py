@@ -3,11 +3,12 @@ from method.sqlMethod import get_data_frame
 import mysql.connector
 import datetime as dt
 
-from PyQt5.QtWidgets import *
+# from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 from dateutil.rrule import *
+from dateutil.relativedelta import relativedelta
 import pandas as pd
 import numpy as np
 import sys
@@ -122,6 +123,64 @@ def get_tree_df2():
     return df
 
 
+def process_df():
+    df = sql2df(code='000004')
+    # print(df)
+
+    data = df.loc[:, ['id_211_ps_np']]
+    res = get_mouth_delta(data, 'id_211_ps_np_DELTA')
+
+    print(res)
+
+    style_df = get_default_style_df()
+    style_df = add_style_row(style_df, 'id_211_ps_np', 'id_211_ps_np_DELTA')
+
+
+def add_style_row(df: pd.DataFrame, src_name, new_name):
+    series = df.loc[src_name]
+    series.name = new_name
+    df2 = df.append(series)
+    return df2
+
+
+def get_mouth_delta(df: pd.DataFrame, new_name, mode='Monthly'):
+    res_df = pd.DataFrame(columns=[new_name])
+
+    if mode == 'Monthly':
+        step = 1
+    elif mode == 'Season':
+        step = 3
+    year = None
+    month0 = 0
+    value0 = 0
+
+    for tup in df.itertuples():
+        if tup[1]:
+            if isinstance(tup[1], (int, float)):
+                date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
+                if not year == date.year:
+                    month0 = 0
+                    value0 = 0
+
+                month1 = date.month
+                value1 = tup[1]
+                d_value = (value1 - value0) / (month1 - month0)
+                for m in range(month0, month1):
+                    date1 = dt.date(date.year, m + 1, 1)
+                    date_tmp = date1 + relativedelta(months=1, days=-1)
+
+                    # print(date_tmp, d_value)
+
+                    index = date_tmp.strftime("%Y-%m-%d")
+                    res_df.loc[index] = d_value * 12
+
+                # print(date, tup[1])
+
+                month0 = month1
+                value0 = value1
+    return res_df
+
+
 def get_default_style_df():
     # df = get_tree_df2()
     #
@@ -154,14 +213,18 @@ def get_default_style_df():
     # # print(df['info_priority'].max())
     # # print(df.quantile(0.5))
 
-    path = '../gui/style_df_standard.pkl'
+    # path = '../gui/style_df_standard3.pkl'
+    path = '../gui/style_df_20211006113519.pkl'
     with open(path, 'rb') as pk_f:
         df = pickle.load(pk_f)
+
+    # df.insert(0, "delta_mode", False)
 
     return df
 
 
 if __name__ == '__main__':
+    # process_df()
 
     path = '../basicData/BasicData.pkl'
     with open(path, 'rb') as pk_f:
@@ -169,12 +232,15 @@ if __name__ == '__main__':
 
     d = json.loads(res)['data']
 
-    str0 = ''
+    res = dict()
     for v in d:
-        str0 = '\n'.join([str0, repr(v)])
-    print(str0)
+        res[v['stockCode']] = v['name']
+    print(res)
 
-    with open("../comparisonTable/basic_table.txt", "w", encoding="utf-8") as f:
-        f.write(str0)
+    # with open("../comparisonTable/basic_table.txt", "w", encoding="utf-8") as f:
+    #     f.write(str0)
+
+    with open("../basicData/code_name.pkl", 'wb') as pk_f:
+        pickle.dump(res, pk_f)
 
     pass

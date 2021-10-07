@@ -3,6 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from method.mainMethod import get_units_dict
 import pandas as pd
+import time
 
 
 class QItemDf(QTreeWidgetItem):
@@ -58,7 +59,7 @@ class PenStyleComboBox(QComboBox):
         self.update_tree()
 
     def update_tree(self):
-        self.tree.update_signal.emit()
+        self.tree.update_style.emit()
 
     def wheelEvent(self, e):
         pass
@@ -77,32 +78,35 @@ class DataCheckBox(QCheckBox):
 
     def self_clicked(self):
         flag = self.isChecked()
+        index = self.row
 
         if self.column == 'selected' and flag:
             # df0 = self.df[self.df['selected'] == True]
-            if not self.df.loc[self.row, 'show_name']:
-                self.df.loc[self.row, 'show_name'] = self.df.loc[self.row, 'txt_CN']
-                a = self.df.loc[self.row]
-                # print(type(a), '-->', a)
+            if not self.df.loc[index, 'show_name']:
+                self.df.loc[index, 'show_name'] = self.df.loc[index, 'txt_CN']
 
-            self.df.loc[self.row, 'info_priority'] = self.df['info_priority'].max() + 1
-            self.df.loc[self.row, self.column] = flag
-            child = self.df.loc[self.row, 'child']
-            self.tree.init_child(child, self.row)
-        elif self.column == 'selected' and not flag:
-            self.df.loc[self.row, 'info_priority'] = 0
-            self.df.loc[self.row, self.column] = flag
+            self.df.loc[index, ['info_priority', self.column]] = [self.df['info_priority'].max() + 1, flag]
+
+            row = self.df.loc[index]
+            child = row['child']
+            self.tree.init_child(child, index, row)
             self.update_tree()
+
+        elif self.column == 'selected' and not flag:
+            self.df.loc[index, ['info_priority', self.column]] = [0, flag]
+            # self.df.loc[index, ] = flag
+            self.update_tree()
+
         else:
-            self.df.loc[self.row, self.column] = flag
+            self.df.loc[index, self.column] = flag
             self.update_tree()
 
     def update_tree(self):
-        self.tree.update_signal.emit()
+        self.tree.update_style.emit()
 
 
 class CheckTree(QTreeWidget):
-    update_signal = pyqtSignal()
+    update_style = pyqtSignal()
 
     def __init__(self, df: pd.DataFrame):
         super().__init__()
@@ -126,13 +130,19 @@ class CheckTree(QTreeWidget):
 
             'default_ds',
             'info_priority',
+
+            'ds_type',
+            'delta_mode',
         ]
 
-        self.column_names = columns
+        self.index_pos = dict()
+        for i, value in enumerate(columns):
+            self.index_pos[value] = i
 
+        self.column_names = columns
         self.setColumnCount(len(columns))
 
-        width_list = [180, 20, 70, 10, 40, 90, 50, 50, 40, 10, 30, 200, 20, 40]
+        width_list = [180, 20, 70, 10, 40, 90, 50, 50, 40, 10, 30, 200, 20, 40, 50, 20]
         for idx, val in enumerate(width_list):
             self.setColumnWidth(idx, val)
 
@@ -141,10 +151,13 @@ class CheckTree(QTreeWidget):
         root.df = df
         self.df = df
 
-        for index, _ in self.df.iterrows():
+        child_list = list()
+        # self.df['child'] = QItemDf(root)
+        for index, row in self.df.iterrows():
             child = QItemDf(root)
-            self.init_child(child, index)
-            self.df.loc[index, 'child'] = child
+            self.init_child(child, index, row)
+            child_list.append(child)
+        self.df['child'] = child_list
 
         self.setHeaderLabels(columns)
         self.expandAll()
@@ -152,63 +165,66 @@ class CheckTree(QTreeWidget):
 
         self.clicked.connect(self.tree_clicked)
 
+        self.setMinimumSize(800, 800)
+
     def update_tree(self):
-        for index, _ in self.df.iterrows():
-            child = self.df.loc[index, 'child']
-            self.init_digit_item(child, index, 'scale_min')
-            self.init_digit_item(child, index, 'scale_max')
-            self.init_digit_item(child, index, 'scale_div')
-            self.init_checkbox_item(child, index, 'logarithmic')
-            self.init_digit_item(child, index, 'info_priority')
+        pass
+        # print('----------------------')
+        #
+        # for index, row in self.df.iterrows():
+        #     child = row['child']
+        #
+        #     self.init_digit_item(child, row, 'scale_min')
+        #     self.init_digit_item(child, row, 'scale_max')
+        #     self.init_digit_item(child, row, 'scale_div')
+        #     self.init_checkbox_item(child, index, row, 'logarithmic')
+        #     self.init_str_item(child, row, 'units')
+        #
+        #     self.init_digit_item(child, row, 'info_priority')
+        #     self.init_checkbox_item(child, index, row, 'default_ds')
+        # self.update()
 
-    def init_child(self, child, index):
-        self.init_str_item(child, index, 'index_name')
+    def init_child(self, child, index, row):
+        self.init_str_item(child, row, 'index_name')
 
-        self.init_checkbox_item(child, index, 'selected')
-        self.init_str_item(child, index, 'show_name')
+        self.init_checkbox_item(child, index, row, 'selected')
+        self.init_str_item(child, row, 'show_name')
 
-        self.init_color_item(child, index, 'color')
-        self.init_digit_item(child, index, 'line_thick')
-        self.init_combobox_item(child, index, 'pen_style', combobox=PenStyleComboBox)
+        self.init_color_item(child, row, 'color')
+        self.init_digit_item(child, row, 'line_thick')
+        self.init_combobox_item(child, index, row, 'pen_style', combobox=PenStyleComboBox)
 
-        self.init_digit_item(child, index, 'scale_min')
-        self.init_digit_item(child, index, 'scale_max')
-        self.init_digit_item(child, index, 'scale_div')
-        self.init_checkbox_item(child, index, 'logarithmic')
-        self.init_str_item(child, index, 'units')
+        self.init_digit_item(child, row, 'scale_min')
+        self.init_digit_item(child, row, 'scale_max')
+        self.init_digit_item(child, row, 'scale_div')
+        self.init_checkbox_item(child, index, row, 'logarithmic')
+        self.init_str_item(child, row, 'units')
 
-        self.init_str_item(child, index, 'txt_CN')
+        self.init_str_item(child, row, 'txt_CN')
 
-        self.init_digit_item(child, index, 'info_priority')
-        self.init_checkbox_item(child, index, 'default_ds')
+        self.init_digit_item(child, row, 'info_priority')
+        self.init_checkbox_item(child, index, row, 'default_ds')
 
-    def init_color_item(self, child, index, column):
+        self.init_str_item(child, row, 'ds_type')
+        self.init_checkbox_item(child, index, row, 'delta_mode')
+
+    def init_color_item(self, child, row, column):
         pix = QPixmap(64, 64)
-        pix.fill(self.df.loc[index, column])
-        pos = self.column_names.index(column)
+        pix.fill(row[column])
+        pos = self.index_pos[column]
         child.setIcon(pos, QIcon(pix))
 
-    def init_digit_item(self, child, index, column):
-        value = str(self.df.loc[index, column])
-        pos = self.column_names.index(column)
+    def init_digit_item(self, child, row, column):
+        value = str(row[column])
+        pos = self.index_pos[column]
         child.setText(pos, value)
 
-    def init_format_item(self, child, index, column, format_str: str):
-        value = format_str.format(self.df.loc[index, column])
-        pos = self.column_names.index(column)
+    def init_str_item(self, child, row, column):
+        value = row[column]
+        pos = self.index_pos[column]
         child.setText(pos, value)
 
-    def init_repr_item(self, child, index, column):
-        value = repr(self.df.loc[index, column])
-        pos = self.column_names.index(column)
-        child.setText(pos, value)
-
-    def init_str_item(self, child, index, column):
-        value = self.df.loc[index, column]
-        pos = self.column_names.index(column)
-        child.setText(pos, value)
-
-    def init_checkbox_item(self, child, index, column):
+    def init_checkbox_item(self, child, index, row, column):
         check_box = DataCheckBox()
 
         check_box.row = index
@@ -217,13 +233,13 @@ class CheckTree(QTreeWidget):
         check_box.tree = self
         check_box.setStyleSheet('QComboBox{margin:3px};')
 
-        value = self.df.loc[index, column]
-        check_box.setChecked(value)
+        value = row[column]
+        pos = self.index_pos[column]
 
-        pos = self.column_names.index(column)
+        check_box.setChecked(value)
         self.setItemWidget(child, pos, check_box)
 
-    def init_combobox_item(self, child, index, column, combobox):
+    def init_combobox_item(self, child, index, row, column, combobox):
         combo_box = combobox()
 
         combo_box.row = index
@@ -232,10 +248,10 @@ class CheckTree(QTreeWidget):
         combo_box.tree = self
         combo_box.setStyleSheet('QComboBox{margin:3px};')
 
-        value = self.df.loc[index, column]
-        combo_box.setCurrentText(combo_box.pen_dict[value])
+        value = row[column]
+        pos = self.index_pos[column]
 
-        pos = self.column_names.index(column)
+        combo_box.setCurrentText(combo_box.pen_dict[value])
         self.setItemWidget(child, pos, combo_box)
 
     def tree_clicked(self, index):
@@ -256,14 +272,14 @@ class CheckTree(QTreeWidget):
                 pix.fill(color)
                 item.setIcon(column, QIcon(pix))
                 df.loc[index_name, column_name] = color
-                self.update_signal.emit()
+                self.update_style.emit()
 
             elif column_name in ['line_thick', "scale_div", "info_priority"]:
                 text, _ = QInputDialog.getText(self, column_name, column_name + ': ')
                 if text.isdigit():
                     df.loc[index_name, column_name] = int(text)
                     item.setText(column, text)
-                    self.update_signal.emit()
+                    self.update_style.emit()
 
             elif column_name in ["scale_min", "scale_max"]:
                 text, _ = QInputDialog.getText(self, column_name, column_name + ': ')
@@ -271,7 +287,7 @@ class CheckTree(QTreeWidget):
                     val = float(text)
                     df.loc[index_name, column_name] = val
                     item.setText(column, text)
-                    self.update_signal.emit()
+                    self.update_style.emit()
 
                 except Exception as e:
                     print(e)
@@ -280,7 +296,7 @@ class CheckTree(QTreeWidget):
                 text, _ = QInputDialog.getText(self, column_name, column_name + ': ')
                 df.loc[index_name, column_name] = text
                 item.setText(column, text)
-                self.update_signal.emit()
+                self.update_style.emit()
 
             elif column_name in ["units"]:
                 text, _ = QInputDialog.getText(self, column_name, column_name + ': ')
@@ -288,7 +304,7 @@ class CheckTree(QTreeWidget):
                 if text in get_units_dict().keys():
                     df.loc[index_name, column_name] = text
                     item.setText(column, text)
-                    self.update_signal.emit()
+                    self.update_style.emit()
 
 
 if __name__ == '__main__':
