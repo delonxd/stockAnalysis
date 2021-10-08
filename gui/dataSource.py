@@ -38,6 +38,10 @@ class DataSource:
         self.index_name = index_name
         self.show_name = show_name
 
+        # if index_name == 'id_145_bs_shbt1sh_tsc_r':
+        #     print('>>>>>>>>>>>>>>>')
+        #     print(df.values)
+
         self.df = df
         self.ds_type = ds_type
         self.delta_mode = delta_mode
@@ -88,10 +92,22 @@ class DataSource:
 
         self.set_val_scale()
 
-    def get_last_data_ratio(self):
-        value = self.df.iloc[-1, 0]
-        # print(value)
-        return value
+        self.df.columns = [index_name]
+
+        # self.df.fillna(value=np.nan)
+        # self.df.fillna(value=None)
+
+        # try:
+        #     self.df[self.df[index_name].values is None, index_name] = np.nan
+        # except Exception as e:
+        #     print(self.df)
+        #     print(self.df.columns)
+        #     raise KeyboardInterrupt(e)
+
+    # def get_last_data_ratio(self):
+    #     value = self.df.iloc[-1, 0]
+    #     # print(value)
+    #     return value
 
     def format(self, value):
         if value is None:
@@ -124,8 +140,9 @@ class DataSource:
         if self.logarithmic is True:
             # self.df = df.where(df[column] > 0, None)
             # self.df = df.where(df > 0, None)
-            self.df = self.df.where(self.df > 0, None)
+            # self.df = self.df.where(self.df > 0, None)
             # self.df = self.df.where(self.df > 0, np.inf)
+            pass
 
             # todo：optimize check_logarithmic()
 

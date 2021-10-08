@@ -34,7 +34,7 @@ def sql2df(code):
 
     sql_df = sql_df.set_index('standardDate', drop=False)
 
-    sql_df = sql_df.where(sql_df.notnull(), None)
+    # sql_df = sql_df.where(sql_df.notnull(), None)
     sql_df.sort_index(inplace=True)
 
     sql_df.index = sql_df.index.map(lambda x: x[:10])
@@ -153,16 +153,19 @@ def get_mouth_delta(df: pd.DataFrame, new_name, mode='Monthly'):
     year = None
     month0 = 0
     value0 = 0
-
+    print(len(df))
     for tup in df.itertuples():
         if tup[1]:
+
             if isinstance(tup[1], (int, float)):
+
+                print(tup[1])
                 date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
                 if not year == date.year:
                     month0 = 0
                     value0 = 0
 
-                month1 = date.month
+                month1 = int(date.month)
                 value1 = tup[1]
                 d_value = (value1 - value0) / (month1 - month0)
                 for m in range(month0, month1):

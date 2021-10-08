@@ -71,7 +71,7 @@ class MainWindow(QWidget):
         with open('../basicData/code_name.pkl', 'rb') as pk_f:
             self.code_dict = pickle.load(pk_f)
 
-        stock = '600460'
+        stock = '600008'
         self.code_index = self.code_list.index(stock)
 
         # self.code_index = 0

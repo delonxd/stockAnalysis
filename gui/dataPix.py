@@ -105,6 +105,9 @@ class DataPix(QObject):
         self.data_dict = res
         self.draw_pix()
 
+        print(13, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
+
+
     def reset_scale_all(self):
         style_df = self.style_df[self.style_df['selected'].values]
 
@@ -122,18 +125,6 @@ class DataPix(QObject):
             ] = [scale_max, scale_min]
 
         self.update_tree.emit()
-
-
-        # self.parent.update_data()
-
-    # def scale_ratio(self, ratio):
-    #     for index, row in self.style_df.iterrows():
-    #         if row['logarithmic'] is True:
-    #             if row['units'] == '亿':
-    #                 self.style_df.loc[index, 'scale_min'] = row['scale_min'] * ratio
-    #                 self.style_df.loc[index, 'scale_max'] = row['scale_max'] * ratio
-    #
-    #     self.parent.update_data()
 
     def get_date_list(self, mode):
         res = None
@@ -309,43 +300,102 @@ class DataPix(QObject):
             self.draw_data(data)
 
     def draw_data(self, data: DataSource):
+        # if data.ds_type == 'digit':
+        #
+        #     pix_painter = QPainter(self.pix)
+        #     pen = QPen(data.color, data.line_thick, data.pen_type)
+        #     pix_painter.setPen(pen)
+
+        #     if data.delta_mode is False:
+        #         data.df.dropna(inplace=True)
+        #
+        #         point1 = None
+        #         for tup in data.df.itertuples():
+        #
+        #             if data.index_name == 'id_145_bs_shbt1sh_tsc_r':
+        #                 print('>>>>>>>>>>>>>>>')
+        #                 print(tup[1])
+        #
+        #             if tup[1]:
+        #                 date = dt.datetime.strptime(tup[0], "%Y-%m-%d").date()
+        #                 value = tup[1]
+        #                 if isinstance(value, (int, float)):
+        #
+        #                     x, y = self.data2px(date, value, data)
+        #                     point2 = QPoint(x, y)
+        #                     if point1:
+        #                         pix_painter.drawLine(point1, point2)
+        #                     point1 = point2
+        #     else:
+        #         point1 = None
+        #         for tup in data.df.itertuples():
+        #             if tup[1]:
+        #                 date = dt.datetime.strptime(tup[0], "%Y-%m-%d").date()
+        #                 value = tup[1]
+        #                 if isinstance(value, (int, float)):
+        #
+        #                     x, y = self.data2px(date, value, data)
+        #                     point2 = QPoint(x, y)
+        #                     if point1:
+        #                         point3 = QPoint(point1.x(), point2.y())
+        #                         pix_painter.drawLine(point1, point3)
+        #                         pix_painter.drawLine(point3, point2)
+        #                     point1 = point2
+
+        dates = data.df.index.values
+        val_x = np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(dates)
+        px_x = self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
+        # print(dates)
+        # print(val_x)
+        # print(px_x)
+
         if data.ds_type == 'digit':
 
             pix_painter = QPainter(self.pix)
-
             pen = QPen(data.color, data.line_thick, data.pen_type)
             pix_painter.setPen(pen)
+
+            data_y = data.df.iloc[:, 0].values
+
+            if data.logarithmic is False:
+                data_y[data_y == 0] = np.nan
+
+                df_point = pd.DataFrame()
+                df_point['px_x'] = px_x
+                df_point['px_y'] = (data.val_max - data_y) * self.data_rect.height() / data.val_delta
+
+                df_point.dropna(inplace=True)
+                point_list = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
+
+            else:
+                # print(data.index_name, data.show_name)
+                px_x[np.isnan(data_y)] = np.nan
+                data_y[np.isnan(data_y)] = 0
+                data_y[data_y <= 0] = 1e-10
+
+                df_point = pd.DataFrame()
+                df_point['px_x'] = px_x
+                px_y = (data.val_max - np.log2(data_y / data.scale_min) / np.log2(data.scale_max / data.scale_min)) * self.data_rect.height() / data.val_delta
+                df_point['px_y'] = px_y
+
+                df_point.dropna(inplace=True)
+                point_list = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
+
             if data.delta_mode is False:
-
-                point1 = None
-                for tup in data.df.itertuples():
-                    if tup[1]:
-                        date = dt.datetime.strptime(tup[0], "%Y-%m-%d").date()
-                        value = tup[1]
-                        if isinstance(value, (int, float)):
-
-                            x, y = self.data2px(date, value, data)
-                            point2 = QPoint(x, y)
-                            if point1:
-                                pix_painter.drawLine(point1, point2)
-                            point1 = point2
+                pix_painter.drawPolyline(*point_list)
             else:
                 point1 = None
-                for tup in data.df.itertuples():
-                    if tup[1]:
-                        date = dt.datetime.strptime(tup[0], "%Y-%m-%d").date()
-                        value = tup[1]
-                        if isinstance(value, (int, float)):
-
-                            x, y = self.data2px(date, value, data)
-                            point2 = QPoint(x, y)
-                            if point1:
-                                point3 = QPoint(point1.x(), point2.y())
-                                pix_painter.drawLine(point1, point3)
-                                pix_painter.drawLine(point3, point2)
-                            point1 = point2
+                print(len(point_list))
+                for point in point_list:
+                    point2 = point
+                    if point1:
+                        point3 = QPoint(point1.x(), point2.y())
+                        pix_painter.drawLine(point1, point3)
+                        pix_painter.drawLine(point3, point2)
+                    point1 = point2
 
             pix_painter.end()
+
 
     ###############################################################################################
 
