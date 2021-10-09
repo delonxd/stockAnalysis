@@ -143,48 +143,10 @@ def add_style_row(df: pd.DataFrame, src_name, new_name):
     return df2
 
 
-def get_month_delta(df: pd.DataFrame, new_name, mode='Season'):
-
-    if mode == 'Monthly':
-        step = 1
-    elif mode == 'Season':
-        step = 3
-    else:
-        step = 1
-    year = None
-    month0 = 0
-    value0 = 0
-
-    indexes = list()
-    values = list()
-
-    for tup in df.itertuples():
-        date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
-        if not year == date.year:
-            month0 = 0
-            value0 = 0
-        month1 = date.month
-        value1 = tup[1]
-        year = date.year
-
-        d_value = (value1 - value0) / (month1 - month0)
-
-        for m in range(month0, month1, step):
-            date1 = dt.date(date.year, m + 1, 1) + relativedelta(months=-1)
-            date_tmp = date1 + relativedelta(months=1, days=-1)
-
-            index = date_tmp.strftime("%Y-%m-%d")
-            # res_df.loc[index] = d_value * 12
-
-            indexes.append(index)
-            values.append(d_value * 12)
-
-        month0 = month1
-        value0 = value1
-
-    res_df = pd.DataFrame(values, index=indexes, columns=[new_name])
-
-    return res_df
+def get_value_from_ratio(date0, value0, date, ratio_year):
+    x = (date - date0).days
+    res = value0 * (ratio_year ** (x / 365))
+    return res
 
 
 def get_month_data(df: pd.DataFrame, new_name):
@@ -236,6 +198,50 @@ def get_month_data(df: pd.DataFrame, new_name):
 
     # print(res_df)
     # raise KeyboardInterrupt
+
+    return res_df
+
+
+def get_month_delta(df: pd.DataFrame, new_name, mode='Season'):
+
+    if mode == 'Monthly':
+        step = 1
+    elif mode == 'Season':
+        step = 3
+    else:
+        step = 1
+    year = None
+    month0 = 0
+    value0 = 0
+
+    indexes = list()
+    values = list()
+
+    for tup in df.itertuples():
+        date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
+        if not year == date.year:
+            month0 = 0
+            value0 = 0
+        month1 = date.month
+        value1 = tup[1]
+        year = date.year
+
+        d_value = (value1 - value0) / (month1 - month0)
+
+        for m in range((month0 + step), (month1 + 1), step):
+            date1 = dt.date(date.year, m, 1)
+            date_tmp = date1 + relativedelta(months=1, days=-1)
+
+            index = date_tmp.strftime("%Y-%m-%d")
+            # res_df.loc[index] = d_value * 12
+
+            indexes.append(index)
+            values.append(d_value * 12)
+
+        month0 = month1
+        value0 = value1
+
+    res_df = pd.DataFrame(values, index=indexes, columns=[new_name])
 
     return res_df
 
