@@ -29,22 +29,21 @@ class DataSource:
             ds_type,
             delta_mode,
             default_ds,
+
+            ma_mode,
     ):
 
-        self.parent = parent
+        # self.parent = parent
 
         self.default_ds = default_ds
 
         self.index_name = index_name
         self.show_name = show_name
 
-        # if index_name == 'id_145_bs_shbt1sh_tsc_r':
-        #     print('>>>>>>>>>>>>>>>')
-        #     print(df.values)
-
         self.df = df
         self.ds_type = ds_type
         self.delta_mode = delta_mode
+        self.ma_mode = ma_mode
 
         self.format_data_source()
 
@@ -86,28 +85,11 @@ class DataSource:
 
         if self.ds_type == 'digit':
             self.format_fun = lambda x: '%.2f%s' % (x / self.ratio, units)
-            self.check_logarithmic()
         else:
             self.format_fun = lambda x: '%s' % x
 
         self.set_val_scale()
-
         self.df.columns = [index_name]
-
-        # self.df.fillna(value=np.nan)
-        # self.df.fillna(value=None)
-
-        # try:
-        #     self.df[self.df[index_name].values is None, index_name] = np.nan
-        # except Exception as e:
-        #     print(self.df)
-        #     print(self.df.columns)
-        #     raise KeyboardInterrupt(e)
-
-    # def get_last_data_ratio(self):
-    #     value = self.df.iloc[-1, 0]
-    #     # print(value)
-    #     return value
 
     def format(self, value):
         if value is None:
@@ -119,10 +101,6 @@ class DataSource:
                 return repr(value)
 
     def set_val_scale(self):
-        # if self.scale_max == 0 or self.scale_min == 0:
-        #     self.logarithmic = False
-        #     self.parent.style_df.loc[self.index_name, 'logarithmic'] = self.logarithmic
-
         if self.logarithmic is True:
             self.val_max = 1
             self.val_min = 0
@@ -134,29 +112,33 @@ class DataSource:
         self.metrics = list(np.linspace(self.val_min, self.val_max, self.scale_div+1))
         self.metrics = self.metrics[1:-1]
 
-    def check_logarithmic(self):
-        # df = self.df
-        # column = self.df.columns.tolist()[0]
-        if self.logarithmic is True:
-            # self.df = df.where(df[column] > 0, None)
-            # self.df = df.where(df > 0, None)
-            # self.df = self.df.where(self.df > 0, None)
-            # self.df = self.df.where(self.df > 0, np.inf)
-            pass
-
-            # todo：optimize check_logarithmic()
-
     def format_data_source(self):
-        date_list = self.parent.date_list
         if self.ds_type == 'digit':
-            # print(7, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-
             if self.delta_mode is True:
-                self.df = get_mouth_delta(df=self.df, new_name=self.index_name)
+                self.df = get_month_delta(df=self.df, new_name=self.index_name)
             else:
+                self.df = get_month_data(df=self.df, new_name=self.index_name)
                 # self.df = data_by_dates(self.df, date_list)
-                pass
-            # print(7, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
+
+            if self.ma_mode > 1:
+
+                print(self.df)
+                array0 = self.df.iloc[:, 0].values.copy()
+
+                first = self.ma_mode - 1
+                array1 = array0[first:]
+
+                last = 0
+                while first:
+                    first -= 1
+                    last -= 1
+                    array1 = array1 + array0[first:last].copy()
+
+                array1 = array1 / self.ma_mode
+                print('array1', array1)
+                indexes = self.df.index.values[(self.ma_mode - 1):]
+
+                self.df = pd.DataFrame(array1, index=indexes, columns=[self.index_name])
 
     @staticmethod
     def copy(data):

@@ -143,44 +143,100 @@ def add_style_row(df: pd.DataFrame, src_name, new_name):
     return df2
 
 
-def get_mouth_delta(df: pd.DataFrame, new_name, mode='Monthly'):
-    res_df = pd.DataFrame(columns=[new_name])
+def get_month_delta(df: pd.DataFrame, new_name, mode='Season'):
 
     if mode == 'Monthly':
         step = 1
     elif mode == 'Season':
         step = 3
+    else:
+        step = 1
     year = None
     month0 = 0
     value0 = 0
-    print(len(df))
+
+    indexes = list()
+    values = list()
+
     for tup in df.itertuples():
-        if tup[1]:
+        date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
+        if not year == date.year:
+            month0 = 0
+            value0 = 0
+        month1 = date.month
+        value1 = tup[1]
+        year = date.year
 
-            if isinstance(tup[1], (int, float)):
+        d_value = (value1 - value0) / (month1 - month0)
 
-                print(tup[1])
-                date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
-                if not year == date.year:
-                    month0 = 0
-                    value0 = 0
+        for m in range(month0, month1, step):
+            date1 = dt.date(date.year, m + 1, 1) + relativedelta(months=-1)
+            date_tmp = date1 + relativedelta(months=1, days=-1)
 
-                month1 = int(date.month)
-                value1 = tup[1]
-                d_value = (value1 - value0) / (month1 - month0)
-                for m in range(month0, month1):
-                    date1 = dt.date(date.year, m + 1, 1)
-                    date_tmp = date1 + relativedelta(months=1, days=-1)
+            index = date_tmp.strftime("%Y-%m-%d")
+            # res_df.loc[index] = d_value * 12
 
-                    # print(date_tmp, d_value)
+            indexes.append(index)
+            values.append(d_value * 12)
 
-                    index = date_tmp.strftime("%Y-%m-%d")
-                    res_df.loc[index] = d_value * 12
+        month0 = month1
+        value0 = value1
 
-                # print(date, tup[1])
+    res_df = pd.DataFrame(values, index=indexes, columns=[new_name])
 
-                month0 = month1
-                value0 = value1
+    return res_df
+
+
+def get_month_data(df: pd.DataFrame, new_name):
+    df = df.dropna()
+
+    date0 = None
+    year0 = None
+    month0 = None
+    index0 = None
+    value0 = None
+
+    indexes = list()
+    values = list()
+
+    for tup in df.itertuples():
+        date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
+
+        if date0:
+            year1 = date.year
+            month1 = date.month
+            value1 = tup[1]
+
+            d_month = (year1 - year0) * 12 + month1 - month0
+            d_value = (value1 - value0) / d_month
+
+            indexes.append(index0)
+            values.append(value0)
+
+            for m in range(3, d_month, 3):
+                date1 = date0 + dt.timedelta(days=1)
+                date_tmp = date1 + relativedelta(months=m, days=-1)
+
+                index = date_tmp.strftime("%Y-%m-%d")
+
+                indexes.append(index)
+                values.append(value0 + d_value * m)
+
+        date0 = date
+        year0 = date.year
+        month0 = date.month
+        value0 = tup[1]
+        index0 = tup[0]
+
+    if index0:
+        indexes.append(index0)
+        values.append(value0)
+
+    res_df = pd.DataFrame(values, index=indexes, columns=[new_name])
+
+    # print(res_df)
+    # raise KeyboardInterrupt
+
     return res_df
 
 
@@ -216,12 +272,13 @@ def get_default_style_df():
     # # print(df['info_priority'].max())
     # # print(df.quantile(0.5))
 
-    # path = '../gui/style_df_standard3.pkl'
-    path = '../gui/style_df_standard2.pkl'
+    path = '../gui/style_df_standard4.pkl'
     with open(path, 'rb') as pk_f:
         df = pickle.load(pk_f)
 
-    # df.insert(0, "delta_mode", False)
+    # df.insert(0, "ma_mode", 0)
+    #
+    # df.loc['id_211_ps_np', 'ma_mode'] = 4
 
     return df
 

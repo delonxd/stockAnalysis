@@ -71,7 +71,7 @@ class MainWindow(QWidget):
         with open('../basicData/code_name.pkl', 'rb') as pk_f:
             self.code_dict = pickle.load(pk_f)
 
-        stock = '600008'
+        stock = '600032'
         self.code_index = self.code_list.index(stock)
 
         # self.code_index = 0
@@ -90,10 +90,10 @@ class MainWindow(QWidget):
 
         print(2, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
-        # self.tree = CheckTree(self.style_df)
-
-        # self.tree.update_style.connect(self.update_data)
-        # self.data_pix.update_tree.connect(self.tree.update_tree)
+        self.tree = CheckTree(self.style_df)
+        #
+        self.tree.update_style.connect(self.update_data)
+        self.data_pix.update_tree.connect(self.tree.update_tree)
 
         print(3, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 

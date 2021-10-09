@@ -101,6 +101,8 @@ class DataCheckBox(QCheckBox):
             self.df.loc[index, self.column] = flag
             self.update_tree()
 
+        # todo: default ds check
+
     def update_tree(self):
         self.tree.update_style.emit()
 
@@ -133,6 +135,8 @@ class CheckTree(QTreeWidget):
 
             'ds_type',
             'delta_mode',
+
+            'ma_mode',
         ]
 
         self.index_pos = dict()
@@ -142,7 +146,7 @@ class CheckTree(QTreeWidget):
         self.column_names = columns
         self.setColumnCount(len(columns))
 
-        width_list = [180, 20, 70, 10, 40, 90, 50, 50, 40, 10, 30, 200, 20, 40, 50, 20]
+        width_list = [180, 20, 70, 10, 40, 90, 50, 50, 40, 10, 30, 200, 20, 40, 50, 20, 20]
         for idx, val in enumerate(width_list):
             self.setColumnWidth(idx, val)
 
@@ -169,8 +173,8 @@ class CheckTree(QTreeWidget):
 
     def update_tree(self):
         pass
-        # print('----------------------')
-        #
+        # # print('----------------------')
+        # #
         # for index, row in self.df.iterrows():
         #     child = row['child']
         #
@@ -182,6 +186,8 @@ class CheckTree(QTreeWidget):
         #
         #     self.init_digit_item(child, row, 'info_priority')
         #     self.init_checkbox_item(child, index, row, 'default_ds')
+        #
+        #     self.init_digit_item(child, row, 'ma_mode')
         # self.update()
 
     def init_child(self, child, index, row):
@@ -207,6 +213,8 @@ class CheckTree(QTreeWidget):
 
         self.init_str_item(child, row, 'ds_type')
         self.init_checkbox_item(child, index, row, 'delta_mode')
+
+        self.init_digit_item(child, row, 'ma_mode')
 
     def init_color_item(self, child, row, column):
         pix = QPixmap(64, 64)
@@ -274,7 +282,7 @@ class CheckTree(QTreeWidget):
                 df.loc[index_name, column_name] = color
                 self.update_style.emit()
 
-            elif column_name in ['line_thick', "scale_div", "info_priority"]:
+            elif column_name in ['line_thick', "scale_div", "info_priority", "ma_mode"]:
                 text, _ = QInputDialog.getText(self, column_name, column_name + ': ')
                 if text.isdigit():
                     df.loc[index_name, column_name] = int(text)

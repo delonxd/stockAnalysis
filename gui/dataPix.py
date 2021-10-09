@@ -68,12 +68,9 @@ class DataPix(QObject):
 
         self.reset_scale_all()
 
-        res = dict()
+        ds_dict = dict()
 
         style_df = self.style_df[self.style_df['selected'].values]
-
-        # print(type(data), '-->', data)
-        print(11, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
         for index, row in style_df.iterrows():
             data = self.df.loc[:, [row['index_name']]]
@@ -93,20 +90,16 @@ class DataPix(QObject):
                 units=row['units'],
                 ds_type=row['ds_type'],
                 delta_mode=row['delta_mode'],
-                default_ds=row['default_ds']
+                default_ds=row['default_ds'],
+                ma_mode=row['ma_mode'],
             )
-            res[ds.index_name] = ds
+            ds_dict[ds.index_name] = ds
 
             if ds.default_ds is True:
                 self.default_ds = ds
 
-        print(12, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-
-        self.data_dict = res
+        self.data_dict = ds_dict
         self.draw_pix()
-
-        print(13, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-
 
     def reset_scale_all(self):
         style_df = self.style_df[self.style_df['selected'].values]
@@ -142,12 +135,14 @@ class DataPix(QObject):
 
     def get_px_list(self):
         px_dict = dict()
+        px_list = list()
         for datetime in self.date_list:
             date = datetime.date()
             px = self.x_data2px(date)
             px_dict[px] = date
-        px_list = list(px_dict.keys())
-        px_list.sort()
+            px_list.append(px)
+
+        # px_list.sort()
 
         return px_list, px_dict
 
@@ -217,8 +212,6 @@ class DataPix(QObject):
 
             pix_painter.setPen(pen2)
             pix_painter.drawLine(QPoint(x, d_top), QPoint(x, d_bottom))
-
-            # todo: load path
 
         pix_painter.end()
 
@@ -300,54 +293,9 @@ class DataPix(QObject):
             self.draw_data(data)
 
     def draw_data(self, data: DataSource):
-        # if data.ds_type == 'digit':
-        #
-        #     pix_painter = QPainter(self.pix)
-        #     pen = QPen(data.color, data.line_thick, data.pen_type)
-        #     pix_painter.setPen(pen)
-
-        #     if data.delta_mode is False:
-        #         data.df.dropna(inplace=True)
-        #
-        #         point1 = None
-        #         for tup in data.df.itertuples():
-        #
-        #             if data.index_name == 'id_145_bs_shbt1sh_tsc_r':
-        #                 print('>>>>>>>>>>>>>>>')
-        #                 print(tup[1])
-        #
-        #             if tup[1]:
-        #                 date = dt.datetime.strptime(tup[0], "%Y-%m-%d").date()
-        #                 value = tup[1]
-        #                 if isinstance(value, (int, float)):
-        #
-        #                     x, y = self.data2px(date, value, data)
-        #                     point2 = QPoint(x, y)
-        #                     if point1:
-        #                         pix_painter.drawLine(point1, point2)
-        #                     point1 = point2
-        #     else:
-        #         point1 = None
-        #         for tup in data.df.itertuples():
-        #             if tup[1]:
-        #                 date = dt.datetime.strptime(tup[0], "%Y-%m-%d").date()
-        #                 value = tup[1]
-        #                 if isinstance(value, (int, float)):
-        #
-        #                     x, y = self.data2px(date, value, data)
-        #                     point2 = QPoint(x, y)
-        #                     if point1:
-        #                         point3 = QPoint(point1.x(), point2.y())
-        #                         pix_painter.drawLine(point1, point3)
-        #                         pix_painter.drawLine(point3, point2)
-        #                     point1 = point2
-
         dates = data.df.index.values
         val_x = np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(dates)
         px_x = self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
-        # print(dates)
-        # print(val_x)
-        # print(px_x)
 
         if data.ds_type == 'digit':
 
@@ -355,7 +303,10 @@ class DataPix(QObject):
             pen = QPen(data.color, data.line_thick, data.pen_type)
             pix_painter.setPen(pen)
 
-            data_y = data.df.iloc[:, 0].values
+            data_y = data.df.iloc[:, 0].values.copy()
+
+            # print(data.show_name)
+            # print(data_y)
 
             if data.logarithmic is False:
                 data_y[data_y == 0] = np.nan
@@ -382,10 +333,10 @@ class DataPix(QObject):
                 point_list = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
 
             if data.delta_mode is False:
-                pix_painter.drawPolyline(*point_list)
+                if point_list:
+                    pix_painter.drawPolyline(*point_list)
             else:
                 point1 = None
-                print(len(point_list))
                 for point in point_list:
                     point2 = point
                     if point1:
@@ -395,7 +346,6 @@ class DataPix(QObject):
                     point1 = point2
 
             pix_painter.end()
-
 
     ###############################################################################################
 
