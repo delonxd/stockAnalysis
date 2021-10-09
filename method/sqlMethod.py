@@ -17,6 +17,8 @@ def update_df2sql(cursor, table, df_data, check_field, ini=False):
 
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
 
+    new_data = df_data.loc[df_data['first_update'].isnull()]
+
     df_data.loc[:, 'first_update'].fillna(value=timestamp, inplace=True)
     df_data.loc[:, 'last_update'].fillna(value=timestamp, inplace=True)
 
@@ -42,6 +44,8 @@ def update_df2sql(cursor, table, df_data, check_field, ini=False):
         sql_execute_multi(cursor, insert_str)
 
     sql_execute_multi(cursor, 'COMMIT;')
+
+    return new_data
 
 
 def sql_execute_multi(cursor, instruct):
