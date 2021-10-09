@@ -29,8 +29,8 @@ if __name__ == '__main__':
         length=100,
     )
 
-    index = 400
-    while index < 402:
+    index = 600
+    while index < 602:
         stockCode = codeList[index]
 
         try:
@@ -47,7 +47,7 @@ if __name__ == '__main__':
                 url = 'https://open.lixinger.com/api/a/company/fs/non_financial'
                 api = {
                     "token": "e7a7f2e5-181b-4caa-9142-592ab6787871",
-                    "startDate": "1970-01-01",
+                    "startDate": "2008-01-01",
                     "stockCodes": [stockCode],
                     "metricsList": metrics,
                 }
@@ -60,17 +60,18 @@ if __name__ == '__main__':
             endTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
             print(endTime)
 
-            bufferData = {
-                'startTime': startTime,
-                'endTime': endTime,
-                'resList': resList,
-            }
+            # bufferData = {
+            #     'startTime': startTime,
+            #     'endTime': endTime,
+            #     'resList': resList,
+            # }
 
-            fileName = 'FinancialSheet_%s' % stockCode
+            time_str = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
+            fileName = 'FinancialSheet_%s_%s' % (stockCode, time_str)
             value2pkl(
                 root='../bufferData/financialData',
                 file_name=fileName,
-                value=bufferData,
+                value=resList,
             )
             index += 1
 
