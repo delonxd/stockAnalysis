@@ -117,7 +117,6 @@ class DataSource:
                 self.df = get_month_delta(df=self.df, new_name=self.index_name)
             else:
                 self.df = get_month_data(df=self.df, new_name=self.index_name)
-                # self.df = data_by_dates(self.df, date_list)
 
             if self.ma_mode > 1:
                 array0 = self.df.iloc[:, 0].values.copy()
