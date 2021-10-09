@@ -66,7 +66,6 @@ class DataSource:
         #         self.parent.style_df.loc[index_name, 'units'] = units
         #         self.parent.style_df.loc[index_name, 'logarithmic'] = logarithmic
         #
-        #         # todo: 优化遍历
 
         self.units = units
         self.ratio = get_units_dict()[units]
@@ -121,8 +120,6 @@ class DataSource:
                 # self.df = data_by_dates(self.df, date_list)
 
             if self.ma_mode > 1:
-
-                print(self.df)
                 array0 = self.df.iloc[:, 0].values.copy()
 
                 first = self.ma_mode - 1
@@ -135,7 +132,7 @@ class DataSource:
                     array1 = array1 + array0[first:last].copy()
 
                 array1 = array1 / self.ma_mode
-                print('array1', array1)
+                # print('array1', array1)
                 indexes = self.df.index.values[(self.ma_mode - 1):]
 
                 self.df = pd.DataFrame(array1, index=indexes, columns=[self.index_name])
