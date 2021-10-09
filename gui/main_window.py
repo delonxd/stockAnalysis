@@ -11,59 +11,11 @@ import time
 import pickle
 
 
-class BufferThread(QThread):
-
-    def __init__(self, parent):
-        super().__init__()
-        self.parent = parent
-        self.buffer_dict = dict()
-        self.un_buffer_codes = list()
-
-    def run(self):
-        while len(self.un_buffer_codes) > 0:
-            code = self.un_buffer_codes[0]
-            if code in self.buffer_dict.keys():
-                pass
-            else:
-                tmp_dict = dict()
-                df = sql2df(code=code)
-                style_df = get_default_style_df()
-
-                data_pix = DataPix(
-                    df=df,
-                    style_df=style_df,
-                    m_width=1600,
-                    m_height=800,
-                )
-
-                tree = CheckTree(style_df)
-
-                # tree.update_style.connect(data_pix.update_pix)
-                # data_pix.update_tree.connect(tree.update_tree)
-
-                tmp_dict['df'] = df
-                tmp_dict['style_df'] = style_df
-                tmp_dict['data_pix'] = data_pix
-                tmp_dict['tree'] = tree
-
-                self.buffer_dict[code] = tmp_dict
-
-            self.un_buffer_codes.pop(0)
-            print(self.un_buffer_codes, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-
-        print('buffer finished', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-
-
 class MainWindow(QWidget):
     # code_index = 0
 
     def __init__(self):
         super().__init__()
-
-        self.setWindowTitle('绘制图形')
-        self.resize(1600, 900)
-
-        self.buffer_dict = dict()
 
         with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
             self.code_list = pickle.load(pk_f)
@@ -71,15 +23,13 @@ class MainWindow(QWidget):
         with open('../basicData/code_name.pkl', 'rb') as pk_f:
             self.code_dict = pickle.load(pk_f)
 
-        stock = '600032'
-        self.code_index = self.code_list.index(stock)
+        stock = '600006'
 
+        self.code_index = self.code_list.index(stock)
         # self.code_index = 0
 
         self.df = sql2df(code=self.code_list[self.code_index])
         self.style_df = get_default_style_df()
-
-        print(1, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
         self.data_pix = DataPix(
             parent=self,
@@ -88,18 +38,36 @@ class MainWindow(QWidget):
             m_height=800,
         )
 
-        print(2, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-
-        self.tree = CheckTree(self.style_df)
-        #
-        self.tree.update_style.connect(self.update_data)
-        self.data_pix.update_tree.connect(self.tree.update_tree)
-
-        print(3, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-
-        # todo: add data buffer
-
         self.label = QLabel(self)
+
+        self.button1 = QPushButton('export')
+        self.button2 = QPushButton('x2')
+        self.button3 = QPushButton('/2')
+        self.button4 = QPushButton('style')
+
+        self.editor1 = QLineEdit()
+        self.editor1.setValidator(QIntValidator())
+        self.editor1.setMaxLength(6)
+
+        self.stock_label = QLabel()
+        self.stock_label.setFont(QFont('Consolas', 20))
+
+        # print(2, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
+
+        # self.tree = CheckTree(self.style_df)
+
+        # self.tree.update_style.connect(self.update_data)
+        # self.data_pix.update_tree.connect(self.tree.update_tree)
+
+        # print(3, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
+
+        self.cross = False
+        self.init_ui()
+
+    def init_ui(self):
+
+        self.setWindowTitle('绘制图形')
+        self.resize(1600, 900)
 
         layout = QHBoxLayout()
         layout.addStretch(1)
@@ -107,26 +75,13 @@ class MainWindow(QWidget):
         layout.addWidget(self.label, 0, Qt.AlignCenter)
         layout.addStretch(1)
 
-        button1 = QPushButton('export')
-        button2 = QPushButton('x2')
-        button3 = QPushButton('/2')
-        button4 = QPushButton('style')
-
-        editor1 = QLineEdit()
-        editor1.setValidator(QIntValidator())
-        editor1.setMaxLength(6)
-
-        self.stock_label = QLabel()
-        self.stock_label.setFont(QFont('Consolas', 20))
-        self.show_stock_name()
-
         layout2 = QHBoxLayout()
         layout2.addStretch(1)
-        layout2.addWidget(button1, 0, Qt.AlignCenter)
-        layout2.addWidget(button2, 0, Qt.AlignCenter)
-        layout2.addWidget(button3, 0, Qt.AlignCenter)
-        layout2.addWidget(button4, 0, Qt.AlignCenter)
-        layout2.addWidget(editor1, 0, Qt.AlignCenter)
+        layout2.addWidget(self.button1, 0, Qt.AlignCenter)
+        layout2.addWidget(self.button2, 0, Qt.AlignCenter)
+        layout2.addWidget(self.button3, 0, Qt.AlignCenter)
+        layout2.addWidget(self.button4, 0, Qt.AlignCenter)
+        layout2.addWidget(self.editor1, 0, Qt.AlignCenter)
 
         layout2.addStretch(1)
         # layout2.addWidget(button1, 0, Qt.AlignCenter)
@@ -140,23 +95,17 @@ class MainWindow(QWidget):
 
         self.setLayout(layout1)
 
-        self.cross = False
         self.setMouseTracking(True)
         self.label.setMouseTracking(True)
         self.center()
 
-        button1.clicked.connect(self.export_style)
-        # button2.clicked.connect(self.scale_up)
-        # button3.clicked.connect(self.scale_down)
-        button4.clicked.connect(self.show_tree)
-        editor1.textChanged.connect(self.editor1_changed)
+        self.show_stock_name()
 
-        # buffer_codes = ['600461']
-        # self.buffer = BufferThread(parent=self)
-        # self.buffer.un_buffer_codes = buffer_codes
-        # self.buffer.start()
-
-        # print('buffer started', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
+        self.button1.clicked.connect(self.export_style)
+        # self.button2.clicked.connect(self.scale_up)
+        # self.button3.clicked.connect(self.scale_down)
+        self.button4.clicked.connect(self.show_tree)
+        self.editor1.textChanged.connect(self.editor1_changed)
 
     def show_tree(self):
         self.tree.show()
@@ -196,28 +145,14 @@ class MainWindow(QWidget):
         self.update()
 
     def change_stock(self):
-        print('change started', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-        self.df = sql2df(code=self.code_list[self.code_index])
+        stock_code = self.code_list[self.code_index]
+        # print(stock_code, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
+        self.df = sql2df(code=stock_code)
         self.update_data()
-
-        # code = self.code_list[self.code_index]
-        #
-        # if code in self.buffer.buffer_dict.keys():
-        #     tmp = self.buffer.buffer_dict[code]
-        #     # print(tmp)
-        #     self.df = tmp['df']
-        #     self.style_df = tmp['style_df']
-        #     self.data_pix = tmp['data_pix']
-        #     self.tree = tmp['tree']
-        #
-        #     self.tree.show()
-        #     self.tree.update_style.connect(self.update_data)
-        #     self.data_pix.update_tree.connect(self.tree.update_tree)
-        #     self.update()
 
         self.show_stock_name()
 
-        print('change finished', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
+        # print('finished', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
     def show_stock_name(self):
         code = self.code_list[self.code_index]
