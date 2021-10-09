@@ -155,6 +155,8 @@ class DataPix(QObject):
         # self.pix.fill(Qt.black)
         self.draw_struct()
         self.draw_metrics(self.default_ds)
+
+        self.draw_auxiliary_line(self.default_ds)
         self.draw_data_dict()
         self.pix_show = self.pix
 
@@ -287,6 +289,39 @@ class DataPix(QObject):
     #     #     pix_painter.drawLine(QPoint(d_left, y), QPoint(d_right, y))
     #
     #     pix_painter.end()
+
+    def draw_auxiliary_line(self, data: DataSource):
+        pix_painter = QPainter(self.pix)
+
+        d_left = self.data_rect.left()
+        d_right = self.data_rect.right()
+
+        date0 = dt.datetime.strptime(data.df.index.values[-1], "%Y-%m-%d").date()
+        value0 = data.df.values[-1, -1]
+
+        # 30% 辅助线
+        ratio_year = 1.3
+        value1 = get_value_from_ratio(date0, value0, self.date_min, ratio_year)
+        value2 = get_value_from_ratio(date0, value0, self.date_max, ratio_year)
+        y1 = self.y_data2px(value1, self.default_ds)
+        y2 = self.y_data2px(value2, self.default_ds)
+
+        pen = QPen(Qt.red, 1, Qt.DotLine)
+        pix_painter.setPen(pen)
+        pix_painter.drawLine(QPoint(d_left, y1), QPoint(d_right, y2))
+
+        # 10% 辅助线
+        ratio_year = 1.1
+        value1 = get_value_from_ratio(date0, value0, self.date_min, ratio_year)
+        value2 = get_value_from_ratio(date0, value0, self.date_max, ratio_year)
+        y1 = self.y_data2px(value1, self.default_ds)
+        y2 = self.y_data2px(value2, self.default_ds)
+
+        pen = QPen(Qt.blue, 1, Qt.DotLine)
+        pix_painter.setPen(pen)
+        pix_painter.drawLine(QPoint(d_left, y1), QPoint(d_right, y2))
+
+        pix_painter.end()
 
     def draw_data_dict(self):
         for data in self.data_dict.values():
