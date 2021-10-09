@@ -94,14 +94,38 @@ class DataCheckBox(QCheckBox):
 
         elif self.column == 'selected' and not flag:
             self.df.loc[index, ['info_priority', self.column]] = [0, flag]
-            # self.df.loc[index, ] = flag
+
+            row = self.df.loc[index]
+            child = row['child']
+            self.tree.init_digit_item(child, row, 'info_priority')
+
             self.update_tree()
+
+        elif self.column == 'default_ds' and flag:
+            if self.df.loc[index, 'selected'] == True:
+                if self.df.loc[index, 'ds_type'] == 'digit':
+                    row_df = self.df.loc[self.df['default_ds'] == True]
+
+                    self.df['default_ds'] = False
+                    for _, row in row_df.iterrows():
+                        child = row['child']
+                        pos = self.tree.index_pos['default_ds']
+                        checkbox = self.tree.itemWidget(child, pos)
+                        checkbox.setChecked(False)
+
+                    self.df.loc[index, 'default_ds'] = flag
+                    self.update_tree()
+                    return
+
+            self.setChecked(False)
+            return
+
+        elif self.column == 'default_ds' and not flag:
+            self.setChecked(True)
 
         else:
             self.df.loc[index, self.column] = flag
             self.update_tree()
-
-        # todo: default ds check
 
     def update_tree(self):
         self.tree.update_style.emit()
@@ -169,17 +193,18 @@ class CheckTree(QTreeWidget):
 
         self.clicked.connect(self.tree_clicked)
 
-        self.setMinimumSize(800, 800)
+        self.setMinimumSize(1200, 800)
 
     def update_tree(self):
-        pass
-        # # print('----------------------')
-        # #
-        # for index, row in self.df.iterrows():
-        #     child = row['child']
-        #
-        #     self.init_digit_item(child, row, 'scale_min')
-        #     self.init_digit_item(child, row, 'scale_max')
+
+        row_df = self.df.loc[self.df['selected'] == True]
+
+        for index, row in row_df.iterrows():
+            child = row['child']
+
+            self.init_digit_item(child, row, 'scale_min')
+            self.init_digit_item(child, row, 'scale_max')
+
         #     self.init_digit_item(child, row, 'scale_div')
         #     self.init_checkbox_item(child, index, row, 'logarithmic')
         #     self.init_str_item(child, row, 'units')
