@@ -299,6 +299,9 @@ class DataPix(QObject):
         date0 = dt.datetime.strptime(data.df.index.values[-1], "%Y-%m-%d").date()
         value0 = data.df.values[-1, -1]
 
+        if value0 <= 0:
+            value0 = data.scale_max / 4
+
         # 30% 辅助线
         ratio_year = 1.3
         value1 = get_value_from_ratio(date0, value0, self.date_min, ratio_year)
