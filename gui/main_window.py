@@ -2,6 +2,7 @@ from method.dataMethod import *
 from method.mainMethod import *
 from gui.checkTree import CheckTree
 from gui.dataPix import DataPix
+from request.requestStockFs import request_fs_data2mysql
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -23,7 +24,7 @@ class MainWindow(QWidget):
         with open('../basicData/code_name.pkl', 'rb') as pk_f:
             self.code_dict = pickle.load(pk_f)
 
-        stock = '600006'
+        stock = '600022'
 
         self.code_index = self.code_list.index(stock)
         # self.code_index = 0
@@ -44,6 +45,7 @@ class MainWindow(QWidget):
         self.button2 = QPushButton('x2')
         self.button3 = QPushButton('/2')
         self.button4 = QPushButton('style')
+        self.button5 = QPushButton('request')
 
         self.editor1 = QLineEdit()
         self.editor1.setValidator(QIntValidator())
@@ -54,10 +56,10 @@ class MainWindow(QWidget):
 
         # print(2, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
-        # self.tree = CheckTree(self.style_df)
-
-        # self.tree.update_style.connect(self.update_data)
-        # self.data_pix.update_tree.connect(self.tree.update_tree)
+        self.tree = CheckTree(self.style_df)
+        #
+        self.tree.update_style.connect(self.update_data)
+        self.data_pix.update_tree.connect(self.tree.update_tree)
 
         # print(3, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
@@ -81,6 +83,7 @@ class MainWindow(QWidget):
         layout2.addWidget(self.button2, 0, Qt.AlignCenter)
         layout2.addWidget(self.button3, 0, Qt.AlignCenter)
         layout2.addWidget(self.button4, 0, Qt.AlignCenter)
+        layout2.addWidget(self.button5, 0, Qt.AlignCenter)
         layout2.addWidget(self.editor1, 0, Qt.AlignCenter)
 
         layout2.addStretch(1)
@@ -105,7 +108,25 @@ class MainWindow(QWidget):
         # self.button2.clicked.connect(self.scale_up)
         # self.button3.clicked.connect(self.scale_down)
         self.button4.clicked.connect(self.show_tree)
+        self.button5.clicked.connect(self.request_data)
         self.editor1.textChanged.connect(self.editor1_changed)
+
+    def request_data(self):
+        stock_code = self.code_list[self.code_index]
+        with open('../basicData/metricsList.pkl', 'rb') as pk_f:
+            metrics_list = pickle.load(pk_f)
+
+        datetime0 = dt.datetime(2021, 10, 9, 16, 30, 0)
+
+        request_fs_data2mysql(
+            stock_code=stock_code,
+            metrics_list=metrics_list,
+            start_date="2008-01-01",
+            datetime=datetime0,
+        )
+
+        self.change_stock()
+        # self.tree.exec_()
 
     def show_tree(self):
         self.tree.show()
@@ -137,6 +158,10 @@ class MainWindow(QWidget):
         path = '../gui/style_df_%s.pkl' % timestamp
         df = self.tree.df.copy()
         df['child'] = None
+        with open(path, 'wb') as pk_f:
+            pickle.dump(df, pk_f)
+
+        path = '../gui/style_df_standard.pkl'
         with open(path, 'wb') as pk_f:
             pickle.dump(df, pk_f)
 

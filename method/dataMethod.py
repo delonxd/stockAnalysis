@@ -278,7 +278,7 @@ def get_default_style_df():
     # # print(df['info_priority'].max())
     # # print(df.quantile(0.5))
 
-    path = '../gui/style_df_standard4.pkl'
+    path = '../gui/style_df_standard.pkl'
     with open(path, 'rb') as pk_f:
         df = pickle.load(pk_f)
 

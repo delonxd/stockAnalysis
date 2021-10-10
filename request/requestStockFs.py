@@ -1,6 +1,71 @@
 import time
-from method.urlMethod import *
-from method.mainMethod import *
+import pickle
+import datetime as dt
+from method.urlMethod import data_request
+from method.mainMethod import value2pkl
+from method.updateMethod import buffer2mysql
+
+
+def request_fs_data(stock_code, metrics_list, start_date):
+    flag = True
+    while flag is True:
+        try:
+            # 显示时间戳
+            start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+            print(start_time, ' request url')
+            print(start_time, ' stock_code --> %s' % stock_code)
+            res_list = list()
+
+            for metrics in metrics_list:
+                url = 'https://open.lixinger.com/api/a/company/fs/non_financial'
+                api = {
+                    "token": "e7a7f2e5-181b-4caa-9142-592ab6787871",
+                    "startDate": start_date,
+                    "stockCodes": [stock_code],
+                    "metricsList": metrics,
+                }
+
+                res = data_request(url=url, api_dict=api)
+                res_list.append(res)
+
+                time.sleep(0.2)
+
+            end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+            print(end_time, ' request finished\n')
+            flag = False
+
+            return res_list
+
+        except BaseException as e:
+            print(e)
+            time.sleep(1)
+
+
+def dump_fs_data2buffer(res_list, stock_code):
+    start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+    print(start_time, ' dump to buffer')
+
+    time_str = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
+    file = 'FinancialSheet_%s_%s' % (stock_code, time_str)
+    print(start_time, ' filename --> %s' % file)
+
+    value2pkl(
+        root='../bufferData/financialData',
+        file_name=file,
+        value=res_list,
+    )
+
+    print(123)
+
+    end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+    print(end_time, ' dump finished\n')
+
+
+def request_fs_data2mysql(stock_code, metrics_list, start_date, datetime):
+
+    res0 = request_fs_data(stock_code, metrics_list, start_date)
+    dump_fs_data2buffer(res0, stock_code)
+    buffer2mysql(datetime)
 
 
 if __name__ == '__main__':
@@ -8,73 +73,20 @@ if __name__ == '__main__':
     with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
         codeList = pickle.load(pk_f)
 
-    tables = ['bs', 'ps', 'cfs', 'm']
+    with open('../basicData/metricsList.pkl', 'rb') as pk_f:
+        metricsList = pickle.load(pk_f)
 
-    files = [''.join(['Ns', value.capitalize(), 'Text.pkl']) for value in tables]
+    datetime0 = dt.datetime(2021, 10, 9, 16, 30, 0)
 
-    subs = get_api_names(
-        files=files,
-        root='../basicData',
-        regular=r'\n.* : (.*)',
-    )
-
-    apiAll = config_api_names(
-        infix_list=subs,
-        prefix='q',
-        postfix='t',
-    )
-
-    metricsList = split_list(
-        source=apiAll,
-        length=100,
-    )
-
-    index = 600
-    while index < 602:
+    index = 305
+    while index < 306:
         stockCode = codeList[index]
 
-        try:
+        request_fs_data2mysql(
+            stock_code=stockCode,
+            metrics_list=metricsList,
+            start_date="2008-01-01",
+            datetime=datetime0,
+        )
 
-            # 显示时间戳
-            startTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-            print(startTime)
-            print(index, stockCode)
-
-            resList = list()
-
-            for metrics in metricsList:
-
-                url = 'https://open.lixinger.com/api/a/company/fs/non_financial'
-                api = {
-                    "token": "e7a7f2e5-181b-4caa-9142-592ab6787871",
-                    "startDate": "2008-01-01",
-                    "stockCodes": [stockCode],
-                    "metricsList": metrics,
-                }
-
-                res = data_request(url=url, api_dict=api)
-                resList.append(res)
-
-                time.sleep(0.2)
-
-            endTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-            print(endTime)
-
-            # bufferData = {
-            #     'startTime': startTime,
-            #     'endTime': endTime,
-            #     'resList': resList,
-            # }
-
-            time_str = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
-            fileName = 'FinancialSheet_%s_%s' % (stockCode, time_str)
-            value2pkl(
-                root='../bufferData/financialData',
-                file_name=fileName,
-                value=resList,
-            )
-            index += 1
-
-        except BaseException as r:
-            print(r)
-            time.sleep(1)
+        index += 1
