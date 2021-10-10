@@ -238,6 +238,16 @@ def get_data_frame(cursor, table):
     return df
 
 
+def sql_if_table_exists(cursor, table):
+    tmp = 'SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = "%s";' % table
+    cursor.execute(tmp)
+    res = cursor.fetchall()
+    if res:
+        return True
+    else:
+        return False
+
+
 if __name__ == '__main__':
     sql_config = {
         'user': 'root',

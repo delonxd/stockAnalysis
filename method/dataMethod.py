@@ -1,5 +1,5 @@
 from method.mainMethod import get_header_df, transpose_df, show_df
-from method.sqlMethod import get_data_frame
+from method.sqlMethod import get_data_frame, sql_if_table_exists
 import mysql.connector
 import datetime as dt
 
@@ -30,16 +30,18 @@ def sql2df(code):
     table = 'fs_' + code
 
     cursor = db.cursor()
-    sql_df = get_data_frame(cursor=cursor, table=table)
 
-    sql_df = sql_df.set_index('standardDate', drop=False)
+    flag = sql_if_table_exists(cursor=cursor, table=table)
+    if flag:
+        sql_df = get_data_frame(cursor=cursor, table=table)
+        sql_df = sql_df.set_index('standardDate', drop=False)
+        # sql_df = sql_df.where(sql_df.notnull(), None)
+        sql_df.sort_index(inplace=True)
+        sql_df.index = sql_df.index.map(lambda x: x[:10])
 
-    # sql_df = sql_df.where(sql_df.notnull(), None)
-    sql_df.sort_index(inplace=True)
-
-    sql_df.index = sql_df.index.map(lambda x: x[:10])
-
-    return sql_df
+        return sql_df
+    else:
+        return pd.DataFrame()
 
 
 def data_by_dates(df: pd.DataFrame, dates: list):

@@ -24,12 +24,12 @@ class MainWindow(QWidget):
         with open('../basicData/code_name.pkl', 'rb') as pk_f:
             self.code_dict = pickle.load(pk_f)
 
-        stock = '600022'
+        self.stock_code = '600004'
 
-        self.code_index = self.code_list.index(stock)
         # self.code_index = 0
+        self.code_index = self.code_list.index(self.stock_code)
 
-        self.df = sql2df(code=self.code_list[self.code_index])
+        self.df = sql2df(code=self.stock_code)
         self.style_df = get_default_style_df()
 
         self.data_pix = DataPix(
@@ -170,19 +170,16 @@ class MainWindow(QWidget):
         self.update()
 
     def change_stock(self):
-        stock_code = self.code_list[self.code_index]
         # print(stock_code, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-        self.df = sql2df(code=stock_code)
+        self.df = sql2df(code=self.stock_code)
         self.update_data()
-
         self.show_stock_name()
 
         # print('finished', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
     def show_stock_name(self):
-        code = self.code_list[self.code_index]
-        name = self.code_dict[code]
-        txt = '%s: %s' % (code, name)
+        name = self.code_dict.get(self.stock_code)
+        txt = '%s: %s' % (self.stock_code, name)
         self.stock_label.setText(txt)
 
     def center(self):
@@ -221,9 +218,12 @@ class MainWindow(QWidget):
         a = event.angleDelta().y() / 120
         if a < 0:
             self.code_index += 1
+            self.stock_code = self.code_list[self.code_index]
             self.change_stock()
+
         elif a > 0:
             self.code_index -= 1
+            self.stock_code = self.code_list[self.code_index]
             self.change_stock()
 
 
