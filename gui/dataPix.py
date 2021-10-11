@@ -64,6 +64,9 @@ class DataPix(QObject):
 
     def update_pix(self):
         if len(self.df.index) == 0:
+            self.init_pix()
+            self.draw_struct()
+            self.pix_show = self.pix
             return
 
         self.reset_scale_all()
@@ -150,11 +153,14 @@ class DataPix(QObject):
 
     ###############################################################################################
 
-    def draw_pix(self):
+    def init_pix(self):
         self.pix = QPixmap(self.main_rect.width(), self.main_rect.height())
         color = QColor(40, 40, 40, 255)
         self.pix.fill(color)
         # self.pix.fill(Qt.black)
+
+    def draw_pix(self):
+        self.init_pix()
         self.draw_struct()
         self.draw_metrics(self.default_ds)
 
