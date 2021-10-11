@@ -1,4 +1,5 @@
 from method.mainMethod import get_header_df, transpose_df, show_df
+from method.mainMethod import get_header_df_mvs
 from method.sqlMethod import get_data_frame, sql_if_table_exists
 import mysql.connector
 import datetime as dt
@@ -16,7 +17,7 @@ import pickle
 import json
 
 
-def sql2df(code):
+def sql2df_fs(code):
     config = {
         'user': 'root',
         'password': 'aQLZciNTq4sx',
@@ -35,6 +36,34 @@ def sql2df(code):
     if flag:
         sql_df = get_data_frame(cursor=cursor, table=table)
         sql_df = sql_df.set_index('standardDate', drop=False)
+        # sql_df = sql_df.where(sql_df.notnull(), None)
+        sql_df.sort_index(inplace=True)
+        sql_df.index = sql_df.index.map(lambda x: x[:10])
+
+        return sql_df
+    else:
+        return pd.DataFrame()
+
+
+def sql2df_mvs(code):
+    config = {
+        'user': 'root',
+        'password': 'aQLZciNTq4sx',
+        'host': 'localhost',
+        'port': '3306',
+        'database': 'marketData',
+        # 'database': 'bsdata',
+    }
+    db = mysql.connector.connect(**config)
+
+    table = 'mvs_' + code
+
+    cursor = db.cursor()
+
+    flag = sql_if_table_exists(cursor=cursor, table=table)
+    if flag:
+        sql_df = get_data_frame(cursor=cursor, table=table)
+        sql_df = sql_df.set_index('date', drop=False)
         # sql_df = sql_df.where(sql_df.notnull(), None)
         sql_df.sort_index(inplace=True)
         sql_df.index = sql_df.index.map(lambda x: x[:10])
@@ -123,19 +152,6 @@ def get_tree_df2():
     # show_df(df)
 
     return df
-
-
-def process_df():
-    df = sql2df(code='000004')
-    # print(df)
-
-    data = df.loc[:, ['id_211_ps_np']]
-    res = get_mouth_delta(data, 'id_211_ps_np_DELTA')
-
-    print(res)
-
-    style_df = get_default_style_df()
-    style_df = add_style_row(style_df, 'id_211_ps_np', 'id_211_ps_np_DELTA')
 
 
 def add_style_row(df: pd.DataFrame, src_name, new_name):
@@ -280,7 +296,8 @@ def get_default_style_df():
     # # print(df['info_priority'].max())
     # # print(df.quantile(0.5))
 
-    path = '../gui/style_df_standard.pkl'
+    # path = '../gui/style_df_standard.pkl'
+    path = '../gui/style_combined_default0.pkl'
     with open(path, 'rb') as pk_f:
         df = pickle.load(pk_f)
 
@@ -291,9 +308,7 @@ def get_default_style_df():
     return df
 
 
-if __name__ == '__main__':
-    # process_df()
-
+def dump_code_name():
     path = '../basicData/BasicData.pkl'
     with open(path, 'rb') as pk_f:
         res = pickle.load(pk_f)
@@ -311,4 +326,96 @@ if __name__ == '__main__':
     with open("../basicData/code_name.pkl", 'wb') as pk_f:
         pickle.dump(res, pk_f)
 
+
+def sql2df(code):
+    df1 = sql2df_mvs(code)
+    # df1 = pd.DataFrame()
+    df2 = sql2df_fs(code)
+
+    # df = pd.concat([df1, df2], axis=1, sort=True)
+
+    df = pd.merge(df1, df2, how='outer', left_index=True, right_index=True,
+                  sort=True, suffixes=('_mvs', '_fs'), copy=True)
+    # print(df1)
+    # print(df2)
+
+    # print(df)
+    # print(df.columns.values)
+    return df
+
+
+def get_style_df_mvs():
+    header_df = get_header_df_mvs()
+    df = transpose_df(header_df)
+
+    df.insert(0, "ma_mode", 0)
+    df.insert(1, "delta_mode", False)
+    df.insert(2, "default_ds", False)
+    df.insert(3, "show_name", '')
+    df.insert(4, "index_name", '')
+    df.insert(5, "selected", False)
+
+    df.insert(6, "color", QColor(Qt.red))
+    df.insert(7, "line_thick", 2)
+    df.insert(8, "pen_style", Qt.SolidLine)
+
+    df.insert(9, "scale_min", 1)
+    df.insert(10, "scale_max", 1024)
+    df.insert(11, "scale_div", 10)
+    df.insert(12, "logarithmic", True)
+
+    df.insert(13, "info_priority", 0)
+
+    df.insert(14, "units", '亿')
+    df.insert(15, "child", None)
+    df.insert(16, "ds_type", 'digit')
+
+    df.loc['first_update', 'ds_type'] = 'str'
+    df.loc['last_update', 'ds_type'] = 'str'
+    df.loc['stockCode', 'ds_type'] = 'const'
+    df.loc['date', 'ds_type'] = 'str'
+
+    return df
+
+
+def combine_style_df():
+
+    path = '../gui/style_df_standard.pkl'
+    with open(path, 'rb') as pk_f:
+        df1 = pickle.load(pk_f)
+
+    df1.insert(0, "frequency", "QUARTERLY")
+
+    df2 = get_style_df_mvs()
+
+    df2.insert(0, "frequency", "DAILY")
+
+    res = pd.merge(df1.T, df2.T, how='outer', left_index=True, right_index=True,
+                   suffixes=('_fs', '_mvs'), copy=True).T
+
+    res["index_name"] = res.index.values
+
+    res.loc['first_update_fs', 'txt_CN'] = '首次上传日期_fs'
+    res.loc['last_update_fs', 'txt_CN'] = '最近上传日期_fs'
+
+    res.loc['first_update_mvs', 'txt_CN'] = '首次上传日期_mvs'
+    res.loc['last_update_mvs', 'txt_CN'] = '最近上传日期_mvs'
+
+    # print(res)
+    # print(res.index.values)
+    # print(res.columns.values)
+    #
+    # for _, row in res.iterrows():
+    #     print(row.values)
+
+    path = '../gui/style_combined_default0.pkl'
+
+    with open(path, 'wb') as pk_f:
+        pickle.dump(res, pk_f)
+
+
+if __name__ == '__main__':
+    # sql2df('000002')
+
+    combine_style_df()
     pass
