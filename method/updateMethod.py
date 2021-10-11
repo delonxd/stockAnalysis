@@ -65,7 +65,6 @@ def buffer2mysql(datetime):
 
         header_df = get_header_df()
         df = res2df_fs(res=res, header_df=header_df)
-
         header_str = sql_format_header_df(header_df)
 
         table = 'fs_%s' % stock_code
@@ -90,7 +89,9 @@ def buffer2mysql(datetime):
         )
 
         if len(new_data.index.tolist()) == 0:
-            pass
+            log_str = 'new data: None'
+            log_file = get_log(log_file, log_str)
+
         else:
             log_str = 'new data:\n%s' % repr(new_data)
             log_file = get_log(log_file, log_str)
@@ -170,17 +171,8 @@ def buffer2mysql_mvs(datetime):
 
         res = read_pkl(root=r'..\bufferData\marketData', file=tFile)
 
-        # tmp = json.loads(res.decode())['data'][0]
-        # print(type(tmp))
-        # print(tmp.keys())
-
         header_df = get_header_df_mvs()
-
-        # print(type(header_df.T))
         df = res2df_mvs(res=res, header_df=header_df)
-
-        # print(df.values)
-
         header_str = sql_format_header_df(header_df)
 
         table = 'mvs_%s' % stock_code
@@ -204,37 +196,39 @@ def buffer2mysql_mvs(datetime):
             ini=False,
         )
 
-    #     if len(new_data.index.tolist()) == 0:
-    #         pass
-    #     else:
-    #         log_str = 'new data:\n%s' % repr(new_data)
-    #         log_file = get_log(log_file, log_str)
-    #
-    #         if stock_code in new_dict.keys():
-    #             old_data = new_dict[stock_code]
-    #
-    #             tmp = pd.concat([old_data, new_data])
-    #             new_dict[stock_code] = tmp
-    #         else:
-    #             new_dict[stock_code] = new_data
-    #
-    #     shutil.move(path + tFile, new_dir)
-    #
-    #     log_str = 'move file:\n' + path + tFile + '-->' + new_dir
-    #     log_file = get_log(log_file, log_str)
-    #     log_file = get_log(log_file, '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n')
-    #
-    # db.close()
+        if len(new_data.index.tolist()) == 0:
+            log_str = 'new data: None'
+            log_file = get_log(log_file, log_str)
 
-    # # print('print:')
-    # # print(log_file)
-    #
-    # file = 'log_update_%s' % time0_str
-    # log_path = '..\\bufferData\\log_files\\' + file
-    # with open(log_path, "w", encoding="utf-8") as f:
-    #     f.write(log_file)
-    #
-    # return new_dict
+        else:
+            log_str = 'new data:\n%s' % repr(new_data)
+            log_file = get_log(log_file, log_str)
+
+            if stock_code in new_dict.keys():
+                old_data = new_dict[stock_code]
+
+                tmp = pd.concat([old_data, new_data])
+                new_dict[stock_code] = tmp
+            else:
+                new_dict[stock_code] = new_data
+
+        shutil.move(path + tFile, new_dir)
+
+        log_str = 'move file:\n' + path + tFile + '-->' + new_dir
+        log_file = get_log(log_file, log_str)
+        log_file = get_log(log_file, '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n')
+
+    db.close()
+
+    # print('print:')
+    # print(log_file)
+
+    file = 'log_update_%s' % time0_str
+    log_path = '..\\bufferData\\log_files_mvs\\' + file
+    with open(log_path, "w", encoding="utf-8") as f:
+        f.write(log_file)
+
+    return new_dict
 
 
 def test_buffer2mysql_mvs():
