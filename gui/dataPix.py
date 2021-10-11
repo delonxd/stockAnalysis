@@ -74,6 +74,8 @@ class DataPix(QObject):
 
         for index, row in style_df.iterrows():
             data = self.df.loc[:, [row['index_name']]]
+            data.dropna(inplace=True)
+            # print(data)
             ds = DataSource(
                 parent=self,
                 df=data,
