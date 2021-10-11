@@ -18,15 +18,19 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
-            self.code_list = pickle.load(pk_f)
+        # with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
+        #     self.code_list = pickle.load(pk_f)
+
+        with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
+            txt = f.read()
+            self.code_list = re.findall(r'([0-9]{6})', txt)
 
         with open('../basicData/code_name.pkl', 'rb') as pk_f:
             self.code_dict = pickle.load(pk_f)
 
-        self.stock_code = '600004'
-
+        # self.stock_code = '301035'
         # self.code_index = 0
+        self.stock_code = self.code_list[0]
         self.code_index = self.code_list.index(self.stock_code)
 
         self.df = sql2df(code=self.stock_code)

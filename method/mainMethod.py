@@ -223,6 +223,54 @@ def res2df_fs(res, header_df, prefix='q', postfix='t'):
     return res_df
 
 
+def res2df_mvs(res, header_df):
+    index_dict = dict()
+    tmp_df = transpose_df(header_df)
+
+    counter = -1
+    for index, row in tmp_df.iterrows():
+        counter += 1
+        sheet = row['sheet_name']
+        api = row['api']
+        if sheet and api:
+            key = api
+            index_dict[key] = counter
+        else:
+            index_dict[index] = counter
+
+    columns = header_df.columns
+    length = len(columns)
+
+    data_dict = dict()
+
+    sub_list = json.loads(res.decode())['data']
+    for tmp in sub_list:
+        date = tmp['date']
+
+        if date not in data_dict.keys():
+            data_dict[date] = [None] * length
+
+        for key, value in tmp.items():
+            # if key == prefix:
+            #     for infix in value.keys():
+            #         sub_dict = value[infix]
+            #         for subKey, subValue in sub_dict.items():
+            #             field = '.'.join([infix, subKey])
+            #             data_dict[date][index_dict[field]] = subValue.get(postfix)
+            # else:
+            data_dict[date][index_dict[key]] = value
+
+    data_list = list()
+    for key, value in data_dict.items():
+        data_list.append(value)
+
+    res_df = pd.DataFrame(data_list, columns=columns)
+    res_df.set_index('date', drop=False, inplace=True)
+
+    # res_df.replace(to_replace=[None], value=np.NAN, inplace=True)
+    return res_df
+
+
 def show_type(value):
     print(type(value), '-->', value)
 
@@ -267,6 +315,34 @@ def get_header_df():
             else:
                 sql_name = 'id_{:0>3}_{}_{}'.format(counter, infix, tmp[0][2])
                 res_df[sql_name] = [tmp[0][0], 'DOUBLE', infix, tmp[0][2]]
+
+    return res_df
+
+
+def get_header_df_mvs():
+    txt = read_pkl(root='../basicData/', file='priceText.pkl')
+
+    index = ['txt_CN', 'sql_type', 'sheet_name', 'api']
+    res_df = pd.DataFrame(index=index)
+
+    res_df['first_update'] = ['首次上传日期', 'VARCHAR(30)', None, None]
+    res_df['last_update'] = ['最近上传日期', 'VARCHAR(30)', None, None]
+    res_df['stockCode'] = ['代码', 'VARCHAR(6)', None, None]
+    res_df['date'] = ['日期', 'VARCHAR(30)', None, None]
+
+    counter = 0
+    infix = 'mvs'
+
+    for rowText in re.findall(r'\n(.*)', txt):
+        tmp = re.findall(r'(.*) :(.*)', rowText)
+        counter += 1
+
+        if len(tmp) == 0:
+            sql_name = 'id_{:0>3}'.format(counter)
+            res_df[sql_name] = [rowText, 'VARCHAR(1)', infix, None]
+        else:
+            sql_name = 'id_{:0>3}_{}_{}'.format(counter, infix, tmp[0][1])
+            res_df[sql_name] = [tmp[0][0], 'DOUBLE', infix, tmp[0][1]]
 
     return res_df
 
