@@ -61,6 +61,12 @@ def read_pkl(root, file):
     return res
 
 
+def show_pkl(path):
+    with open(path, 'rb') as pk_f:
+        res = pickle.load(pk_f)
+    print(res)
+    return res
+
 # def get_header_fs(root, file):
 #     path = '%s/%s' % (root, file)
 #     with open(path, 'rb') as pk_f:
