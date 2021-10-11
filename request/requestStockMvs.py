@@ -3,7 +3,7 @@ import pickle
 import datetime as dt
 from method.urlMethod import data_request
 from method.mainMethod import value2pkl
-from method.updateMethod import buffer2mysql
+from method.updateMethod import buffer2mysql_mvs
 
 
 def request_mvs_data(stock_code, metrics, start_date):
@@ -53,19 +53,19 @@ def dump_mvs_data2buffer(res, stock_code):
 
     end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
     print(end_time, ' dump finished\n')
-#
-#
-# def request_fs_data2mysql(stock_code, metrics_list, start_date, datetime):
-#
-#     res0 = request_fs_data(stock_code, metrics_list, start_date)
-#     dump_fs_data2buffer(res0, stock_code)
-#     buffer2mysql(datetime)
+
+
+def request_mvs_data2mysql(stock_code, metrics, start_date, datetime):
+
+    res0 = request_mvs_data(stock_code, metrics, start_date)
+    dump_mvs_data2buffer(res0, stock_code)
+    buffer2mysql_mvs(datetime)
 
 
 if __name__ == '__main__':
 
-    with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
-        codeList = pickle.load(pk_f)
+    # with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
+    #     codeList = pickle.load(pk_f)
 
     with open('../basicData/metricsMvs.pkl', 'rb') as pk_f:
         metrics0 = pickle.load(pk_f)
@@ -84,9 +84,9 @@ if __name__ == '__main__':
     #
     #     index += 1
 
-    res = request_mvs_data(
+    request_mvs_data2mysql(
         stock_code='000002',
         metrics=metrics0,
-        start_date="2018-01-01",
+        start_date="2017-12-20",
+        datetime=datetime0,
     )
-    dump_mvs_data2buffer(res, '000002')

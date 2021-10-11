@@ -68,25 +68,37 @@ def request_fs_data2mysql(stock_code, metrics_list, start_date, datetime):
     buffer2mysql(datetime)
 
 
-if __name__ == '__main__':
-
+def test_request_fs_data():
     with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
-        codeList = pickle.load(pk_f)
+        code_list = pickle.load(pk_f)
 
     with open('../basicData/metricsList.pkl', 'rb') as pk_f:
-        metricsList = pickle.load(pk_f)
+        metrics_list = pickle.load(pk_f)
 
-    datetime0 = dt.datetime(2021, 10, 9, 16, 30, 0)
+    datetime0 = dt.datetime(2021, 10, 11, 8, 30, 0)
 
-    index = 305
-    while index < 306:
-        stockCode = codeList[index]
+    # index = 305
+    # while index < 306:
+    #     stock_code = code_list[index]
+    #
+    #     request_fs_data2mysql(
+    #         stock_code=stock_code,
+    #         metrics_list=metrics_list,
+    #         start_date="2008-01-01",
+    #         datetime=datetime0,
+    #     )
+    #
+    #     index += 1
 
-        request_fs_data2mysql(
-            stock_code=stockCode,
-            metrics_list=metricsList,
-            start_date="2008-01-01",
-            datetime=datetime0,
-        )
+    stock_code = '000002'
 
-        index += 1
+    request_fs_data2mysql(
+        stock_code=stock_code,
+        metrics_list=metrics_list,
+        start_date="2008-01-01",
+        datetime=datetime0,
+    )
+
+
+if __name__ == '__main__':
+    test_request_fs_data()
