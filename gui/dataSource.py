@@ -31,6 +31,7 @@ class DataSource:
             default_ds,
 
             ma_mode,
+            frequency,
     ):
 
         # self.parent = parent
@@ -44,6 +45,7 @@ class DataSource:
         self.ds_type = ds_type
         self.delta_mode = delta_mode
         self.ma_mode = ma_mode
+        self.frequency = frequency
 
         self.format_data_source()
 
@@ -89,6 +91,7 @@ class DataSource:
 
         self.set_val_scale()
         self.df.columns = [index_name]
+        self.date_list = list()
 
     def format(self, value):
         if value is None:
@@ -113,6 +116,9 @@ class DataSource:
 
     def format_data_source(self):
         if self.ds_type == 'digit':
+            if self.frequency == 'DAILY':
+                return
+
             if self.delta_mode is True:
                 self.df = get_month_delta(df=self.df, new_name=self.index_name)
             else:
@@ -135,6 +141,19 @@ class DataSource:
                 indexes = self.df.index.values[(self.ma_mode - 1):]
 
                 self.df = pd.DataFrame(array1, index=indexes, columns=[self.index_name])
+
+    @staticmethod
+    def index2date(index):
+        return dt.datetime.strptime(index, "%Y-%m-%d").date()
+
+    def map_indexes2date(self):
+        return map(self.index2date, self.df.index)
+        # date_list = list()
+        # for index in self.df.index:
+        #     date = dt.datetime.strptime(index, "%Y-%m-%d").date()
+        #     date_list.append(date)
+        #
+        # self.date_list = date_list
 
     @staticmethod
     def copy(data):

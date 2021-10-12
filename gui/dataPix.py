@@ -97,6 +97,7 @@ class DataPix(QObject):
                 delta_mode=row['delta_mode'],
                 default_ds=row['default_ds'],
                 ma_mode=row['ma_mode'],
+                frequency=row['frequency'],
             )
             ds_dict[ds.index_name] = ds
 
@@ -150,6 +151,16 @@ class DataPix(QObject):
         # px_list.sort()
 
         return px_list, px_dict
+
+    @staticmethod
+    def iter_delta_date(date_min, date_iter):
+        return map(lambda x: (x - date_min).days, date_iter)
+
+    def indexes_2_val_x(self, indexes):
+        return np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(indexes)
+
+    def val_x_2_px_x(self, val_x):
+        return self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
 
     ###############################################################################################
 
@@ -339,9 +350,12 @@ class DataPix(QObject):
             self.draw_data(data)
 
     def draw_data(self, data: DataSource):
-        dates = data.df.index.values
-        val_x = np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(dates)
-        px_x = self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
+        # dates = data.df.index.values
+        # val_x = np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(dates)
+        # px_x = self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
+
+        val_x = self.indexes_2_val_x(data.df.index.values)
+        px_x = self.val_x_2_px_x(val_x)
 
         if data.ds_type == 'digit':
 
@@ -434,7 +448,8 @@ class DataPix(QObject):
 
         self.draw_tooltip(x, self.data_rect.bottom() + 1, date_str)
         self.draw_tooltip(self.data_rect.right() + 1, y, val_str)
-        self.draw_information(date)
+        # self.draw_information(date)
+        self.draw_information(x)
 
     def draw_tooltip(self, x, y, text):
         pix_painter = QPainter(self.pix_show)
@@ -459,9 +474,9 @@ class DataPix(QObject):
 
         pix_painter.end()
 
-    def draw_information(self, date):
+    def draw_information(self, px_x):
         box = InformationBox(parent=self)
-        pix = box.draw_pix(date)
+        pix = box.draw_pix(px_x)
 
         pix_painter = QPainter(self.pix_show)
         pix_painter.drawPixmap(10, 10, pix)

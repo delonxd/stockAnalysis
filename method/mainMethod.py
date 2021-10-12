@@ -383,6 +383,7 @@ def get_units_dict():
         '千': 1e3,
         '百': 1e2,
         '%': 1e-2,
+        '倍': 1,
     }
     return res
 

@@ -42,7 +42,9 @@ def sql2df_fs(code):
 
         return sql_df
     else:
-        return pd.DataFrame()
+        header_df = get_header_df()
+        return pd.DataFrame(columns=header_df.columns)
+        # return pd.DataFrame()
 
 
 def sql2df_mvs(code):
@@ -70,7 +72,8 @@ def sql2df_mvs(code):
 
         return sql_df
     else:
-        return pd.DataFrame()
+        header_df = get_header_df_mvs()
+        return pd.DataFrame(columns=header_df.columns)
 
 
 def data_by_dates(df: pd.DataFrame, dates: list):
@@ -359,14 +362,14 @@ def get_style_df_mvs():
     df.insert(7, "line_thick", 2)
     df.insert(8, "pen_style", Qt.SolidLine)
 
-    df.insert(9, "scale_min", 1)
-    df.insert(10, "scale_max", 1024)
+    df.insert(9, "scale_min", 0)
+    df.insert(10, "scale_max", 100)
     df.insert(11, "scale_div", 10)
-    df.insert(12, "logarithmic", True)
+    df.insert(12, "logarithmic", False)
 
     df.insert(13, "info_priority", 0)
 
-    df.insert(14, "units", '亿')
+    df.insert(14, "units", '倍')
     df.insert(15, "child", None)
     df.insert(16, "ds_type", 'digit')
 
@@ -417,5 +420,9 @@ def combine_style_df():
 if __name__ == '__main__':
     # sql2df('000002')
 
-    combine_style_df()
+    # combine_style_df()
+
+    res = sql2df('600006')
+
+    print(res)
     pass
