@@ -3,6 +3,7 @@ from method.mainMethod import *
 from gui.checkTree import CheckTree
 from gui.dataPix import DataPix
 from request.requestStockFs import request_fs_data2mysql
+from request.requestStockMvs import request_mvs_data2mysql
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -122,12 +123,23 @@ class MainWindow(QWidget):
         with open('../basicData/metricsList.pkl', 'rb') as pk_f:
             metrics_list = pickle.load(pk_f)
 
-        datetime0 = dt.datetime(2021, 10, 9, 16, 30, 0)
+        with open('../basicData/metricsMvs.pkl', 'rb') as pk_f:
+            metrics0 = pickle.load(pk_f)
+
+        # datetime0 = dt.datetime(2021, 10, 9, 16, 30, 0)
+        datetime0 = dt.datetime.now()
 
         request_fs_data2mysql(
             stock_code=stock_code,
             metrics_list=metrics_list,
-            start_date="2008-01-01",
+            start_date="1970-01-01",
+            datetime=datetime0,
+        )
+
+        request_mvs_data2mysql(
+            stock_code=stock_code,
+            metrics=metrics0,
+            start_date="1970-01-01",
             datetime=datetime0,
         )
 

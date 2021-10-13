@@ -64,29 +64,30 @@ def request_mvs_data2mysql(stock_code, metrics, start_date, datetime):
 
 if __name__ == '__main__':
 
-    # with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
-    #     codeList = pickle.load(pk_f)
+    with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
+        codeList = pickle.load(pk_f)
 
     with open('../basicData/metricsMvs.pkl', 'rb') as pk_f:
         metrics0 = pickle.load(pk_f)
 
     datetime0 = dt.datetime(2021, 10, 9, 16, 30, 0)
 
-    # index = 305
-    # while index < 306:
-    #     stockCode = codeList[index]
-    #
-    #     request_mvs_data(
-    #         stock_code=stockCode,
-    #         metrics=metrics0,
-    #         start_date="2008-01-01",
-    #     )
-    #
-    #     index += 1
+    index = 0
+    while index < 100:
+        stockCode = codeList[index]
 
-    request_mvs_data2mysql(
-        stock_code='000002',
-        metrics=metrics0,
-        start_date="2017-12-20",
-        datetime=datetime0,
-    )
+        request_mvs_data2mysql(
+            stock_code=stockCode,
+            metrics=metrics0,
+            start_date="1970-01-01",
+            datetime=datetime0,
+        )
+
+        index += 1
+
+    # request_mvs_data2mysql(
+    #     stock_code='000002',
+    #     metrics=metrics0,
+    #     start_date="2017-12-20",
+    #     datetime=datetime0,
+    # )
