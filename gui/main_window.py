@@ -36,7 +36,7 @@ class MainWindow(QWidget):
         self.code_index = self.code_list.index(self.stock_code)
 
         self.df = sql2df(code=self.stock_code)
-        self.style_df = get_default_style_df()
+        self.style_df = load_default_style()
 
         self.data_pix = DataPix(
             parent=self,
@@ -160,16 +160,9 @@ class MainWindow(QWidget):
     #     self.update_data()
 
     def export_style(self):
-        timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
-        path = '../gui/style_df_%s.pkl' % timestamp
         df = self.tree.df.copy()
         df['child'] = None
-        with open(path, 'wb') as pk_f:
-            pickle.dump(df, pk_f)
-
-        path = '../gui/style_df_standard.pkl'
-        with open(path, 'wb') as pk_f:
-            pickle.dump(df, pk_f)
+        save_default_style(df)
 
     def update_data(self):
         self.data_pix.update_pix()
@@ -224,11 +217,13 @@ class MainWindow(QWidget):
         a = event.angleDelta().y() / 120
         if a < 0:
             self.code_index += 1
+            self.code_index = self.code_index % len(self.code_list)
             self.stock_code = self.code_list[self.code_index]
             self.change_stock()
 
         elif a > 0:
             self.code_index -= 1
+            self.code_index = self.code_index % len(self.code_list)
             self.stock_code = self.code_list[self.code_index]
             self.change_stock()
 

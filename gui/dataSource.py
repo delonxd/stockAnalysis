@@ -34,7 +34,7 @@ class DataSource:
             frequency,
     ):
 
-        # self.parent = parent
+        self.parent = parent
 
         self.default_ds = default_ds
 
@@ -91,7 +91,9 @@ class DataSource:
 
         self.set_val_scale()
         self.df.columns = [index_name]
-        self.date_list = list()
+
+        self.offsets = None
+        self.init_offsets()
 
     def format(self, value):
         if value is None:
@@ -141,6 +143,15 @@ class DataSource:
                 indexes = self.df.index.values[(self.ma_mode - 1):]
 
                 self.df = pd.DataFrame(array1, index=indexes, columns=[self.index_name])
+
+    def init_offsets(self):
+        if self.frequency == 'DAILY':
+            self.offsets = np.zeros(self.df.index.values.shape[0], dtype='int32')
+            date0 = self.parent.date_min
+            for i, index in enumerate(self.df.index.values):
+                date = dt.datetime.strptime(index, "%Y-%m-%d").date()
+                offset = (date - date0).days
+                self.offsets[i] = offset
 
     @staticmethod
     def index2date(index):

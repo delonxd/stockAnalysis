@@ -5,6 +5,8 @@ from gui.informationBox import InformationBox
 
 import datetime as dt
 import numpy as np
+from collections import defaultdict
+
 import time
 
 
@@ -49,8 +51,9 @@ class DataPix(QObject):
 
         # px_list
         # self.date_list = self.get_date_list('MONTHLY')
-        self.date_list = self.get_date_list('SEASON')
+        self.date_list = self.get_date_list('QUARTERLY')
         self.px_list, self.px_dict = self.get_px_list()
+        # self.px_list, self.px_dict = self.get_px_dict()
 
         # data_source
         self.data_dict = None
@@ -78,6 +81,9 @@ class DataPix(QObject):
         for index, row in style_df.iterrows():
             data = self.df.loc[:, [row['index_name']]]
             data.dropna(inplace=True)
+
+            if len(data.index) == 0:
+                continue
             # print(data)
             ds = DataSource(
                 parent=self,
@@ -126,18 +132,17 @@ class DataPix(QObject):
         self.update_tree.emit()
 
     def get_date_list(self, mode):
-        res = None
         if mode == 'WEEKLY':
-            res = list(rrule(WEEKLY, wkst=SU, byweekday=FR, dtstart=self.date_min, until=self.date_max))
+            return list(rrule(WEEKLY, wkst=SU, byweekday=FR, dtstart=self.date_min, until=self.date_max))
         elif mode == 'MONTHLY':
-            res = list(rrule(MONTHLY, bymonthday=-1, dtstart=self.date_min, until=self.date_max))
+            return list(rrule(MONTHLY, bymonthday=-1, dtstart=self.date_min, until=self.date_max))
         elif mode == 'YEARLY':
-            res = list(rrule(YEARLY, byyearday=-1, dtstart=self.date_min, until=self.date_max))
+            return list(rrule(YEARLY, byyearday=-1, dtstart=self.date_min, until=self.date_max))
         elif mode == 'INTERIM':
-            res = list(rrule(YEARLY, bymonthday=-1, bymonth=6, dtstart=self.date_min, until=self.date_max))
-        elif mode == 'SEASON':
-            res = list(rrule(YEARLY, bymonthday=-1, bymonth=[3, 6, 9, 12], dtstart=self.date_min, until=self.date_max))
-        return res
+            return list(rrule(YEARLY, bymonthday=-1, bymonth=6, dtstart=self.date_min, until=self.date_max))
+        elif mode == 'QUARTERLY':
+            return list(rrule(YEARLY, bymonthday=-1, bymonth=[3, 6, 9, 12], dtstart=self.date_min, until=self.date_max))
+        return None
 
     def get_px_list(self):
         px_dict = dict()
@@ -152,15 +157,32 @@ class DataPix(QObject):
 
         return px_list, px_dict
 
-    @staticmethod
-    def iter_delta_date(date_min, date_iter):
-        return map(lambda x: (x - date_min).days, date_iter)
+    def get_px_dict(self):
+        res_dict = defaultdict(str)
 
-    def indexes_2_val_x(self, indexes):
-        return np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(indexes)
+        val_x = np.arange(0, self.d_date + 1)
+        px_x = self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
+        px_x = np.floor(px_x)
+        res_list = np.unique(px_x).tolist()
+        # res_list.sort()
+        date0 = self.date_min
+        for i in val_x:
+            px = px_x[i]
+            index = date0.strftime("%Y-%m-%d")
+            res_dict[px] = index
+            date0 = date0 + dt.timedelta(days=1)
 
-    def val_x_2_px_x(self, val_x):
-        return self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
+        return res_list, res_dict
+
+    # @staticmethod
+    # def iter_delta_date(date_min, date_iter):
+    #     return map(lambda x: (x - date_min).days, date_iter)
+    #
+    # def indexes_2_val_x(self, indexes):
+    #     return np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(indexes)
+    #
+    # def val_x_2_px_x(self, val_x):
+    #     return self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
 
     ###############################################################################################
 
@@ -350,12 +372,12 @@ class DataPix(QObject):
             self.draw_data(data)
 
     def draw_data(self, data: DataSource):
-        # dates = data.df.index.values
-        # val_x = np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(dates)
-        # px_x = self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
+        dates = data.df.index.values
+        val_x = np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(dates)
+        px_x = self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
 
-        val_x = self.indexes_2_val_x(data.df.index.values)
-        px_x = self.val_x_2_px_x(val_x)
+        # val_x = self.indexes_2_val_x(data.df.index.values)
+        # px_x = self.val_x_2_px_x(val_x)
 
         if data.ds_type == 'digit':
 
@@ -435,20 +457,25 @@ class DataPix(QObject):
         pen = QPen(Qt.gray, 1, Qt.SolidLine)
         pix_painter.setPen(pen)
 
-        x = self.get_nearest_px(x)
+        x = self.get_nearest_value(x, self.px_list)
 
         pix_painter.drawLine(QPoint(x, d_top), QPoint(x, d_bottom))
         pix_painter.drawLine(QPoint(d_left, y), QPoint(d_right, y))
 
         pix_painter.end()
 
-        date, val = self.px2data(x, y, self.default_ds)
-        date_str = date.strftime("%Y-%m-%d")
+        # date, val = self.px2data(x, y, self.default_ds)
+        # date_str = date.strftime("%Y-%m-%d")
+
+        val = self.y_px2data(y, self.default_ds)
         val_str = self.default_ds.format(val)
+        date = self.px_dict[x]
+        date_str = date.strftime("%Y-%m-%d")
 
         self.draw_tooltip(x, self.data_rect.bottom() + 1, date_str)
         self.draw_tooltip(self.data_rect.right() + 1, y, val_str)
         # self.draw_information(date)
+
         self.draw_information(x)
 
     def draw_tooltip(self, x, y, text):
@@ -482,17 +509,18 @@ class DataPix(QObject):
         pix_painter.drawPixmap(10, 10, pix)
         pix_painter.end()
 
-    def get_nearest_px(self, x):
+    @staticmethod
+    def get_nearest_value(x, x_list):
         nearest = None
 
-        if len(self.px_list) > 0:
-            if x <= self.px_list[0]:
-                return self.px_list[0]
-            elif x >= self.px_list[-1]:
-                return self.px_list[-1]
+        if len(x_list) > 0:
+            if x <= x_list[0]:
+                return x_list[0]
+            elif x >= x_list[-1]:
+                return x_list[-1]
 
         px1 = np.inf
-        for px in self.px_list:
+        for px in x_list:
             px2 = px
             if px1 <= x < px2:
                 if (x - px1) <= (px2 - x):
@@ -503,12 +531,12 @@ class DataPix(QObject):
             px1 = px
         return nearest
 
-    def get_nearest_date(self, x):
-        px = self.get_nearest_px(x)
-        if px is not None:
-            return self.px_dict[px]
-        else:
-            return None
+    # def get_nearest_date(self, x):
+    #     px = self.get_nearest_px(x)
+    #     if px is not None:
+    #         return self.px_dict[px]
+    #     else:
+    #         return None
 
     ###############################################################################################
 

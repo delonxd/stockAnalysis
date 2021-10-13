@@ -15,6 +15,7 @@ import numpy as np
 import sys
 import pickle
 import json
+import time
 
 
 def sql2df_fs(code):
@@ -125,36 +126,36 @@ def get_y_from_points(x: int, point1, point2):
     return res
 
 
-def get_tree_df2():
-    header_df = get_header_df()
-
-    df = transpose_df(header_df)
-
-    df.insert(0, "ds_type", 'digit')
-    df.insert(0, "child", None)
-
-    df.insert(0, "index_name", df.index)
-    df.insert(1, "selected", False)
-
-    df.insert(2, "color", QColor(Qt.red))
-    df.insert(3, "line_thick", 2)
-    df.insert(4, "pen_style", Qt.SolidLine)
-
-    df.insert(5, "scale_min", 1)
-    df.insert(6, "scale_max", 1024)
-    df.insert(7, "scale_div", 10)
-    df.insert(8, "logarithmic", True)
-
-    df.insert(9, "info_priority", 0)
-
-    df.insert(10, "units", '亿')
-
-    df.insert(0, "show_name", '')
-    df.insert(0, "default_ds", False)
-
-    # show_df(df)
-
-    return df
+# def get_tree_df2():
+#     header_df = get_header_df()
+#
+#     df = transpose_df(header_df)
+#
+#     df.insert(0, "ds_type", 'digit')
+#     df.insert(0, "child", None)
+#
+#     df.insert(0, "index_name", df.index)
+#     df.insert(1, "selected", False)
+#
+#     df.insert(2, "color", QColor(Qt.red))
+#     df.insert(3, "line_thick", 2)
+#     df.insert(4, "pen_style", Qt.SolidLine)
+#
+#     df.insert(5, "scale_min", 1)
+#     df.insert(6, "scale_max", 1024)
+#     df.insert(7, "scale_div", 10)
+#     df.insert(8, "logarithmic", True)
+#
+#     df.insert(9, "info_priority", 0)
+#
+#     df.insert(10, "units", '亿')
+#
+#     df.insert(0, "show_name", '')
+#     df.insert(0, "default_ds", False)
+#
+#     # show_df(df)
+#
+#     return df
 
 
 def add_style_row(df: pd.DataFrame, src_name, new_name):
@@ -223,11 +224,11 @@ def get_month_data(df: pd.DataFrame, new_name):
     return res_df
 
 
-def get_month_delta(df: pd.DataFrame, new_name, mode='Season'):
+def get_month_delta(df: pd.DataFrame, new_name, mode='QUARTERLY'):
 
-    if mode == 'Monthly':
+    if mode == 'MONTHLY':
         step = 1
-    elif mode == 'Season':
+    elif mode == 'QUARTERLY':
         step = 3
     else:
         step = 1
@@ -267,48 +268,66 @@ def get_month_delta(df: pd.DataFrame, new_name, mode='Season'):
     return res_df
 
 
-def get_default_style_df():
-    # df = get_tree_df2()
-    #
-    # df.loc['id_001_bs_ta', 'color'] = QColor(Qt.green)
-    # df.loc['id_001_bs_ta', 'selected'] = True
-    # df.loc['id_001_bs_ta', 'show_name'] = '资产合计'
-    # df.loc['id_001_bs_ta', 'info_priority'] = 3
-    # df.loc['id_001_bs_ta', 'default_ds'] = True
-    #
-    # df.loc['id_062_bs_tl', 'color'] = QColor(Qt.red)
-    # df.loc['id_062_bs_tl', 'selected'] = True
-    # df.loc['id_062_bs_tl', 'show_name'] = '负债合计'
-    # df.loc['id_062_bs_tl', 'info_priority'] = 2
-    #
-    # df.loc['id_110_bs_toe', 'color'] = QColor(Qt.yellow)
-    # df.loc['id_110_bs_toe', 'selected'] = True
-    # df.loc['id_110_bs_toe', 'show_name'] = '所有者权益'
-    # df.loc['id_110_bs_toe', 'info_priority'] = 1
-    #
-    # df.loc['first_update', 'ds_type'] = 'str'
-    # df.loc['last_update', 'ds_type'] = 'str'
-    # df.loc['stockCode', 'ds_type'] = 'const'
-    # df.loc['currency', 'ds_type'] = 'const'
-    # df.loc['standardDate', 'ds_type'] = 'str'
-    # df.loc['reportDate', 'ds_type'] = 'str'
-    # df.loc['reportType', 'ds_type'] = 'str'
-    # df.loc['date', 'ds_type'] = 'str'
-    #
-    # # show_df(df)
-    # # print(df['info_priority'].max())
-    # # print(df.quantile(0.5))
+# def get_default_style_df():
+#     # df = get_tree_df2()
+#     #
+#     # df.loc['id_001_bs_ta', 'color'] = QColor(Qt.green)
+#     # df.loc['id_001_bs_ta', 'selected'] = True
+#     # df.loc['id_001_bs_ta', 'show_name'] = '资产合计'
+#     # df.loc['id_001_bs_ta', 'info_priority'] = 3
+#     # df.loc['id_001_bs_ta', 'default_ds'] = True
+#     #
+#     # df.loc['id_062_bs_tl', 'color'] = QColor(Qt.red)
+#     # df.loc['id_062_bs_tl', 'selected'] = True
+#     # df.loc['id_062_bs_tl', 'show_name'] = '负债合计'
+#     # df.loc['id_062_bs_tl', 'info_priority'] = 2
+#     #
+#     # df.loc['id_110_bs_toe', 'color'] = QColor(Qt.yellow)
+#     # df.loc['id_110_bs_toe', 'selected'] = True
+#     # df.loc['id_110_bs_toe', 'show_name'] = '所有者权益'
+#     # df.loc['id_110_bs_toe', 'info_priority'] = 1
+#     #
+#     # df.loc['first_update', 'ds_type'] = 'str'
+#     # df.loc['last_update', 'ds_type'] = 'str'
+#     # df.loc['stockCode', 'ds_type'] = 'const'
+#     # df.loc['currency', 'ds_type'] = 'const'
+#     # df.loc['standardDate', 'ds_type'] = 'str'
+#     # df.loc['reportDate', 'ds_type'] = 'str'
+#     # df.loc['reportType', 'ds_type'] = 'str'
+#     # df.loc['date', 'ds_type'] = 'str'
+#     #
+#     # # show_df(df)
+#     # # print(df['info_priority'].max())
+#     # # print(df.quantile(0.5))
+#
+#     # path = '../gui/style_df_standard.pkl'
+#     path = '../gui/style_default.pkl'
+#     with open(path, 'rb') as pk_f:
+#         df = pickle.load(pk_f)
+#
+#     # df.insert(0, "ma_mode", 0)
+#     #
+#     # df.loc['id_211_ps_np', 'ma_mode'] = 4
+#
+#     return df
 
-    # path = '../gui/style_df_standard.pkl'
-    path = '../gui/style_combined_default0.pkl'
+
+def load_default_style():
+    path = '../gui/style_default.pkl'
     with open(path, 'rb') as pk_f:
         df = pickle.load(pk_f)
-
-    # df.insert(0, "ma_mode", 0)
-    #
-    # df.loc['id_211_ps_np', 'ma_mode'] = 4
-
     return df
+
+
+def save_default_style(df):
+    timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
+    path1 = '../gui/style_%s.pkl' % timestamp
+    with open(path1, 'wb') as pk_f:
+        pickle.dump(df, pk_f)
+
+    path2 = '../gui/style_default.pkl'
+    with open(path2, 'wb') as pk_f:
+        pickle.dump(df, pk_f)
 
 
 def dump_code_name():
@@ -328,23 +347,6 @@ def dump_code_name():
 
     with open("../basicData/code_name.pkl", 'wb') as pk_f:
         pickle.dump(res, pk_f)
-
-
-def sql2df(code):
-    df1 = sql2df_mvs(code)
-    # df1 = pd.DataFrame()
-    df2 = sql2df_fs(code)
-
-    # df = pd.concat([df1, df2], axis=1, sort=True)
-
-    df = pd.merge(df1, df2, how='outer', left_index=True, right_index=True,
-                  sort=True, suffixes=('_mvs', '_fs'), copy=True)
-    # print(df1)
-    # print(df2)
-
-    # print(df)
-    # print(df.columns.values)
-    return df
 
 
 def get_style_df_mvs():
@@ -377,6 +379,8 @@ def get_style_df_mvs():
     df.loc['last_update', 'ds_type'] = 'str'
     df.loc['stockCode', 'ds_type'] = 'const'
     df.loc['date', 'ds_type'] = 'str'
+
+    df.loc['id_001_mvs_pe_ttm', 'selected'] = True
 
     return df
 
@@ -411,18 +415,28 @@ def combine_style_df():
     # for _, row in res.iterrows():
     #     print(row.values)
 
-    path = '../gui/style_combined_default0.pkl'
+    # path = '../gui/style_combined_default0.pkl'
+    path = '../gui/style_default.pkl'
 
     with open(path, 'wb') as pk_f:
         pickle.dump(res, pk_f)
 
 
+def sql2df(code):
+    df1 = sql2df_mvs(code)
+    df2 = sql2df_fs(code)
+
+    df = pd.merge(df1, df2, how='outer', left_index=True, right_index=True,
+                  sort=True, suffixes=('_mvs', '_fs'), copy=True)
+    return df
+
+
 if __name__ == '__main__':
     # sql2df('000002')
 
-    # combine_style_df()
-
-    res = sql2df('600006')
-
-    print(res)
+    combine_style_df()
+    #
+    # res = sql2df('600006')
+    #
+    # print(res)
     pass
