@@ -22,15 +22,18 @@ class InformationBox:
             index_list = ds.df.index.tolist()
 
             if ds.frequency == 'DAILY':
-                date0 = self.parent.date_min
-                val_x = (date - date0).days
-                val_x = self.parent.get_nearest_value(val_x, ds.offsets)
-                # print(type(val_x), '-->', val_x)
-                date1 = date0 + relativedelta(days=int(val_x))
-                date_index1 = date1.strftime("%Y-%m-%d")
+                # date0 = self.parent.date_min
+                # val_x = (date - date0).days
+                # val_x = self.parent.get_nearest_value(val_x, ds.offsets)
+                # # print(type(val_x), '-->', val_x)
+                # date1 = date0 + relativedelta(days=int(val_x))
+                # date_index1 = date1.strftime("%Y-%m-%d")
+                #
+                # box_df.loc[index_name, 'value'] = ds.df.loc[date_index1][0]
+                # box_df.loc[index_name, 'real_date'] = date_index1
 
-                box_df.loc[index_name, 'value'] = ds.df.loc[date_index1][0]
-                box_df.loc[index_name, 'real_date'] = date_index1
+                box_df.loc[index_name, 'value'] = None
+                box_df.loc[index_name, 'real_date'] = None
 
             else:
                 if date_index in index_list:
