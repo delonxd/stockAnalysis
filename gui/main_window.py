@@ -12,17 +12,76 @@ import sys
 import time
 import pickle
 
+import threading
+import time
+
+
+class ReadSQLThread(QThread):
+    signal1 = pyqtSignal(object)
+
+    def __init__(self):
+        super().__init__()
+        self.code_list = list()
+        self.lock = threading.Lock()
+
+    def run(self):
+        print(time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())))
+        print('thread start')
+
+        while True:
+            self.lock.acquire()
+            if len(self.code_list) > 0:
+                code = self.code_list[0]
+                self.code_list.pop(0)
+            else:
+                break
+            self.lock.release()
+
+            res0 = (code, sql2df(code))
+            print(code)
+            self.signal1.emit(res0)
+
+        print('thread end')
+        self.lock.release()
+
+    def append(self, code):
+        self.lock.acquire()
+        if code in self.code_list:
+            index = self.code_list.index(code)
+            self.code_list.pop(index)
+        self.code_list.insert(0, code)
+        self.lock.release()
+
+    def extend(self, code_list):
+        self.lock.acquire()
+        code_list.reverse()
+        for code in code_list:
+            if code in self.code_list:
+                index = self.code_list.index(code)
+                self.code_list.pop(index)
+            self.code_list.insert(0, code)
+        self.lock.release()
+
+    def clear(self):
+        self.lock.acquire()
+        self.code_list.clear()
+        self.lock.release()
+
 
 class MainWindow(QWidget):
     # code_index = 0
 
     def __init__(self):
         super().__init__()
-        
-        self.code_list = ['000002', '000004', '600004', '600006', '600007', '600008']
 
-        # with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
-        #     self.code_list = pickle.load(pk_f)
+        self.df_dict = dict()
+        self.buffer = ReadSQLThread()
+        self.buffer.signal1.connect(self.update_df_dict)
+
+        # self.code_list = ['000002', '000004', '600004', '600006', '600007', '600008']
+
+        with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
+            self.code_list = pickle.load(pk_f)
 
         # with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     txt = f.read()
@@ -31,12 +90,13 @@ class MainWindow(QWidget):
         with open('../basicData/code_name.pkl', 'rb') as pk_f:
             self.code_dict = pickle.load(pk_f)
 
-        self.stock_code = '000002'
+        self.stock_code = '000005'
         # self.code_index = 0
         # self.stock_code = self.code_list[0]
         self.code_index = self.code_list.index(self.stock_code)
 
         self.df = sql2df(code=self.stock_code)
+        self.df_dict[self.stock_code] = self.df
         self.style_df = load_default_style()
 
         self.data_pix = DataPix(
@@ -72,6 +132,40 @@ class MainWindow(QWidget):
 
         self.cross = False
         self.init_ui()
+
+        self.buffer_df()
+
+    def update_df_dict(self, tup):
+        self.df_dict[tup[0]] = tup[1]
+
+    def buffer_df(self):
+        index1 = self.code_index
+        index2 = self.code_index
+        arr = np.array([], dtype='int32')
+
+        l0 = len(self.code_list)
+        l1 = (l0 - 1) / 2
+        l2 = 10
+
+        offset = int(min(l1, l2))
+
+        for _ in range(offset):
+            index1 += 1
+            index2 -= 1
+            arr = np.append(arr, index1)
+            arr = np.append(arr, index2)
+        arr = arr % l0
+
+        tmp = list()
+        for index in arr:
+            stock_code = self.code_list[index]
+            if stock_code in self.df_dict.keys():
+                pass
+            else:
+                tmp.append(stock_code)
+
+        self.buffer.extend(tmp)
+        self.buffer.start()
 
     def init_ui(self):
 
@@ -119,7 +213,7 @@ class MainWindow(QWidget):
         self.editor1.textChanged.connect(self.editor1_changed)
 
     def request_data(self):
-        stock_code = self.code_list[self.code_index]
+        stock_code = self.stock_code
         with open('../basicData/metricsList.pkl', 'rb') as pk_f:
             metrics_list = pickle.load(pk_f)
 
@@ -143,6 +237,8 @@ class MainWindow(QWidget):
             datetime=datetime0,
         )
 
+        self.df = sql2df(code=self.stock_code)
+
         self.change_stock()
         # self.tree.exec_()
 
@@ -153,6 +249,8 @@ class MainWindow(QWidget):
     def editor1_changed(self, txt):
         if txt in self.code_list:
             self.code_index = self.code_list.index(txt)
+            self.stock_code = txt
+            self.buffer.clear()
             self.change_stock()
 
     # def scale_up(self):
@@ -182,7 +280,11 @@ class MainWindow(QWidget):
 
     def change_stock(self):
         # print(stock_code, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-        self.df = sql2df(code=self.stock_code)
+        self.buffer_df()
+        if self.stock_code in self.df_dict.keys():
+            self.df = self.df_dict[self.stock_code]
+        else:
+            self.df = sql2df(code=self.stock_code)
         self.update_data()
         self.show_stock_name()
 
@@ -192,6 +294,8 @@ class MainWindow(QWidget):
         name = self.code_dict.get(self.stock_code)
         txt = '%s: %s' % (self.stock_code, name)
         self.stock_label.setText(txt)
+
+        # todo: show stock_list, show type
 
     def center(self):
         qr = self.frameGeometry()
