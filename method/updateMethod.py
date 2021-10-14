@@ -43,9 +43,10 @@ def buffer2mysql(datetime):
 
     timestamp = time.localtime(time.time())
 
-    time0_str = time.strftime("%Y%m%d%H%M%S", timestamp)
+    time0_str = time.strftime("%Y%m%d", timestamp)
     new_dir = '..\\bufferData\\fsData_updated\\fsData_update_%s\\' % time0_str
-    os.makedirs(new_dir)
+    if not os.path.exists(new_dir):
+        os.makedirs(new_dir)
 
     log_str = 'make dir --> %s' % new_dir
     log_file = get_log('log_file:', log_str)
@@ -151,7 +152,8 @@ def buffer2mysql_mvs(datetime):
 
     time0_str = time.strftime("%Y%m%d%H%M%S", timestamp)
     new_dir = '..\\bufferData\\marketData_updated\\marketData_update_%s\\' % time0_str
-    os.makedirs(new_dir)
+    if not os.path.exists(new_dir):
+        os.makedirs(new_dir)
 
     log_str = 'make dir --> %s' % new_dir
     log_file = get_log('log_file:', log_str)
