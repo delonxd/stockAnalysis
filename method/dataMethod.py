@@ -1,6 +1,8 @@
 from method.mainMethod import get_header_df, transpose_df, show_df
 from method.mainMethod import get_header_df_mvs
 from method.sqlMethod import get_data_frame, sql_if_table_exists
+from request.requestStockFs import request_fs_data2mysql
+
 import mysql.connector
 import datetime as dt
 
@@ -16,6 +18,7 @@ import sys
 import pickle
 import json
 import time
+import timeit
 
 
 def sql2df_fs(code):
@@ -423,8 +426,23 @@ def combine_style_df():
 
 
 def sql2df(code):
+    # df1 = sql2df_mvs('code')
     df1 = sql2df_mvs(code)
     df2 = sql2df_fs(code)
+
+    if df2.index.values.shape[0] == 0:
+        print('***')
+        with open('../basicData/metricsList.pkl', 'rb') as pk_f:
+            metrics_list = pickle.load(pk_f)
+
+        datetime0 = dt.datetime.now()
+        request_fs_data2mysql(
+            stock_code=code,
+            metrics_list=metrics_list,
+            start_date="1970-01-01",
+            datetime=datetime0,
+        )
+        df2 = sql2df_fs(code)
 
     df = pd.merge(df1, df2, how='outer', left_index=True, right_index=True,
                   sort=True, suffixes=('_mvs', '_fs'), copy=True)
@@ -433,8 +451,11 @@ def sql2df(code):
 
 if __name__ == '__main__':
     # sql2df('000002')
+    str2 = "from __main__ import sql2df_mvs"
+    t0 = timeit.Timer("sql2df_mvs('000004')", str2)
+    print(t0.timeit(10))
 
-    combine_style_df()
+    # combine_style_df()
     #
     # res = sql2df('600006')
     #
