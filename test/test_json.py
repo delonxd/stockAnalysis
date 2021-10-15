@@ -21,14 +21,14 @@ def test_json():
     # tmp = df.to_json(orient="columns", force_ascii=False)
     tmp = df.to_json(orient="split", force_ascii=False)
 
-    res = json.dumps(tmp)
+    # res = json.dumps(tmp)
 
-    with open("../test/style_test.json", "w", encoding="utf-8") as f:
-        f.write(res)
+    with open("../test/style_test.txt", "w", encoding="utf-8") as f:
+        f.write(tmp)
     pass
 
-    with open("../comparisonTable/name_table.txt", "w", encoding="utf-8") as f:
-        f.write(tmp_str)
+    # with open("../comparisonTable/name_table.txt", "w", encoding="utf-8") as f:
+    #     f.write(tmp_str)
 
 
 if __name__ == '__main__':
