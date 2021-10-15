@@ -64,8 +64,13 @@ def request_mvs_data2mysql(stock_code, metrics, start_date, datetime):
 
 if __name__ == '__main__':
 
-    with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
-        codeList = pickle.load(pk_f)
+    # with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
+    #     codeList = pickle.load(pk_f)
+
+    import re
+    with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
+        txt = f.read()
+        codeList = re.findall(r'([0-9]{6})', txt)
 
     with open('../basicData/metricsMvs.pkl', 'rb') as pk_f:
         metrics0 = pickle.load(pk_f)
@@ -73,13 +78,15 @@ if __name__ == '__main__':
     datetime0 = dt.datetime(2021, 10, 9, 16, 30, 0)
 
     index = 0
-    while index < 100:
+    while index < len(codeList):
         stockCode = codeList[index]
 
         request_mvs_data2mysql(
             stock_code=stockCode,
-            metrics=metrics0,
-            start_date="1970-01-01",
+            # metrics=metrics0,
+            # start_date="2021-06-30",
+            metrics=['mc'],
+            start_date="2017-06-30",
             datetime=datetime0,
         )
 
