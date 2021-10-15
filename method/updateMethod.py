@@ -150,7 +150,7 @@ def buffer2mysql_mvs(datetime):
 
     timestamp = time.localtime(time.time())
 
-    time0_str = time.strftime("%Y%m%d%H%M%S", timestamp)
+    time0_str = time.strftime("%Y%m%d", timestamp)
     new_dir = '..\\bufferData\\marketData_updated\\marketData_update_%s\\' % time0_str
     if not os.path.exists(new_dir):
         os.makedirs(new_dir)
