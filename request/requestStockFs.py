@@ -4,6 +4,7 @@ import datetime as dt
 from method.urlMethod import data_request
 from method.mainMethod import value2pkl
 from method.updateMethod import buffer2mysql
+import json
 
 
 def request_fs_data(stock_code, metrics_list, start_date):
@@ -69,35 +70,36 @@ def request_fs_data2mysql(stock_code, metrics_list, start_date, datetime):
 
 
 def test_request_fs_data():
-    with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
-        code_list = pickle.load(pk_f)
+    with open('../basicData/list_nf_codes.txt', 'r', encoding='utf-8') as f:
+        code_list = json.loads(f.read())
 
-    with open('../basicData/metricsList.pkl', 'rb') as pk_f:
-        metrics_list = pickle.load(pk_f)
+    print(code_list)
 
-    datetime0 = dt.datetime(2021, 10, 11, 8, 30, 0)
-
-    # index = 305
-    # while index < 306:
-    #     stock_code = code_list[index]
+    # with open('../basicData/metrics/metrics_fs.txt', 'r', encoding='utf-8') as f:
+    #     metrics_list = json.loads(f.read())
     #
-    #     request_fs_data2mysql(
-    #         stock_code=stock_code,
-    #         metrics_list=metrics_list,
-    #         start_date="2008-01-01",
-    #         datetime=datetime0,
-    #     )
+    # # index = 305
+    # # while index < 306:
+    # #     stock_code = code_list[index]
+    # #
+    # #     request_fs_data2mysql(
+    # #         stock_code=stock_code,
+    # #         metrics_list=metrics_list,
+    # #         start_date="2008-01-01",
+    # #         datetime=datetime0,
+    # #     )
+    # #
+    # #     index += 1
     #
-    #     index += 1
-
-    stock_code = '000002'
-
-    request_fs_data2mysql(
-        stock_code=stock_code,
-        metrics_list=metrics_list,
-        start_date="2008-01-01",
-        datetime=datetime0,
-    )
+    # stock_code = '000002'
+    # datetime0 = dt.datetime.now()
+    #
+    # request_fs_data2mysql(
+    #     stock_code=stock_code,
+    #     metrics_list=metrics_list,
+    #     start_date="2008-01-01",
+    #     datetime=datetime0,
+    # )
 
 
 if __name__ == '__main__':
