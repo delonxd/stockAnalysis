@@ -32,8 +32,11 @@ class InformationBox:
                 # box_df.loc[index_name, 'value'] = ds.df.loc[date_index1][0]
                 # box_df.loc[index_name, 'real_date'] = date_index1
 
-                box_df.loc[index_name, 'value'] = None
-                box_df.loc[index_name, 'real_date'] = None
+                box_df.loc[index_name, 'value'] = ds.df.iloc[-1, 0]
+                box_df.loc[index_name, 'real_date'] = ds.df.index[-1]
+
+                # box_df.loc[index_name, 'value'] = None
+                # box_df.loc[index_name, 'real_date'] = None
 
             else:
                 if date_index in index_list:
