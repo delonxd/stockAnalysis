@@ -2,6 +2,7 @@ from method.mainMethod import get_header_df, transpose_df, show_df
 from method.mainMethod import get_header_df_mvs
 from method.sqlMethod import get_data_frame, sql_if_table_exists
 from request.requestStockFs import request_fs_data2mysql
+from request.requestStockMvs import request_mvs_data2mysql
 
 import mysql.connector
 import datetime as dt
@@ -427,11 +428,23 @@ def combine_style_df():
 
 def sql2df(code):
     # df1 = sql2df_mvs('code')
-    df1 = sql2df_mvs(code)
+    # df1 = sql2df_mvs(code)
     df2 = sql2df_fs(code)
 
+    with open('../basicData/metricsMvs.pkl', 'rb') as pk_f:
+        metrics0 = pickle.load(pk_f)
+
+    datetime0 = dt.datetime.now()
+    request_mvs_data2mysql(
+        stock_code=code,
+        metrics=metrics0,
+        # metrics=['mc'],
+        start_date="2021-01-01",
+        datetime=datetime0,
+    )
+    df1 = sql2df_mvs(code)
+
     if df2.index.values.shape[0] == 0:
-        print('***')
         with open('../basicData/metricsList.pkl', 'rb') as pk_f:
             metrics_list = pickle.load(pk_f)
 

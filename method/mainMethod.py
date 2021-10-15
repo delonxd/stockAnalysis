@@ -54,6 +54,13 @@ def value2pkl(root, file_name, value):
         pickle.dump(value, pk_f)
 
 
+def res2txt(root, file_name, value):
+    path = '%s/%s.txt' % (root, file_name)
+    res = json.dumps(json.loads(value), indent=4, ensure_ascii=False)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(res)
+
+
 def read_pkl(root, file):
     path = '%s/%s' % (root, file)
     with open(path, 'rb') as pk_f:
