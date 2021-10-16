@@ -1,0 +1,75 @@
+
+一、 人均指标
+员工人数 : m.ep_stn
+人均营业总收入 : m.toi_pc
+人均净利润 : m.np_pc
+人均薪酬 : m.s_pc
+二、 每股指标
+归属于母公司普通股股东的每股收益 : m.npatoshopc_ps
+归属于母公司普通股股东的每股扣非收益 : m.npadnrpatoshaopc_ps
+归属于母公司普通股股东的每股股东权益 : m.tetoshopc_ps
+每股资本公积 : m.cr_ps
+每股未分配利润 : m.rp_ps
+每股经营活动产生的现金流量 : m.stciffoa_ps
+每股经营活动产生的现金流量净额 : m.ncffoa_ps
+三、 盈利能力
+归属于母公司普通股股东的ROE : m.roe_atoshaopc
+归属于母公司普通股股东的扣非ROE : m.roe_adnrpatoshaopc
+归属于母公司普通股股东的加权ROE : m.wroe
+净资产收益率(ROE) : m.roe
+杠杆倍数 : m.l
+总资产收益率(ROA) : m.roa
+资产周转率 : m.ta_to
+净利润率 : m.np_s_r
+毛利率(GM) : m.gp_m
+有形资产回报率(ROTA) : m.rota
+资本回报率(ROIC) : m.roic
+资本收益率(ROC) : m.roc
+四、 营运能力(周转率)
+预付账款周转率 : m.ats_tor
+合同资产周转率 : m.ca_tor
+存货周转率 : m.i_tor
+应收票据和应收账款周转率 : m.nraar_tor
+应收票据周转率 : m.nr_tor
+应收账款周转率 : m.ar_tor
+应收款项融资周转率 : m.rf_tor
+预收账款周转率 : m.afc_tor
+合同负债周转率 : m.cl_tor
+应付票据和应付账款周转率 : m.npaap_tor
+应付票据周转率 : m.np_tor
+应付账款周转率 : m.ap_tor
+固定资产周转率 : m.fa_tor
+五、 营运能力(周转天数)
+预付账款周转天数 : m.ats_ds
+合同资产周转天数 : m.ca_ds
+存货周转天数 : m.i_ds
+应收票据和应收账款周转天数 : m.nraar_ds
+应收票据周转天数 : m.nr_ds
+应收账款周转天数 : m.ar_ds
+应收款项融资周转天数 : m.rf_ds
+预收账款周转天数 : m.afc_ds
+合同负债周转天数 : m.cl_ds
+应付票据和应付账款周转天数 : m.npaap_ds
+应付票据周转天数 : m.np_ds
+应付账款周转天数 : m.ap_ds
+营业周转天数 : m.b_ds
+净现金周转天数(CCC) : m.m_ds
+固定资产周转天数 : m.fa_ds
+流动资产周转天数 : m.tca_ds
+股东权益周转天数 : m.toe_ds
+总资产周转天数 : m.ta_ds
+六、 偿债及资本结构
+资产负债率 : m.tl_ta_r
+有息负债率 : m.lwi_ta_r
+货币资金占流动负债比率 : m.cabb_tcl_r
+流动比率 : m.c_r
+速动比率 : m.q_r
+固定资产占总资产比率 : m.fa_ta_r
+清算价值比率 : m.lv_r
+七、 现金流量
+自由现金流量 : m.fcf
+销售商品提供劳务收到的现金对营业收入的比率 : m.crfscapls_oi_r
+经营活动产生的现金流量净额对营业利润的比率 : m.ncffoa_op_r
+经营活动产生的现金流量净额对净利润的比率 : m.ncffoa_np_r
+销售商品提供劳务收到的现金对总资产的比率 : m.crfscapls_ta_r
+经营活动产生的现金流量净额对固定资产的比率 : m.ncffoa_fa_r

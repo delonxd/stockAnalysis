@@ -1,0 +1,74 @@
+
+一、 营业总收入 : ps.toi
+营业收入 : ps.oi
+利息收入 : ps.ii
+已赚保费 : ps.ep
+手续费及佣金收入 : ps.faci
+其他业务收入 : ps.ooi
+二、 营业总成本 : ps.toc
+营业成本 : ps.oc
+毛利率(GM) : ps.gp_m
+利息支出 : ps.ie
+手续费及佣金支出 : ps.face
+退保金 : ps.s
+保险合同赔付支出 : ps.ce
+提取保险责任准备金净额 : ps.iiicr
+保单红利支出 : ps.phdrfpip
+分保费用 : ps.rie
+税金及附加 : ps.tas
+销售费用 : ps.se
+管理费用 : ps.ae
+研发费用 : ps.rade
+财务费用 : ps.fe
+(其中) 利息费用 : ps.ieife
+(其中) 利息收入 : ps.iiife
+销售费用率 : ps.se_r
+管理费用率 : ps.ae_r
+研发费用率 : ps.rade_r
+财务费用率 : ps.fe_r
+总营业费用率 : ps.oe_r
+三项费用率 : ps.te_r
+加： 其他收益 : ps.oic
+投资收益 : ps.ivi
+(其中) 对联营企业及合营企业的投资收益 : ps.iifaajv
+(其中) 以摊余成本计量的金融资产终止确认产生的投资收益 : ps.iftdofamaac
+汇兑收益 : ps.ei
+净敞口套期收益 : ps.nehb
+公允价值变动收益 : ps.ciofv
+信用减值损失 : ps.cilor
+资产减值损失 : ps.ailor
+其他资产减值损失 : ps.oail
+资产处置收益 : ps.adi
+其他业务成本 : ps.ooe
+核心利润 : ps.cp
+核心利润率 : ps.cp_r
+三、 营业利润 : ps.op
+营业利润率 : ps.op_s_r
+其他营业利润率 : ps.op_op_r
+加： 营业外收入 : ps.noi
+(其中) 非流动资产毁损报废利得 : ps.ncadarg
+减： 营业外支出 : ps.noe
+(其中) 非流动资产毁损报废损失 : ps.ncadarl
+四、 利润总额 : ps.tp
+研发费占利润总额比值 : ps.rade_tp_r
+减： 所得税费用 : ps.ite
+有效税率 : ps.ite_tp_r
+五、 净利润 : ps.np
+净利润率 : ps.np_s_r
+息税前净利润(EBIT) : ps.ebit
+(一) 持续经营净利润 : ps.npfco
+(二) 终止经营净利润 : ps.npfdco
+归属于母公司股东及其他权益持有者的净利润 : ps.npatshaoehopc
+归属于母公司普通股股东的净利润 : ps.npatoshopc
+少数股东损益 : ps.npatmsh
+归属于母公司普通股股东的扣除非经常性损益的净利润 : ps.npadnrpatoshaopc
+扣非净利润占比 : ps.npadnrpatoshaopc_npatoshopc_r
+归属于母公司普通股股东的加权ROE : ps.wroe
+归属于母公司普通股股东的扣非加权ROE : ps.wdroe
+六、 基本每股收益 : ps.beps
+稀释每股收益 : ps.deps
+七、 综合收益总额 : ps.tci
+归属于母公司股东及其他权益持有者的综合收益总额 : ps.tciatshaoehopc
+归属于母公司普通股股东的综合收益总额 : ps.tciatoshopc
+归属于少数股东的综合收益总额 : ps.tciatmsh
+其他综合收益的税后净额 : ps.natooci

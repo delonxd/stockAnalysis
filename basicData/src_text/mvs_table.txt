@@ -1,7 +1,4 @@
-import pickle
 
-
-bsList = r"""
 PE-TTM :pe_ttm
 PE-TTM分位点(3年) :pe_ttm_pos3
 PE-TTM分位点(5年) :pe_ttm_pos5
@@ -48,8 +45,4 @@ EV/EBIT :ev_ebit_r
 人均自由流通市值 :ecmc_psh
 融资余额 :fb
 融券余额 :sb
-陆股通持仓金额 :ha_shm"""
-
-
-with open('../basicData/priceText.pkl', 'wb') as pk_f:
-    pickle.dump(bsList, pk_f)
+陆股通持仓金额 :ha_shm
