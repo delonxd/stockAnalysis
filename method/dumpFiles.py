@@ -1,7 +1,4 @@
-# from method.mainMethod import get_api_names
-# from method.mainMethod import config_api_names
-# from method.mainMethod import split_list
-from method.mainMethod import read_pkl
+# from method.mainMethod import read_pkl
 
 import pickle
 import json

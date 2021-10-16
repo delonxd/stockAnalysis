@@ -1,8 +1,7 @@
-from method.mainMethod import get_header_df, transpose_df, show_df
-from method.mainMethod import get_header_df_mvs
+from method.mainMethod import transpose_df, show_df
 from method.sqlMethod import get_data_frame, sql_if_table_exists
-from request.requestStockFs import request_fs_data2mysql
-from request.requestStockMvs import request_mvs_data2mysql
+from request.requestData import get_cursor
+from request.requestData import get_header_df
 
 import mysql.connector
 import datetime as dt
@@ -11,74 +10,96 @@ import datetime as dt
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from dateutil.rrule import *
 from dateutil.relativedelta import relativedelta
 import pandas as pd
-import numpy as np
-import sys
 import pickle
-import json
 import time
 import timeit
 
 
-def sql2df_fs(code):
-    config = {
-        'user': 'root',
-        'password': 'aQLZciNTq4sx',
-        'host': 'localhost',
-        'port': '3306',
-        'database': 'fsdata',
-        # 'database': 'bsdata',
-    }
-    db = mysql.connector.connect(**config)
+def load_df_from_mysql(stock_code, data_type):
+    db, cursor = get_cursor(data_type)
 
-    table = 'fs_' + code
-
-    cursor = db.cursor()
+    if data_type == 'fs':
+        table = 'fs_%s' % stock_code
+        check_field = 'standardDate'
+    elif data_type == 'mvs':
+        table = 'mvs_%s' % stock_code
+        check_field = 'date'
+    else:
+        return
 
     flag = sql_if_table_exists(cursor=cursor, table=table)
     if flag:
         sql_df = get_data_frame(cursor=cursor, table=table)
-        sql_df = sql_df.set_index('standardDate', drop=False)
+        sql_df = sql_df.set_index(check_field, drop=False)
         # sql_df = sql_df.where(sql_df.notnull(), None)
         sql_df.sort_index(inplace=True)
         sql_df.index = sql_df.index.map(lambda x: x[:10])
 
         return sql_df
     else:
-        header_df = get_header_df()
+        header_df = get_header_df(data_type)
         return pd.DataFrame(columns=header_df.columns)
-        # return pd.DataFrame()
 
 
-def sql2df_mvs(code):
-    config = {
-        'user': 'root',
-        'password': 'aQLZciNTq4sx',
-        'host': 'localhost',
-        'port': '3306',
-        'database': 'marketData',
-        # 'database': 'bsdata',
-    }
-    db = mysql.connector.connect(**config)
-
-    table = 'mvs_' + code
-
-    cursor = db.cursor()
-
-    flag = sql_if_table_exists(cursor=cursor, table=table)
-    if flag:
-        sql_df = get_data_frame(cursor=cursor, table=table)
-        sql_df = sql_df.set_index('date', drop=False)
-        # sql_df = sql_df.where(sql_df.notnull(), None)
-        sql_df.sort_index(inplace=True)
-        sql_df.index = sql_df.index.map(lambda x: x[:10])
-
-        return sql_df
-    else:
-        header_df = get_header_df_mvs()
-        return pd.DataFrame(columns=header_df.columns)
+# def sql2df_fs(code):
+#     config = {
+#         'user': 'root',
+#         'password': 'aQLZciNTq4sx',
+#         'host': 'localhost',
+#         'port': '3306',
+#         'database': 'fsdata',
+#         # 'database': 'bsdata',
+#     }
+#     db = mysql.connector.connect(**config)
+#
+#     table = 'fs_' + code
+#
+#     cursor = db.cursor()
+#
+#     flag = sql_if_table_exists(cursor=cursor, table=table)
+#     if flag:
+#         sql_df = get_data_frame(cursor=cursor, table=table)
+#         sql_df = sql_df.set_index('standardDate', drop=False)
+#         # sql_df = sql_df.where(sql_df.notnull(), None)
+#         sql_df.sort_index(inplace=True)
+#         sql_df.index = sql_df.index.map(lambda x: x[:10])
+#
+#         return sql_df
+#     else:
+#         header_df = get_header_df()
+#         return pd.DataFrame(columns=header_df.columns)
+#         # return pd.DataFrame()
+#
+#
+# def sql2df_mvs(code):
+#     config = {
+#         'user': 'root',
+#         'password': 'aQLZciNTq4sx',
+#         'host': 'localhost',
+#         'port': '3306',
+#         'database': 'marketData',
+#         # 'database': 'bsdata',
+#     }
+#     db = mysql.connector.connect(**config)
+#
+#     table = 'mvs_' + code
+#
+#     cursor = db.cursor()
+#
+#     flag = sql_if_table_exists(cursor=cursor, table=table)
+#     if flag:
+#         sql_df = get_data_frame(cursor=cursor, table=table)
+#         sql_df = sql_df.set_index('date', drop=False)
+#         # sql_df = sql_df.where(sql_df.notnull(), None)
+#         sql_df.sort_index(inplace=True)
+#         sql_df.index = sql_df.index.map(lambda x: x[:10])
+#
+#         return sql_df
+#     else:
+#         header_df = get_header_df_mvs()
+#         return pd.DataFrame(columns=header_df.columns)
 
 
 def data_by_dates(df: pd.DataFrame, dates: list):
@@ -160,13 +181,6 @@ def get_y_from_points(x: int, point1, point2):
 #     # show_df(df)
 #
 #     return df
-
-
-def add_style_row(df: pd.DataFrame, src_name, new_name):
-    series = df.loc[src_name]
-    series.name = new_name
-    df2 = df.append(series)
-    return df2
 
 
 def get_value_from_ratio(date0, value0, date, ratio_year):
@@ -334,25 +348,6 @@ def save_default_style(df):
         pickle.dump(df, pk_f)
 
 
-def dump_code_name():
-    path = '../basicData/BasicData.pkl'
-    with open(path, 'rb') as pk_f:
-        res = pickle.load(pk_f)
-
-    d = json.loads(res)['data']
-
-    res = dict()
-    for v in d:
-        res[v['stockCode']] = v['name']
-    print(res)
-
-    # with open("../comparisonTable/basic_table.txt", "w", encoding="utf-8") as f:
-    #     f.write(str0)
-
-    with open("../basicData/code_name.pkl", 'wb') as pk_f:
-        pickle.dump(res, pk_f)
-
-
 def get_style_df_mvs():
     header_df = get_header_df_mvs()
     df = transpose_df(header_df)
@@ -429,33 +424,34 @@ def combine_style_df():
 def sql2df(code):
     # df1 = sql2df_mvs('code')
     # df1 = sql2df_mvs(code)
-    df2 = sql2df_fs(code)
+    df1 = load_df_from_mysql(code, 'fs')
+    df2 = load_df_from_mysql(code, 'mvs')
 
-    with open('../basicData/metricsMvs.pkl', 'rb') as pk_f:
-        metrics0 = pickle.load(pk_f)
-
-    datetime0 = dt.datetime.now()
-    request_mvs_data2mysql(
-        stock_code=code,
-        metrics=metrics0,
-        # metrics=['mc'],
-        start_date="2021-01-01",
-        datetime=datetime0,
-    )
-    df1 = sql2df_mvs(code)
-
-    if df2.index.values.shape[0] == 0:
-        with open('../basicData/metricsList.pkl', 'rb') as pk_f:
-            metrics_list = pickle.load(pk_f)
-
-        datetime0 = dt.datetime.now()
-        request_fs_data2mysql(
-            stock_code=code,
-            metrics_list=metrics_list,
-            start_date="1970-01-01",
-            datetime=datetime0,
-        )
-        df2 = sql2df_fs(code)
+    # with open('../basicData/metricsMvs.pkl', 'rb') as pk_f:
+    #     metrics0 = pickle.load(pk_f)
+    #
+    # datetime0 = dt.datetime.now()
+    # request_mvs_data2mysql(
+    #     stock_code=code,
+    #     metrics=metrics0,
+    #     # metrics=['mc'],
+    #     start_date="2021-01-01",
+    #     datetime=datetime0,
+    # )
+    # df1 = sql2df_mvs(code)
+    #
+    # if df2.index.values.shape[0] == 0:
+    #     with open('../basicData/metricsList.pkl', 'rb') as pk_f:
+    #         metrics_list = pickle.load(pk_f)
+    #
+    #     datetime0 = dt.datetime.now()
+    #     request_fs_data2mysql(
+    #         stock_code=code,
+    #         metrics_list=metrics_list,
+    #         start_date="1970-01-01",
+    #         datetime=datetime0,
+    #     )
+    #     df2 = sql2df_fs(code)
 
     df = pd.merge(df1, df2, how='outer', left_index=True, right_index=True,
                   sort=True, suffixes=('_mvs', '_fs'), copy=True)
