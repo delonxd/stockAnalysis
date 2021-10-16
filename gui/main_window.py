@@ -1,19 +1,20 @@
 from method.dataMethod import *
-from method.mainMethod import *
+from request.requestData import request_data2mysql
+
 from gui.checkTree import CheckTree
 from gui.dataPix import DataPix
-from request.requestStockFs import request_fs_data2mysql
-from request.requestStockMvs import request_mvs_data2mysql
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-import sys
-import time
-import pickle
 
+import sys
+import json
+import re
 import threading
 import time
+
+import numpy as np
 
 
 class ReadSQLThread(QThread):
@@ -83,15 +84,15 @@ class MainWindow(QWidget):
         # with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
         #     self.code_list = pickle.load(pk_f)
 
-        # with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
             txt = f.read()
             self.code_list = re.findall(r'([0-9]{6})', txt)
 
-        with open('../basicData/code_name.pkl', 'rb') as pk_f:
-            self.code_dict = pickle.load(pk_f)
+        with open('../basicData/code_names_dict.txt', 'r', encoding='utf-8') as f:
+            self.code_dict = json.loads(f.read())
 
-        self.stock_code = '002410'
+        self.stock_code = '002407'
         self.code_index = self.code_list.index(self.stock_code)
 
         # self.code_index = 0
@@ -151,11 +152,13 @@ class MainWindow(QWidget):
 
         offset = int(min(l1, l2))
 
-        for _ in range(offset):
+        for i in range(offset):
             index1 += 1
-            index2 -= 1
             arr = np.append(arr, index1)
-            arr = np.append(arr, index2)
+
+            if i < 2:
+                index2 -= 1
+                arr = np.append(arr, index2)
         arr = arr % l0
 
         tmp = list()
@@ -215,32 +218,19 @@ class MainWindow(QWidget):
         self.editor1.textChanged.connect(self.editor1_changed)
 
     def request_data(self):
-        stock_code = self.stock_code
-        with open('../basicData/metricsList.pkl', 'rb') as pk_f:
-            metrics_list = pickle.load(pk_f)
-
-        with open('../basicData/metricsMvs.pkl', 'rb') as pk_f:
-            metrics0 = pickle.load(pk_f)
-
-        # datetime0 = dt.datetime(2021, 10, 9, 16, 30, 0)
-        datetime0 = dt.datetime.now()
-
-        request_fs_data2mysql(
-            stock_code=stock_code,
-            metrics_list=metrics_list,
-            start_date="1970-01-01",
-            datetime=datetime0,
+        request_data2mysql(
+            stock_code=self.stock_code,
+            data_type='fs',
+            start_date="2021-04-01",
         )
 
-        request_mvs_data2mysql(
-            stock_code=stock_code,
-            metrics=metrics0,
-            start_date="1970-01-01",
-            datetime=datetime0,
+        request_data2mysql(
+            stock_code=self.stock_code,
+            data_type='mvs',
+            start_date="2021-04-01",
         )
 
-        self.df = sql2df(code=self.stock_code)
-
+        self.df_dict[self.stock_code] = sql2df(code=self.stock_code)
         self.change_stock()
         # self.tree.exec_()
 
