@@ -1,0 +1,308 @@
+{
+    "first_update": {
+        "txt_CN": "首次上传日期",
+        "sql_type": "VARCHAR(30)",
+        "sheet_name": null,
+        "api": null
+    },
+    "last_update": {
+        "txt_CN": "最近上传日期",
+        "sql_type": "VARCHAR(30)",
+        "sheet_name": null,
+        "api": null
+    },
+    "stockCode": {
+        "txt_CN": "代码",
+        "sql_type": "VARCHAR(6)",
+        "sheet_name": null,
+        "api": null
+    },
+    "date": {
+        "txt_CN": "日期",
+        "sql_type": "VARCHAR(30)",
+        "sheet_name": null,
+        "api": null
+    },
+    "id_001_mvs_pe_ttm": {
+        "txt_CN": "PE-TTM",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pe_ttm"
+    },
+    "id_002_mvs_pe_ttm_pos3": {
+        "txt_CN": "PE-TTM分位点(3年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pe_ttm_pos3"
+    },
+    "id_003_mvs_pe_ttm_pos5": {
+        "txt_CN": "PE-TTM分位点(5年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pe_ttm_pos5"
+    },
+    "id_004_mvs_pe_ttm_pos10": {
+        "txt_CN": "PE-TTM分位点(10年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pe_ttm_pos10"
+    },
+    "id_005_mvs_pe_ttm_pos20": {
+        "txt_CN": "PE-TTM分位点(20年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pe_ttm_pos20"
+    },
+    "id_006_mvs_pe_ttm_pos_all": {
+        "txt_CN": "PE-TTM分位点(全部)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pe_ttm_pos_all"
+    },
+    "id_007_mvs_d_pe_ttm": {
+        "txt_CN": "PE-TTM(扣非)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "d_pe_ttm"
+    },
+    "id_008_mvs_d_pe_ttm_pos3": {
+        "txt_CN": "PE-TTM(扣非)分位点(3年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "d_pe_ttm_pos3"
+    },
+    "id_009_mvs_d_pe_ttm_pos5": {
+        "txt_CN": "PE-TTM(扣非)分位点(5年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "d_pe_ttm_pos5"
+    },
+    "id_010_mvs_d_pe_ttm_pos10": {
+        "txt_CN": "PE-TTM(扣非)分位点(10年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "d_pe_ttm_pos10"
+    },
+    "id_011_mvs_d_pe_ttm_pos20": {
+        "txt_CN": "PE-TTM(扣非)分位点(20年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "d_pe_ttm_pos20"
+    },
+    "id_012_mvs_d_pe_ttm_pos_all": {
+        "txt_CN": "PE-TTM(扣非)分位点(全部)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "d_pe_ttm_pos_all"
+    },
+    "id_013_mvs_pb": {
+        "txt_CN": "PB",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pb"
+    },
+    "id_014_mvs_pb_pos3": {
+        "txt_CN": "PB分位点(3年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pb_pos3"
+    },
+    "id_015_mvs_pb_pos5": {
+        "txt_CN": "PB分位点(5年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pb_pos5"
+    },
+    "id_016_mvs_pb_pos10": {
+        "txt_CN": "PB分位点(10年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pb_pos10"
+    },
+    "id_017_mvs_pb_pos20": {
+        "txt_CN": "PB分位点(20年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pb_pos20"
+    },
+    "id_018_mvs_pb_pos_all": {
+        "txt_CN": "PB分位点(全部)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pb_pos_all"
+    },
+    "id_019_mvs_pb_wo_gw": {
+        "txt_CN": "PB(不含商誉)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pb_wo_gw"
+    },
+    "id_020_mvs_pb_wo_gw_pos3": {
+        "txt_CN": "PB(不含商誉)分位点(3年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pb_wo_gw_pos3"
+    },
+    "id_021_mvs_pb_wo_gw_pos5": {
+        "txt_CN": "PB(不含商誉)分位点(5年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pb_wo_gw_pos5"
+    },
+    "id_022_mvs_pb_wo_gw_pos10": {
+        "txt_CN": "PB(不含商誉)分位点(10年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pb_wo_gw_pos10"
+    },
+    "id_023_mvs_pb_wo_gw_pos20": {
+        "txt_CN": "PB(不含商誉)分位点(20年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pb_wo_gw_pos20"
+    },
+    "id_024_mvs_pb_wo_gw_pos_all": {
+        "txt_CN": "PB(不含商誉)分位点(全部)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pb_wo_gw_pos_all"
+    },
+    "id_025_mvs_ps_ttm": {
+        "txt_CN": "PS-TTM",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "ps_ttm"
+    },
+    "id_026_mvs_ps_ttm_pos3": {
+        "txt_CN": "PS-TTM分位点(3年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "ps_ttm_pos3"
+    },
+    "id_027_mvs_ps_ttm_pos5": {
+        "txt_CN": "PS-TTM分位点(5年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "ps_ttm_pos5"
+    },
+    "id_028_mvs_ps_ttm_pos10": {
+        "txt_CN": "PS-TTM分位点(10年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "ps_ttm_pos10"
+    },
+    "id_029_mvs_ps_ttm_pos20": {
+        "txt_CN": "PS-TTM分位点(20年)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "ps_ttm_pos20"
+    },
+    "id_030_mvs_ps_ttm_pos_all": {
+        "txt_CN": "PS-TTM分位点(全部)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "ps_ttm_pos_all"
+    },
+    "id_031_mvs_pcf_ttm": {
+        "txt_CN": "PCF-TTM",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "pcf_ttm"
+    },
+    "id_032_mvs_ev_ebit_r": {
+        "txt_CN": "EV/EBIT",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "ev_ebit_r"
+    },
+    "id_033_mvs_ey": {
+        "txt_CN": "股票收益率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "ey"
+    },
+    "id_034_mvs_dyr": {
+        "txt_CN": "股息率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "dyr"
+    },
+    "id_035_mvs_sp": {
+        "txt_CN": "股价",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "sp"
+    },
+    "id_036_mvs_tv": {
+        "txt_CN": "成交量",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "tv"
+    },
+    "id_037_mvs_fc_rights": {
+        "txt_CN": "前复权",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "fc_rights"
+    },
+    "id_038_mvs_bc_rights": {
+        "txt_CN": "后复权",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "bc_rights"
+    },
+    "id_039_mvs_lxr_fc_rights": {
+        "txt_CN": "理杏仁前复权",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "lxr_fc_rights"
+    },
+    "id_040_mvs_shn": {
+        "txt_CN": "股东人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "shn"
+    },
+    "id_041_mvs_mc": {
+        "txt_CN": "市值",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "mc"
+    },
+    "id_042_mvs_cmc": {
+        "txt_CN": "流通市值",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "cmc"
+    },
+    "id_043_mvs_ecmc": {
+        "txt_CN": "自由流通市值",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "ecmc"
+    },
+    "id_044_mvs_ecmc_psh": {
+        "txt_CN": "人均自由流通市值",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "ecmc_psh"
+    },
+    "id_045_mvs_fb": {
+        "txt_CN": "融资余额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "fb"
+    },
+    "id_046_mvs_sb": {
+        "txt_CN": "融券余额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "sb"
+    },
+    "id_047_mvs_ha_shm": {
+        "txt_CN": "陆股通持仓金额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "ha_shm"
+    }
+}

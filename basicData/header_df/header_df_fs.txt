@@ -1,0 +1,2402 @@
+{
+    "first_update": {
+        "txt_CN": "首次上传日期",
+        "sql_type": "VARCHAR(30)",
+        "sheet_name": null,
+        "api": null
+    },
+    "last_update": {
+        "txt_CN": "最近上传日期",
+        "sql_type": "VARCHAR(30)",
+        "sheet_name": null,
+        "api": null
+    },
+    "stockCode": {
+        "txt_CN": "代码",
+        "sql_type": "VARCHAR(6)",
+        "sheet_name": null,
+        "api": null
+    },
+    "currency": {
+        "txt_CN": "货币",
+        "sql_type": "VARCHAR(10)",
+        "sheet_name": null,
+        "api": null
+    },
+    "standardDate": {
+        "txt_CN": "标准日期",
+        "sql_type": "VARCHAR(30) PRIMARY KEY",
+        "sheet_name": null,
+        "api": null
+    },
+    "reportDate": {
+        "txt_CN": "报告日期",
+        "sql_type": "VARCHAR(30)",
+        "sheet_name": null,
+        "api": null
+    },
+    "reportType": {
+        "txt_CN": "报告类型",
+        "sql_type": "VARCHAR(30)",
+        "sheet_name": null,
+        "api": null
+    },
+    "date": {
+        "txt_CN": "日期",
+        "sql_type": "VARCHAR(30)",
+        "sheet_name": null,
+        "api": null
+    },
+    "id_001_bs_ta": {
+        "txt_CN": "一、 资产合计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ta"
+    },
+    "id_002_bs_nwc": {
+        "txt_CN": "净营运资本",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "nwc"
+    },
+    "id_003_bs_tca": {
+        "txt_CN": "流动资产合计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tca"
+    },
+    "id_004_bs_tca_ta_r": {
+        "txt_CN": "流动资产占比",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tca_ta_r"
+    },
+    "id_005_bs_cabb": {
+        "txt_CN": "货币资金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "cabb"
+    },
+    "id_006_bs_cabb_ta_r": {
+        "txt_CN": "货币资金占比",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "cabb_ta_r"
+    },
+    "id_007_bs_sr": {
+        "txt_CN": "结算备付金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "sr"
+    },
+    "id_008_bs_pwbaofi": {
+        "txt_CN": "拆出资金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "pwbaofi"
+    },
+    "id_009_bs_tfa": {
+        "txt_CN": "交易性金融资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tfa"
+    },
+    "id_010_bs_cdfa": {
+        "txt_CN": "衍生金融资产(流动)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "cdfa"
+    },
+    "id_011_bs_nraar": {
+        "txt_CN": "应收票据及应收账款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "nraar"
+    },
+    "id_012_bs_nr": {
+        "txt_CN": "(其中) 应收票据",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "nr"
+    },
+    "id_013_bs_ar": {
+        "txt_CN": "(其中) 应收账款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ar"
+    },
+    "id_014_bs_rf": {
+        "txt_CN": "应收款项融资",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "rf"
+    },
+    "id_015_bs_ats": {
+        "txt_CN": "预付款项",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ats"
+    },
+    "id_016_bs_pr": {
+        "txt_CN": "应收保费",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "pr"
+    },
+    "id_017_bs_rir": {
+        "txt_CN": "应收分保账款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "rir"
+    },
+    "id_018_bs_crorir": {
+        "txt_CN": "应收分保合同准备金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "crorir"
+    },
+    "id_019_bs_or": {
+        "txt_CN": "其他应收款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "or"
+    },
+    "id_020_bs_ir": {
+        "txt_CN": "(其中) 应收利息",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ir"
+    },
+    "id_021_bs_dr": {
+        "txt_CN": "(其中) 应收股利",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "dr"
+    },
+    "id_022_bs_fahursa": {
+        "txt_CN": "买入返售金融资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "fahursa"
+    },
+    "id_023_bs_i": {
+        "txt_CN": "存货",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "i"
+    },
+    "id_024_bs_ca": {
+        "txt_CN": "合同资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ca"
+    },
+    "id_025_bs_ahfs": {
+        "txt_CN": "持有待售资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ahfs"
+    },
+    "id_026_bs_claatc": {
+        "txt_CN": "发放贷款及垫款(流动)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "claatc"
+    },
+    "id_027_bs_pe": {
+        "txt_CN": "待摊费用",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "pe"
+    },
+    "id_028_bs_ncadwioy": {
+        "txt_CN": "一年内到期的非流动资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ncadwioy"
+    },
+    "id_029_bs_oca": {
+        "txt_CN": "其他流动资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "oca"
+    },
+    "id_030_bs_tca_tcl_r": {
+        "txt_CN": "流动比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tca_tcl_r"
+    },
+    "id_031_bs_q_r": {
+        "txt_CN": "速动比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "q_r"
+    },
+    "id_032_bs_tnca": {
+        "txt_CN": "非流动资产合计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tnca"
+    },
+    "id_033_bs_tnca_ta_r": {
+        "txt_CN": "非流动资产占比",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tnca_ta_r"
+    },
+    "id_034_bs_ah_ta_r": {
+        "txt_CN": "重资产占比",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ah_ta_r"
+    },
+    "id_035_bs_nclaatc": {
+        "txt_CN": "发放贷款及垫款(非流动)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "nclaatc"
+    },
+    "id_036_bs_cri": {
+        "txt_CN": "债权投资",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "cri"
+    },
+    "id_037_bs_ocri": {
+        "txt_CN": "其他债权投资",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ocri"
+    },
+    "id_038_bs_ncafsfa": {
+        "txt_CN": "可供出售金融资产(非流动)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ncafsfa"
+    },
+    "id_039_bs_htmi": {
+        "txt_CN": "持有至到期投资",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "htmi"
+    },
+    "id_040_bs_ltar": {
+        "txt_CN": "长期应收款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ltar"
+    },
+    "id_041_bs_ltei": {
+        "txt_CN": "长期股权投资",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ltei"
+    },
+    "id_042_bs_oeii": {
+        "txt_CN": "其他权益工具投资",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "oeii"
+    },
+    "id_043_bs_oncfa": {
+        "txt_CN": "其他非流动金融资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "oncfa"
+    },
+    "id_044_bs_rei": {
+        "txt_CN": "投资性房地产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "rei"
+    },
+    "id_045_bs_fa": {
+        "txt_CN": "固定资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "fa"
+    },
+    "id_046_bs_dofa": {
+        "txt_CN": "(其中) 固定资产清理",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "dofa"
+    },
+    "id_047_bs_fa_ta_r": {
+        "txt_CN": "固定资产占总资产比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "fa_ta_r"
+    },
+    "id_048_bs_cip": {
+        "txt_CN": "在建工程",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "cip"
+    },
+    "id_049_bs_es": {
+        "txt_CN": "(其中) 工程物资",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "es"
+    },
+    "id_050_bs_cip_fa_r": {
+        "txt_CN": "在建工程占固定资产比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "cip_fa_r"
+    },
+    "id_051_bs_pba": {
+        "txt_CN": "生产性生物资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "pba"
+    },
+    "id_052_bs_oaga": {
+        "txt_CN": "油气资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "oaga"
+    },
+    "id_053_bs_pwba": {
+        "txt_CN": "公益性生物资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "pwba"
+    },
+    "id_054_bs_roua": {
+        "txt_CN": "使用权资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "roua"
+    },
+    "id_055_bs_ia": {
+        "txt_CN": "无形资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ia"
+    },
+    "id_056_bs_rade": {
+        "txt_CN": "开发支出",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "rade"
+    },
+    "id_057_bs_gw": {
+        "txt_CN": "商誉",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "gw"
+    },
+    "id_058_bs_gw_toe_r": {
+        "txt_CN": "商誉占净资产比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "gw_toe_r"
+    },
+    "id_059_bs_ltpe": {
+        "txt_CN": "长期待摊费用",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ltpe"
+    },
+    "id_060_bs_dita": {
+        "txt_CN": "递延所得税资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "dita"
+    },
+    "id_061_bs_onca": {
+        "txt_CN": "其他非流动资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "onca"
+    },
+    "id_062_bs_tl": {
+        "txt_CN": "二、 负债合计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tl"
+    },
+    "id_063_bs_lwi": {
+        "txt_CN": "有息负债",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "lwi"
+    },
+    "id_064_bs_lwi_ta_r": {
+        "txt_CN": "有息负债率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "lwi_ta_r"
+    },
+    "id_065_bs_tl_ta_r": {
+        "txt_CN": "资产负债率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tl_ta_r"
+    },
+    "id_066_bs_tcl": {
+        "txt_CN": "流动负债合计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tcl"
+    },
+    "id_067_bs_tcl_tl_r": {
+        "txt_CN": "流动负债占比",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tcl_tl_r"
+    },
+    "id_068_bs_stl": {
+        "txt_CN": "短期借款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "stl"
+    },
+    "id_069_bs_bfcb": {
+        "txt_CN": "向中央银行借款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "bfcb"
+    },
+    "id_070_bs_pfbaofi": {
+        "txt_CN": "拆入资金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "pfbaofi"
+    },
+    "id_071_bs_dfl": {
+        "txt_CN": "衍生金融负债",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "dfl"
+    },
+    "id_072_bs_tfl": {
+        "txt_CN": "交易性金融负债",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tfl"
+    },
+    "id_073_bs_npaap": {
+        "txt_CN": "应付票据及应付账款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "npaap"
+    },
+    "id_074_bs_np": {
+        "txt_CN": "(其中) 应付票据",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "np"
+    },
+    "id_075_bs_ap": {
+        "txt_CN": "(其中) 应付账款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ap"
+    },
+    "id_076_bs_afc": {
+        "txt_CN": "预收账款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "afc"
+    },
+    "id_077_bs_cl": {
+        "txt_CN": "合同负债",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "cl"
+    },
+    "id_078_bs_fasurpa": {
+        "txt_CN": "卖出回购金融资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "fasurpa"
+    },
+    "id_079_bs_dfcab": {
+        "txt_CN": "吸收存款及同业存放",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "dfcab"
+    },
+    "id_080_bs_stoa": {
+        "txt_CN": "代理买卖证券款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "stoa"
+    },
+    "id_081_bs_ssoa": {
+        "txt_CN": "代理承销证券款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ssoa"
+    },
+    "id_082_bs_sawp": {
+        "txt_CN": "应付职工薪酬",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "sawp"
+    },
+    "id_083_bs_tp": {
+        "txt_CN": "应交税费",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tp"
+    },
+    "id_084_bs_oap": {
+        "txt_CN": "其他应付款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "oap"
+    },
+    "id_085_bs_intp": {
+        "txt_CN": "(其中) 应付利息",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "intp"
+    },
+    "id_086_bs_dp": {
+        "txt_CN": "(其中) 应付股利",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "dp"
+    },
+    "id_087_bs_facp": {
+        "txt_CN": "应付手续费及佣金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "facp"
+    },
+    "id_088_bs_rip": {
+        "txt_CN": "应付分保账款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "rip"
+    },
+    "id_089_bs_lhfs": {
+        "txt_CN": "持有待售负债",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "lhfs"
+    },
+    "id_090_bs_ncldwioy": {
+        "txt_CN": "一年内到期的非流动负债",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ncldwioy"
+    },
+    "id_091_bs_didwioy": {
+        "txt_CN": "一年内到期的递延收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "didwioy"
+    },
+    "id_092_bs_cal": {
+        "txt_CN": "预计负债(流动)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "cal"
+    },
+    "id_093_bs_stbp": {
+        "txt_CN": "短期应付债券",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "stbp"
+    },
+    "id_094_bs_ocl": {
+        "txt_CN": "其他流动负债",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ocl"
+    },
+    "id_095_bs_tncl": {
+        "txt_CN": "非流动负债合计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tncl"
+    },
+    "id_096_bs_tncl_tl_r": {
+        "txt_CN": "非流动负债占比",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tncl_tl_r"
+    },
+    "id_097_bs_icr": {
+        "txt_CN": "保险合同准备金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "icr"
+    },
+    "id_098_bs_ltl": {
+        "txt_CN": "长期借款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ltl"
+    },
+    "id_099_bs_bp": {
+        "txt_CN": "应付债券",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "bp"
+    },
+    "id_100_bs_psibp": {
+        "txt_CN": "(其中) 优先股",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "psibp"
+    },
+    "id_101_bs_pcsibp": {
+        "txt_CN": "(其中) 永续债",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "pcsibp"
+    },
+    "id_102_bs_ll": {
+        "txt_CN": "租赁负债",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ll"
+    },
+    "id_103_bs_ltap": {
+        "txt_CN": "长期应付款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ltap"
+    },
+    "id_104_bs_sap": {
+        "txt_CN": "(其中) 专项应付款",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "sap"
+    },
+    "id_105_bs_ltpoe": {
+        "txt_CN": "长期应付职工薪酬",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ltpoe"
+    },
+    "id_106_bs_ncal": {
+        "txt_CN": "预计负债(非流动)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ncal"
+    },
+    "id_107_bs_ltdi": {
+        "txt_CN": "长期递延收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ltdi"
+    },
+    "id_108_bs_ditl": {
+        "txt_CN": "递延所得税负债",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ditl"
+    },
+    "id_109_bs_oncl": {
+        "txt_CN": "其他非流动负债",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "oncl"
+    },
+    "id_110_bs_toe": {
+        "txt_CN": "三、 所有者权益合计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "toe"
+    },
+    "id_111_bs_toe_ta_r": {
+        "txt_CN": "股东权益占比",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "toe_ta_r"
+    },
+    "id_112_bs_sc": {
+        "txt_CN": "股本",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "sc"
+    },
+    "id_113_bs_oei": {
+        "txt_CN": "其他权益工具",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "oei"
+    },
+    "id_114_bs_psioei": {
+        "txt_CN": "(其中) 优先股",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "psioei"
+    },
+    "id_115_bs_pcsioei": {
+        "txt_CN": "(其中) 永续债",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "pcsioei"
+    },
+    "id_116_bs_capr": {
+        "txt_CN": "资本公积",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "capr"
+    },
+    "id_117_bs_is": {
+        "txt_CN": "减： 库存股",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "is"
+    },
+    "id_118_bs_oci": {
+        "txt_CN": "其他综合收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "oci"
+    },
+    "id_119_bs_rr": {
+        "txt_CN": "专项储备",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "rr"
+    },
+    "id_120_bs_surr": {
+        "txt_CN": "盈余公积",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "surr"
+    },
+    "id_121_bs_pogr": {
+        "txt_CN": "一般风险准备金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "pogr"
+    },
+    "id_122_bs_rtp": {
+        "txt_CN": "未分配利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "rtp"
+    },
+    "id_123_bs_tetshaoehopc": {
+        "txt_CN": "归属于母公司股东及其他权益持有者的权益合计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tetshaoehopc"
+    },
+    "id_124_bs_tetoshopc": {
+        "txt_CN": "归属于母公司普通股股东权益合计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tetoshopc"
+    },
+    "id_125_bs_tetoshopc_ps": {
+        "txt_CN": "归属于母公司普通股股东的每股股东权益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tetoshopc_ps"
+    },
+    "id_126_bs_etmsh": {
+        "txt_CN": "少数股东权益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "etmsh"
+    },
+    "id_127": {
+        "txt_CN": "四、 员工情况",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "bs",
+        "api": null
+    },
+    "id_128_bs_ep_stn": {
+        "txt_CN": "员工人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ep_stn"
+    },
+    "id_129_bs_ep_pn": {
+        "txt_CN": "博士人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ep_pn"
+    },
+    "id_130_bs_ep_mn": {
+        "txt_CN": "硕士人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ep_mn"
+    },
+    "id_131_bs_ep_bn": {
+        "txt_CN": "学士人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ep_bn"
+    },
+    "id_132_bs_ep_jcn": {
+        "txt_CN": "大专人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ep_jcn"
+    },
+    "id_133_bs_ep_hsabn": {
+        "txt_CN": "高中及以下人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ep_hsabn"
+    },
+    "id_134_bs_ep_psn": {
+        "txt_CN": "生产人员人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ep_psn"
+    },
+    "id_135_bs_ep_spn": {
+        "txt_CN": "销售人员人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ep_spn"
+    },
+    "id_136_bs_ep_tsn": {
+        "txt_CN": "技术人员人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ep_tsn"
+    },
+    "id_137_bs_ep_fon": {
+        "txt_CN": "财务人员人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ep_fon"
+    },
+    "id_138_bs_ep_asn": {
+        "txt_CN": "行政人员人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ep_asn"
+    },
+    "id_139_bs_ep_osn": {
+        "txt_CN": "其他人员人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ep_osn"
+    },
+    "id_140": {
+        "txt_CN": "五、 股本、股东和估值",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "bs",
+        "api": null
+    },
+    "id_141_bs_mc": {
+        "txt_CN": "市值",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "mc"
+    },
+    "id_142_bs_tsc": {
+        "txt_CN": "总股本",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "tsc"
+    },
+    "id_143_bs_csc": {
+        "txt_CN": "流通股本",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "csc"
+    },
+    "id_144_bs_shn": {
+        "txt_CN": "股东人数(季度)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "shn"
+    },
+    "id_145_bs_shbt1sh_tsc_r": {
+        "txt_CN": "第一大股东持仓占总股本比例",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "shbt1sh_tsc_r"
+    },
+    "id_146_bs_shbt10sh_tsc_r": {
+        "txt_CN": "前十大股东持仓占总股本比例",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "shbt10sh_tsc_r"
+    },
+    "id_147_bs_shbt10sh_csc_r": {
+        "txt_CN": "前十大流通股东持仓占流通股本比例",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "shbt10sh_csc_r"
+    },
+    "id_148_bs_shbpoof_csc_r": {
+        "txt_CN": "公募基金持仓占流通股本比例",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "shbpoof_csc_r"
+    },
+    "id_149_bs_shbeosh_poof_ecsc_r": {
+        "txt_CN": "公募基金+自由流通股东持仓占自由流通股本比例",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "shbeosh_poof_ecsc_r"
+    },
+    "id_150_bs_pe_ttm": {
+        "txt_CN": "PE-TTM",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "pe_ttm"
+    },
+    "id_151_bs_d_pe_ttm": {
+        "txt_CN": "PE-TTM(扣非)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "d_pe_ttm"
+    },
+    "id_152_bs_pb": {
+        "txt_CN": "PB",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "pb"
+    },
+    "id_153_bs_pb_wo_gw": {
+        "txt_CN": "PB(不含商誉)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "pb_wo_gw"
+    },
+    "id_154_bs_ps_ttm": {
+        "txt_CN": "PS-TTM",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "ps_ttm"
+    },
+    "id_155_bs_dyr": {
+        "txt_CN": "股息率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "dyr"
+    },
+    "id_156_bs_d_np_r": {
+        "txt_CN": "分红率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "bs",
+        "api": "d_np_r"
+    },
+    "id_157_ps_toi": {
+        "txt_CN": "一、 营业总收入",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "toi"
+    },
+    "id_158_ps_oi": {
+        "txt_CN": "营业收入",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "oi"
+    },
+    "id_159_ps_ii": {
+        "txt_CN": "利息收入",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ii"
+    },
+    "id_160_ps_ep": {
+        "txt_CN": "已赚保费",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ep"
+    },
+    "id_161_ps_faci": {
+        "txt_CN": "手续费及佣金收入",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "faci"
+    },
+    "id_162_ps_ooi": {
+        "txt_CN": "其他业务收入",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ooi"
+    },
+    "id_163_ps_toc": {
+        "txt_CN": "二、 营业总成本",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "toc"
+    },
+    "id_164_ps_oc": {
+        "txt_CN": "营业成本",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "oc"
+    },
+    "id_165_ps_gp_m": {
+        "txt_CN": "毛利率(GM)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "gp_m"
+    },
+    "id_166_ps_ie": {
+        "txt_CN": "利息支出",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ie"
+    },
+    "id_167_ps_face": {
+        "txt_CN": "手续费及佣金支出",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "face"
+    },
+    "id_168_ps_s": {
+        "txt_CN": "退保金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "s"
+    },
+    "id_169_ps_ce": {
+        "txt_CN": "保险合同赔付支出",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ce"
+    },
+    "id_170_ps_iiicr": {
+        "txt_CN": "提取保险责任准备金净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "iiicr"
+    },
+    "id_171_ps_phdrfpip": {
+        "txt_CN": "保单红利支出",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "phdrfpip"
+    },
+    "id_172_ps_rie": {
+        "txt_CN": "分保费用",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "rie"
+    },
+    "id_173_ps_tas": {
+        "txt_CN": "税金及附加",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "tas"
+    },
+    "id_174_ps_se": {
+        "txt_CN": "销售费用",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "se"
+    },
+    "id_175_ps_ae": {
+        "txt_CN": "管理费用",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ae"
+    },
+    "id_176_ps_rade": {
+        "txt_CN": "研发费用",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "rade"
+    },
+    "id_177_ps_fe": {
+        "txt_CN": "财务费用",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "fe"
+    },
+    "id_178_ps_ieife": {
+        "txt_CN": "(其中) 利息费用",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ieife"
+    },
+    "id_179_ps_iiife": {
+        "txt_CN": "(其中) 利息收入",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "iiife"
+    },
+    "id_180_ps_se_r": {
+        "txt_CN": "销售费用率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "se_r"
+    },
+    "id_181_ps_ae_r": {
+        "txt_CN": "管理费用率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ae_r"
+    },
+    "id_182_ps_rade_r": {
+        "txt_CN": "研发费用率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "rade_r"
+    },
+    "id_183_ps_fe_r": {
+        "txt_CN": "财务费用率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "fe_r"
+    },
+    "id_184_ps_oe_r": {
+        "txt_CN": "总营业费用率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "oe_r"
+    },
+    "id_185_ps_te_r": {
+        "txt_CN": "三项费用率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "te_r"
+    },
+    "id_186_ps_oic": {
+        "txt_CN": "加： 其他收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "oic"
+    },
+    "id_187_ps_ivi": {
+        "txt_CN": "投资收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ivi"
+    },
+    "id_188_ps_iifaajv": {
+        "txt_CN": "(其中) 对联营企业及合营企业的投资收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "iifaajv"
+    },
+    "id_189_ps_iftdofamaac": {
+        "txt_CN": "(其中) 以摊余成本计量的金融资产终止确认产生的投资收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "iftdofamaac"
+    },
+    "id_190_ps_ei": {
+        "txt_CN": "汇兑收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ei"
+    },
+    "id_191_ps_nehb": {
+        "txt_CN": "净敞口套期收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "nehb"
+    },
+    "id_192_ps_ciofv": {
+        "txt_CN": "公允价值变动收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ciofv"
+    },
+    "id_193_ps_cilor": {
+        "txt_CN": "信用减值损失",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "cilor"
+    },
+    "id_194_ps_ailor": {
+        "txt_CN": "资产减值损失",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ailor"
+    },
+    "id_195_ps_oail": {
+        "txt_CN": "其他资产减值损失",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "oail"
+    },
+    "id_196_ps_adi": {
+        "txt_CN": "资产处置收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "adi"
+    },
+    "id_197_ps_ooe": {
+        "txt_CN": "其他业务成本",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ooe"
+    },
+    "id_198_ps_cp": {
+        "txt_CN": "核心利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "cp"
+    },
+    "id_199_ps_cp_r": {
+        "txt_CN": "核心利润率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "cp_r"
+    },
+    "id_200_ps_op": {
+        "txt_CN": "三、 营业利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "op"
+    },
+    "id_201_ps_op_s_r": {
+        "txt_CN": "营业利润率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "op_s_r"
+    },
+    "id_202_ps_op_op_r": {
+        "txt_CN": "其他营业利润率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "op_op_r"
+    },
+    "id_203_ps_noi": {
+        "txt_CN": "加： 营业外收入",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "noi"
+    },
+    "id_204_ps_ncadarg": {
+        "txt_CN": "(其中) 非流动资产毁损报废利得",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ncadarg"
+    },
+    "id_205_ps_noe": {
+        "txt_CN": "减： 营业外支出",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "noe"
+    },
+    "id_206_ps_ncadarl": {
+        "txt_CN": "(其中) 非流动资产毁损报废损失",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ncadarl"
+    },
+    "id_207_ps_tp": {
+        "txt_CN": "四、 利润总额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "tp"
+    },
+    "id_208_ps_rade_tp_r": {
+        "txt_CN": "研发费占利润总额比值",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "rade_tp_r"
+    },
+    "id_209_ps_ite": {
+        "txt_CN": "减： 所得税费用",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ite"
+    },
+    "id_210_ps_ite_tp_r": {
+        "txt_CN": "有效税率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ite_tp_r"
+    },
+    "id_211_ps_np": {
+        "txt_CN": "五、 净利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "np"
+    },
+    "id_212_ps_np_s_r": {
+        "txt_CN": "净利润率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "np_s_r"
+    },
+    "id_213_ps_ebit": {
+        "txt_CN": "息税前净利润(EBIT)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "ebit"
+    },
+    "id_214_ps_npfco": {
+        "txt_CN": "(一) 持续经营净利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "npfco"
+    },
+    "id_215_ps_npfdco": {
+        "txt_CN": "(二) 终止经营净利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "npfdco"
+    },
+    "id_216_ps_npatshaoehopc": {
+        "txt_CN": "归属于母公司股东及其他权益持有者的净利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "npatshaoehopc"
+    },
+    "id_217_ps_npatoshopc": {
+        "txt_CN": "归属于母公司普通股股东的净利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "npatoshopc"
+    },
+    "id_218_ps_npatmsh": {
+        "txt_CN": "少数股东损益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "npatmsh"
+    },
+    "id_219_ps_npadnrpatoshaopc": {
+        "txt_CN": "归属于母公司普通股股东的扣除非经常性损益的净利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "npadnrpatoshaopc"
+    },
+    "id_220_ps_npadnrpatoshaopc_npatoshopc_r": {
+        "txt_CN": "扣非净利润占比",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "npadnrpatoshaopc_npatoshopc_r"
+    },
+    "id_221_ps_wroe": {
+        "txt_CN": "归属于母公司普通股股东的加权ROE",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "wroe"
+    },
+    "id_222_ps_wdroe": {
+        "txt_CN": "归属于母公司普通股股东的扣非加权ROE",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "wdroe"
+    },
+    "id_223_ps_beps": {
+        "txt_CN": "六、 基本每股收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "beps"
+    },
+    "id_224_ps_deps": {
+        "txt_CN": "稀释每股收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "deps"
+    },
+    "id_225_ps_tci": {
+        "txt_CN": "七、 综合收益总额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "tci"
+    },
+    "id_226_ps_tciatshaoehopc": {
+        "txt_CN": "归属于母公司股东及其他权益持有者的综合收益总额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "tciatshaoehopc"
+    },
+    "id_227_ps_tciatoshopc": {
+        "txt_CN": "归属于母公司普通股股东的综合收益总额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "tciatoshopc"
+    },
+    "id_228_ps_tciatmsh": {
+        "txt_CN": "归属于少数股东的综合收益总额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "tciatmsh"
+    },
+    "id_229_ps_natooci": {
+        "txt_CN": "其他综合收益的税后净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "ps",
+        "api": "natooci"
+    },
+    "id_230": {
+        "txt_CN": "一、 经营活动产生的现金流量",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "cfs",
+        "api": null
+    },
+    "id_231_cfs_crfscapls": {
+        "txt_CN": "销售商品、提供劳务收到的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crfscapls"
+    },
+    "id_232_cfs_ndilaatc": {
+        "txt_CN": "发放贷款及垫款的净减少额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ndilaatc"
+    },
+    "id_233_cfs_niicdadfbaofi": {
+        "txt_CN": "客户存款和同业及其他金融机构存放款项净增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niicdadfbaofi"
+    },
+    "id_234_cfs_niibfcb": {
+        "txt_CN": "向中央银行借款净增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niibfcb"
+    },
+    "id_235_cfs_niipfofi": {
+        "txt_CN": "向其他金融机构拆入资金净增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niipfofi"
+    },
+    "id_236_cfs_crfp": {
+        "txt_CN": "收到原保险合同保费取得的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crfp"
+    },
+    "id_237_cfs_ncrfrib": {
+        "txt_CN": "收到再保险业务现金净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ncrfrib"
+    },
+    "id_238_cfs_niiphd": {
+        "txt_CN": "保户储金及投资款净增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niiphd"
+    },
+    "id_239_cfs_ndifahftp": {
+        "txt_CN": "为交易目的而持有的金融资产净减少额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ndifahftp"
+    },
+    "id_240_cfs_niipfbaofi": {
+        "txt_CN": "拆入资金净增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niipfbaofi"
+    },
+    "id_241_cfs_niifasurpaioa": {
+        "txt_CN": "卖出回购业务资金净增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niifasurpaioa"
+    },
+    "id_242_cfs_crfifac": {
+        "txt_CN": "收取利息、手续费及佣金的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crfifac"
+    },
+    "id_243_cfs_ncrfstoa": {
+        "txt_CN": "代理买卖证券收到的现金净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ncrfstoa"
+    },
+    "id_244_cfs_crfwbot": {
+        "txt_CN": "收到的税费返还",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crfwbot"
+    },
+    "id_245_cfs_crrtooa": {
+        "txt_CN": "收到的其他与经营活动有关现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crrtooa"
+    },
+    "id_246_cfs_stciffoa": {
+        "txt_CN": "经营活动现金流入小计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "stciffoa"
+    },
+    "id_247_cfs_cpfpcarls": {
+        "txt_CN": "购买商品、接收劳务支付的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cpfpcarls"
+    },
+    "id_248_cfs_niilaatc": {
+        "txt_CN": "发放贷款及垫款的净增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niilaatc"
+    },
+    "id_249_cfs_niibwcbbaofi": {
+        "txt_CN": "存放中央银行和同业及其他金融机构款项净增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niibwcbbaofi"
+    },
+    "id_250_cfs_ndipfofi": {
+        "txt_CN": "向其他金融机构拆入资金净减少额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ndipfofi"
+    },
+    "id_251_cfs_cpfc": {
+        "txt_CN": "支付原保险合同赔付等款项的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cpfc"
+    },
+    "id_252_cfs_niipwbaofi": {
+        "txt_CN": "拆出资金增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niipwbaofi"
+    },
+    "id_253_cfs_niifahursaioa": {
+        "txt_CN": "买入返售金融资产净增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niifahursaioa"
+    },
+    "id_254_cfs_cpfphd": {
+        "txt_CN": "支付保单红利的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cpfphd"
+    },
+    "id_255_cfs_niifahftp": {
+        "txt_CN": "为交易目的而持有的金融资产净增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niifahftp"
+    },
+    "id_256_cfs_cpfifac": {
+        "txt_CN": "支付利息、手续费及佣金的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cpfifac"
+    },
+    "id_257_cfs_cptofe": {
+        "txt_CN": "支付给职工及为职工支付的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cptofe"
+    },
+    "id_258_cfs_cpft": {
+        "txt_CN": "支付的各种税费",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cpft"
+    },
+    "id_259_cfs_cprtooa": {
+        "txt_CN": "支付的其他与经营活动有关现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cprtooa"
+    },
+    "id_260_cfs_stcoffoa": {
+        "txt_CN": "经营活动现金流出小计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "stcoffoa"
+    },
+    "id_261_cfs_ncffoa": {
+        "txt_CN": "经营活动产生的现金流量净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ncffoa"
+    },
+    "id_262": {
+        "txt_CN": "二、 投资活动产生的现金流量金额",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "cfs",
+        "api": null
+    },
+    "id_263_cfs_crfrci": {
+        "txt_CN": "收回投资收到的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crfrci"
+    },
+    "id_264_cfs_crfii": {
+        "txt_CN": "取得投资收益所收到的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crfii"
+    },
+    "id_265_cfs_crfdofiaolta": {
+        "txt_CN": "处置固定资产、无形资产及其他长期资产收到的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crfdofiaolta"
+    },
+    "id_266_cfs_ncrfdossajvaou": {
+        "txt_CN": "处置子公司、合营联营企业及其他营业单位收到的现金净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ncrfdossajvaou"
+    },
+    "id_267_cfs_ncrfdossaou": {
+        "txt_CN": "(其中) 处置子公司或其他营业单位收到的现金净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ncrfdossaou"
+    },
+    "id_268_cfs_ncrfdoaajv": {
+        "txt_CN": "(其中) 处置合营或联营公司所收到的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ncrfdoaajv"
+    },
+    "id_269_cfs_crrtoia": {
+        "txt_CN": "收到的其他与投资活动相关的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crrtoia"
+    },
+    "id_270_cfs_stcifia": {
+        "txt_CN": "投资活动现金流入小计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "stcifia"
+    },
+    "id_271_cfs_cpfpfiaolta": {
+        "txt_CN": "购建固定资产、无形资产及其他长期资产所支付的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cpfpfiaolta"
+    },
+    "id_272_cfs_cpfi": {
+        "txt_CN": "投资所支付的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cpfi"
+    },
+    "id_273_cfs_niipl": {
+        "txt_CN": "质押贷款净增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niipl"
+    },
+    "id_274_cfs_ncpfbssajvaou": {
+        "txt_CN": "取得子公司、合营联营企业及其他营业单位支付的现金净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ncpfbssajvaou"
+    },
+    "id_275_cfs_ncpfbssaou": {
+        "txt_CN": "(其中) 取得子公司及其营业单位支付的现金净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ncpfbssaou"
+    },
+    "id_276_cfs_ncpfbajv": {
+        "txt_CN": "(其中) 取得联营及合营公司支付的现金净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ncpfbajv"
+    },
+    "id_277_cfs_cprtoia": {
+        "txt_CN": "支付的其他与投资活动有关的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cprtoia"
+    },
+    "id_278_cfs_stcoffia": {
+        "txt_CN": "投资活动现金流出小计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "stcoffia"
+    },
+    "id_279_cfs_ncffia": {
+        "txt_CN": "投资活动产生的现金流量净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ncffia"
+    },
+    "id_280": {
+        "txt_CN": "三、 筹资活动产生的现金流量",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "cfs",
+        "api": null
+    },
+    "id_281_cfs_crfai": {
+        "txt_CN": "吸收投资收到的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crfai"
+    },
+    "id_282_cfs_crfamshibss": {
+        "txt_CN": "(其中) 子公司吸收少数股东投资收到的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crfamshibss"
+    },
+    "id_283_cfs_crfl": {
+        "txt_CN": "取得借款收到的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crfl"
+    },
+    "id_284_cfs_crfib": {
+        "txt_CN": "发行债券收到的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crfib"
+    },
+    "id_285_cfs_crrtofa": {
+        "txt_CN": "收到的其他与筹资活动有关的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "crrtofa"
+    },
+    "id_286_cfs_stcifffa": {
+        "txt_CN": "筹资活动产生的现金流入小计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "stcifffa"
+    },
+    "id_287_cfs_cpfbrp": {
+        "txt_CN": "偿付债务支付的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cpfbrp"
+    },
+    "id_288_cfs_cpfdapdoi": {
+        "txt_CN": "分配股利、利润或偿付利息所支付的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cpfdapdoi"
+    },
+    "id_289_cfs_cpfdapomshpbss": {
+        "txt_CN": "(其中) 子公司支付少数股东股利及利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cpfdapomshpbss"
+    },
+    "id_290_cfs_cprtofa": {
+        "txt_CN": "支付的其他与筹资活动有关的现金",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cprtofa"
+    },
+    "id_291_cfs_stcofffa": {
+        "txt_CN": "筹资活动产生的现金流出小计",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "stcofffa"
+    },
+    "id_292_cfs_ncfffa": {
+        "txt_CN": "筹资活动产生的现金流量净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ncfffa"
+    },
+    "id_293_cfs_iocacedtfier": {
+        "txt_CN": "四、 汇率变动对现金及现金等价物的影响",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "iocacedtfier"
+    },
+    "id_294_cfs_bocaceatpb": {
+        "txt_CN": "期初现金及现金等价物的余额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "bocaceatpb"
+    },
+    "id_295_cfs_niicace": {
+        "txt_CN": "现金及现金等价物的净增加额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "niicace"
+    },
+    "id_296_cfs_bocaceatpe": {
+        "txt_CN": "期末现金及现金等价物净余额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "bocaceatpe"
+    },
+    "id_297": {
+        "txt_CN": "五、 附注",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "cfs",
+        "api": null
+    },
+    "id_298_cfs_np": {
+        "txt_CN": "净利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "np"
+    },
+    "id_299_cfs_ioa": {
+        "txt_CN": "加： 资产减值准备",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "ioa"
+    },
+    "id_300_cfs_cilor": {
+        "txt_CN": "信用减值损失",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cilor"
+    },
+    "id_301_cfs_dofx_dooaga_dopba": {
+        "txt_CN": "固定资产折旧、油气资产折耗、生产性生物资产折旧",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "dofx_dooaga_dopba"
+    },
+    "id_302_cfs_daaorei": {
+        "txt_CN": "投资性房地产的折旧及摊销",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "daaorei"
+    },
+    "id_303_cfs_aoia": {
+        "txt_CN": "无形资产摊销",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "aoia"
+    },
+    "id_304_cfs_aoltde": {
+        "txt_CN": "长期待摊费用摊销",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "aoltde"
+    },
+    "id_305_cfs_lodofaiaaolta": {
+        "txt_CN": "处置固定资产、无形资产和其他长期资产的损失",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "lodofaiaaolta"
+    },
+    "id_306_cfs_lfsfa": {
+        "txt_CN": "固定资产报废损失",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "lfsfa"
+    },
+    "id_307_cfs_lfcifv": {
+        "txt_CN": "公允价值变动损失",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "lfcifv"
+    },
+    "id_308_cfs_fe": {
+        "txt_CN": "财务费用",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "fe"
+    },
+    "id_309_cfs_il": {
+        "txt_CN": "投资损失",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "il"
+    },
+    "id_310_cfs_didita": {
+        "txt_CN": "递延所得税资产减少",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "didita"
+    },
+    "id_311_cfs_iiditl": {
+        "txt_CN": "递延所得税负债增加",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "iiditl"
+    },
+    "id_312_cfs_dii": {
+        "txt_CN": "存货的减少",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "dii"
+    },
+    "id_313_cfs_dior": {
+        "txt_CN": "经营性应收项目的减少",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "dior"
+    },
+    "id_314_cfs_iiop": {
+        "txt_CN": "经营性应付项目的增加",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "iiop"
+    },
+    "id_315_cfs_o": {
+        "txt_CN": "其他",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "o"
+    },
+    "id_316_cfs_coditc": {
+        "txt_CN": "债务转为资本",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "coditc"
+    },
+    "id_317_cfs_cbdwioy": {
+        "txt_CN": "一年内到期的可转换公司债券",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "cbdwioy"
+    },
+    "id_318_cfs_flofa": {
+        "txt_CN": "融资租入固定资产",
+        "sql_type": "DOUBLE",
+        "sheet_name": "cfs",
+        "api": "flofa"
+    },
+    "id_319": {
+        "txt_CN": "一、 人均指标",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "m",
+        "api": null
+    },
+    "id_320_m_ep_stn": {
+        "txt_CN": "员工人数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ep_stn"
+    },
+    "id_321_m_toi_pc": {
+        "txt_CN": "人均营业总收入",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "toi_pc"
+    },
+    "id_322_m_np_pc": {
+        "txt_CN": "人均净利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "np_pc"
+    },
+    "id_323_m_s_pc": {
+        "txt_CN": "人均薪酬",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "s_pc"
+    },
+    "id_324": {
+        "txt_CN": "二、 每股指标",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "m",
+        "api": null
+    },
+    "id_325_m_npatoshopc_ps": {
+        "txt_CN": "归属于母公司普通股股东的每股收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "npatoshopc_ps"
+    },
+    "id_326_m_npadnrpatoshaopc_ps": {
+        "txt_CN": "归属于母公司普通股股东的每股扣非收益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "npadnrpatoshaopc_ps"
+    },
+    "id_327_m_tetoshopc_ps": {
+        "txt_CN": "归属于母公司普通股股东的每股股东权益",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "tetoshopc_ps"
+    },
+    "id_328_m_cr_ps": {
+        "txt_CN": "每股资本公积",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "cr_ps"
+    },
+    "id_329_m_rp_ps": {
+        "txt_CN": "每股未分配利润",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "rp_ps"
+    },
+    "id_330_m_stciffoa_ps": {
+        "txt_CN": "每股经营活动产生的现金流量",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "stciffoa_ps"
+    },
+    "id_331_m_ncffoa_ps": {
+        "txt_CN": "每股经营活动产生的现金流量净额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ncffoa_ps"
+    },
+    "id_332": {
+        "txt_CN": "三、 盈利能力",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "m",
+        "api": null
+    },
+    "id_333_m_roe_atoshaopc": {
+        "txt_CN": "归属于母公司普通股股东的ROE",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "roe_atoshaopc"
+    },
+    "id_334_m_roe_adnrpatoshaopc": {
+        "txt_CN": "归属于母公司普通股股东的扣非ROE",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "roe_adnrpatoshaopc"
+    },
+    "id_335_m_wroe": {
+        "txt_CN": "归属于母公司普通股股东的加权ROE",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "wroe"
+    },
+    "id_336_m_roe": {
+        "txt_CN": "净资产收益率(ROE)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "roe"
+    },
+    "id_337_m_l": {
+        "txt_CN": "杠杆倍数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "l"
+    },
+    "id_338_m_roa": {
+        "txt_CN": "总资产收益率(ROA)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "roa"
+    },
+    "id_339_m_ta_to": {
+        "txt_CN": "资产周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ta_to"
+    },
+    "id_340_m_np_s_r": {
+        "txt_CN": "净利润率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "np_s_r"
+    },
+    "id_341_m_gp_m": {
+        "txt_CN": "毛利率(GM)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "gp_m"
+    },
+    "id_342_m_rota": {
+        "txt_CN": "有形资产回报率(ROTA)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "rota"
+    },
+    "id_343_m_roic": {
+        "txt_CN": "资本回报率(ROIC)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "roic"
+    },
+    "id_344_m_roc": {
+        "txt_CN": "资本收益率(ROC)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "roc"
+    },
+    "id_345": {
+        "txt_CN": "四、 营运能力(周转率)",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "m",
+        "api": null
+    },
+    "id_346_m_ats_tor": {
+        "txt_CN": "预付账款周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ats_tor"
+    },
+    "id_347_m_ca_tor": {
+        "txt_CN": "合同资产周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ca_tor"
+    },
+    "id_348_m_i_tor": {
+        "txt_CN": "存货周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "i_tor"
+    },
+    "id_349_m_nraar_tor": {
+        "txt_CN": "应收票据和应收账款周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "nraar_tor"
+    },
+    "id_350_m_nr_tor": {
+        "txt_CN": "应收票据周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "nr_tor"
+    },
+    "id_351_m_ar_tor": {
+        "txt_CN": "应收账款周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ar_tor"
+    },
+    "id_352_m_rf_tor": {
+        "txt_CN": "应收款项融资周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "rf_tor"
+    },
+    "id_353_m_afc_tor": {
+        "txt_CN": "预收账款周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "afc_tor"
+    },
+    "id_354_m_cl_tor": {
+        "txt_CN": "合同负债周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "cl_tor"
+    },
+    "id_355_m_npaap_tor": {
+        "txt_CN": "应付票据和应付账款周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "npaap_tor"
+    },
+    "id_356_m_np_tor": {
+        "txt_CN": "应付票据周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "np_tor"
+    },
+    "id_357_m_ap_tor": {
+        "txt_CN": "应付账款周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ap_tor"
+    },
+    "id_358_m_fa_tor": {
+        "txt_CN": "固定资产周转率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "fa_tor"
+    },
+    "id_359": {
+        "txt_CN": "五、 营运能力(周转天数)",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "m",
+        "api": null
+    },
+    "id_360_m_ats_ds": {
+        "txt_CN": "预付账款周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ats_ds"
+    },
+    "id_361_m_ca_ds": {
+        "txt_CN": "合同资产周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ca_ds"
+    },
+    "id_362_m_i_ds": {
+        "txt_CN": "存货周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "i_ds"
+    },
+    "id_363_m_nraar_ds": {
+        "txt_CN": "应收票据和应收账款周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "nraar_ds"
+    },
+    "id_364_m_nr_ds": {
+        "txt_CN": "应收票据周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "nr_ds"
+    },
+    "id_365_m_ar_ds": {
+        "txt_CN": "应收账款周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ar_ds"
+    },
+    "id_366_m_rf_ds": {
+        "txt_CN": "应收款项融资周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "rf_ds"
+    },
+    "id_367_m_afc_ds": {
+        "txt_CN": "预收账款周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "afc_ds"
+    },
+    "id_368_m_cl_ds": {
+        "txt_CN": "合同负债周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "cl_ds"
+    },
+    "id_369_m_npaap_ds": {
+        "txt_CN": "应付票据和应付账款周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "npaap_ds"
+    },
+    "id_370_m_np_ds": {
+        "txt_CN": "应付票据周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "np_ds"
+    },
+    "id_371_m_ap_ds": {
+        "txt_CN": "应付账款周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ap_ds"
+    },
+    "id_372_m_b_ds": {
+        "txt_CN": "营业周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "b_ds"
+    },
+    "id_373_m_m_ds": {
+        "txt_CN": "净现金周转天数(CCC)",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "m_ds"
+    },
+    "id_374_m_fa_ds": {
+        "txt_CN": "固定资产周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "fa_ds"
+    },
+    "id_375_m_tca_ds": {
+        "txt_CN": "流动资产周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "tca_ds"
+    },
+    "id_376_m_toe_ds": {
+        "txt_CN": "股东权益周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "toe_ds"
+    },
+    "id_377_m_ta_ds": {
+        "txt_CN": "总资产周转天数",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ta_ds"
+    },
+    "id_378": {
+        "txt_CN": "六、 偿债及资本结构",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "m",
+        "api": null
+    },
+    "id_379_m_tl_ta_r": {
+        "txt_CN": "资产负债率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "tl_ta_r"
+    },
+    "id_380_m_lwi_ta_r": {
+        "txt_CN": "有息负债率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "lwi_ta_r"
+    },
+    "id_381_m_cabb_tcl_r": {
+        "txt_CN": "货币资金占流动负债比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "cabb_tcl_r"
+    },
+    "id_382_m_c_r": {
+        "txt_CN": "流动比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "c_r"
+    },
+    "id_383_m_q_r": {
+        "txt_CN": "速动比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "q_r"
+    },
+    "id_384_m_fa_ta_r": {
+        "txt_CN": "固定资产占总资产比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "fa_ta_r"
+    },
+    "id_385_m_lv_r": {
+        "txt_CN": "清算价值比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "lv_r"
+    },
+    "id_386": {
+        "txt_CN": "七、 现金流量",
+        "sql_type": "VARCHAR(1)",
+        "sheet_name": "m",
+        "api": null
+    },
+    "id_387_m_fcf": {
+        "txt_CN": "自由现金流量",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "fcf"
+    },
+    "id_388_m_crfscapls_oi_r": {
+        "txt_CN": "销售商品提供劳务收到的现金对营业收入的比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "crfscapls_oi_r"
+    },
+    "id_389_m_ncffoa_op_r": {
+        "txt_CN": "经营活动产生的现金流量净额对营业利润的比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ncffoa_op_r"
+    },
+    "id_390_m_ncffoa_np_r": {
+        "txt_CN": "经营活动产生的现金流量净额对净利润的比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ncffoa_np_r"
+    },
+    "id_391_m_crfscapls_ta_r": {
+        "txt_CN": "销售商品提供劳务收到的现金对总资产的比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "crfscapls_ta_r"
+    },
+    "id_392_m_ncffoa_fa_r": {
+        "txt_CN": "经营活动产生的现金流量净额对固定资产的比率",
+        "sql_type": "DOUBLE",
+        "sheet_name": "m",
+        "api": "ncffoa_fa_r"
+    }
+}
