@@ -27,9 +27,6 @@ def test_json():
         f.write(tmp)
     pass
 
-    # with open("../comparisonTable/name_table.txt", "w", encoding="utf-8") as f:
-    #     f.write(tmp_str)
-
 
 if __name__ == '__main__':
     test_json()
