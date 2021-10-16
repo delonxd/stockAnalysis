@@ -75,10 +75,6 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.df_dict = dict()
-        self.buffer = ReadSQLThread()
-        self.buffer.signal1.connect(self.update_df_dict)
-
         # self.code_list = ['000002', '000004', '600004', '600006', '600007', '600008']
 
         # with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
@@ -91,6 +87,16 @@ class MainWindow(QWidget):
 
         with open('../basicData/code_names_dict.txt', 'r', encoding='utf-8') as f:
             self.code_dict = json.loads(f.read())
+
+        with open('../basicData/industry/code_industry_dict.txt', 'r', encoding='utf-8') as f:
+            self.code_industry_dict = json.loads(f.read())
+
+        with open('../basicData/industry/industry_dict.txt', 'r', encoding='utf-8') as f:
+            self.industry_name_dict = json.loads(f.read())
+
+        self.df_dict = dict()
+        self.buffer = ReadSQLThread()
+        self.buffer.signal1.connect(self.update_df_dict)
 
         self.stock_code = '002407'
         self.code_index = self.code_list.index(self.stock_code)
@@ -123,6 +129,9 @@ class MainWindow(QWidget):
 
         self.stock_label = QLabel()
         self.stock_label.setFont(QFont('Consolas', 20))
+
+        self.industry_label = QLabel()
+        self.industry_label.setFont(QFont('Consolas', 14))
 
         # print(2, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
@@ -177,11 +186,16 @@ class MainWindow(QWidget):
         self.setWindowTitle('绘制图形')
         self.resize(1600, 900)
 
-        layout = QHBoxLayout()
-        layout.addStretch(1)
+        layout0 = QHBoxLayout()
+        layout0.addWidget(self.industry_label, 1, Qt.AlignLeft | Qt.AlignBottom)
+        layout0.addWidget(self.stock_label, 0, Qt.AlignCenter)
+        layout0.addStretch(1)
+
+        layout1 = QHBoxLayout()
+        layout1.addStretch(1)
         # layout.addWidget(self.tree, 0, Qt.AlignCenter)
-        layout.addWidget(self.label, 0, Qt.AlignCenter)
-        layout.addStretch(1)
+        layout1.addWidget(self.label, 0, Qt.AlignCenter)
+        layout1.addStretch(1)
 
         layout2 = QHBoxLayout()
         layout2.addStretch(1)
@@ -191,18 +205,18 @@ class MainWindow(QWidget):
         layout2.addWidget(self.button4, 0, Qt.AlignCenter)
         layout2.addWidget(self.button5, 0, Qt.AlignCenter)
         layout2.addWidget(self.editor1, 0, Qt.AlignCenter)
-
         layout2.addStretch(1)
         # layout2.addWidget(button1, 0, Qt.AlignCenter)
 
-        layout1 = QVBoxLayout()
-        layout1.addStretch(1)
-        layout1.addWidget(self.stock_label, 0, Qt.AlignCenter)
-        layout1.addLayout(layout, 0)
-        layout1.addLayout(layout2, 0)
-        layout1.addStretch(1)
+        layout = QVBoxLayout()
+        layout.addStretch(1)
+        # layout.addWidget(self.stock_label, 0, Qt.AlignCenter)
+        layout.addLayout(layout0, 0)
+        layout.addLayout(layout1, 0)
+        layout.addLayout(layout2, 0)
+        layout.addStretch(1)
 
-        self.setLayout(layout1)
+        self.setLayout(layout)
 
         self.setMouseTracking(True)
         self.label.setMouseTracking(True)
@@ -282,10 +296,29 @@ class MainWindow(QWidget):
 
         # print('finished', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
+    @staticmethod
+    def format_industry(i_code, i_code_dict):
+        i1 = i_code[:3]
+        i2 = i_code[:5]
+        i3 = i_code[:7]
+
+        val1 = i_code_dict[i1]
+        val2 = i_code_dict[i2]
+        val3 = i_code_dict[i3]
+
+        res = '%s-%s-%s' % (val1, val2, val3)
+        return res
+
     def show_stock_name(self):
         name = self.code_dict.get(self.stock_code)
-        txt = '%s: %s' % (self.stock_code, name)
-        self.stock_label.setText(txt)
+
+        industry_code = self.code_industry_dict.get(self.stock_code)
+
+        txt1 = '%s: %s' % (self.stock_code, name)
+        txt2 = '行业: %s' % self.format_industry(industry_code, self.industry_name_dict)
+
+        self.stock_label.setText(txt1)
+        self.industry_label.setText(txt2)
 
         # todo: show stock_list, show type
 

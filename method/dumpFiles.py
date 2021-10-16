@@ -4,6 +4,7 @@ import pickle
 import json
 import re
 import pandas as pd
+from collections import defaultdict
 
 
 def get_api_names(paths, regular):
@@ -215,6 +216,22 @@ def dump_industry3_list():
         f.write(res)
 
 
+def dump_code_industry_dict():
+    with open("../basicData/industry/res_industryConstituents.txt", "r", encoding='utf-8') as f:
+        data_list = json.loads(f.read())['data']
+
+    dict0 = defaultdict(str)
+    for data in data_list:
+        sub_data = data["constituents"]
+        industry = data["stockCode"]
+        for val in sub_data:
+            dict0[val["stockCode"]] = industry
+
+    res = json.dumps(dict0, indent=4, ensure_ascii=False)
+    with open("../basicData/industry/code_industry_dict.txt", "w", encoding='utf-8') as f:
+        f.write(res)
+
+
 if __name__ == '__main__':
     # dump_fs_metrics_list()
     # dump_mvs_metrics()
@@ -224,5 +241,6 @@ if __name__ == '__main__':
     # dump_header_df_mvs()
     # dump_code_names_dict()
     # dump_code_list()
-    dump_industry3_list()
+    # dump_industry3_list()
+    dump_code_industry_dict()
     pass
