@@ -195,6 +195,26 @@ def dump_code_list():
         f.write(res)
 
 
+def dump_industry3_list():
+    with open("../basicData/industry/res_industryData.txt", "r", encoding='utf-8') as f:
+        data_list = json.loads(f.read())['data']
+
+    list0 = list()
+    dict0 = dict()
+    for data in data_list:
+        if data['level'] == 'three':
+            list0.append(data['stockCode'])
+        dict0[data['stockCode']] = data['name']
+
+    res = json.dumps(list0, indent=4, ensure_ascii=False)
+    with open("../basicData/industry/industry3_list.txt", "w", encoding='utf-8') as f:
+        f.write(res)
+
+    res = json.dumps(dict0, indent=4, ensure_ascii=False)
+    with open("../basicData/industry/industry_dict.txt", "w", encoding='utf-8') as f:
+        f.write(res)
+
+
 if __name__ == '__main__':
     # dump_fs_metrics_list()
     # dump_mvs_metrics()
@@ -203,5 +223,6 @@ if __name__ == '__main__':
     # dump_header_df_fs()
     # dump_header_df_mvs()
     # dump_code_names_dict()
-    dump_code_list()
+    # dump_code_list()
+    dump_industry3_list()
     pass

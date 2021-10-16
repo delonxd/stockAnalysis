@@ -1,0 +1,1038 @@
+{
+  "code": 1,
+  "message": "success",
+  "data": [
+    {
+      "stockCode": "C01",
+      "level": "one",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "能源"
+    },
+    {
+      "stockCode": "C0101",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "能源"
+    },
+    {
+      "stockCode": "C010101",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "能源设备与服务"
+    },
+    {
+      "stockCode": "C010102",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "石油天然气"
+    },
+    {
+      "stockCode": "C010103",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "煤炭"
+    },
+    {
+      "stockCode": "C010104",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "可替代能源"
+    },
+    {
+      "stockCode": "C02",
+      "level": "one",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "原材料"
+    },
+    {
+      "stockCode": "C0201",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "基础化工"
+    },
+    {
+      "stockCode": "C020101",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "化学原料"
+    },
+    {
+      "stockCode": "C020102",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "化学制品"
+    },
+    {
+      "stockCode": "C020103",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "农用化工"
+    },
+    {
+      "stockCode": "C020104",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "合成纤维"
+    },
+    {
+      "stockCode": "C0202",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "基础材料"
+    },
+    {
+      "stockCode": "C020201",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "建筑材料"
+    },
+    {
+      "stockCode": "C020202",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "容器与包装"
+    },
+    {
+      "stockCode": "C020203",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "黑色金属"
+    },
+    {
+      "stockCode": "C020204",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "有色金属"
+    },
+    {
+      "stockCode": "C020205",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "非金属材料与制品"
+    },
+    {
+      "stockCode": "C020206",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "纸类与林业产品"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C020207",
+      "level": "three",
+      "source": "cni",
+      "market": "a",
+      "name": "合成金属"
+    },
+    {
+      "stockCode": "C03",
+      "level": "one",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "工业"
+    },
+    {
+      "stockCode": "C0301",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "工业品"
+    },
+    {
+      "stockCode": "C030101",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "航天航空"
+    },
+    {
+      "stockCode": "C030102",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "建筑产品"
+    },
+    {
+      "stockCode": "C030103",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "电气部件与设备"
+    },
+    {
+      "stockCode": "C030104",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "重型电气设备"
+    },
+    {
+      "stockCode": "C030105",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "通用机械"
+    },
+    {
+      "stockCode": "C030106",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "专用设备"
+    },
+    {
+      "stockCode": "C030107",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "工业集团企业"
+    },
+    {
+      "stockCode": "C0302",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "工业服务"
+    },
+    {
+      "stockCode": "C030201",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "建筑与工程"
+    },
+    {
+      "stockCode": "C030202",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "工业贸易经销商"
+    },
+    {
+      "stockCode": "C030203",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "商业用品与服务"
+    },
+    {
+      "stockCode": "C0303",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "运输"
+    },
+    {
+      "stockCode": "C030301",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "物流"
+    },
+    {
+      "stockCode": "C030302",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "航空运输"
+    },
+    {
+      "stockCode": "C030303",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "水上运输"
+    },
+    {
+      "stockCode": "C030304",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "陆运"
+    },
+    {
+      "stockCode": "C030305",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "交通基本设施"
+    },
+    {
+      "stockCode": "C04",
+      "level": "one",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "可选消费"
+    },
+    {
+      "stockCode": "C0401",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "汽车与汽车零配件"
+    },
+    {
+      "stockCode": "C040101",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "汽车零配件与设备"
+    },
+    {
+      "stockCode": "C040102",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "汽车"
+    },
+    {
+      "stockCode": "C0402",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "耐用消费品"
+    },
+    {
+      "stockCode": "C040201",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "家用电器"
+    },
+    {
+      "stockCode": "C040202",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "耐用家居用品"
+    },
+    {
+      "stockCode": "C040203",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "休闲设备与用品"
+    },
+    {
+      "stockCode": "C0403",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "纺织服装与奢侈品"
+    },
+    {
+      "stockCode": "C040301",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "服装与配饰"
+    },
+    {
+      "stockCode": "C040302",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "纺织品"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C040303",
+      "level": "three",
+      "source": "cni",
+      "market": "a",
+      "name": "珠宝与奢侈品"
+    },
+    {
+      "stockCode": "C0404",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "消费者服务"
+    },
+    {
+      "stockCode": "C040401",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "酒店餐饮与休闲"
+    },
+    {
+      "stockCode": "C040402",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "其他消费者服务"
+    },
+    {
+      "stockCode": "C0405",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "传媒"
+    },
+    {
+      "stockCode": "C040501",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "传媒"
+    },
+    {
+      "stockCode": "C0406",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "零售业"
+    },
+    {
+      "stockCode": "C040601",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "消费品经销商"
+    },
+    {
+      "stockCode": "C040602",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "网络零售"
+    },
+    {
+      "stockCode": "C040603",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "百货商店"
+    },
+    {
+      "stockCode": "C040604",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "专营零售"
+    },
+    {
+      "stockCode": "C05",
+      "level": "one",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "主要消费"
+    },
+    {
+      "stockCode": "C0501",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "食品与主要用品零售"
+    },
+    {
+      "stockCode": "C050101",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "食品与主要用品零售"
+    },
+    {
+      "stockCode": "C0502",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "农牧渔产品"
+    },
+    {
+      "stockCode": "C050201",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "农牧渔产品"
+    },
+    {
+      "stockCode": "C0503",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "食品饮料与烟草"
+    },
+    {
+      "stockCode": "C050301",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "食品"
+    },
+    {
+      "stockCode": "C050302",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "饮料"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C050303",
+      "level": "three",
+      "source": "cni",
+      "market": "a",
+      "name": "烟草"
+    },
+    {
+      "stockCode": "C0504",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "家庭与个人用品"
+    },
+    {
+      "stockCode": "C050401",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "家常用品"
+    },
+    {
+      "stockCode": "C050402",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "个人用品"
+    },
+    {
+      "stockCode": "C06",
+      "level": "one",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "医药卫生"
+    },
+    {
+      "stockCode": "C0601",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "医疗保健设备与服务"
+    },
+    {
+      "stockCode": "C060101",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "医疗保健设备与用品"
+    },
+    {
+      "stockCode": "C060102",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "医疗保健提供商与服务"
+    },
+    {
+      "stockCode": "C0602",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "制药"
+    },
+    {
+      "stockCode": "C060201",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "化学原料药"
+    },
+    {
+      "stockCode": "C060202",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "化学制剂"
+    },
+    {
+      "stockCode": "C060203",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "中药"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C060204",
+      "level": "three",
+      "source": "cni",
+      "market": "a",
+      "name": "药品流通"
+    },
+    {
+      "stockCode": "C0603",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "生物科技"
+    },
+    {
+      "stockCode": "C060301",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "生物科技"
+    },
+    {
+      "stockCode": "C07",
+      "level": "one",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "金融"
+    },
+    {
+      "stockCode": "C0701",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "银行"
+    },
+    {
+      "stockCode": "C070101",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "银行"
+    },
+    {
+      "stockCode": "C0702",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "综合金融"
+    },
+    {
+      "stockCode": "C070201",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "证券"
+    },
+    {
+      "stockCode": "C070202",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "保险"
+    },
+    {
+      "stockCode": "C070203",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "投资信托"
+    },
+    {
+      "stockCode": "C070204",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "其他金融服务"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C070205",
+      "level": "three",
+      "source": "cni",
+      "market": "a",
+      "name": "消费金融"
+    },
+    {
+      "stockCode": "C0703",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "资本市场服务"
+    },
+    {
+      "stockCode": "C070301",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "资本市场服务"
+    },
+    {
+      "stockCode": "C08",
+      "level": "one",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "信息技术"
+    },
+    {
+      "stockCode": "C0801",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "软件与互联网"
+    },
+    {
+      "stockCode": "C080101",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "互联网软件与服务"
+    },
+    {
+      "stockCode": "C080102",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "信息技术服务"
+    },
+    {
+      "stockCode": "C080103",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "计算机软件"
+    },
+    {
+      "stockCode": "C0802",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "技术硬件与设备"
+    },
+    {
+      "stockCode": "C080201",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "电脑与外围设备"
+    },
+    {
+      "stockCode": "C080202",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "电子设备及服务"
+    },
+    {
+      "stockCode": "C080203",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "电子元器件"
+    },
+    {
+      "stockCode": "C080204",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "光电子器件"
+    },
+    {
+      "stockCode": "C0803",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "半导体"
+    },
+    {
+      "stockCode": "C080301",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "半导体"
+    },
+    {
+      "stockCode": "C09",
+      "level": "one",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "电信业务"
+    },
+    {
+      "stockCode": "C0901",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "电信服务"
+    },
+    {
+      "stockCode": "C090101",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "电信运营"
+    },
+    {
+      "stockCode": "C090102",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "电信增值服务"
+    },
+    {
+      "stockCode": "C0902",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "通信设备及技术服务"
+    },
+    {
+      "stockCode": "C090201",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "通信设备"
+    },
+    {
+      "stockCode": "C090202",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "通信技术服务"
+    },
+    {
+      "stockCode": "C10",
+      "level": "one",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "公用事业"
+    },
+    {
+      "stockCode": "C1001",
+      "level": "two",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "公用事业"
+    },
+    {
+      "stockCode": "C100101",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "电力公用事业"
+    },
+    {
+      "stockCode": "C100102",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "燃气公用事业"
+    },
+    {
+      "stockCode": "C100103",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "水公用事业"
+    },
+    {
+      "stockCode": "C100104",
+      "level": "three",
+      "source": "cni",
+      "areaCode": "cn",
+      "market": "a",
+      "name": "复合型公用事业"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C11",
+      "level": "one",
+      "source": "cni",
+      "market": "a",
+      "name": "房地产"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C1101",
+      "level": "two",
+      "source": "cni",
+      "market": "a",
+      "name": "房地产开发和管理"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C110101",
+      "level": "three",
+      "source": "cni",
+      "market": "a",
+      "name": "住宅地产开发和管理"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C110102",
+      "level": "three",
+      "source": "cni",
+      "market": "a",
+      "name": "商业地产开发和管理"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C110103",
+      "level": "three",
+      "source": "cni",
+      "market": "a",
+      "name": "工业地产开发和管理"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C1102",
+      "level": "two",
+      "source": "cni",
+      "market": "a",
+      "name": "房地产服务"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C110201",
+      "level": "three",
+      "source": "cni",
+      "market": "a",
+      "name": "房地产信托"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C110202",
+      "level": "three",
+      "source": "cni",
+      "market": "a",
+      "name": "房地产租赁"
+    },
+    {
+      "areaCode": "cn",
+      "stockCode": "C110203",
+      "level": "three",
+      "source": "cni",
+      "market": "a",
+      "name": "其他房地产服务"
+    }
+  ]
+}
