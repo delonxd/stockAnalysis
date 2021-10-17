@@ -69,7 +69,7 @@ class ReadSQLThread(QThread):
         self.lock.release()
 
 
-class MainWindow(QWidget):
+class MainWidget(QWidget):
     # code_index = 0
 
     def __init__(self):
@@ -98,11 +98,11 @@ class MainWindow(QWidget):
         self.buffer = ReadSQLThread()
         self.buffer.signal1.connect(self.update_df_dict)
 
-        self.stock_code = '002407'
-        self.code_index = self.code_list.index(self.stock_code)
+        # self.stock_code = '002407'
+        # self.code_index = self.code_list.index(self.stock_code)
 
-        # self.code_index = 0
-        # self.stock_code = self.code_list[0]
+        self.code_index = 0
+        self.stock_code = self.code_list[0]
 
         self.df = sql2df(code=self.stock_code)
         self.df_dict[self.stock_code] = self.df
@@ -112,7 +112,7 @@ class MainWindow(QWidget):
             parent=self,
             style_df=self.style_df,
             m_width=1600,
-            m_height=800,
+            m_height=900,
         )
 
         self.label = QLabel(self)
@@ -127,11 +127,18 @@ class MainWindow(QWidget):
         self.editor1.setValidator(QIntValidator())
         self.editor1.setMaxLength(6)
 
+        p = QPalette()
+        p.setColor(QPalette.WindowText, Qt.red)
+        # p.setColor(QPalette.Background, color)
+
         self.stock_label = QLabel()
         self.stock_label.setFont(QFont('Consolas', 20))
+        self.stock_label.setPalette(p)
 
         self.industry_label = QLabel()
         self.industry_label.setFont(QFont('Consolas', 14))
+        self.industry_label.setPalette(p)
+
 
         # print(2, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
@@ -162,10 +169,11 @@ class MainWindow(QWidget):
         offset = int(min(l1, l2))
 
         for i in range(offset):
-            index1 += 1
-            arr = np.append(arr, index1)
-
             if i < 2:
+                index1 += 1
+                arr = np.append(arr, index1)
+
+            if i < 10:
                 index2 -= 1
                 arr = np.append(arr, index2)
         arr = arr % l0
@@ -216,7 +224,13 @@ class MainWindow(QWidget):
         layout.addLayout(layout2, 0)
         layout.addStretch(1)
 
-        self.setLayout(layout)
+        m_layout = QHBoxLayout()
+        m_layout.addStretch(1)
+        m_layout.addLayout(layout, 0)
+        m_layout.addStretch(1)
+
+        self.setLayout(m_layout)
+        # self.setCentralWidget(layout)
 
         self.setMouseTracking(True)
         self.label.setMouseTracking(True)
@@ -230,6 +244,8 @@ class MainWindow(QWidget):
         self.button4.clicked.connect(self.show_tree)
         self.button5.clicked.connect(self.request_data)
         self.editor1.textChanged.connect(self.editor1_changed)
+
+        self.showMaximized()
 
     def request_data(self):
         request_data2mysql(
@@ -367,6 +383,30 @@ class MainWindow(QWidget):
             self.code_index = self.code_index % len(self.code_list)
             self.stock_code = self.code_list[self.code_index]
             self.change_stock()
+
+
+class MainWindow(QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle('绘制图形')
+        self.resize(1600, 900)
+
+        widget1 = MainWidget()
+        self.setCentralWidget(widget1)
+        #
+        # self.setObjectName('MainWindow')
+        # self.setStyleSheet("#MainWindow{border-color:url(./images/welcome.jpg);}")
+
+        self.showMaximized()
+
+        palette1 = QPalette()
+        palette1.setColor(self.backgroundRole(), QColor(40, 40, 40, 255))
+        self.setPalette(palette1)
+        self.setAutoFillBackground(True)
 
 
 if __name__ == '__main__':

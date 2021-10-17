@@ -2,6 +2,7 @@ from method.mainMethod import transpose_df, show_df
 from method.sqlMethod import get_data_frame, sql_if_table_exists
 from request.requestData import get_cursor
 from request.requestData import get_header_df
+from request.requestData import request_data2mysql
 
 import mysql.connector
 import datetime as dt
@@ -331,7 +332,7 @@ def get_month_delta(df: pd.DataFrame, new_name, mode='QUARTERLY'):
 
 
 def load_default_style():
-    path = '../gui/style_default.pkl'
+    path = '../gui/styles/style_default.pkl'
     with open(path, 'rb') as pk_f:
         df = pickle.load(pk_f)
     return df
@@ -339,11 +340,11 @@ def load_default_style():
 
 def save_default_style(df):
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
-    path1 = '../gui/style_%s.pkl' % timestamp
+    path1 = '../gui/styles/style_%s.pkl' % timestamp
     with open(path1, 'wb') as pk_f:
         pickle.dump(df, pk_f)
 
-    path2 = '../gui/style_default.pkl'
+    path2 = '../gui/styles/style_default.pkl'
     with open(path2, 'wb') as pk_f:
         pickle.dump(df, pk_f)
 
@@ -386,7 +387,7 @@ def get_style_df_mvs():
 
 def combine_style_df():
 
-    path = '../gui/style_df_standard.pkl'
+    path = '../gui/styles/style_df_standard.pkl'
     with open(path, 'rb') as pk_f:
         df1 = pickle.load(pk_f)
 
@@ -424,34 +425,21 @@ def combine_style_df():
 def sql2df(code):
     # df1 = sql2df_mvs('code')
     # df1 = sql2df_mvs(code)
+
+    # request_data2mysql(
+    #     stock_code=code,
+    #     data_type='fs',
+    #     start_date="2021-01-01",
+    # )
+    #
+    # request_data2mysql(
+    #     stock_code=code,
+    #     data_type='mvs',
+    #     start_date="2021-01-01",
+    # )
+
     df1 = load_df_from_mysql(code, 'fs')
     df2 = load_df_from_mysql(code, 'mvs')
-
-    # with open('../basicData/metricsMvs.pkl', 'rb') as pk_f:
-    #     metrics0 = pickle.load(pk_f)
-    #
-    # datetime0 = dt.datetime.now()
-    # request_mvs_data2mysql(
-    #     stock_code=code,
-    #     metrics=metrics0,
-    #     # metrics=['mc'],
-    #     start_date="2021-01-01",
-    #     datetime=datetime0,
-    # )
-    # df1 = sql2df_mvs(code)
-    #
-    # if df2.index.values.shape[0] == 0:
-    #     with open('../basicData/metricsList.pkl', 'rb') as pk_f:
-    #         metrics_list = pickle.load(pk_f)
-    #
-    #     datetime0 = dt.datetime.now()
-    #     request_fs_data2mysql(
-    #         stock_code=code,
-    #         metrics_list=metrics_list,
-    #         start_date="1970-01-01",
-    #         datetime=datetime0,
-    #     )
-    #     df2 = sql2df_fs(code)
 
     df = pd.merge(df1, df2, how='outer', left_index=True, right_index=True,
                   sort=True, suffixes=('_mvs', '_fs'), copy=True)

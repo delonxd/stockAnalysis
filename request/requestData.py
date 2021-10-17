@@ -290,20 +290,31 @@ def request_data2mysql(stock_code, data_type, start_date):
     move_buffer_file(path, data_type)
 
 
-def test_request_data1():
-    # request_data2mysql(
-    #     stock_code='000002',
-    #     data_type='fs',
-    #     start_date='2008-01-01',
-    # )
-    #
-    request_data2mysql(
-        stock_code='002417',
-        data_type='mvs',
-        start_date='2020-01-01',
-    )
+def test_request_data():
+    import re
+    with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
+        txt = f.read()
+        code_list = re.findall(r'([0-9]{6})', txt)
+
+    length = len(code_list)
+    index = code_list.index('600600')
+
+    while index < length:
+        print('index --> ', index)
+        request_data2mysql(
+            stock_code=code_list[index],
+            data_type='fs',
+            start_date='2021-01-01',
+        )
+
+        request_data2mysql(
+            stock_code=code_list[index],
+            data_type='mvs',
+            start_date='2021-01-01',
+        )
+        index += 1
 
 
 if __name__ == '__main__':
     # test_request_fs_data()
-    test_request_data1()
+    test_request_data()
