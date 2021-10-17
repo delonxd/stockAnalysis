@@ -41,7 +41,11 @@ class DataSource:
         self.index_name = index_name
         self.show_name = show_name
 
+        if index_name == 'id_141_bs_mc':
+            df = np.trim_zeros(df.iloc[:, 0]).to_frame()
+
         self.df = df
+
         self.ds_type = ds_type
         self.delta_mode = delta_mode
         self.ma_mode = ma_mode

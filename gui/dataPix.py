@@ -114,6 +114,17 @@ class DataPix(QObject):
 
         self.data_dict = ds_dict
         self.draw_pix()
+        self.config_report_date()
+
+    def config_report_date(self):
+        df = self.data_dict['reportDate'].df
+        dates1 = np.vectorize(lambda x: x[:10])(df.iloc[:, 0].values)
+        val_x1 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates1)
+
+        dates2 = df.index.values
+        val_x2 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates2)
+        print(val_x1)
+        print(val_x2)
 
     def reset_scale_all(self):
         style_df = self.style_df[self.style_df['selected'].values]
@@ -371,9 +382,9 @@ class DataPix(QObject):
 
     def draw_data_dict(self):
         for data in self.data_dict.values():
-            self.draw_data(data)
+            self.draw_data(data, self.pix)
 
-    def draw_data(self, data: DataSource):
+    def draw_data(self, data: DataSource, pix):
         dates = data.df.index.values
         val_x = np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(dates)
         px_x = self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
@@ -381,10 +392,9 @@ class DataPix(QObject):
         # val_x = self.indexes_2_val_x(data.df.index.values)
         # px_x = self.val_x_2_px_x(val_x)
 
-
         if data.ds_type == 'digit':
 
-            pix_painter = QPainter(self.pix)
+            pix_painter = QPainter(pix)
             pen = QPen(data.color, data.line_thick, data.pen_type)
             pix_painter.setPen(pen)
 
@@ -475,6 +485,32 @@ class DataPix(QObject):
         date = self.px_dict[x]
         date_str = date.strftime("%Y-%m-%d")
 
+        mask_width1 = 20
+        mask_width0 = d_right - x + 2
+        mask_width = min(mask_width0, mask_width1)
+
+        mask_height = self.main_rect.height()
+
+        pix_painter = QPainter(self.pix_show)
+
+        mask1 = QPixmap(mask_width, mask_height)
+        mask1.fill(QColor(0, 0, 0, 255))
+        pix_painter.drawPixmap(x, self.main_rect.top() + 1, mask1)
+
+        mask_width2 = mask_width0 - mask_width1
+        pix_painter.end()
+
+        self.draw_data(self.data_dict['id_041_mvs_mc'], self.pix_show)
+
+        if mask_width2 > 0:
+            pix_painter = QPainter(self.pix_show)
+            mask2 = QPixmap(mask_width2, mask_height)
+            mask2.fill(QColor(0, 0, 0, 255))
+
+            mask_left2 = x + mask_width1
+            pix_painter.drawPixmap(mask_left2, self.main_rect.top() + 1, mask2)
+            pix_painter.end()
+
         self.draw_tooltip(x, self.data_rect.bottom() + 1, date_str)
         self.draw_tooltip(self.data_rect.right() + 1, y, val_str)
         # self.draw_information(date)
@@ -511,6 +547,15 @@ class DataPix(QObject):
         pix_painter = QPainter(self.pix_show)
         pix_painter.drawPixmap(10, 10, pix)
         pix_painter.end()
+
+    @staticmethod
+    def get_last_value(x, x_list):
+        last = None
+        for px in x_list:
+            if x < px:
+                return last
+            last = px
+        return last
 
     @staticmethod
     def get_nearest_value(x, x_list):

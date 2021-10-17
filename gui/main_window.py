@@ -1,5 +1,6 @@
 from method.dataMethod import *
 from request.requestData import request_data2mysql
+from method.logMethod import log_it, MainLog
 
 from gui.checkTree import CheckTree
 from gui.dataPix import DataPix
@@ -17,6 +18,10 @@ import time
 import numpy as np
 
 
+class GuiLog(MainLog):
+    content = ''
+
+
 class ReadSQLThread(QThread):
     signal1 = pyqtSignal(object)
 
@@ -26,8 +31,7 @@ class ReadSQLThread(QThread):
         self.lock = threading.Lock()
 
     def run(self):
-        print(time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())))
-        print('thread start')
+        GuiLog.add_log('thread start')
 
         while True:
             self.lock.acquire()
@@ -39,10 +43,10 @@ class ReadSQLThread(QThread):
             self.lock.release()
 
             res0 = (code, sql2df(code))
-            print(code)
+            GuiLog.add_log('    add buffer %s' % code)
             self.signal1.emit(res0)
 
-        print('thread end')
+        GuiLog.add_log('thread end')
         self.lock.release()
 
     def append(self, code):
@@ -84,6 +88,7 @@ class MainWidget(QWidget):
         # with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
             txt = f.read()
             self.code_list = re.findall(r'([0-9]{6})', txt)
+            self.code_list.reverse()
 
         with open('../basicData/code_names_dict.txt', 'r', encoding='utf-8') as f:
             self.code_dict = json.loads(f.read())
@@ -94,6 +99,9 @@ class MainWidget(QWidget):
         with open('../basicData/industry/industry_dict.txt', 'r', encoding='utf-8') as f:
             self.industry_name_dict = json.loads(f.read())
 
+        time0 = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
+        self.log_path = '../bufferData/logs/gui_log/gui_log_%s.txt' % time0
+
         self.df_dict = dict()
         self.buffer = ReadSQLThread()
         self.buffer.signal1.connect(self.update_df_dict)
@@ -101,7 +109,7 @@ class MainWidget(QWidget):
         # self.stock_code = '002407'
         # self.code_index = self.code_list.index(self.stock_code)
 
-        self.code_index = 0
+        self.code_index = 70
         self.stock_code = self.code_list[0]
 
         self.df = sql2df(code=self.stock_code)
@@ -136,7 +144,7 @@ class MainWidget(QWidget):
         self.stock_label.setPalette(p)
 
         self.industry_label = QLabel()
-        self.industry_label.setFont(QFont('Consolas', 14))
+        self.industry_label.setFont(QFont('Consolas', 16))
         self.industry_label.setPalette(p)
 
 
@@ -169,11 +177,11 @@ class MainWidget(QWidget):
         offset = int(min(l1, l2))
 
         for i in range(offset):
-            if i < 2:
+            if i < 10:
                 index1 += 1
                 arr = np.append(arr, index1)
 
-            if i < 10:
+            if i < 2:
                 index2 -= 1
                 arr = np.append(arr, index2)
         arr = arr % l0
@@ -330,9 +338,10 @@ class MainWidget(QWidget):
 
         industry_code = self.code_industry_dict.get(self.stock_code)
 
-        txt1 = '%s: %s' % (self.stock_code, name)
+        txt1 = '%s: %s(%s/%s)' % (self.stock_code, name, self.code_index, len(self.code_list))
         txt2 = '行业: %s' % self.format_industry(industry_code, self.industry_name_dict)
 
+        GuiLog.add_log('show stock --> ' + txt1)
         self.stock_label.setText(txt1)
         self.industry_label.setText(txt2)
 
@@ -361,6 +370,8 @@ class MainWidget(QWidget):
                 pos = event.pos() - self.label.pos()
                 self.draw_cross(pos.x(), pos.y())
                 self.cross = True
+
+            GuiLog.write(self.log_path)
 
         # elif event.button() == Qt.RightButton:
         #     self.close()
