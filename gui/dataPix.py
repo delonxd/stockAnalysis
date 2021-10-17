@@ -37,7 +37,7 @@ class DataPix(QObject):
         bottom_blank = 50
 
         self.main_rect = QRect(0, 0, m_width, m_height)
-        self.data_rect = QRect(left_blank, 0, d_width, d_height)
+        self.data_rect = QRect(left_blank, 100, d_width, d_height)
 
         # pix
         self.pix = QPixmap()
@@ -381,6 +381,7 @@ class DataPix(QObject):
         # val_x = self.indexes_2_val_x(data.df.index.values)
         # px_x = self.val_x_2_px_x(val_x)
 
+
         if data.ds_type == 'digit':
 
             pix_painter = QPainter(self.pix)
@@ -397,7 +398,7 @@ class DataPix(QObject):
 
                 df_point = pd.DataFrame()
                 df_point['px_x'] = px_x
-                df_point['px_y'] = (data.val_max - data_y) * self.data_rect.height() / data.val_delta
+                df_point['px_y'] = (data.val_max - data_y) * self.data_rect.height() / data.val_delta + self.data_rect.top()
 
                 df_point.dropna(inplace=True)
                 point_list = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
@@ -410,7 +411,7 @@ class DataPix(QObject):
 
                 df_point = pd.DataFrame()
                 df_point['px_x'] = px_x
-                px_y = (data.val_max - np.log2(data_y / data.scale_min) / np.log2(data.scale_max / data.scale_min)) * self.data_rect.height() / data.val_delta
+                px_y = (data.val_max - np.log2(data_y / data.scale_min) / np.log2(data.scale_max / data.scale_min)) * self.data_rect.height() / data.val_delta + self.data_rect.top()
                 df_point['px_y'] = px_y
 
                 df_point.dropna(inplace=True)
@@ -601,13 +602,13 @@ class DataPix(QObject):
     def y_value2px(self, val_y, data: DataSource):
         y = None
         if val_y is not None:
-            y = (data.val_max - val_y) * self.data_rect.height() / data.val_delta
+            y = (data.val_max - val_y) * self.data_rect.height() / data.val_delta + self.data_rect.top()
         return y
 
     def y_px2value(self, px_y, data: DataSource):
         val_y = None
         if px_y is not None:
-            val_y = data.val_max - px_y * data.val_delta / self.data_rect.height()
+            val_y = data.val_max - (px_y - self.data_rect.top()) * data.val_delta / self.data_rect.height()
         return val_y
 
     def y_data2px(self, value, data):
