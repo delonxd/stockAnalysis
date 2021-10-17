@@ -444,6 +444,9 @@ class DataPix(QObject):
 
     ###############################################################################################
 
+    def init_pix_show(self):
+        self.pix_show = QPixmap(self.pix)
+
     def draw_cross(self, x, y):
 
         self.pix_show = QPixmap(self.pix)

@@ -363,8 +363,9 @@ class MainWidget(QWidget):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.cross:
-                # self.draw_cross(None, None)
-                # self.cross = False
+                self.data_pix.init_pix_show()
+                self.update()
+                self.cross = False
                 pass
             else:
                 pos = event.pos() - self.label.pos()
