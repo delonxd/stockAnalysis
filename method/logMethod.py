@@ -18,6 +18,11 @@ class MainLog:
         cls.content = cls.content + row + '\n'
         print(row)
 
+    @classmethod
+    def write(cls, path):
+        with open(path, "w", encoding='utf-8') as f:
+            f.write(cls.content)
+
 
 def get_log_time():
     return time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time()))
