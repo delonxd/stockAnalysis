@@ -84,8 +84,8 @@ class MainWidget(QWidget):
         # with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
         #     self.code_list = pickle.load(pk_f)
 
-        with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
             txt = f.read()
             self.code_list = re.findall(r'([0-9]{6})', txt)
             self.code_list.reverse()
@@ -109,8 +109,8 @@ class MainWidget(QWidget):
         # self.stock_code = '002407'
         # self.code_index = self.code_list.index(self.stock_code)
 
-        self.code_index = 70
-        self.stock_code = self.code_list[0]
+        self.code_index = 1
+        self.stock_code = self.code_list[self.code_index]
 
         self.df = sql2df(code=self.stock_code)
         self.df_dict[self.stock_code] = self.df
@@ -253,7 +253,10 @@ class MainWidget(QWidget):
         self.button5.clicked.connect(self.request_data)
         self.editor1.textChanged.connect(self.editor1_changed)
 
-        self.showMaximized()
+        palette1 = QPalette()
+        palette1.setColor(self.backgroundRole(), QColor(40, 40, 40, 255))
+        self.setPalette(palette1)
+        self.setAutoFillBackground(True)
 
     def request_data(self):
         request_data2mysql(
@@ -354,7 +357,7 @@ class MainWidget(QWidget):
         self.move(qr.topLeft().x() - 11, qr.topLeft().y() - 45)
 
     def draw_cross(self, x, y):
-        self.data_pix.draw_cross(x, y)
+        self.data_pix.draw_cross(x, y, self.cross)
         self.update()
 
     def paintEvent(self, e):
@@ -362,25 +365,19 @@ class MainWidget(QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            if self.cross:
-                self.data_pix.init_pix_show()
-                self.update()
-                self.cross = False
-                pass
-            else:
-                pos = event.pos() - self.label.pos()
-                self.draw_cross(pos.x(), pos.y())
-                self.cross = True
+            self.cross = not self.cross
 
-            GuiLog.write(self.log_path)
-
-        # elif event.button() == Qt.RightButton:
-        #     self.close()
-
-    def mouseMoveEvent(self, event):
-        if self.cross:
             pos = event.pos() - self.label.pos()
             self.draw_cross(pos.x(), pos.y())
+            GuiLog.write(self.log_path)
+
+        elif event.button() == Qt.RightButton:
+            self.close()
+
+    def mouseMoveEvent(self, event):
+        # if self.cross:
+        pos = event.pos() - self.label.pos()
+        self.draw_cross(pos.x(), pos.y())
 
     def wheelEvent(self, event):
         a = event.angleDelta().y() / 120
@@ -413,8 +410,6 @@ class MainWindow(QMainWindow):
         # self.setObjectName('MainWindow')
         # self.setStyleSheet("#MainWindow{border-color:url(./images/welcome.jpg);}")
 
-        self.showMaximized()
-
         palette1 = QPalette()
         palette1.setColor(self.backgroundRole(), QColor(40, 40, 40, 255))
         self.setPalette(palette1)
@@ -423,6 +418,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    main = MainWindow()
-    main.show()
+    # main = MainWindow()
+    main = MainWidget()
+    main.showMaximized()
     sys.exit(app.exec_())

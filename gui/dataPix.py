@@ -42,6 +42,7 @@ class DataPix(QObject):
         # pix
         self.pix = QPixmap()
         self.pix_show = QPixmap()
+        self.struct_pix = QPixmap()
 
         # date metrics
         self.date_max = dt.date(2022, 7, 20)
@@ -60,6 +61,9 @@ class DataPix(QObject):
         # data_source
         self.data_dict = None
         self.default_ds = None
+
+        self.report_dict = None
+        self.report_date = None
 
         self.update_pix()
 
@@ -123,8 +127,15 @@ class DataPix(QObject):
 
         dates2 = df.index.values
         val_x2 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates2)
-        print(val_x1)
-        print(val_x2)
+
+        dict0 = defaultdict(int)
+        for index in range(val_x1.shape[0]):
+            dict0[val_x1[index]] = val_x2[index]
+
+        self.report_dict = dict0
+        list0 = list(dict0.keys())
+        list0.sort()
+        self.report_date = list0
 
     def reset_scale_all(self):
         style_df = self.style_df[self.style_df['selected'].values]
@@ -211,6 +222,8 @@ class DataPix(QObject):
         self.draw_metrics(self.default_ds)
 
         self.draw_auxiliary_line(self.default_ds)
+
+        self.struct_pix = QPixmap(self.pix)
         self.draw_data_dict()
         self.pix_show = self.pix
 
@@ -444,10 +457,7 @@ class DataPix(QObject):
 
     ###############################################################################################
 
-    def init_pix_show(self):
-        self.pix_show = QPixmap(self.pix)
-
-    def draw_cross(self, x, y):
+    def draw_cross(self, x, y, state):
 
         self.pix_show = QPixmap(self.pix)
 
@@ -468,57 +478,72 @@ class DataPix(QObject):
         elif y > d_bottom:
             y = d_bottom
 
-        pix_painter = QPainter(self.pix_show)
-
-        pen = QPen(Qt.gray, 1, Qt.SolidLine)
-        pix_painter.setPen(pen)
-
-        x = self.get_nearest_value(x, self.px_list)
-
-        pix_painter.drawLine(QPoint(x, d_top), QPoint(x, d_bottom))
-        pix_painter.drawLine(QPoint(d_left, y), QPoint(d_right, y))
-
-        pix_painter.end()
-
         # date, val = self.px2data(x, y, self.default_ds)
         # date_str = date.strftime("%Y-%m-%d")
 
         val = self.y_px2data(y, self.default_ds)
         val_str = self.default_ds.format(val)
-        date = self.px_dict[x]
-        date_str = date.strftime("%Y-%m-%d")
 
-        mask_width1 = 20
-        mask_width0 = d_right - x + 2
-        mask_width = min(mask_width0, mask_width1)
+        val_x0 = self.x_px2value(x)
 
-        mask_height = self.main_rect.height()
+        val_x1 = self.get_last_value(val_x0, self.report_date)
+
+        if not val_x1:
+            val_x1 = self.report_date[0]
+        val_x2 = self.report_dict.get(val_x1)
+
+        px_x0 = x
+        px_x2 = self.x_value2px(val_x2)
+
+        if state is True:
+            self.draw_mask(px_x0, px_x2)
 
         pix_painter = QPainter(self.pix_show)
+        pen = QPen(Qt.gray, 1, Qt.SolidLine)
+        pix_painter.setPen(pen)
 
-        mask1 = QPixmap(mask_width, mask_height)
-        mask1.fill(QColor(0, 0, 0, 255))
-        pix_painter.drawPixmap(x, self.main_rect.top() + 1, mask1)
-
-        mask_width2 = mask_width0 - mask_width1
+        pix_painter.drawLine(QPoint(x, d_top), QPoint(x, d_bottom))
+        pix_painter.drawLine(QPoint(d_left, y), QPoint(d_right, y))
         pix_painter.end()
 
-        self.draw_data(self.data_dict['id_041_mvs_mc'], self.pix_show)
+        date0 = self.x_value2data(int(val_x0))
+        date2 = self.x_value2data(int(val_x2))
+        date_str0 = date0.strftime("%Y-%m-%d")
+        date_str2 = date2.strftime("%Y-%m-%d")
 
-        if mask_width2 > 0:
-            pix_painter = QPainter(self.pix_show)
-            mask2 = QPixmap(mask_width2, mask_height)
-            mask2.fill(QColor(0, 0, 0, 255))
+        self.draw_tooltip(px_x0, self.data_rect.bottom() + 1, date_str0)
+        self.draw_tooltip(px_x2, self.data_rect.top(), date_str2)
 
-            mask_left2 = x + mask_width1
-            pix_painter.drawPixmap(mask_left2, self.main_rect.top() + 1, mask2)
-            pix_painter.end()
-
-        self.draw_tooltip(x, self.data_rect.bottom() + 1, date_str)
         self.draw_tooltip(self.data_rect.right() + 1, y, val_str)
         # self.draw_information(date)
 
-        self.draw_information(x)
+        self.draw_information(px_x2)
+
+    def draw_mask(self, px_x0, px_x2):
+        if px_x2:
+            self.draw_mask_pix(
+                pix=self.pix_show,
+                x=px_x2,
+            )
+
+        self.draw_data(self.data_dict['id_041_mvs_mc'], self.pix_show)
+
+        self.draw_mask_pix(
+            pix=self.pix_show,
+            x=px_x0,
+        )
+
+    def draw_mask_pix(self, pix, x):
+        y = self.main_rect.top()
+        width = self.main_rect.right() - x
+        height = self.main_rect.height()
+
+        pix_painter = QPainter(pix)
+        mask = self.struct_pix.copy(x, y, width, height)
+        # mask = QPixmap(xwidth, height)
+        # mask.fill(QColor(40, 40, 40, 255))
+        pix_painter.drawPixmap(x, y, mask)
+        pix_painter.end()
 
     def draw_tooltip(self, x, y, text):
         pix_painter = QPainter(self.pix_show)

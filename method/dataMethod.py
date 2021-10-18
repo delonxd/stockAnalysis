@@ -435,7 +435,8 @@ def sql2df(code):
     # request_data2mysql(
     #     stock_code=code,
     #     data_type='mvs',
-    #     start_date="2021-01-01",
+    #     # start_date="2021-01-01",
+    #     start_date="1970-01-01",
     # )
 
     df1 = load_df_from_mysql(code, 'fs')

@@ -292,25 +292,29 @@ def request_data2mysql(stock_code, data_type, start_date):
 
 def test_request_data():
     import re
-    with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
+    # with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
+    with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
+
         txt = f.read()
         code_list = re.findall(r'([0-9]{6})', txt)
+        code_list.reverse()
 
     length = len(code_list)
-    index = code_list.index('600600')
+    # index = code_list.index('600600')
+    index = 82
 
     while index < length:
-        print('index --> ', index)
+        print('\nindex --> ', index, '\n')
         request_data2mysql(
             stock_code=code_list[index],
             data_type='fs',
-            start_date='2021-01-01',
+            start_date='1970-01-01',
         )
 
         request_data2mysql(
             stock_code=code_list[index],
             data_type='mvs',
-            start_date='2021-01-01',
+            start_date='1970-01-01',
         )
         index += 1
 
