@@ -109,7 +109,7 @@ class MainWidget(QWidget):
         # self.stock_code = '002407'
         # self.code_index = self.code_list.index(self.stock_code)
 
-        self.code_index = 1
+        self.code_index = 21
         self.stock_code = self.code_list[self.code_index]
 
         self.df = sql2df(code=self.stock_code)
@@ -247,8 +247,8 @@ class MainWidget(QWidget):
         self.show_stock_name()
 
         self.button1.clicked.connect(self.export_style)
-        # self.button2.clicked.connect(self.scale_up)
-        # self.button3.clicked.connect(self.scale_down)
+        self.button2.clicked.connect(self.scale_up)
+        self.button3.clicked.connect(self.scale_down)
         self.button4.clicked.connect(self.show_tree)
         self.button5.clicked.connect(self.request_data)
         self.editor1.textChanged.connect(self.editor1_changed)
@@ -286,21 +286,13 @@ class MainWidget(QWidget):
             self.buffer.clear()
             self.change_stock()
 
-    # def scale_up(self):
-    #     for index, row in self.style_df.iterrows():
-    #         if row['logarithmic'] is True:
-    #             self.style_df.loc[index, 'scale_min'] = row['scale_min'] * 2
-    #             self.style_df.loc[index, 'scale_max'] = row['scale_max'] * 2
-    #
-    #     self.update_data()
-    #
-    # def scale_down(self):
-    #     for index, row in self.style_df.iterrows():
-    #         if row['logarithmic'] is True:
-    #             self.style_df.loc[index, 'scale_min'] = row['scale_min'] / 2
-    #             self.style_df.loc[index, 'scale_max'] = row['scale_max'] / 2
-    #
-    #     self.update_data()
+    def scale_up(self):
+        self.data_pix.scale_ratio = self.data_pix.scale_ratio * 2
+        self.update_data()
+
+    def scale_down(self):
+        self.data_pix.scale_ratio = self.data_pix.scale_ratio / 2
+        self.update_data()
 
     def export_style(self):
         df = self.tree.df.copy()

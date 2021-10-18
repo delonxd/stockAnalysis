@@ -65,6 +65,8 @@ class DataPix(QObject):
         self.report_dict = None
         self.report_date = None
 
+        self.scale_ratio = 4
+
         self.update_pix()
 
     @property
@@ -143,7 +145,7 @@ class DataPix(QObject):
         default_row = style_df[style_df['default_ds'].values].iloc[0]
         ratio = get_units_dict()[default_row['units']]
 
-        scale_max = self.df[default_row['index_name']].max() * 4 / ratio
+        scale_max = self.df[default_row['index_name']].max() * self.scale_ratio / ratio
         scale_min = scale_max / 1024
 
         self.style_df.loc[
