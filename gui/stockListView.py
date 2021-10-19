@@ -12,7 +12,7 @@ class CodesDataFrame:
 
     def __init__(self, code_list, current_index=0):
 
-        columns = ['code', 'name', 'level1', 'level2', 'level3']
+        columns = ['code', 'name', 'level1', 'level2', 'level3', 'i_code']
         self.df = pd.DataFrame(columns=columns)
 
         with open('../basicData/code_names_dict.txt', 'r', encoding='utf-8') as f:
