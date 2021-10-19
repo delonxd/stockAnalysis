@@ -232,6 +232,12 @@ def dump_code_industry_dict():
         f.write(res)
 
 
+def dump_empty_list():
+    res = json.dumps([], indent=4, ensure_ascii=False)
+    with open("../bufferData/codes/self_select.txt", "w", encoding='utf-8') as f:
+        f.write(res)
+
+
 if __name__ == '__main__':
     # dump_fs_metrics_list()
     # dump_mvs_metrics()
@@ -242,5 +248,6 @@ if __name__ == '__main__':
     # dump_code_names_dict()
     # dump_code_list()
     # dump_industry3_list()
-    dump_code_industry_dict()
+    # dump_code_industry_dict()
+    dump_empty_list()
     pass

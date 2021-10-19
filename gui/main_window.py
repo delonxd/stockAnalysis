@@ -84,8 +84,8 @@ class MainWidget(QWidget):
         # with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
         #     self.code_list = pickle.load(pk_f)
 
-        # with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
             txt = f.read()
             self.code_list = re.findall(r'([0-9]{6})', txt)
             self.code_list.reverse()
@@ -130,6 +130,7 @@ class MainWidget(QWidget):
         self.button3 = QPushButton('/2')
         self.button4 = QPushButton('style')
         self.button5 = QPushButton('request')
+        self.button6 = QPushButton('save code')
 
         self.editor1 = QLineEdit()
         self.editor1.setValidator(QIntValidator())
@@ -220,6 +221,7 @@ class MainWidget(QWidget):
         layout2.addWidget(self.button3, 0, Qt.AlignCenter)
         layout2.addWidget(self.button4, 0, Qt.AlignCenter)
         layout2.addWidget(self.button5, 0, Qt.AlignCenter)
+        layout2.addWidget(self.button6, 0, Qt.AlignCenter)
         layout2.addWidget(self.editor1, 0, Qt.AlignCenter)
         layout2.addStretch(1)
         # layout2.addWidget(button1, 0, Qt.AlignCenter)
@@ -251,12 +253,32 @@ class MainWidget(QWidget):
         self.button3.clicked.connect(self.scale_down)
         self.button4.clicked.connect(self.show_tree)
         self.button5.clicked.connect(self.request_data)
+        self.button6.clicked.connect(self.save_code)
         self.editor1.textChanged.connect(self.editor1_changed)
 
         palette1 = QPalette()
         palette1.setColor(self.backgroundRole(), QColor(40, 40, 40, 255))
         self.setPalette(palette1)
         self.setAutoFillBackground(True)
+
+    def save_code(self):
+        code = self.stock_code
+        name = self.code_dict.get(self.stock_code)
+
+        path = "../bufferData/codes/self_select.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            code_list = json.loads(f.read())
+
+        if code_list:
+            x, y = zip(*code_list)
+
+            if code in x:
+                return
+
+        code_list.append((code, name))
+        res = json.dumps(code_list, indent=4, ensure_ascii=False)
+        with open(path, "w", encoding='utf-8') as f:
+            f.write(res)
 
     def request_data(self):
         request_data2mysql(
