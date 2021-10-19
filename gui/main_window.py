@@ -4,6 +4,7 @@ from method.logMethod import log_it, MainLog
 
 from gui.checkTree import CheckTree
 from gui.dataPix import DataPix
+from gui.stockListView import QStockListView, CodesDataFrame
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -73,6 +74,21 @@ class ReadSQLThread(QThread):
         self.lock.release()
 
 
+class QDataFrameModel(QStandardItemModel):
+    def __init__(self, df: pd.DataFrame):
+        self.df = df
+        super().__init__(*df.shape)
+        h_header = np.vectorize(lambda x: str(x))(df.columns.values)
+        v_header = np.vectorize(lambda x: str(x))(df.index.values)
+        self.setHorizontalHeaderLabels(h_header)
+        self.setVerticalHeaderLabels(v_header)
+
+        arr = df.values
+        for i in range(df.shape[0]):
+            for j in range(df.shape[1]):
+                self.setItem(i, j, QStandardItem(str(arr[i, j])))
+
+
 class MainWidget(QWidget):
     # code_index = 0
 
@@ -84,20 +100,13 @@ class MainWidget(QWidget):
         # with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
         #     self.code_list = pickle.load(pk_f)
 
-        with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
             txt = f.read()
-            self.code_list = re.findall(r'([0-9]{6})', txt)
-            self.code_list.reverse()
+            code_list = re.findall(r'([0-9]{6})', txt)
+            code_list.reverse()
 
-        with open('../basicData/code_names_dict.txt', 'r', encoding='utf-8') as f:
-            self.code_dict = json.loads(f.read())
-
-        with open('../basicData/industry/code_industry_dict.txt', 'r', encoding='utf-8') as f:
-            self.code_industry_dict = json.loads(f.read())
-
-        with open('../basicData/industry/industry_dict.txt', 'r', encoding='utf-8') as f:
-            self.industry_name_dict = json.loads(f.read())
+        self.codes_df = CodesDataFrame(code_list)
 
         time0 = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
         self.log_path = '../bufferData/logs/gui_log/gui_log_%s.txt' % time0
@@ -106,14 +115,11 @@ class MainWidget(QWidget):
         self.buffer = ReadSQLThread()
         self.buffer.signal1.connect(self.update_df_dict)
 
-        # self.stock_code = '002407'
-        # self.code_index = self.code_list.index(self.stock_code)
-
         self.code_index = 21
-        self.stock_code = self.code_list[self.code_index]
 
-        self.df = sql2df(code=self.stock_code)
-        self.df_dict[self.stock_code] = self.df
+        code = self.stock_code
+        self.df = sql2df(code=code)
+        self.df_dict[code] = self.df
         self.style_df = load_default_style()
 
         self.data_pix = DataPix(
@@ -136,72 +142,41 @@ class MainWidget(QWidget):
         self.editor1.setValidator(QIntValidator())
         self.editor1.setMaxLength(6)
 
-        p = QPalette()
-        p.setColor(QPalette.WindowText, Qt.red)
-        # p.setColor(QPalette.Background, color)
-
         self.stock_label = QLabel()
-        self.stock_label.setFont(QFont('Consolas', 20))
-        self.stock_label.setPalette(p)
-
         self.industry_label = QLabel()
-        self.industry_label.setFont(QFont('Consolas', 16))
-        self.industry_label.setPalette(p)
-
-
-        # print(2, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
         self.tree = CheckTree(self.style_df)
-        #
+
         self.tree.update_style.connect(self.update_data)
         self.data_pix.update_tree.connect(self.tree.update_tree)
-
-        # print(3, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 
         self.cross = False
         self.init_ui()
 
         self.buffer_df()
 
+    @property
+    def stock_code(self):
+        return str(self.codes_df.df.index.values[self.code_index])
+
+    @property
+    def len_list(self):
+        return int(self.codes_df.df.shape[0])
+
     def update_df_dict(self, tup):
         self.df_dict[tup[0]] = tup[1]
-
-    def buffer_df(self):
-        index1 = self.code_index
-        index2 = self.code_index
-        arr = np.array([], dtype='int32')
-
-        l0 = len(self.code_list)
-        l1 = (l0 - 1) / 2
-        l2 = 10
-
-        offset = int(min(l1, l2))
-
-        for i in range(offset):
-            if i < 10:
-                index1 += 1
-                arr = np.append(arr, index1)
-
-            if i < 2:
-                index2 -= 1
-                arr = np.append(arr, index2)
-        arr = arr % l0
-
-        tmp = list()
-        for index in arr:
-            stock_code = self.code_list[index]
-            if stock_code in self.df_dict.keys():
-                pass
-            else:
-                tmp.append(stock_code)
-
-        self.buffer.extend(tmp)
-        self.buffer.start()
 
     def init_ui(self):
 
         self.setWindowTitle('绘制图形')
         self.resize(1600, 900)
+
+        p = QPalette()
+        p.setColor(QPalette.WindowText, Qt.red)
+        self.stock_label.setFont(QFont('Consolas', 20))
+        self.stock_label.setPalette(p)
+        self.industry_label.setFont(QFont('Consolas', 16))
+        self.industry_label.setPalette(p)
 
         layout0 = QHBoxLayout()
         layout0.addWidget(self.industry_label, 1, Qt.AlignLeft | Qt.AlignBottom)
@@ -254,7 +229,7 @@ class MainWidget(QWidget):
         self.button4.clicked.connect(self.show_tree)
         self.button5.clicked.connect(self.request_data)
         self.button6.clicked.connect(self.save_code)
-        self.editor1.textChanged.connect(self.editor1_changed)
+        # self.editor1.textChanged.connect(self.editor1_changed)
 
         palette1 = QPalette()
         palette1.setColor(self.backgroundRole(), QColor(40, 40, 40, 255))
@@ -262,8 +237,10 @@ class MainWidget(QWidget):
         self.setAutoFillBackground(True)
 
     def save_code(self):
-        code = self.stock_code
-        name = self.code_dict.get(self.stock_code)
+        row = self.codes_df.df.iloc[self.code_index]
+
+        code = row['code']
+        name = row['name']
 
         path = "../bufferData/codes/self_select.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
@@ -281,19 +258,21 @@ class MainWidget(QWidget):
             f.write(res)
 
     def request_data(self):
+        code = self.stock_code
+
         request_data2mysql(
-            stock_code=self.stock_code,
+            stock_code=code,
             data_type='fs',
             start_date="2021-04-01",
         )
 
         request_data2mysql(
-            stock_code=self.stock_code,
+            stock_code=code,
             data_type='mvs',
             start_date="2021-04-01",
         )
 
-        self.df_dict[self.stock_code] = sql2df(code=self.stock_code)
+        self.df_dict[code] = sql2df(code=code)
         self.change_stock()
         # self.tree.exec_()
 
@@ -301,12 +280,12 @@ class MainWidget(QWidget):
         self.tree.show()
         # self.tree.exec_()
 
-    def editor1_changed(self, txt):
-        if txt in self.code_list:
-            self.code_index = self.code_list.index(txt)
-            self.stock_code = txt
-            self.buffer.clear()
-            self.change_stock()
+    # def editor1_changed(self, txt):
+    #     if txt in self.code_list:
+    #         self.code_index = self.code_list.index(txt)
+    #         self.stock_code = txt
+    #         self.buffer.clear()
+    #         self.change_stock()
 
     def scale_up(self):
         self.data_pix.scale_ratio = self.data_pix.scale_ratio * 2
@@ -325,44 +304,60 @@ class MainWidget(QWidget):
         self.data_pix.update_pix()
         self.update()
 
+    def buffer_df(self):
+        index1 = self.code_index
+        index2 = self.code_index
+        arr = np.array([], dtype='int32')
+
+        codes_df = self.codes_df.df
+
+        l0 = codes_df.shape[0]
+        l1 = (l0 - 1) / 2
+        l2 = 10
+
+        offset = int(min(l1, l2))
+
+        for i in range(offset):
+            if i < 10:
+                index1 += 1
+                arr = np.append(arr, index1)
+
+            if i < 2:
+                index2 -= 1
+                arr = np.append(arr, index2)
+        arr = arr % l0
+
+        tmp = list()
+        for index in arr:
+            stock_code = codes_df.index.values[index]
+            if stock_code in self.df_dict.keys():
+                pass
+            else:
+                tmp.append(stock_code)
+
+        self.buffer.extend(tmp)
+        self.buffer.start()
+
     def change_stock(self):
-        # print(stock_code, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
         self.buffer_df()
-        if self.stock_code in self.df_dict.keys():
-            self.df = self.df_dict[self.stock_code]
+        code = self.stock_code
+        if code in self.df_dict.keys():
+            self.df = self.df_dict[code]
         else:
-            self.df = sql2df(code=self.stock_code)
+            self.df = sql2df(code=code)
         self.update_data()
         self.show_stock_name()
 
-        # print('finished', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-
-    @staticmethod
-    def format_industry(i_code, i_code_dict):
-        i1 = i_code[:3]
-        i2 = i_code[:5]
-        i3 = i_code[:7]
-
-        val1 = i_code_dict[i1]
-        val2 = i_code_dict[i2]
-        val3 = i_code_dict[i3]
-
-        res = '%s-%s-%s' % (val1, val2, val3)
-        return res
-
     def show_stock_name(self):
-        name = self.code_dict.get(self.stock_code)
+        row = self.codes_df.df.iloc[self.code_index]
+        len_df = self.codes_df.df.shape[0]
 
-        industry_code = self.code_industry_dict.get(self.stock_code)
-
-        txt1 = '%s: %s(%s/%s)' % (self.stock_code, name, self.code_index, len(self.code_list))
-        txt2 = '行业: %s' % self.format_industry(industry_code, self.industry_name_dict)
+        txt1 = '%s: %s(%s/%s)' % (row['code'], row['name'], self.code_index, len_df)
+        txt2 = '行业: %s-%s-%s' % (row['level1'], row['level2'], row['level3'])
 
         GuiLog.add_log('show stock --> ' + txt1)
         self.stock_label.setText(txt1)
         self.industry_label.setText(txt2)
-
-        # todo: show stock_list, show type
 
     def center(self):
         qr = self.frameGeometry()
@@ -397,14 +392,12 @@ class MainWidget(QWidget):
         a = event.angleDelta().y() / 120
         if a < 0:
             self.code_index += 1
-            self.code_index = self.code_index % len(self.code_list)
-            self.stock_code = self.code_list[self.code_index]
+            self.code_index = self.code_index % self.len_list
             self.change_stock()
 
         elif a > 0:
             self.code_index -= 1
-            self.code_index = self.code_index % len(self.code_list)
-            self.stock_code = self.code_list[self.code_index]
+            self.code_index = self.code_index % self.len_list
             self.change_stock()
 
 
