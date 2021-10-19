@@ -106,7 +106,7 @@ class MainWidget(QWidget):
             code_list = re.findall(r'([0-9]{6})', txt)
             code_list.reverse()
 
-        self.codes_df = CodesDataFrame(code_list)
+        self.codes_df = CodesDataFrame(code_list, current_index=21)
 
         time0 = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
         self.log_path = '../bufferData/logs/gui_log/gui_log_%s.txt' % time0
@@ -115,7 +115,7 @@ class MainWidget(QWidget):
         self.buffer = ReadSQLThread()
         self.buffer.signal1.connect(self.update_df_dict)
 
-        self.code_index = 21
+        # self.code_index = 21
 
         code = self.stock_code
         self.df = sql2df(code=code)
@@ -137,6 +137,7 @@ class MainWidget(QWidget):
         self.button4 = QPushButton('style')
         self.button5 = QPushButton('request')
         self.button6 = QPushButton('save code')
+        self.button7 = QPushButton('code list')
 
         self.editor1 = QLineEdit()
         self.editor1.setValidator(QIntValidator())
@@ -146,9 +147,11 @@ class MainWidget(QWidget):
         self.industry_label = QLabel()
 
         self.tree = CheckTree(self.style_df)
+        self.code_widget = QStockListView(self.codes_df)
 
         self.tree.update_style.connect(self.update_data)
         self.data_pix.update_tree.connect(self.tree.update_tree)
+        self.code_widget.table_view.change_signal.connect(self.change_stock)
 
         self.cross = False
         self.init_ui()
@@ -156,8 +159,12 @@ class MainWidget(QWidget):
         self.buffer_df()
 
     @property
+    def code_index(self):
+        return self.codes_df.current_index
+
+    @property
     def stock_code(self):
-        return str(self.codes_df.df.index.values[self.code_index])
+        return str(self.codes_df.df.iloc[self.code_index]['code'])
 
     @property
     def len_list(self):
@@ -197,6 +204,7 @@ class MainWidget(QWidget):
         layout2.addWidget(self.button4, 0, Qt.AlignCenter)
         layout2.addWidget(self.button5, 0, Qt.AlignCenter)
         layout2.addWidget(self.button6, 0, Qt.AlignCenter)
+        layout2.addWidget(self.button7, 0, Qt.AlignCenter)
         layout2.addWidget(self.editor1, 0, Qt.AlignCenter)
         layout2.addStretch(1)
         # layout2.addWidget(button1, 0, Qt.AlignCenter)
@@ -229,6 +237,7 @@ class MainWidget(QWidget):
         self.button4.clicked.connect(self.show_tree)
         self.button5.clicked.connect(self.request_data)
         self.button6.clicked.connect(self.save_code)
+        self.button7.clicked.connect(self.show_code_list)
         # self.editor1.textChanged.connect(self.editor1_changed)
 
         palette1 = QPalette()
@@ -273,19 +282,21 @@ class MainWidget(QWidget):
         )
 
         self.df_dict[code] = sql2df(code=code)
-        self.change_stock()
+        self.change_stock(self.code_index)
         # self.tree.exec_()
 
     def show_tree(self):
         self.tree.show()
         # self.tree.exec_()
 
-    # def editor1_changed(self, txt):
-    #     if txt in self.code_list:
-    #         self.code_index = self.code_list.index(txt)
-    #         self.stock_code = txt
-    #         self.buffer.clear()
-    #         self.change_stock()
+    def show_code_list(self):
+        self.code_widget.show()
+
+    def editor1_changed(self, txt):
+        name_list = self.codes_df.df['name'].values
+        if txt in name_list:
+            new_index = name_list.index(txt)
+            self.change_stock(new_index)
 
     def scale_up(self):
         self.data_pix.scale_ratio = self.data_pix.scale_ratio * 2
@@ -329,7 +340,7 @@ class MainWidget(QWidget):
 
         tmp = list()
         for index in arr:
-            stock_code = codes_df.index.values[index]
+            stock_code = codes_df.iloc[index]['code']
             if stock_code in self.df_dict.keys():
                 pass
             else:
@@ -338,7 +349,11 @@ class MainWidget(QWidget):
         self.buffer.extend(tmp)
         self.buffer.start()
 
-    def change_stock(self):
+    def change_stock(self, new_index):
+        if abs(new_index - self.codes_df.current_index) > 1:
+            self.buffer.clear()
+
+        self.codes_df.current_index = new_index
         self.buffer_df()
         code = self.stock_code
         if code in self.df_dict.keys():
@@ -391,14 +406,12 @@ class MainWidget(QWidget):
     def wheelEvent(self, event):
         a = event.angleDelta().y() / 120
         if a < 0:
-            self.code_index += 1
-            self.code_index = self.code_index % self.len_list
-            self.change_stock()
+            new_index = (self.code_index + 1) % self.len_list
+            self.change_stock(new_index)
 
         elif a > 0:
-            self.code_index -= 1
-            self.code_index = self.code_index % self.len_list
-            self.change_stock()
+            new_index = (self.code_index - 1) % self.len_list
+            self.change_stock(new_index)
 
 
 class MainWindow(QMainWindow):
@@ -427,5 +440,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     # main = MainWindow()
     main = MainWidget()
-    main.showMaximized()
+    # main.showMaximized()
     sys.exit(app.exec_())
