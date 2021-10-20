@@ -1,16 +1,15 @@
-from method.dataMethod import *
+from method.dataMethod import get_value_from_ratio
 from method.mainMethod import get_units_dict
 from gui.dataSource import DataSource
 from gui.dataSource import DefaultDataSource
 from gui.informationBox import InformationBox
 
 from dateutil.rrule import *
+from collections import defaultdict
 
 import datetime as dt
 import numpy as np
-from collections import defaultdict
-
-import time
+import pandas as pd
 
 
 from PyQt5.QtCore import *
@@ -75,6 +74,9 @@ class DataPix(QObject):
         return self.parent.df
 
     def update_pix(self):
+        self.data_dict = dict()
+        self.default_ds = DefaultDataSource(parent=self)
+
         if len(self.df.index) == 0:
             self.init_pix()
             self.draw_struct()
@@ -83,12 +85,7 @@ class DataPix(QObject):
 
         self.reset_scale_all()
 
-        ds_dict = dict()
-
         style_df = self.style_df[self.style_df['selected'].values]
-
-        self.default_ds = DefaultDataSource(parent=self)
-
         for index, row in style_df.iterrows():
             data = self.df.loc[:, [row['index_name']]]
             data.dropna(inplace=True)
@@ -116,12 +113,11 @@ class DataPix(QObject):
                 ma_mode=row['ma_mode'],
                 frequency=row['frequency'],
             )
-            ds_dict[ds.index_name] = ds
+            self.data_dict[ds.index_name] = ds
 
             if ds.default_ds is True:
                 self.default_ds = ds
 
-        self.data_dict = ds_dict
         self.draw_pix()
         self.config_report_date()
 
@@ -149,7 +145,12 @@ class DataPix(QObject):
         default_row = style_df[style_df['default_ds'].values].iloc[0]
         ratio = get_units_dict()[default_row['units']]
 
-        scale_max = self.df[default_row['index_name']].max() * self.scale_ratio / ratio
+        max0 = self.df[default_row['index_name']].max()
+
+        if np.isnan(max0):
+            max0 = self.default_ds.data_max
+
+        scale_max = max0 * self.scale_ratio / ratio
         scale_min = scale_max / 1024
 
         self.style_df.loc[
@@ -400,53 +401,39 @@ class DataPix(QObject):
         pix_painter.end()
 
     def draw_data_dict(self):
-        for data in self.data_dict.values():
-            self.draw_data(data, self.pix)
+        for ds in self.data_dict.values():
+            self.draw_data(ds, self.pix)
 
-    def draw_data(self, data: DataSource, pix):
-        dates = data.df.index.values
-        val_x = np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(dates)
-        px_x = self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
+    def draw_data(self, ds: DataSource, pix):
+        val_x = self.x_date_str2value_vector(ds.df.index.values)
+        px_x = self.x_value2px_vector(val_x)
 
         # val_x = self.indexes_2_val_x(data.df.index.values)
         # px_x = self.val_x_2_px_x(val_x)
 
-        if data.ds_type == 'digit':
+        if ds.ds_type == 'digit':
+            data_y = ds.df.iloc[:, 0].values.copy()
 
-            pix_painter = QPainter(pix)
-            pen = QPen(data.color, data.line_thick, data.pen_type)
-            pix_painter.setPen(pen)
-
-            data_y = data.df.iloc[:, 0].values.copy()
-
-            # print(data.show_name)
-            # print(data_y)
-
-            if data.logarithmic is False:
+            if ds.logarithmic is False:
                 data_y[data_y == 0] = np.nan
-
-                df_point = pd.DataFrame()
-                df_point['px_x'] = px_x
-                df_point['px_y'] = (data.val_max - data_y) * self.data_rect.height() / data.val_delta + self.data_rect.top()
-
-                df_point.dropna(inplace=True)
-                point_list = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
-
             else:
-                # print(data.index_name, data.show_name)
                 px_x[np.isnan(data_y)] = np.nan
                 data_y[np.isnan(data_y)] = 0
                 data_y[data_y <= 0] = 1e-10
 
-                df_point = pd.DataFrame()
-                df_point['px_x'] = px_x
-                px_y = (data.val_max - np.log2(data_y / data.scale_min) / np.log2(data.scale_max / data.scale_min)) * self.data_rect.height() / data.val_delta + self.data_rect.top()
-                df_point['px_y'] = px_y
+            df_point = pd.DataFrame()
+            df_point['px_x'] = px_x
+            df_point['px_y'] = self.y_data2px_vector(data_y, ds)
+            df_point.dropna(inplace=True)
 
-                df_point.dropna(inplace=True)
-                point_list = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
+            point_list = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
 
-            if data.delta_mode is False:
+            # draw line
+            pix_painter = QPainter(pix)
+            pen = QPen(ds.color, ds.line_thick, ds.pen_type)
+            pix_painter.setPen(pen)
+
+            if ds.delta_mode is False:
                 if point_list:
                     pix_painter.drawPolyline(*point_list)
             else:
@@ -468,6 +455,9 @@ class DataPix(QObject):
         self.pix_show = QPixmap(self.pix)
 
         if x is None and y is None:
+            return
+
+        if not self.data_dict:
             return
 
         d_left = self.data_rect.left()
@@ -547,9 +537,9 @@ class DataPix(QObject):
         height = self.main_rect.height()
 
         pix_painter = QPainter(pix)
+
         mask = self.struct_pix.copy(x, y, width, height)
-        # mask = QPixmap(xwidth, height)
-        # mask.fill(QColor(40, 40, 40, 255))
+
         pix_painter.drawPixmap(x, y, mask)
         pix_painter.end()
 
@@ -736,4 +726,22 @@ class DataPix(QObject):
         date = self.x_px2data(px_x)
         value = self.y_px2data(px_y, data)
         return date, value
+
+    ###############################################################################################
+
+    def x_date_str2value_vector(self, array):
+        res = np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(array)
+        return res
+
+    def x_value2px_vector(self, array):
+        res = self.data_rect.x() + array * (self.data_rect.width() - 1) / self.d_date
+        return res
+
+    def y_data2px_vector(self, array, data):
+        if data.logarithmic is False:
+            res = (data.val_max - array) * self.data_rect.height() / data.val_delta + self.data_rect.top()
+        else:
+            res = (data.val_max - np.log2(array / data.scale_min) / np.log2(
+                data.scale_max / data.scale_min)) * self.data_rect.height() / data.val_delta + self.data_rect.top()
+        return res
 
