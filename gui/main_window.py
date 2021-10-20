@@ -97,7 +97,7 @@ class MainWidget(QWidget):
 
         code_list = self.get_code_list()
 
-        self.codes_df = CodesDataFrame(code_list, current_index=28)
+        self.codes_df = CodesDataFrame(code_list, current_index=9)
 
         time0 = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
         self.log_path = '../bufferData/logs/gui_log/gui_log_%s.txt' % time0
@@ -453,5 +453,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     # main = MainWindow()
     main = MainWidget()
-    main.showMaximized()
+    # main.showMaximized()
+    main.showMinimized()
     sys.exit(app.exec_())
