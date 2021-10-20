@@ -1,8 +1,10 @@
-from PyQt5.QtCore import *
 from method.mainMethod import get_units_dict
-from method.dataMethod import *
+from method.dataMethod import get_month_delta
+from method.dataMethod import get_month_data
+
+import pandas as pd
 import numpy as np
-import time
+import datetime as dt
 
 
 class DataSource:
@@ -105,7 +107,8 @@ class DataSource:
         else:
             try:
                 return self.format_fun(value)
-            except Exception:
+            except Exception as e:
+                print(e)
                 return repr(value)
 
     def set_val_scale(self):
@@ -174,8 +177,6 @@ class DataSource:
 
     @staticmethod
     def copy(data):
-        # todo: copy dataSource
-
         pass
 
 
@@ -191,8 +192,9 @@ class DefaultDataSource(DataSource):
         self.df = pd.DataFrame(columns=[self.index_name])
 
         index = dt.datetime.now().date().strftime("%Y-%m-%d")
-        value = 1024 * 1e8
-        self.df.loc[index] = [value]
+
+        self.data_max = 256 * 1e8
+        self.df.loc[index] = [self.data_max]
 
         self.ds_type = 'digit'
         self.delta_mode = False
@@ -207,8 +209,9 @@ class DefaultDataSource(DataSource):
 
         self.units = '亿'
         self.ratio = get_units_dict()[self.units]
-        self.scale_min = 1024 * self.ratio
-        self.scale_max = 1 * self.ratio
+
+        self.scale_max = self.data_max * parent.scale_ratio
+        self.scale_min = self.scale_max / 1024
 
         self.scale_div = 10
         self.logarithmic = True
