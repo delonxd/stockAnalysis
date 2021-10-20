@@ -95,18 +95,9 @@ class MainWidget(QWidget):
     def __init__(self):
         super().__init__()
 
-        # self.code_list = ['000002', '000004', '600004', '600006', '600007', '600008']
+        code_list = self.get_code_list()
 
-        # with open('../basicData/nfCodeList.pkl', 'rb') as pk_f:
-        #     self.code_list = pickle.load(pk_f)
-
-        # with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
-            txt = f.read()
-            code_list = re.findall(r'([0-9]{6})', txt)
-            code_list.reverse()
-
-        self.codes_df = CodesDataFrame(code_list, current_index=21)
+        self.codes_df = CodesDataFrame(code_list, current_index=28)
 
         time0 = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
         self.log_path = '../bufferData/logs/gui_log/gui_log_%s.txt' % time0
@@ -165,6 +156,10 @@ class MainWidget(QWidget):
     @property
     def stock_code(self):
         return str(self.codes_df.df.iloc[self.code_index]['code'])
+
+    @property
+    def stock_name(self):
+        return str(self.codes_df.df.iloc[self.code_index]['name'])
 
     @property
     def len_list(self):
@@ -395,8 +390,8 @@ class MainWidget(QWidget):
             self.draw_cross(pos.x(), pos.y())
             GuiLog.write(self.log_path)
 
-        elif event.button() == Qt.RightButton:
-            self.close()
+        # elif event.button() == Qt.RightButton:
+        #     self.close()
 
     def mouseMoveEvent(self, event):
         # if self.cross:
@@ -412,6 +407,24 @@ class MainWidget(QWidget):
         elif a > 0:
             new_index = (self.code_index - 1) % self.len_list
             self.change_stock(new_index)
+
+    @staticmethod
+    def get_code_list():
+        # code_list = ['000002', '000004', '600004', '600006', '600007', '600008']
+
+        with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
+            code_list = json.loads(f.read())
+
+        # with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
+        #     txt = f.read()
+        #     code_list = re.findall(r'([0-9]{6})', txt)
+        #     code_list.reverse()
+
+        # with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
+        #     txt = f.read()
+        #     code_list = re.findall(r'([0-9]{6})', txt)
+        #     code_list.reverse()
+        return code_list
 
 
 class MainWindow(QMainWindow):

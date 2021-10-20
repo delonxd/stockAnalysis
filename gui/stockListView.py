@@ -33,7 +33,7 @@ class CodesDataFrame:
         row = pd.Series(index=self.df.columns, dtype=str)
 
         row['code'] = code
-        row['name'] = self.code_names_dict[code]
+        row['name'] = self.code_names_dict.get(code)
 
         i_code = self.code_industry_dict.get(code)
         if i_code:
@@ -41,9 +41,9 @@ class CodesDataFrame:
             i2 = i_code[:5]
             i3 = i_code[:7]
 
-            row['level1'] = self.industry_name_dict[i1]
-            row['level2'] = self.industry_name_dict[i2]
-            row['level3'] = self.industry_name_dict[i3]
+            row['level1'] = self.industry_name_dict.get(i1)
+            row['level2'] = self.industry_name_dict.get(i2)
+            row['level3'] = self.industry_name_dict.get(i3)
             row['i_code'] = i_code
 
         self.df.loc[index] = row
