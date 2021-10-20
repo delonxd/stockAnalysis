@@ -240,6 +240,7 @@ def buffer2mysql(path, db, cursor, stock_code, data_type):
 
     if len(new_data.index) == 0:
         MainLog.add_log('    new data: None')
+        return
     else:
         MainLog.add_log('    new data:\n%s' % repr(new_data))
 
@@ -278,7 +279,7 @@ def request_data2mysql(stock_code, data_type, start_date):
 
     db, cursor = get_cursor(data_type)
 
-    buffer2mysql(
+    new_data = buffer2mysql(
         path=path,
         db=db,
         cursor=cursor,
@@ -288,6 +289,8 @@ def request_data2mysql(stock_code, data_type, start_date):
 
     db.close()
     move_buffer_file(path, data_type)
+
+    return new_data
 
 
 def test_request_data():

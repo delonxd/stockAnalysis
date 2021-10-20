@@ -23,6 +23,18 @@ class MainLog:
         with open(path, "w", encoding='utf-8') as f:
             f.write(cls.content)
 
+    @classmethod
+    def write_add(cls, path):
+        flag = True
+        while flag:
+            try:
+                with open(path, "a", encoding='utf-8') as f:
+                    f.write(cls.content)
+                flag = False
+            except Exception as e:
+                log_str = '\n%s\n' % e
+                cls.add_log(log_str)
+
 
 def get_log_time():
     return time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time()))
