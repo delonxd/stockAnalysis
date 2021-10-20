@@ -1,6 +1,7 @@
 from method.dataMethod import *
 from method.mainMethod import get_units_dict
 from gui.dataSource import DataSource
+from gui.dataSource import DefaultDataSource
 from gui.informationBox import InformationBox
 
 from dateutil.rrule import *
@@ -62,8 +63,8 @@ class DataPix(QObject):
         self.data_dict = None
         self.default_ds = None
 
-        self.report_dict = None
-        self.report_date = None
+        self.report_dict = dict()
+        self.report_date = list()
 
         self.scale_ratio = 4
 
@@ -85,6 +86,8 @@ class DataPix(QObject):
         ds_dict = dict()
 
         style_df = self.style_df[self.style_df['selected'].values]
+
+        self.default_ds = DefaultDataSource(parent=self)
 
         for index, row in style_df.iterrows():
             data = self.df.loc[:, [row['index_name']]]
@@ -123,21 +126,22 @@ class DataPix(QObject):
         self.config_report_date()
 
     def config_report_date(self):
-        df = self.data_dict['reportDate'].df
-        dates1 = np.vectorize(lambda x: x[:10])(df.iloc[:, 0].values)
-        val_x1 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates1)
+        if 'reportDate' in self.data_dict.keys():
+            df = self.data_dict['reportDate'].df
+            dates1 = np.vectorize(lambda x: x[:10])(df.iloc[:, 0].values)
+            val_x1 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates1)
 
-        dates2 = df.index.values
-        val_x2 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates2)
+            dates2 = df.index.values
+            val_x2 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates2)
 
-        dict0 = defaultdict(int)
-        for index in range(val_x1.shape[0]):
-            dict0[val_x1[index]] = val_x2[index]
+            dict0 = defaultdict(int)
+            for index in range(val_x1.shape[0]):
+                dict0[val_x1[index]] = val_x2[index]
 
-        self.report_dict = dict0
-        list0 = list(dict0.keys())
-        list0.sort()
-        self.report_date = list0
+            self.report_dict = dict0
+            list0 = list(dict0.keys())
+            list0.sort()
+            self.report_date = list0
 
     def reset_scale_all(self):
         style_df = self.style_df[self.style_df['selected'].values]
@@ -492,7 +496,9 @@ class DataPix(QObject):
 
         if not val_x1:
             val_x1 = self.report_date[0]
+
         val_x2 = self.report_dict.get(val_x1)
+        val_x2 = val_x2 if val_x2 else val_x1
 
         px_x0 = x
         px_x2 = self.x_value2px(val_x2)
@@ -580,6 +586,9 @@ class DataPix(QObject):
 
     @staticmethod
     def get_last_value(x, x_list):
+        if not x_list:
+            return x
+
         last = None
         for px in x_list:
             if x < px:

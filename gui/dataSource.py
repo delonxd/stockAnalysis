@@ -131,22 +131,24 @@ class DataSource:
                 self.df = get_month_data(df=self.df, new_name=self.index_name)
 
             if self.ma_mode > 1:
-                array0 = self.df.iloc[:, 0].values.copy()
+                # array0 = self.df.iloc[:, 0].values.copy()
+                #
+                # first = self.ma_mode - 1
+                # array1 = array0[first:]
+                #
+                # last = 0
+                # while first:
+                #     first -= 1
+                #     last -= 1
+                #     array1 = array1 + array0[first:last].copy()
+                #
+                # array1 = array1 / self.ma_mode
+                # # print('array1', array1)
+                # indexes = self.df.index.values[(self.ma_mode - 1):]
+                #
+                # self.df = pd.DataFrame(array1, index=indexes, columns=[self.index_name])
 
-                first = self.ma_mode - 1
-                array1 = array0[first:]
-
-                last = 0
-                while first:
-                    first -= 1
-                    last -= 1
-                    array1 = array1 + array0[first:last].copy()
-
-                array1 = array1 / self.ma_mode
-                # print('array1', array1)
-                indexes = self.df.index.values[(self.ma_mode - 1):]
-
-                self.df = pd.DataFrame(array1, index=indexes, columns=[self.index_name])
+                self.df = self.df.rolling(self.ma_mode, min_periods=1).sum()
 
     def init_offsets(self):
         if self.frequency == 'DAILY':
@@ -175,3 +177,52 @@ class DataSource:
         # todo: copy dataSource
 
         pass
+
+
+class DefaultDataSource(DataSource):
+    def __init__(self, parent):
+        self.parent = parent
+
+        self.default_ds = True
+
+        self.index_name = 'DefaultDataSource'
+        self.show_name = 'DefaultDataSource'
+
+        self.df = pd.DataFrame(columns=[self.index_name])
+
+        index = dt.datetime.now().date().strftime("%Y-%m-%d")
+        value = 1024 * 1e8
+        self.df.loc[index] = [value]
+
+        self.ds_type = 'digit'
+        self.delta_mode = False
+        self.ma_mode = 0
+        self.frequency = None
+
+        self.format_data_source()
+
+        self.color = None
+        self.line_thick = None
+        self.pen_type = None
+
+        self.units = '亿'
+        self.ratio = get_units_dict()[self.units]
+        self.scale_min = 1024 * self.ratio
+        self.scale_max = 1 * self.ratio
+
+        self.scale_div = 10
+        self.logarithmic = True
+
+        self.info_priority = 0
+
+        self.val_max = None
+        self.val_min = None
+        self.val_delta = None
+        self.metrics = None
+
+        self.set_val_scale()
+
+        self.format_fun = lambda x: '%.2f%s' % (x / self.ratio, self.units)
+
+        self.df.columns = [self.index_name]
+        self.offsets = None

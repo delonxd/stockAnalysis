@@ -14,7 +14,7 @@ class InformationBox:
 
     def load_value(self, px_x):
         date = self.parent.px_dict.get(px_x)
-        date_index = date.strftime("%Y-%m-%d")
+        date_index = date.strftime("%Y-%m-%d") if date else None
         box_df = pd.DataFrame(columns=['priority', 'data_source', 'show_name', 'value', 'real_date'])
 
         for ds in self.parent.data_dict.values():
@@ -53,8 +53,9 @@ class InformationBox:
         box_df.sort_values('priority', inplace=True)
 
         res = list()
-        txt = date.strftime("%Y-%m-%d")
-        res.append(('日期: %s' % txt, QPen(Qt.white, 1, Qt.SolidLine)))
+        if date:
+            txt = date.strftime("%Y-%m-%d")
+            res.append(('日期: %s' % txt, QPen(Qt.white, 1, Qt.SolidLine)))
 
         for _, row in box_df.iterrows():
             name, value, ds = row['show_name'], row['value'], row['data_source']
