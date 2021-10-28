@@ -72,7 +72,7 @@ class InformationBox:
     def draw_pix(self, px_x):
         text_list = self.load_value(px_x)
 
-        pix = QPixmap(400, 800)
+        pix = QPixmap(900, 800)
         pix.fill(QColor(0, 0, 0, 30))
 
         pix_painter = QPainter(pix)
