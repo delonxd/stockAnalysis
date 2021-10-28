@@ -1,10 +1,14 @@
-from method.dataMethod import *
+from method.dataMethod import sql2df
 from request.requestData import request_data2mysql
 from method.logMethod import log_it, MainLog
+from method.mainMethod import get_part_codes
 
 from gui.checkTree import CheckTree
 from gui.dataPix import DataPix
 from gui.stockListView import QStockListView, CodesDataFrame
+
+from gui.styleDataFrame import load_default_style
+from gui.styleDataFrame import save_default_style
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -17,6 +21,7 @@ import threading
 import time
 
 import numpy as np
+import pandas as pd
 
 
 class GuiLog(MainLog):
@@ -97,7 +102,10 @@ class MainWidget(QWidget):
 
         code_list = self.get_code_list()
 
-        self.codes_df = CodesDataFrame(code_list, current_index=9)
+        self.codes_df = CodesDataFrame(code_list)
+        # self.codes_df.init_current_index(index=62)
+        # self.codes_df.init_current_index(code='600438')
+        # self.codes_df.init_current_index(code='000921')
 
         time0 = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
         self.log_path = '../bufferData/logs/gui_log/gui_log_%s.txt' % time0
@@ -288,9 +296,9 @@ class MainWidget(QWidget):
         self.code_widget.show()
 
     def editor1_changed(self, txt):
-        name_list = self.codes_df.df['name'].values
-        if txt in name_list:
-            new_index = name_list.index(txt)
+        code_list = self.codes_df.df['code'].tolist()
+        if txt in code_list:
+            new_index = code_list.index(txt)
             self.change_stock(new_index)
 
     def scale_up(self):
@@ -412,15 +420,16 @@ class MainWidget(QWidget):
     def get_code_list():
         # code_list = ['000002', '000004', '600004', '600006', '600007', '600008']
 
-        with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
+        #     code_list = json.loads(f.read())
+
+        # with open("..\\basicData\\analyzedData\\jlr_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\analyzedData\\roe_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
-        # with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
-        #     txt = f.read()
-        #     code_list = re.findall(r'([0-9]{6})', txt)
-        #     code_list.reverse()
+        code_list = get_part_codes(code_list)
 
-        # with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\selected_0514.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     txt = f.read()
         #     code_list = re.findall(r'([0-9]{6})', txt)
         #     code_list.reverse()
