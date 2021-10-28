@@ -151,7 +151,8 @@ class DataSource:
                 #
                 # self.df = pd.DataFrame(array1, index=indexes, columns=[self.index_name])
 
-                self.df = self.df.rolling(self.ma_mode, min_periods=1).sum()
+                # self.df = self.df.rolling(self.ma_mode, min_periods=1).sum()
+                self.df = self.df.rolling(self.ma_mode, min_periods=1).mean()
 
     def init_offsets(self):
         if self.frequency == 'DAILY':
