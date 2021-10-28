@@ -121,5 +121,15 @@ def get_units_dict():
     return res
 
 
+def get_part_codes(code_list):
+
+    new_list = []
+    for code in code_list:
+        if code[0] == '0' or code[0] == '6':
+            if code[:3] != '688':
+                new_list.append(code)
+    return new_list
+
+
 if __name__ == '__main__':
     pass
