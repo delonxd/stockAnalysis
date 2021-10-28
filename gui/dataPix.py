@@ -87,6 +87,8 @@ class DataPix(QObject):
 
         style_df = self.style_df[self.style_df['selected'].values]
         for index, row in style_df.iterrows():
+            if not row['index_name'] in self.df.columns:
+                continue
             data = self.df.loc[:, [row['index_name']]]
             data.dropna(inplace=True)
 
