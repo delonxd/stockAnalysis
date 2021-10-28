@@ -405,6 +405,8 @@ class DataPix(QObject):
             self.draw_data(ds, self.pix)
 
     def draw_data(self, ds: DataSource, pix):
+        if ds.df.index.size == 0:
+            return
         val_x = self.x_date_str2value_vector(ds.df.index.values)
         px_x = self.x_value2px_vector(val_x)
 
