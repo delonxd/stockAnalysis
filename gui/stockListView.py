@@ -51,6 +51,18 @@ class CodesDataFrame:
     def sort_values(self, columns, ascending=True):
         self.df.sort_values(columns, ascending=ascending, inplace=True)
 
+    def init_current_index(self, index=None, code=None):
+
+        if index is not None:
+            self.current_index = index
+            return
+
+        if code is not None:
+            code_list = self.df['code'].tolist()
+            if code in code_list:
+                self.current_index = code_list.index(code)
+            return
+
 
 class QDataFrameTable(QTableWidget):
     change_signal = pyqtSignal(int)
@@ -113,15 +125,19 @@ class QStockListView(QWidget):
 
 
 def test_codes_data_frame():
-    import re
-    # with open("F:\\Backups\\价值投资0406.txt", "r", encoding="utf-8", errors="ignore") as f:
-    with open("C:\\Backups\\价值投资0514.txt", "r", encoding="utf-8", errors="ignore") as f:
-        txt = f.read()
-        code_list = re.findall(r'([0-9]{6})', txt)
-        code_list.reverse()
+    # import re
+    # with open("..\\basicData\\selected_0514.txt", "r", encoding="utf-8", errors="ignore") as f:
+    #     txt = f.read()
+    #     code_list = re.findall(r'([0-9]{6})', txt)
+    #     code_list.reverse()
+
+    with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
+        code_list = json.loads(f.read())
 
     tmp = CodesDataFrame(code_list)
     print(tmp.df)
+
+    tmp.init_current_index(code='600000')
 
 
 if __name__ == '__main__':
