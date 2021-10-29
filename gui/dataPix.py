@@ -65,6 +65,9 @@ class DataPix(QObject):
         self.report_dict = dict()
         self.report_date = list()
 
+        self.dt_fs = pd.Series()
+        self.dt_mvs = pd.Series()
+
         self.scale_ratio = 4
 
         self.update_pix()
@@ -74,6 +77,9 @@ class DataPix(QObject):
         return self.parent.df
 
     def update_pix(self):
+        self.dt_fs = self.df['reportDate'].copy().dropna()
+        self.dt_mvs = self.df['date_mvs'].copy().dropna()
+
         self.data_dict = dict()
         self.default_ds = DefaultDataSource(parent=self)
 
@@ -124,6 +130,15 @@ class DataPix(QObject):
         self.config_report_date()
 
     def config_report_date(self):
+        dict0 = dict()
+        for index, value in self.dt_fs.iteritems():
+            dict0[value[:10]] = index
+
+        self.dt_fs = pd.Series(dict0, name='dt_fs')
+        self.dt_fs.sort_index(inplace=True)
+
+        self.dt_mvs = pd.Series(self.dt_mvs.index, name='dt_mvs', index=self.dt_mvs.index)
+
         if 'reportDate' in self.data_dict.keys():
             df = self.data_dict['reportDate'].df
             dates1 = np.vectorize(lambda x: x[:10])(df.iloc[:, 0].values)

@@ -103,7 +103,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=171)
+        self.codes_df.init_current_index(index=300)
         # self.codes_df.init_current_index(code='600438')
         # self.codes_df.init_current_index(code='000921')
 
@@ -241,7 +241,7 @@ class MainWidget(QWidget):
         self.button5.clicked.connect(self.request_data)
         self.button6.clicked.connect(self.save_code)
         self.button7.clicked.connect(self.show_code_list)
-        # self.editor1.textChanged.connect(self.editor1_changed)
+        self.editor1.textChanged.connect(self.editor1_changed)
 
         palette1 = QPalette()
         palette1.setColor(self.backgroundRole(), QColor(40, 40, 40, 255))
@@ -275,13 +275,13 @@ class MainWidget(QWidget):
         request_data2mysql(
             stock_code=code,
             data_type='fs',
-            start_date="2021-04-01",
+            start_date="1970-01-01",
         )
 
         request_data2mysql(
             stock_code=code,
             data_type='mvs',
-            start_date="2021-04-01",
+            start_date="1970-01-01",
         )
 
         self.df_dict[code] = sql2df(code=code)
