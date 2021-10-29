@@ -1,6 +1,7 @@
 from method.sqlMethod import get_data_frame, sql_if_table_exists
 from request.requestData import get_cursor
 from request.requestData import get_header_df
+from request.requestData import request_data2mysql
 
 import pandas as pd
 import numpy as np
@@ -219,22 +220,30 @@ def get_roe_from_df(df: pd.DataFrame):
 
 
 def sql2df(code):
-
-    # request_data2mysql(
-    #     stock_code=code,
-    #     data_type='fs',
-    #     start_date="2021-01-01",
-    # )
-    #
-    # request_data2mysql(
-    #     stock_code=code,
-    #     data_type='mvs',
-    #     # start_date="2021-01-01",
-    #     start_date="1970-01-01",
-    # )
+    today = dt.date.today().strftime("%Y-%m-%d")
 
     df1 = load_df_from_mysql(code, 'fs')
+    d0 = df1.iloc[-1, :]['last_update'][:10]
+
+    if not d0 == today:
+        request_data2mysql(
+            stock_code=code,
+            data_type='fs',
+            start_date="2021-04-01",
+        )
+        df1 = load_df_from_mysql(code, 'fs')
+
     df2 = load_df_from_mysql(code, 'mvs')
+    d0 = df2.iloc[-1, :]['last_update'][:10]
+
+    if not d0 == today:
+        request_data2mysql(
+            stock_code=code,
+            data_type='mvs',
+            start_date="2021-04-01",
+            # start_date="1970-01-01",
+        )
+        df2 = load_df_from_mysql(code, 'mvs')
 
     df = pd.merge(df1, df2, how='outer', left_index=True, right_index=True,
                   sort=True, suffixes=('_mvs', '_fs'), copy=True)
