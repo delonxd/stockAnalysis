@@ -246,7 +246,7 @@ def sql2df(code):
         df2 = load_df_from_mysql(code, 'mvs')
 
     df = pd.merge(df1, df2, how='outer', left_index=True, right_index=True,
-                  sort=True, suffixes=('_mvs', '_fs'), copy=True)
+                  sort=True, suffixes=('_fs', '_mvs'), copy=True)
 
     df_roe = get_roe_from_df(df)
     df_roe.columns = ['s_001_roe']
