@@ -103,8 +103,8 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=300)
-        # self.codes_df.init_current_index(code='600438')
+        self.codes_df.init_current_index(index=0)
+        # self.codes_df.init_current_index(code='600282')
         # self.codes_df.init_current_index(code='000921')
 
         time0 = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
@@ -254,17 +254,29 @@ class MainWidget(QWidget):
         code = row['code']
         name = row['name']
 
-        path = "../bufferData/codes/self_select.txt"
+        # path = "../bufferData/codes/self_select.txt"
+        # with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        #     code_list = json.loads(f.read())
+        #
+        # if code_list:
+        #     x, y = zip(*code_list)
+        #
+        #     if code in x:
+        #         return
+        #
+        # code_list.append((code, name))
+        # res = json.dumps(code_list, indent=4, ensure_ascii=False)
+        # with open(path, "w", encoding='utf-8') as f:
+        #     f.write(res)
+
+        path = "../bufferData/codes/blacklist.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
-        if code_list:
-            x, y = zip(*code_list)
+        if code in code_list:
+            return
 
-            if code in x:
-                return
-
-        code_list.append((code, name))
+        code_list.append(code)
         res = json.dumps(code_list, indent=4, ensure_ascii=False)
         with open(path, "w", encoding='utf-8') as f:
             f.write(res)
@@ -418,16 +430,20 @@ class MainWidget(QWidget):
 
     @staticmethod
     def get_code_list():
+        with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
+            blacklist = json.loads(f.read())
+
         # code_list = ['000002', '000004', '600004', '600006', '600007', '600008']
 
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     code_list = json.loads(f.read())
 
         # with open("..\\basicData\\analyzedData\\jlr_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\analyzedData\\roe_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\analyzedData\\roe_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\analyzedData\\revenue_rate_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
-        code_list = get_part_codes(code_list)
+        code_list = get_part_codes(code_list, blacklist=blacklist)
 
         # with open("..\\basicData\\selected_0514.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     txt = f.read()
