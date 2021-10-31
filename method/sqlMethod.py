@@ -218,12 +218,13 @@ def get_sql_header(data_header, ini_header):
 
 
 def get_data_frame(cursor, table):
-    check_str = sql_format_select(
-        select='COLUMN_name',
-        table='information_schema.COLUMNS',
-        where='table_name = "%s"' % table,
-        order_by='ordinal_position',
-    )
+    # check_str = sql_format_select(
+    #     select='COLUMN_name',
+    #     table='information_schema.COLUMNS',
+    #     where='table_name = "%s"' % table,
+    #     order_by='ordinal_position',
+    # )
+    check_str = 'SHOW FIELDS FROM %s;' % table
     cursor.execute(check_str)
     res = cursor.fetchall()
 
