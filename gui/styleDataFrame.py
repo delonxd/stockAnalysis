@@ -94,9 +94,11 @@ def save_default_style(df):
         pickle.dump(df, pk_f)
 
 
-def add_new_style(df: pd.DataFrame, index_name):
-
-    row = df[df['default_ds'] == True].copy()
+def add_new_style(df: pd.DataFrame, index_name, src=None):
+    if src is None:
+        row = df[df['default_ds'] == True].copy()
+    else:
+        row = df.loc[[src], :].copy()
 
     row['default_ds'] = False
     row['selected'] = False
@@ -122,7 +124,15 @@ if __name__ == '__main__':
     pd.set_option('max_colwidth', 150)
     # test_analysis()
     df0 = load_default_style()
-    res = add_new_style(df0, 's_001_roe')
+    # df0 = add_new_style(df0, 's_002_equity')
+    # df0 = add_new_style(df0, 's_003_profit')
+    # df0 = add_new_style(df0, 's_004_pe', src='id_001_mvs_pe_ttm')
+    # df0 = add_new_style(df0, 's_005_stocks')
+    # df0 = add_new_style(df0, 's_006_stocks_rate', src='id_004_bs_tca_ta_r')
+    # df0 = add_new_style(df0, 's_007_asset')
+    # df0 = add_new_style(df0, 's_008_revenue')
+    # df0 = add_new_style(df0, 's_009_revenue_rate', src='id_004_bs_tca_ta_r')
+    # df0.drop('s_004_pe', inplace=True)
 
-    save_default_style(res)
+    save_default_style(df0)
     pass
