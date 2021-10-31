@@ -1,6 +1,6 @@
 
 from method.urlMethod import data_request
-
+from method.mainMethod import get_part_codes
 from method.mainMethod import res2df_fs, res2df_mvs
 # from method.mainMethod import get_header_df, get_header_df_mvs
 
@@ -302,25 +302,30 @@ def test_request_data():
     #     code_list = re.findall(r'([0-9]{6})', txt)
     #     code_list.reverse()
 
-    with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
+    # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
+    #     code_list = json.loads(f.read())
+
+    with open("..\\basicData\\analyzedData\\roe_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
+
+    code_list = get_part_codes(code_list)
 
     print(code_list)
     length = len(code_list)
-    start = code_list.index('600000')
-    index = start
-    while index < start + 55:
+    # start = code_list.index('600000')
+    index = 700
+    while index < length:
         print('\nindex --> ', index, '\n')
-        # request_data2mysql(
-        #     stock_code=code_list[index],
-        #     data_type='fs',
-        #     start_date='1970-01-01',
-        # )
+        request_data2mysql(
+            stock_code=code_list[index],
+            data_type='fs',
+            start_date='2021-04-01',
+        )
 
         request_data2mysql(
             stock_code=code_list[index],
             data_type='mvs',
-            start_date='1970-01-01',
+            start_date='2021-04-01',
         )
         index += 1
 
