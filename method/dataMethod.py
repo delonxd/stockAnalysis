@@ -5,6 +5,7 @@ from request.requestData import request_data2mysql
 
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 import datetime as dt
 from dateutil.relativedelta import relativedelta
@@ -188,72 +189,357 @@ def get_month_delta(df: pd.DataFrame, new_name, mode='QUARTERLY'):
     return res_df
 
 
-def get_roe_from_df(df: pd.DataFrame):
-    profit0 = df.loc[:, ['id_211_ps_np']]
-    profit0.dropna(inplace=True)
-
-    profit = get_month_delta(profit0, 'profit')
-    profit = profit.rolling(4, min_periods=1).mean()
-
-    equity0 = df.loc[:, ['id_110_bs_toe']]
-    equity0.dropna(inplace=True)
-    equity = get_month_data(equity0, 'equity')
-
-    res_df = pd.concat([profit, equity], axis=1, sort=True, join='inner')
-
-    a = res_df['profit'].values
-    b = res_df['equity'].values
-    c = b - a
-    c[c <= 0] = np.nan
-    d = a / c
-
-    if d.size == 0:
-        return pd.DataFrame(columns=['roe'])
-
-    d[np.isnan(d)] = -np.inf
-    d[d <= -50] = -np.inf
-    d[d == -np.inf] = np.nan
-    res_df['roe'] = np.around(d, decimals=2)
-
-    res = res_df.loc[:, ['roe']]
-    return res
-
-
 def sql2df(code):
     today = dt.date.today().strftime("%Y-%m-%d")
 
     df1 = load_df_from_mysql(code, 'fs')
-    d0 = df1.iloc[-1, :]['last_update'][:10]
+    d0 = '' if df1.shape[0] == 0 else df1.iloc[-1, :]['last_update'][:10]
 
-    if not d0 == today:
-        request_data2mysql(
-            stock_code=code,
-            data_type='fs',
-            start_date="2021-04-01",
-        )
-        df1 = load_df_from_mysql(code, 'fs')
+    # if not d0 == today:
+    #     request_data2mysql(
+    #         stock_code=code,
+    #         data_type='fs',
+    #         start_date="2021-04-01",
+    #     )
+    #     df1 = load_df_from_mysql(code, 'fs')
 
     df2 = load_df_from_mysql(code, 'mvs')
-    d0 = df2.iloc[-1, :]['last_update'][:10]
+    d0 = '' if df2.shape[0] == 0 else df2.iloc[-1, :]['last_update'][:10]
 
-    if not d0 == today:
-        request_data2mysql(
-            stock_code=code,
-            data_type='mvs',
-            start_date="2021-04-01",
-            # start_date="1970-01-01",
+    # if not d0 == today:
+    #     request_data2mysql(
+    #         stock_code=code,
+    #         data_type='mvs',
+    #         start_date="2021-04-01",
+    #         # start_date="1970-01-01",
+    #     )
+    #     df2 = load_df_from_mysql(code, 'mvs')
+
+    data = DataAnalysis(df1, df2)
+    data.config_widget_data()
+    return data.df
+
+
+class DataAnalysis:
+    def __init__(self, df_fs: pd.DataFrame, df_mvs: pd.DataFrame):
+        self.df_fs = df_fs
+        self.df_mvs = df_mvs
+        self.df = pd.DataFrame()
+
+    def config_widget_data(self):
+        self.df_fs = self.get_dt_fs(add=True)
+        self.df_mvs = self.get_dt_mvs(add=True)
+        self.df_mvs = self.get_last_report(add=True)
+
+        self.df_fs = self.get_asset(add=True)
+        self.df_fs = self.get_equity(add=True)
+        self.df_fs = self.get_stocks(add=True)
+        self.df_fs = self.get_profit(add=True)
+
+        self.df_fs = self.get_roe(add=True)
+        self.df_fs = self.get_stocks_rate(add=True)
+
+        self.df_fs = self.get_revenue(add=True)
+        self.df_fs = self.get_revenue_rate(add=True)
+
+        self.df_mvs = self.get_pe(add=True)
+        self.set_df()
+
+    def set_df(self):
+        self.df = pd.merge(
+            self.df_fs,
+            self.df_mvs,
+            how='outer',
+            left_index=True,
+            right_index=True,
+            sort=True,
+            suffixes=('_fs', '_mvs'),
+            copy=True,
         )
-        df2 = load_df_from_mysql(code, 'mvs')
 
-    df = pd.merge(df1, df2, how='outer', left_index=True, right_index=True,
-                  sort=True, suffixes=('_fs', '_mvs'), copy=True)
+    def get_dt_fs(self, add=False):
+        df = self.df_fs
+        name = 'dt_fs'
 
-    df_roe = get_roe_from_df(df)
-    df_roe.columns = ['s_001_roe']
-    df = pd.merge(df, df_roe, how='outer', left_index=True, right_index=True,
-                  sort=True, suffixes=('_id', '_self'), copy=True)
+        if name in df.columns:
+            new_df = df.loc[:, [name]].copy().dropna()
+            return new_df if add is False else df
+        else:
+            dt_fs = df['reportDate'].copy().dropna()
+            dict0 = dict()
+            for index, value in dt_fs.iteritems():
+                dict0[value[:10]] = index
 
-    return df
+            dt_fs = pd.Series(dict0, name=name)
+            dt_fs.sort_index(inplace=True)
+            new_df = pd.DataFrame(dt_fs)
+            return self.return_df(df, new_df, add=add)
+
+    def get_dt_mvs(self, add=False):
+        df = self.df_mvs
+        name = 'dt_mvs'
+
+        if name in df.columns:
+            new_df = df.loc[:, [name]].copy().dropna()
+            return new_df if add is False else df
+        else:
+            new_df = pd.DataFrame(df.index.values, index=df.index, columns=[name])
+            return self.return_df(df, new_df, add=add)
+
+    def get_last_report(self, add=False):
+        df = self.df_mvs
+        name = 'last_report'
+
+        if name in df.columns:
+            new_df = df.loc[:, [name]].copy().dropna()
+            return new_df if add is False else df
+        else:
+            dt_mvs = self.get_dt_mvs()
+            dt_fs = self.get_dt_fs()
+
+            dict0 = dt_fs.iloc[:, 0].to_dict()
+            it = iter(dt_fs.index.values[::-1])
+
+            last_report = pd.Series(index=dt_mvs.index, name=name)
+
+            d0 = 'a'
+            dates = dt_mvs.index.values[::-1]
+            index = dates.size
+            for date in dates:
+                index -= 1
+                while date < d0:
+                    try:
+                        d0 = it.__next__()
+                    except StopIteration:
+                        break
+                if d0 == 'a':
+                    break
+                last_report.iloc[index] = dict0[d0]
+
+            new_df = pd.DataFrame(last_report)
+            return self.return_df(df, new_df, add=add)
+
+    def get_equity(self, add=False):
+        res = self.get_smooth_data(
+            df=self.df_fs,
+            src='id_110_bs_toe',
+            name='s_002_equity',
+            add=add,
+            delta=False,
+        )
+        return res
+
+    def get_profit(self, add=False):
+        res = self.get_smooth_data(
+            df=self.df_fs,
+            src='id_211_ps_np',
+            name='s_003_profit',
+            add=add,
+            delta=True,
+            ttm=True,
+        )
+        return res
+
+    def get_stocks(self, add=False):
+        res = self.get_smooth_data(
+            df=self.df_fs,
+            src='id_023_bs_i',
+            name='s_005_stocks',
+            add=add,
+            delta=False,
+        )
+        return res
+
+    def get_asset(self, add=False):
+        res = self.get_smooth_data(
+            df=self.df_fs,
+            src='id_001_bs_ta',
+            name='s_007_asset',
+            add=add,
+            delta=False,
+        )
+        return res
+
+    def get_revenue(self, add=False):
+        res = self.get_smooth_data(
+            df=self.df_fs,
+            src='id_157_ps_toi',
+            name='s_008_revenue',
+            add=add,
+            delta=True,
+            ttm=True,
+        )
+        return res
+
+    def get_revenue_rate(self, add=False):
+        name = 's_009_revenue_rate'
+        df = self.df_fs
+        if name in df.columns:
+            new_df = df.loc[:, [name]].copy().dropna()
+            return new_df if add is False else df
+        else:
+            df1 = self.get_revenue()
+            new_df = self.get_growth_rate(df1, name)
+            return self.return_df(df, new_df, add=add)
+
+    def get_roe(self, add=False):
+        name = 's_001_roe'
+        df = self.df_fs
+
+        if name in df.columns:
+            new_df = df.loc[:, [name]].copy().dropna()
+            return new_df if add is False else df
+        else:
+            df1 = self.get_profit()
+            df2 = self.get_equity()
+
+            con = pd.concat([df1, df2], axis=1, sort=True, join='inner')
+
+            a = con[df1.columns[0]].values
+            b = con[df2.columns[0]].values
+            c = b - a
+            c[c <= 0] = np.nan
+            d = a / c
+
+            if d.size > 0:
+                d[np.isnan(d)] = -np.inf
+                d[d <= -50] = -np.inf
+                d[d == -np.inf] = np.nan
+
+            con[name] = np.around(d, decimals=2)
+            new_df = con.loc[:, [name]].copy()
+            return self.return_df(df, new_df, add=add)
+
+    def get_pe(self, add=False):
+        name = 's_004_pe'
+        df = self.df_mvs
+
+        if name in df.columns:
+            new_df = df.loc[:, [name]].copy().dropna()
+            return new_df if add is False else df
+        else:
+            s1 = df['id_041_mvs_mc'].copy().dropna()
+            s2 = self.get_profit().iloc[:, 0]
+            last_report = self.get_last_report().iloc[:, 0]
+
+            new = pd.Series(index=last_report.index, name=name)
+            counter = 0
+            for index, value in last_report.iteritems():
+                try:
+                    a = s1[index]
+                except Exception as e:
+                    # print(e)
+                    a = np.nan
+                try:
+                    b = s2[value]
+                except Exception as e:
+                    # print(e)
+                    b = np.nan
+
+                new[counter] = a / b
+                counter += 1
+            new_df = pd.DataFrame(new)
+
+            return self.return_df(df, new_df, add=add)
+
+    def get_stocks_rate(self, add=False):
+        name = 's_006_stocks_rate'
+        df = self.df_fs
+
+        if name in df.columns:
+            new_df = df.loc[:, [name]].copy().dropna()
+            return new_df if add is False else df
+        else:
+            df1 = self.get_stocks()
+            df2 = self.get_asset()
+
+            con = pd.concat([df1, df2], axis=1, sort=True, join='inner')
+
+            a = con[df1.columns[0]].values
+            b = con[df2.columns[0]].values
+
+            con[name] = a / b
+            new_df = con.loc[:, [name]].copy()
+
+            return self.return_df(df, new_df, add=add)
+
+    def get_smooth_data(self, df, src, name, add=False, delta=False, ttm=False):
+        if name in df.columns:
+            new_df = df.loc[:, [name]].copy().dropna()
+            return new_df if add is False else df
+        else:
+            new_df = df.loc[:, [src]].copy().dropna()
+            if delta is False:
+                new_df = get_month_data(new_df, name)
+            else:
+                new_df = get_month_delta(new_df, name)
+                if ttm is True:
+                    new_df = new_df.rolling(4, min_periods=1).mean()
+            return self.return_df(df, new_df, add=add)
+
+    @staticmethod
+    def return_df(df, new_df, add=False):
+        if add is False:
+            return new_df
+        else:
+            return pd.concat([df, new_df], axis=1, sort=True)
+
+    def get_growth_rate(self, df, name):
+        data = df
+        data2 = np.log(data)
+        data3 = data2.rolling(12, min_periods=1).apply(self.window_method, raw=True)
+        data4 = np.exp(data3) - 1
+
+        data4.columns = [name]
+
+        # arr_y = data2.iloc[:, 0].values
+        # arr_y2 = data4.iloc[:, 0].values
+        # arr_x = np.arange(0, arr_y.size, 1)
+        #
+        # plt.plot(arr_x, arr_y, 'b-', label='data2')
+        # plt.plot(arr_x, arr_y2, 'r', label='data4')
+        #
+        # plt.xlabel('x axis')
+        # plt.ylabel('y axis')
+        #
+        # plt.title('curve_fit')
+        # plt.show()
+
+        return data4
+
+    def window_method(self, arr_y):
+        tmp = np.where(np.isnan(arr_y))[0]
+        if tmp.size > 0:
+            index = tmp[-1] + 1
+            arr_y = arr_y[index:]
+            sample_min = 12
+        else:
+            sample_min = 2
+
+        arr_x = np.arange(0, arr_y.size, 1)
+        if arr_x.size < sample_min:
+            return np.nan
+
+        delta = self.potential_rate(arr_y) * 4
+        return delta
+
+    @staticmethod
+    def potential_rate(arr_y):
+        arr_x = np.arange(0, arr_y.size, 1)
+        p = np.polyfit(arr_x, arr_y, 1)
+        rate = p[0]
+
+        return rate
+
+
+class SubDataAnalysis(DataAnalysis):
+    def __init__(self, df_fs: pd.DataFrame, index):
+        self.df_fs = df_fs.copy()
+        self.df_mvs = None
+
+        self.df_fs = self.get_profit(add=True)
+        self.df_fs = self.get_revenue(add=True)
+        self.df_fs = self.get_revenue_rate(add=True)
 
 
 if __name__ == '__main__':
