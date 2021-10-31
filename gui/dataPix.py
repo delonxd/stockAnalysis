@@ -77,8 +77,8 @@ class DataPix(QObject):
         return self.parent.df
 
     def update_pix(self):
-        self.dt_fs = self.df['reportDate'].copy().dropna()
-        self.dt_mvs = self.df['date_mvs'].copy().dropna()
+        self.dt_fs = self.df['dt_fs'].copy().dropna()
+        self.dt_mvs = self.df['dt_mvs'].copy().dropna()
 
         self.data_dict = dict()
         self.default_ds = DefaultDataSource(parent=self)
@@ -127,7 +127,7 @@ class DataPix(QObject):
                 self.default_ds = ds
 
         self.draw_pix()
-        self.config_report_date()
+        # self.config_report_date()
 
     def config_report_date(self):
         dict0 = dict()
@@ -493,28 +493,22 @@ class DataPix(QObject):
         elif y > d_bottom:
             y = d_bottom
 
-        # date, val = self.px2data(x, y, self.default_ds)
-        # date_str = date.strftime("%Y-%m-%d")
-
         val = self.y_px2data(y, self.default_ds)
         val_str = self.default_ds.format(val)
 
-        val_x0 = self.x_px2value(x)
+        d0 = self.x_px2data(x).strftime("%Y-%m-%d")
 
-        val_x1 = self.get_last_value(val_x0, self.report_date)
-
-        if not val_x1:
-            val_x1 = self.report_date[0]
-
-        val_x2 = self.report_dict.get(val_x1)
-        val_x2 = val_x2 if val_x2 else val_x1
+        d1 = self.get_last_date(d0, self.dt_mvs.values)
+        d_report = self.get_last_date(d0, self.dt_fs.index.values)
+        d2 = None if d_report is None else self.dt_fs[d_report]
 
         px_x0 = x
-        px_x2 = self.x_value2px(val_x2)
+        px_x2 = x if d2 is None else self.x_data2px(dt.datetime.strptime(d2, "%Y-%m-%d").date())
 
         if state is True:
             self.draw_mask(px_x0, px_x2)
 
+        # draw cross
         pix_painter = QPainter(self.pix_show)
         pen = QPen(Qt.gray, 1, Qt.SolidLine)
         pix_painter.setPen(pen)
@@ -523,18 +517,21 @@ class DataPix(QObject):
         pix_painter.drawLine(QPoint(d_left, y), QPoint(d_right, y))
         pix_painter.end()
 
-        date0 = self.x_value2data(int(val_x0))
-        date2 = self.x_value2data(int(val_x2))
-        date_str0 = date0.strftime("%Y-%m-%d")
-        date_str2 = date2.strftime("%Y-%m-%d")
-
-        self.draw_tooltip(px_x0, self.data_rect.bottom() + 1, date_str0)
-        self.draw_tooltip(px_x2, self.data_rect.top(), date_str2)
-
+        self.draw_tooltip(px_x0, self.data_rect.bottom() + 1, d0)
+        self.draw_tooltip(px_x2, self.data_rect.top(), d2)
         self.draw_tooltip(self.data_rect.right() + 1, y, val_str)
-        # self.draw_information(date)
 
-        self.draw_information(px_x2)
+        self.draw_information(d1, d2)
+
+    @staticmethod
+    def get_last_date(d0, arr):
+        res = None
+        for date in arr[::-1]:
+            if date <= d0:
+                res = date
+                break
+
+        return res
 
     def draw_mask(self, px_x0, px_x2):
         if px_x2:
@@ -543,7 +540,9 @@ class DataPix(QObject):
                 x=px_x2,
             )
 
-        self.draw_data(self.data_dict['id_041_mvs_mc'], self.pix_show)
+        for ds in self.data_dict.values():
+            if ds.frequency == 'DAILY':
+                self.draw_data(ds, self.pix_show)
 
         self.draw_mask_pix(
             pix=self.pix_show,
@@ -585,9 +584,9 @@ class DataPix(QObject):
 
         pix_painter.end()
 
-    def draw_information(self, px_x):
+    def draw_information(self, *args):
         box = InformationBox(parent=self)
-        pix = box.draw_pix(px_x)
+        pix = box.draw_pix(*args)
 
         pix_painter = QPainter(self.pix_show)
         pix_painter.drawPixmap(10, 10, pix)
