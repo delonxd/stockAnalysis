@@ -12,50 +12,36 @@ class InformationBox:
         self.parent = parent
         self.background = None
 
-    def load_value(self, px_x):
-        date = self.parent.px_dict.get(px_x)
-        date_index = date.strftime("%Y-%m-%d") if date else None
+    def load_value(self, d1, d2):
         box_df = pd.DataFrame(columns=['priority', 'data_source', 'show_name', 'value', 'real_date'])
 
         for ds in self.parent.data_dict.values():
-            index_name = ds.index_name
-            index_list = ds.df.index.tolist()
-
             if ds.frequency == 'DAILY':
-                # date0 = self.parent.date_min
-                # val_x = (date - date0).days
-                # val_x = self.parent.get_nearest_value(val_x, ds.offsets)
-                # # print(type(val_x), '-->', val_x)
-                # date1 = date0 + relativedelta(days=int(val_x))
-                # date_index1 = date1.strftime("%Y-%m-%d")
-                #
-                # box_df.loc[index_name, 'value'] = ds.df.loc[date_index1][0]
-                # box_df.loc[index_name, 'real_date'] = date_index1
-
-                box_df.loc[index_name, 'value'] = ds.df.iloc[-1, 0]
-                box_df.loc[index_name, 'real_date'] = ds.df.index[-1]
-
-                # box_df.loc[index_name, 'value'] = None
-                # box_df.loc[index_name, 'real_date'] = None
-
+                date = d1
             else:
-                if date_index in index_list:
-                    box_df.loc[index_name, 'value'] = ds.df.loc[date_index][0]
-                else:
-                    box_df.loc[index_name, 'value'] = None
+                date = d2
 
-                box_df.loc[index_name, 'real_date'] = None
+            index_name = ds.index_name
+
+            if date in ds.df.index:
+                box_df.loc[index_name, 'value'] = ds.df.loc[date][0]
+            else:
+                box_df.loc[index_name, 'value'] = None
 
             box_df.loc[index_name, 'priority'] = ds.info_priority
             box_df.loc[index_name, 'data_source'] = ds
             box_df.loc[index_name, 'show_name'] = ds.show_name
 
+            if ds.frequency == 'DAILY':
+                box_df.loc[index_name, 'real_date'] = d1
+            else:
+                box_df.loc[index_name, 'real_date'] = None
+
         box_df.sort_values('priority', inplace=True)
 
         res = list()
-        if date:
-            txt = date.strftime("%Y-%m-%d")
-            res.append(('日期: %s' % txt, QPen(Qt.white, 1, Qt.SolidLine)))
+        res.append(('报告日期1: %s' % d1, QPen(Qt.white, 1, Qt.SolidLine)))
+        res.append(('报告日期2: %s' % d2, QPen(Qt.white, 1, Qt.SolidLine)))
 
         for _, row in box_df.iterrows():
             name, value, ds = row['show_name'], row['value'], row['data_source']
@@ -69,8 +55,8 @@ class InformationBox:
 
         return res
 
-    def draw_pix(self, px_x):
-        text_list = self.load_value(px_x)
+    def draw_pix(self, *args):
+        text_list = self.load_value(*args)
 
         pix = QPixmap(900, 800)
         pix.fill(QColor(0, 0, 0, 30))
