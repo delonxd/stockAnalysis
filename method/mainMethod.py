@@ -121,10 +121,13 @@ def get_units_dict():
     return res
 
 
-def get_part_codes(code_list):
-
+def get_part_codes(code_list, blacklist=None):
+    if blacklist is None:
+        blacklist = []
     new_list = []
     for code in code_list:
+        if code in blacklist:
+            continue
         if code[0] == '0' or code[0] == '6':
             if code[:3] != '688':
                 new_list.append(code)
