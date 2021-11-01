@@ -3,6 +3,8 @@ from method.mainMethod import get_units_dict
 from gui.dataSource import DataSource
 from gui.dataSource import DefaultDataSource
 from gui.informationBox import InformationBox
+from method.dataMethod import get_month_delta
+from method.dataMethod import get_month_data
 
 from dateutil.rrule import *
 from collections import defaultdict
@@ -55,15 +57,15 @@ class DataPix(QObject):
         # px_list
         # self.date_list = self.get_date_list('MONTHLY')
         self.date_list = self.get_date_list('QUARTERLY')
-        self.px_list, self.px_dict = self.get_px_list()
+        # self.px_list, self.px_dict = self.get_px_list()
         # self.px_list, self.px_dict = self.get_px_dict()
 
         # data_source
         self.data_dict = None
         self.default_ds = None
 
-        self.report_dict = dict()
-        self.report_date = list()
+        # self.report_dict = dict()
+        # self.report_date = list()
 
         self.dt_fs = pd.Series()
         self.dt_mvs = pd.Series()
@@ -95,12 +97,13 @@ class DataPix(QObject):
         for index, row in style_df.iterrows():
             if not row['index_name'] in self.df.columns:
                 continue
-            data = self.df.loc[:, [row['index_name']]]
+            data = self.df.loc[:, [row['index_name']]].copy()
             data.dropna(inplace=True)
 
             if len(data.index) == 0:
                 continue
-            # print(data)
+            data = self.config_data(data, row)
+
             ds = DataSource(
                 parent=self,
                 df=data,
@@ -129,32 +132,75 @@ class DataPix(QObject):
         self.draw_pix()
         # self.config_report_date()
 
-    def config_report_date(self):
-        dict0 = dict()
-        for index, value in self.dt_fs.iteritems():
-            dict0[value[:10]] = index
+    def config_data(self, data, row):
+        index_name = row['index_name']
+        if index_name == 'id_141_bs_mc':
+            return np.trim_zeros(data.iloc[:, 0]).to_frame()
 
-        self.dt_fs = pd.Series(dict0, name='dt_fs')
-        self.dt_fs.sort_index(inplace=True)
+        if index_name == 'id_145_bs_shbt1sh_tsc_r' or index_name == 'id_146_bs_shbt10sh_tsc_r':
+            data = data.loc[data.iloc[:, 0].values != 0, :]
+            return data
 
-        self.dt_mvs = pd.Series(self.dt_mvs.index, name='dt_mvs', index=self.dt_mvs.index)
+        if index_name == 'id_211_ps_np':
+            data = self.df.loc[:, ['s_003_profit']].copy()
+            data.dropna(inplace=True)
+            data.columns = [index_name]
+            return data
 
-        if 'reportDate' in self.data_dict.keys():
-            df = self.data_dict['reportDate'].df
-            dates1 = np.vectorize(lambda x: x[:10])(df.iloc[:, 0].values)
-            val_x1 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates1)
+        if index_name == 'id_200_ps_op':
+            data = self.df.loc[:, ['s_010_main_profit']].copy()
+            data.dropna(inplace=True)
+            data.columns = [index_name]
+            return data
 
-            dates2 = df.index.values
-            val_x2 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates2)
+        if index_name == 'id_157_ps_toi':
+            data = self.df.loc[:, ['s_008_revenue']].copy()
+            data.dropna(inplace=True)
+            data.columns = [index_name]
+            return data
 
-            dict0 = defaultdict(int)
-            for index in range(val_x1.shape[0]):
-                dict0[val_x1[index]] = val_x2[index]
+        if row['ds_type'] == 'digit':
+            if row['frequency'] == 'DAILY':
+                return data
 
-            self.report_dict = dict0
-            list0 = list(dict0.keys())
-            list0.sort()
-            self.report_date = list0
+            if row['delta_mode'] is True:
+                data = get_month_delta(df=data, new_name=index_name)
+            else:
+                data = get_month_data(df=data, new_name=index_name)
+
+            ma_mode = row['ma_mode']
+            if ma_mode > 1:
+                data = data.rolling(ma_mode, min_periods=1).mean()
+
+        data.columns = [index_name]
+        return data
+
+    # def config_report_date(self):
+    #     dict0 = dict()
+    #     for index, value in self.dt_fs.iteritems():
+    #         dict0[value[:10]] = index
+    #
+    #     self.dt_fs = pd.Series(dict0, name='dt_fs')
+    #     self.dt_fs.sort_index(inplace=True)
+    #
+    #     self.dt_mvs = pd.Series(self.dt_mvs.index, name='dt_mvs', index=self.dt_mvs.index)
+    #
+    #     if 'reportDate' in self.data_dict.keys():
+    #         df = self.data_dict['reportDate'].df
+    #         dates1 = np.vectorize(lambda x: x[:10])(df.iloc[:, 0].values)
+    #         val_x1 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates1)
+    #
+    #         dates2 = df.index.values
+    #         val_x2 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates2)
+    #
+    #         dict0 = defaultdict(int)
+    #         for index in range(val_x1.shape[0]):
+    #             dict0[val_x1[index]] = val_x2[index]
+    #
+    #         self.report_dict = dict0
+    #         list0 = list(dict0.keys())
+    #         list0.sort()
+    #         self.report_date = list0
 
     def reset_scale_all(self):
         style_df = self.style_df[self.style_df['selected'].values]
@@ -192,35 +238,35 @@ class DataPix(QObject):
             return list(rrule(YEARLY, bymonthday=-1, bymonth=[3, 6, 9, 12], dtstart=self.date_min, until=self.date_max))
         return None
 
-    def get_px_list(self):
-        px_dict = dict()
-        px_list = list()
-        for datetime in self.date_list:
-            date = datetime.date()
-            px = self.x_data2px(date)
-            px_dict[px] = date
-            px_list.append(px)
+    # def get_px_list(self):
+    #     px_dict = dict()
+    #     px_list = list()
+    #     for datetime in self.date_list:
+    #         date = datetime.date()
+    #         px = self.x_data2px(date)
+    #         px_dict[px] = date
+    #         px_list.append(px)
+    #
+    #     # px_list.sort()
+    #
+    #     return px_list, px_dict
 
-        # px_list.sort()
-
-        return px_list, px_dict
-
-    def get_px_dict(self):
-        res_dict = defaultdict(str)
-
-        val_x = np.arange(0, self.d_date + 1)
-        px_x = self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
-        px_x = np.floor(px_x)
-        res_list = np.unique(px_x).tolist()
-        # res_list.sort()
-        date0 = self.date_min
-        for i in val_x:
-            px = px_x[i]
-            index = date0.strftime("%Y-%m-%d")
-            res_dict[px] = index
-            date0 = date0 + dt.timedelta(days=1)
-
-        return res_list, res_dict
+    # def get_px_dict(self):
+    #     res_dict = defaultdict(str)
+    #
+    #     val_x = np.arange(0, self.d_date + 1)
+    #     px_x = self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
+    #     px_x = np.floor(px_x)
+    #     res_list = np.unique(px_x).tolist()
+    #     # res_list.sort()
+    #     date0 = self.date_min
+    #     for i in val_x:
+    #         px = px_x[i]
+    #         index = date0.strftime("%Y-%m-%d")
+    #         res_dict[px] = index
+    #         date0 = date0 + dt.timedelta(days=1)
+    #
+    #     return res_list, res_dict
 
     # @staticmethod
     # def iter_delta_date(date_min, date_iter):
@@ -434,7 +480,8 @@ class DataPix(QObject):
             data_y = ds.df.iloc[:, 0].values.copy()
 
             if ds.logarithmic is False:
-                data_y[data_y == 0] = np.nan
+                # data_y[data_y == 0] = np.nan
+                pass
             else:
                 px_x[np.isnan(data_y)] = np.nan
                 data_y[np.isnan(data_y)] = 0
@@ -592,39 +639,39 @@ class DataPix(QObject):
         pix_painter.drawPixmap(10, 10, pix)
         pix_painter.end()
 
-    @staticmethod
-    def get_last_value(x, x_list):
-        if not x_list:
-            return x
+    # @staticmethod
+    # def get_last_value(x, x_list):
+    #     if not x_list:
+    #         return x
+    #
+    #     last = None
+    #     for px in x_list:
+    #         if x < px:
+    #             return last
+    #         last = px
+    #     return last
 
-        last = None
-        for px in x_list:
-            if x < px:
-                return last
-            last = px
-        return last
-
-    @staticmethod
-    def get_nearest_value(x, x_list):
-        nearest = None
-
-        if len(x_list) > 0:
-            if x <= x_list[0]:
-                return x_list[0]
-            elif x >= x_list[-1]:
-                return x_list[-1]
-
-        px1 = np.inf
-        for px in x_list:
-            px2 = px
-            if px1 <= x < px2:
-                if (x - px1) <= (px2 - x):
-                    nearest = px1
-                else:
-                    nearest = px2
-                break
-            px1 = px
-        return nearest
+    # @staticmethod
+    # def get_nearest_value(x, x_list):
+    #     nearest = None
+    #
+    #     if len(x_list) > 0:
+    #         if x <= x_list[0]:
+    #             return x_list[0]
+    #         elif x >= x_list[-1]:
+    #             return x_list[-1]
+    #
+    #     px1 = np.inf
+    #     for px in x_list:
+    #         px2 = px
+    #         if px1 <= x < px2:
+    #             if (x - px1) <= (px2 - x):
+    #                 nearest = px1
+    #             else:
+    #                 nearest = px2
+    #             break
+    #         px1 = px
+    #     return nearest
 
     # def get_nearest_date(self, x):
     #     px = self.get_nearest_px(x)

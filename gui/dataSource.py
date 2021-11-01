@@ -43,8 +43,8 @@ class DataSource:
         self.index_name = index_name
         self.show_name = show_name
 
-        if index_name == 'id_141_bs_mc':
-            df = np.trim_zeros(df.iloc[:, 0]).to_frame()
+        # if index_name == 'id_141_bs_mc':
+        #     df = np.trim_zeros(df.iloc[:, 0]).to_frame()
 
         self.df = df
 
@@ -53,7 +53,7 @@ class DataSource:
         self.ma_mode = ma_mode
         self.frequency = frequency
 
-        self.format_data_source()
+        # self.format_data_source()
 
         self.color = color
         self.line_thick = line_thick
@@ -98,8 +98,8 @@ class DataSource:
         self.set_val_scale()
         self.df.columns = [index_name]
 
-        self.offsets = None
-        self.init_offsets()
+        # self.offsets = None
+        # self.init_offsets()
 
     def format(self, value):
         if value is None:
@@ -124,35 +124,36 @@ class DataSource:
         self.metrics = self.metrics[1:-1]
 
     def format_data_source(self):
-        if self.ds_type == 'digit':
-            if self.frequency == 'DAILY':
-                return
-
-            if self.delta_mode is True:
-                self.df = get_month_delta(df=self.df, new_name=self.index_name)
-            else:
-                self.df = get_month_data(df=self.df, new_name=self.index_name)
-
-            if self.ma_mode > 1:
-                # array0 = self.df.iloc[:, 0].values.copy()
-                #
-                # first = self.ma_mode - 1
-                # array1 = array0[first:]
-                #
-                # last = 0
-                # while first:
-                #     first -= 1
-                #     last -= 1
-                #     array1 = array1 + array0[first:last].copy()
-                #
-                # array1 = array1 / self.ma_mode
-                # # print('array1', array1)
-                # indexes = self.df.index.values[(self.ma_mode - 1):]
-                #
-                # self.df = pd.DataFrame(array1, index=indexes, columns=[self.index_name])
-
-                # self.df = self.df.rolling(self.ma_mode, min_periods=1).sum()
-                self.df = self.df.rolling(self.ma_mode, min_periods=1).mean()
+        pass
+        # if self.ds_type == 'digit':
+        #     if self.frequency == 'DAILY':
+        #         return
+        #
+        #     if self.delta_mode is True:
+        #         self.df = get_month_delta(df=self.df, new_name=self.index_name)
+        #     else:
+        #         self.df = get_month_data(df=self.df, new_name=self.index_name)
+        #
+        #     if self.ma_mode > 1:
+        #         # array0 = self.df.iloc[:, 0].values.copy()
+        #         #
+        #         # first = self.ma_mode - 1
+        #         # array1 = array0[first:]
+        #         #
+        #         # last = 0
+        #         # while first:
+        #         #     first -= 1
+        #         #     last -= 1
+        #         #     array1 = array1 + array0[first:last].copy()
+        #         #
+        #         # array1 = array1 / self.ma_mode
+        #         # # print('array1', array1)
+        #         # indexes = self.df.index.values[(self.ma_mode - 1):]
+        #         #
+        #         # self.df = pd.DataFrame(array1, index=indexes, columns=[self.index_name])
+        #
+        #         # self.df = self.df.rolling(self.ma_mode, min_periods=1).sum()
+        #         self.df = self.df.rolling(self.ma_mode, min_periods=1).mean()
 
     def init_offsets(self):
         if self.frequency == 'DAILY':

@@ -223,27 +223,70 @@ def sql2df(code):
 class DataAnalysis:
     def __init__(self, df_fs: pd.DataFrame, df_mvs: pd.DataFrame):
         self.df_fs = df_fs
+
+        # self.get_df_after_date(self.df_fs, '2010-01-01')
         self.df_mvs = df_mvs
         self.df = pd.DataFrame()
 
     def config_widget_data(self):
+        self.config_sub_fs()
+
         self.df_fs = self.get_dt_fs(add=True)
         self.df_mvs = self.get_dt_mvs(add=True)
         self.df_mvs = self.get_last_report(add=True)
 
+        # self.df_fs = self.get_asset(add=True)
+        # self.df_fs = self.get_equity(add=True)
+        # self.df_fs = self.get_stocks(add=True)
+        # self.df_fs = self.get_profit(add=True)
+        #
+        # self.df_fs = self.get_roe(add=True)
+        # self.df_fs = self.get_stocks_rate(add=True)
+        #
+        # self.df_fs = self.get_revenue(add=True)
+        # self.df_fs = self.get_revenue_rate(add=True)
+
+        # self.config_fs_data()
+
+        self.df_mvs = self.get_pe(add=True)
+        self.set_df()
+
+    def config_sub_fs(self, inplace=True):
+        df = self.df_fs.copy()
+        sub_list = self.get_sub_date()
+        last_date = ''
+        df_list = list()
+        for sub in sub_list:
+            sub_df = df.loc[sub, :].copy()
+            sub_data = SubDataAnalysis(sub_df)
+            sub_data.config_fs_data()
+
+            sub_data.df_fs = self.get_df_after_date(sub_data.df_fs, last_date)
+            df_list.append(sub_data.df_fs)
+            last_date = sub_data.df_fs.index.values[-1]
+
+        length = len(df_list)
+        if length == 0:
+            pass
+        elif length == 1:
+            self.df_fs = df_list[0]
+        else:
+            self.df_fs = pd.concat(df_list)
+
+        return self.df_fs
+
+    def config_fs_data(self):
         self.df_fs = self.get_asset(add=True)
         self.df_fs = self.get_equity(add=True)
         self.df_fs = self.get_stocks(add=True)
         self.df_fs = self.get_profit(add=True)
+        self.df_fs = self.get_main_profit(add=True)
 
         self.df_fs = self.get_roe(add=True)
         self.df_fs = self.get_stocks_rate(add=True)
 
         self.df_fs = self.get_revenue(add=True)
         self.df_fs = self.get_revenue_rate(add=True)
-
-        self.df_mvs = self.get_pe(add=True)
-        self.set_df()
 
     def set_df(self):
         self.df = pd.merge(
@@ -256,6 +299,32 @@ class DataAnalysis:
             suffixes=('_fs', '_mvs'),
             copy=True,
         )
+
+    def get_sub_date(self):
+        df = self.df_fs
+        dt_fs = df['id_001_bs_ta'].copy().dropna()
+
+        res = list()
+        sub = list()
+        val = np.inf
+        for index, value in dt_fs.iteritems():
+            if value > 2 * val:
+                res.append(sub)
+                sub = list()
+
+            sub.append(index)
+            val = value
+
+        if len(sub) > 0:
+            res.append(sub)
+
+        return res
+
+    @staticmethod
+    def get_df_after_date(df, date):
+        df = df.copy()
+        new_df = df.loc[df.index.values > date, :]
+        return new_df
 
     def get_dt_fs(self, add=False):
         df = self.df_fs
@@ -283,7 +352,8 @@ class DataAnalysis:
             new_df = df.loc[:, [name]].copy().dropna()
             return new_df if add is False else df
         else:
-            new_df = pd.DataFrame(df.index.values, index=df.index, columns=[name])
+            dt_mvs = df['date'].copy().dropna()
+            new_df = pd.DataFrame(dt_mvs.index.values, index=dt_mvs.index, columns=[name])
             return self.return_df(df, new_df, add=add)
 
     def get_last_report(self, add=False):
@@ -334,6 +404,17 @@ class DataAnalysis:
             df=self.df_fs,
             src='id_211_ps_np',
             name='s_003_profit',
+            add=add,
+            delta=True,
+            ttm=True,
+        )
+        return res
+
+    def get_main_profit(self, add=False):
+        res = self.get_smooth_data(
+            df=self.df_fs,
+            src='id_200_ps_op',
+            name='s_010_main_profit',
             add=add,
             delta=True,
             ttm=True,
@@ -512,13 +593,19 @@ class DataAnalysis:
         if tmp.size > 0:
             index = tmp[-1] + 1
             arr_y = arr_y[index:]
-            sample_min = 12
-        else:
-            sample_min = 2
+        #     sample_min = 12
+        # else:
+        #     sample_min = 3
 
-        arr_x = np.arange(0, arr_y.size, 1)
-        if arr_x.size < sample_min:
-            return np.nan
+        # if arr_x.size < sample_min:
+        #     return 0
+
+        if arr_y.size == 0:
+            return 0
+
+        size = 12
+        pre = np.ones(size - arr_y.size) * arr_y[0]
+        arr_y = np.append(pre, arr_y)
 
         delta = self.potential_rate(arr_y) * 4
         return delta
@@ -533,13 +620,14 @@ class DataAnalysis:
 
 
 class SubDataAnalysis(DataAnalysis):
-    def __init__(self, df_fs: pd.DataFrame, index):
+    def __init__(self, df_fs: pd.DataFrame):
         self.df_fs = df_fs.copy()
         self.df_mvs = None
 
-        self.df_fs = self.get_profit(add=True)
-        self.df_fs = self.get_revenue(add=True)
-        self.df_fs = self.get_revenue_rate(add=True)
+        # self.config_fs_data()
+        # self.df_fs = self.get_profit(add=True)
+        # self.df_fs = self.get_revenue(add=True)
+        # self.df_fs = self.get_revenue_rate(add=True)
 
 
 if __name__ == '__main__':
