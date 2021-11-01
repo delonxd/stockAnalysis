@@ -192,6 +192,25 @@ def test_read():
         f.write(res)
 
 
+def test_read2():
+    with open("../basicData/analyzedData/res_dict.pkl", "rb") as f:
+        res_dict = pickle.load(f)
+
+    code_list = list()
+    for key, value in res_dict.items():
+        profit = value['s_003_profit'].copy().dropna()
+        a = profit[profit.index.values > '2018-01-01'].values
+        b = a > 0
+        if False in b:
+            code_list.append(key)
+            print(key)
+
+    print(len(code_list))
+    res = json.dumps(code_list, indent=4, ensure_ascii=False)
+    with open("../basicData/analyzedData/loss_codes.txt", "w", encoding='utf-8') as f:
+        f.write(res)
+
+
 def show_data_jlr():
     with open("../basicData/analyzedData/jlr_codes.txt", "r", encoding='utf-8') as f:
         code_list = json.loads(f.read())
@@ -242,6 +261,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
-    test_analysis()
+    # test_analysis()
     # test_read()
+    test_read2()
     # show_data_jlr()
