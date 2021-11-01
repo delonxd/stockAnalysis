@@ -103,7 +103,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=0)
+        self.codes_df.init_current_index(index=105)
         # self.codes_df.init_current_index(code='600282')
         # self.codes_df.init_current_index(code='000921')
 
@@ -443,7 +443,8 @@ class MainWidget(QWidget):
         with open("..\\basicData\\analyzedData\\revenue_rate_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
-        code_list = get_part_codes(code_list, blacklist=blacklist)
+        # code_list = get_part_codes(code_list, blacklist=blacklist)
+        code_list = get_part_codes(code_list)
 
         # with open("..\\basicData\\selected_0514.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     txt = f.read()
@@ -475,6 +476,10 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.width', 100000)
+
     app = QApplication(sys.argv)
     # main = MainWindow()
     main = MainWidget()
