@@ -267,7 +267,7 @@ class DataAnalysis:
 
         length = len(df_list)
         if length == 0:
-            pass
+            self.config_fs_data()
         elif length == 1:
             self.df_fs = df_list[0]
         else:

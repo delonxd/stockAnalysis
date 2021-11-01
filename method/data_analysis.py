@@ -61,7 +61,7 @@ def test_window(arr_y):
     return delta
 
 
-def test_analysis():
+def test_analysis01():
     with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
@@ -134,7 +134,7 @@ def test_window_roe(arr_y):
     # return np.nan
 
 
-def test_analysis_roe():
+def test_analysis():
     with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
@@ -146,6 +146,8 @@ def test_analysis_roe():
     start = 0
     end = length
 
+    res_dict = dict()
+
     index = start
     while index < end:
         stock_code = code_list[index]
@@ -153,16 +155,23 @@ def test_analysis_roe():
         df = load_df_from_mysql(stock_code, data_type)
         data = DataAnalysis(df, None)
 
-        revenue = data.get_revenue()
-        revenue_rate = data.get_growth_rate(revenue, stock_code)
+        # revenue = data.get_revenue()
+        # revenue_rate = data.get_growth_rate(revenue, stock_code)
 
-        res_df = pd.concat([res_df, revenue_rate], axis=1, sort=True)
+        res = data.config_sub_fs()
+        res_dict[stock_code] = res
+
+        # revenue_rate = res['s_009_revenue_rate'].copy().dropna()
+        # revenue_rate.name = stock_code
+        #
+        # res_df = pd.concat([res_df, revenue_rate], axis=1, sort=True)
         index += 1
 
-        # print(res_df)
+    # with open("../basicData/analyzedData/revenue_rate.pkl", "wb") as f:
+    #     pickle.dump(res_df, f)
 
-    with open("../basicData/analyzedData/revenue_rate.pkl", "wb") as f:
-        pickle.dump(res_df, f)
+    with open("../basicData/analyzedData/res_dict.pkl", "wb") as f:
+        pickle.dump(res_dict, f)
 
 
 def test_read():
@@ -179,7 +188,7 @@ def test_read():
     # print(code_list)
 
     res = json.dumps(code_list, indent=4, ensure_ascii=False)
-    with open("../basicData/analyzedData/revenue_rate_codes.txt", "w", encoding='utf-8') as f:
+    with open("../basicData/analyzedData/revenue_rate_codes2.txt", "w", encoding='utf-8') as f:
         f.write(res)
 
 
@@ -230,14 +239,9 @@ def show_data_jlr():
 
 
 if __name__ == '__main__':
-    # 显示所有列
     pd.set_option('display.max_columns', None)
-    # 显示所有行
     pd.set_option('display.max_rows', None)
-    # # 设置value的显示长度为100，默认为50
-    # pd.set_option('max_colwidth', 100)
-    # test_analysis()
-    # test_analysis_roe()
-    # test_analysis_roe()
-    test_read()
+    pd.set_option('display.width', 10000)
+    test_analysis()
+    # test_read()
     # show_data_jlr()
