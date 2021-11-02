@@ -294,6 +294,9 @@ def request_data2mysql(stock_code, data_type, start_date):
 
 
 def test_request_data():
+    with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
+        blacklist = json.loads(f.read())
+
     import re
 
     # with open("..\\basicData\\selected_0514.txt", "r", encoding="utf-8", errors="ignore") as f:
@@ -305,15 +308,21 @@ def test_request_data():
     # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
     #     code_list = json.loads(f.read())
 
-    with open("..\\basicData\\analyzedData\\roe_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
+    # with open("..\\basicData\\analyzedData\\roe_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
+    #     code_list = json.loads(f.read())
+    #
+    # code_list = get_part_codes(code_list)
+
+    with open("..\\basicData\\analyzedData\\revenue_rate_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
-    code_list = get_part_codes(code_list)
+    code_list = get_part_codes(code_list, blacklist=blacklist)
+    # code_list = get_part_codes(code_list)
 
     print(code_list)
     length = len(code_list)
     # start = code_list.index('600000')
-    index = 700
+    index = 0
     while index < length:
         print('\nindex --> ', index, '\n')
         request_data2mysql(
