@@ -104,7 +104,7 @@ class MainWidget(QWidget):
 
         self.codes_df = CodesDataFrame(code_list)
         self.codes_df.init_current_index(index=0)
-        self.codes_df.init_current_index(code='603836')
+        # self.codes_df.init_current_index(code='603836')
         # self.codes_df.init_current_index(code='000921')
 
         time0 = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
@@ -440,11 +440,11 @@ class MainWidget(QWidget):
 
         # with open("..\\basicData\\analyzedData\\jlr_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\roe_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\analyzedData\\revenue_rate_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\analyzedData\\revenue_rate_codes3.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
-        # code_list = get_part_codes(code_list, blacklist=blacklist)
-        code_list = get_part_codes(code_list)
+        code_list = get_part_codes(code_list, blacklist=blacklist)
+        # code_list = get_part_codes(code_list)
 
         # with open("..\\basicData\\selected_0514.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     txt = f.read()
