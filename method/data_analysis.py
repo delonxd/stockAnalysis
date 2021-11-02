@@ -143,39 +143,43 @@ def test_analysis():
     res_df = pd.DataFrame()
 
     length = len(code_list)
+    print(length)
     start = 0
     end = length
 
     res_dict = dict()
-
     index = start
     while index < end:
         stock_code = code_list[index]
-        print(index, '-->', stock_code)
+        # print(index, '-->', stock_code)
+        print(index)
         df = load_df_from_mysql(stock_code, data_type)
         data = DataAnalysis(df, None)
 
         # revenue = data.get_revenue()
         # revenue_rate = data.get_growth_rate(revenue, stock_code)
-
-        res = data.config_sub_fs()
-        res_dict[stock_code] = res
-
-        # revenue_rate = res['s_009_revenue_rate'].copy().dropna()
-        # revenue_rate.name = stock_code
         #
-        # res_df = pd.concat([res_df, revenue_rate], axis=1, sort=True)
+        res = data.config_sub_fs()
+        # res_dict[stock_code] = res
+
+        revenue_rate = res['s_009_revenue_rate'].copy().dropna()
+        # print(revenue_rate)
+        revenue_rate.name = stock_code
+
+        res_df = pd.concat([res_df, revenue_rate], axis=1, sort=True)
         index += 1
 
-    # with open("../basicData/analyzedData/revenue_rate.pkl", "wb") as f:
-    #     pickle.dump(res_df, f)
+        # print(res_df)
 
-    with open("../basicData/analyzedData/res_dict.pkl", "wb") as f:
-        pickle.dump(res_dict, f)
+    with open("../basicData/analyzedData/revenue_rate2.pkl", "wb") as f:
+        pickle.dump(res_df, f)
+    #
+    # with open("../basicData/analyzedData/res_dict.pkl", "wb") as f:
+    #     pickle.dump(res_dict, f)
 
 
 def test_read():
-    with open("../basicData/analyzedData/revenue_rate.pkl", "rb") as f:
+    with open("../basicData/analyzedData/revenue_rate2.pkl", "rb") as f:
         res_df = pickle.load(f)
 
     a = res_df.loc[['2021-03-31', '2021-06-30', '2021-09-30'], :]
@@ -188,7 +192,7 @@ def test_read():
     # print(code_list)
 
     res = json.dumps(code_list, indent=4, ensure_ascii=False)
-    with open("../basicData/analyzedData/revenue_rate_codes2.txt", "w", encoding='utf-8') as f:
+    with open("../basicData/analyzedData/revenue_rate_codes3.txt", "w", encoding='utf-8') as f:
         f.write(res)
 
 
@@ -262,6 +266,6 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
     # test_analysis()
-    # test_read()
-    test_read2()
+    test_read()
+    # test_read2()
     # show_data_jlr()
