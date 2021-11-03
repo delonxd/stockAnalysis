@@ -218,9 +218,28 @@ def sql2df(code):
     #     )
     #     df2 = load_df_from_mysql(code, 'mvs')
 
-    data = DataAnalysis(df1, df2)
-    data.config_widget_data()
+    # print(df1)
+    # print(df2)
+    data = DataAnalysis2(df1, df2)
+    data.fs_to_mvs('id_001_bs_ta')
+    # data.test001(1, df=2)
+    # data = DataAnalysis(df1, df2)
+    # data.config_widget_data()
     return data.df
+
+
+def if_column_exist(func):
+    @wraps(func)
+    def wrapped_function(*args, **kwargs):
+        self = args[0]
+        column = kwargs.pop('column') if 'column' in kwargs.keys() else args[1]
+        df = kwargs.pop('df') if 'df' in kwargs.keys() else self.df_fs
+        if column in df.columns:
+            return df[column].copy().dropna()
+        else:
+            # return func(*args, **kwargs)
+            return func(self)
+    return wrapped_function
 
 
 class DataAnalysis:
@@ -683,6 +702,8 @@ class DataAnalysis2:
         return self.df_fs
 
     def config_fs_data(self):
+        self.fs_add(self.get_column())
+
         self.df_fs = self.get_asset(add=True)
         self.df_fs = self.get_equity(add=True)
         self.df_fs = self.get_stocks(add=True)
@@ -694,6 +715,9 @@ class DataAnalysis2:
 
         self.df_fs = self.get_revenue(add=True)
         self.df_fs = self.get_revenue_rate(add=True)
+
+    def fs_add(self, new_df):
+        self.df_fs = pd.concat([self.df_fs, new_df], axis=1, sort=True)
 
     def set_df(self):
         self.df = pd.merge(
@@ -731,9 +755,10 @@ class DataAnalysis2:
     def get_df_after_date(df, date):
         return df.loc[df.index.values > date, :].copy()
 
+    @if_column_exist
     def get_column(self, df, column):
         if column == 'dt_fs':
-            dt_fs = df['reportDate'].copy().dropna()
+            dt_fs = self.df_fs['reportDate'].copy().dropna()
             dict0 = dict()
             for index, value in dt_fs.iteritems():
                 dict0[value[:10]] = index
@@ -743,38 +768,38 @@ class DataAnalysis2:
             return dt_fs
 
         elif column == 'dt_mvs':
-            dt_mvs = df['date'].copy().dropna()
-            dt_mvs.name = column
+            index = self.df_mvs['date'].copy().dropna().index.values
+            dt_mvs = pd.Series(index, index=index, name=column)
             return dt_mvs
 
-        elif column == 'last_report':
-            dt_fs = self.get_column(self.df_fs, 'dt_fs')
-            dt_mvs = self.get_column(self.df_mvs, 'dt_mvs')
-
-            dict0 = dt_fs.to_dict()
-            it = iter(dt_fs.index.values[::-1])
-
-            last_report = pd.Series(index=dt_mvs.index, name=column)
-
-            d0 = 'a'
-            dates = dt_mvs.index.values[::-1]
-            index = dates.size
-            for date in dates:
-                index -= 1
-                while date < d0:
-                    try:
-                        d0 = it.__next__()
-                    except StopIteration:
-                        break
-                if d0 == 'a':
-                    break
-                last_report.iloc[index] = dict0[d0]
-
-            return last_report
+        # elif column == 'last_report':
+        #     dt_fs = self.get_column(self.df_fs, 'dt_fs')
+        #     dt_mvs = self.get_column(self.df_mvs, 'dt_mvs')
+        #
+        #     dict0 = dt_fs.to_dict()
+        #     it = iter(dt_fs.index.values[::-1])
+        #
+        #     last_report = pd.Series(index=dt_mvs.index, name=column)
+        #
+        #     d0 = 'a'
+        #     dates = dt_mvs.index.values[::-1]
+        #     index = dates.size
+        #     for date in dates:
+        #         index -= 1
+        #         while date < d0:
+        #             try:
+        #                 d0 = it.__next__()
+        #             except StopIteration:
+        #                 break
+        #         if d0 == 'a':
+        #             break
+        #         last_report.iloc[index] = dict0[d0]
+        #
+        #     return last_report
 
         elif column == 's_001_roe':
-            s1 = self.get_column(self.df_fs, 's_003_profit')
-            s2 = self.get_column(self.df_fs, 's_002_equity')
+            s1 = self.get_column(df, 's_003_profit')
+            s2 = self.get_column(df, 's_002_equity')
             s3 = s2 - s1
             s3[s3 <= 0] = np.nan
             s4 = s1 / s3
@@ -790,14 +815,41 @@ class DataAnalysis2:
             return self.smooth_data(column, 'id_211_ps_np', delta=True, ttm=True)
 
         elif column == 's_004_pe':
+            s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            s2 = self.get_column(df, 's_003_profit')
+            s2 = s2.reindex_like(self.df_fs['reportDate'].copy().dropna())
+            #
+            # s3 = self.get_column('last_report')
+            #
+            # column1 = 's_003_profit'
+            # dict0 = s3.to_dict()
+            #
+            # new = pd.Series(index=s3.index, name=column)
+            # counter = 0
+            # for index, value in s3.iteritems():
+            #     try:
+            #         a = s1[index]
+            #     except Exception as e:
+            #         # print(e)
+            #         a = np.nan
+            #     try:
+            #         b = s2[value]
+            #     except Exception as e:
+            #         # print(e)
+            #         b = np.nan
+            #
+            #     new[counter] = a / b
+            #     counter += 1
+            # new_df = pd.DataFrame(new)
+
             return 0
 
         elif column == 's_005_stocks':
             return self.smooth_data(column, 'id_023_bs_i')
 
         elif column == 's_006_stocks_rate':
-            s1 = self.get_column(self.df_fs, 's_005_stocks')
-            s2 = self.get_column(self.df_fs, 's_007_asset')
+            s1 = self.get_column(df, 's_005_stocks')
+            s2 = self.get_column(df, 's_007_asset')
             s3 = s1 / s2
             s3.name = column
             return s3.dropna()
@@ -809,32 +861,28 @@ class DataAnalysis2:
             return self.smooth_data(column, 'id_157_ps_toi', delta=True, ttm=True)
 
         elif column == 's_009_revenue_rate':
-            revenue = self.get_column(self.df_fs, 's_008_revenue')
+            revenue = self.get_column('s_008_revenue')
             return StandardFitModel.get_growth_rate(revenue, column)
 
         elif column == 's_010_main_profit':
             return self.smooth_data(column, 'id_200_ps_op', delta=True, ttm=True)
 
-    @staticmethod
-    def if_column_exist(func):
-        @wraps(func)
-        def wrapped_function(df, column):
-            if column in df.columns:
-                return df[column].copy().dropna()
-            else:
-                return func(df, column)
-        return wrapped_function
+    def fs_to_mvs(self, column):
+        dt_fs = self.get_column('dt_fs')
+        dt_mvs = self.get_column('dt_mvs')
 
-    def get_revenue_rate(self, add=False):
-        name = 's_009_revenue_rate'
-        df = self.df_fs
-        if name in df.columns:
-            new_df = df.loc[:, [name]].copy().dropna()
-            return new_df if add is False else df
-        else:
-            df1 = self.get_revenue()
-            new_df = StandardFitModel.get_growth_rate(df1, name)
-            return self.return_df(df, new_df, add=add)
+        data = self.get_column(self.df_fs, column)
+        data = data.reindex_like(pd.Series(index=dt_fs.values))
+        data.fillna(np.inf, inplace=True)
+        data.index = dt_fs.index
+
+        index = pd.concat([dt_mvs, data], axis=1).sort_index().index
+        data = data.reindex_like(pd.Series(index=index))
+
+        data.fillna(method='ffill', inplace=True)
+        data[data == np.inf] = np.nan
+        data = data[dt_mvs.values]
+        return data
 
     def get_pe(self, add=False):
         name = 's_004_pe'
@@ -954,6 +1002,6 @@ if __name__ == '__main__':
 
     # combine_style_df()
     #
-    res = sql2df('600006')
-    print(res)
+    # res = sql2df('600006')
+    # print(res)
     pass
