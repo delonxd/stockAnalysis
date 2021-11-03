@@ -124,6 +124,7 @@ if __name__ == '__main__':
     pd.set_option('max_colwidth', 150)
     # test_analysis()
     df0 = load_default_style()
+    # df0 = add_new_style(df0, 's_001_roe', src='id_004_bs_tca_ta_r')
     # df0 = add_new_style(df0, 's_002_equity')
     # df0 = add_new_style(df0, 's_003_profit')
     # df0 = add_new_style(df0, 's_004_pe', src='id_001_mvs_pe_ttm')
@@ -132,7 +133,12 @@ if __name__ == '__main__':
     # df0 = add_new_style(df0, 's_007_asset')
     # df0 = add_new_style(df0, 's_008_revenue')
     # df0 = add_new_style(df0, 's_009_revenue_rate', src='id_004_bs_tca_ta_r')
-    # df0.drop('s_004_pe', inplace=True)
+    # df0 = add_new_style(df0, 's_010_main_profit')
+    # df0 = add_new_style(df0, 's_011_main_profit_rate', src='id_004_bs_tca_ta_r')
+    # df0 = add_new_style(df0, 's_012_return_year', src='id_001_mvs_pe_ttm')
+    df0 = add_new_style(df0, 's_014_pe2', src='id_001_mvs_pe_ttm')
+    df0 = add_new_style(df0, 's_015_return_year2', src='id_001_mvs_pe_ttm')
+    # df0.drop('s_012_return_year', inplace=True)
 
     save_default_style(df0)
     pass
