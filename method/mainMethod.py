@@ -117,6 +117,7 @@ def get_units_dict():
         '百': 1e2,
         '%': 1e-2,
         '倍': 1,
+        '年': 1,
     }
     return res
 

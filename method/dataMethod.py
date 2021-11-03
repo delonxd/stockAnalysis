@@ -220,11 +220,10 @@ def sql2df(code):
 
     # print(df1)
     # print(df2)
-    data = DataAnalysis2(df1, df2)
-    data.fs_to_mvs('id_001_bs_ta')
-    # data.test001(1, df=2)
-    # data = DataAnalysis(df1, df2)
-    # data.config_widget_data()
+    data = DataAnalysis(df1, df2)
+    data.config_widget_data()
+    # print(data.df['s_012_return_year'])
+
     return data.df
 
 
@@ -232,95 +231,20 @@ def if_column_exist(func):
     @wraps(func)
     def wrapped_function(*args, **kwargs):
         self = args[0]
-        column = kwargs.pop('column') if 'column' in kwargs.keys() else args[1]
-        df = kwargs.pop('df') if 'df' in kwargs.keys() else self.df_fs
+        df = kwargs.pop('df') if 'df' in kwargs.keys() else args[1]
+        column = kwargs.pop('column') if 'column' in kwargs.keys() else args[2]
         if column in df.columns:
             return df[column].copy().dropna()
         else:
-            # return func(*args, **kwargs)
-            return func(self)
+            return func(self, df, column)
     return wrapped_function
 
 
 class DataAnalysis:
     def __init__(self, df_fs: pd.DataFrame, df_mvs: pd.DataFrame):
         self.df_fs = df_fs
-
-        # self.get_df_after_date(self.df_fs, '2010-01-01')
         self.df_mvs = df_mvs
         self.df = pd.DataFrame()
-
-    def config_widget_data(self):
-        self.config_sub_fs()
-
-        self.df_fs = self.get_dt_fs(add=True)
-        self.df_mvs = self.get_dt_mvs(add=True)
-        self.df_mvs = self.get_last_report(add=True)
-
-        # self.df_fs = self.get_asset(add=True)
-        # self.df_fs = self.get_equity(add=True)
-        # self.df_fs = self.get_stocks(add=True)
-        # self.df_fs = self.get_profit(add=True)
-        #
-        # self.df_fs = self.get_roe(add=True)
-        # self.df_fs = self.get_stocks_rate(add=True)
-        #
-        # self.df_fs = self.get_revenue(add=True)
-        # self.df_fs = self.get_revenue_rate(add=True)
-
-        # self.config_fs_data()
-
-        self.df_mvs = self.get_pe(add=True)
-        self.set_df()
-
-    def config_sub_fs(self, inplace=True):
-        df = self.df_fs.copy()
-        sub_list = self.get_sub_date()
-        last_date = ''
-        df_list = list()
-        for sub in sub_list:
-            sub_df = df.loc[sub, :].copy()
-            sub_data = SubDataAnalysis(sub_df)
-            sub_data.config_fs_data()
-
-            sub_data.df_fs = self.get_df_after_date(sub_data.df_fs, last_date)
-            df_list.append(sub_data.df_fs)
-            last_date = sub_data.df_fs.index.values[-1]
-
-        length = len(df_list)
-        if length == 0:
-            self.config_fs_data()
-        elif length == 1:
-            self.df_fs = df_list[0]
-        else:
-            self.df_fs = pd.concat(df_list)
-
-        return self.df_fs
-
-    def config_fs_data(self):
-        self.df_fs = self.get_asset(add=True)
-        self.df_fs = self.get_equity(add=True)
-        self.df_fs = self.get_stocks(add=True)
-        self.df_fs = self.get_profit(add=True)
-        self.df_fs = self.get_main_profit(add=True)
-
-        self.df_fs = self.get_roe(add=True)
-        self.df_fs = self.get_stocks_rate(add=True)
-
-        self.df_fs = self.get_revenue(add=True)
-        self.df_fs = self.get_revenue_rate(add=True)
-
-    def set_df(self):
-        self.df = pd.merge(
-            self.df_fs,
-            self.df_mvs,
-            how='outer',
-            left_index=True,
-            right_index=True,
-            sort=True,
-            suffixes=('_fs', '_mvs'),
-            copy=True,
-        )
 
     def get_sub_date(self):
         df = self.df_fs
@@ -342,349 +266,14 @@ class DataAnalysis:
 
         return res
 
-    @staticmethod
-    def get_df_after_date(df, date):
-        df = df.copy()
-        new_df = df.loc[df.index.values > date, :]
-        return new_df
-
-    def get_dt_fs(self, add=False):
-        df = self.df_fs
-        name = 'dt_fs'
-
-        if name in df.columns:
-            new_df = df.loc[:, [name]].copy().dropna()
-            return new_df if add is False else df
-        else:
-            dt_fs = df['reportDate'].copy().dropna()
-            dict0 = dict()
-            for index, value in dt_fs.iteritems():
-                dict0[value[:10]] = index
-
-            dt_fs = pd.Series(dict0, name=name)
-            dt_fs.sort_index(inplace=True)
-            new_df = pd.DataFrame(dt_fs)
-            return self.return_df(df, new_df, add=add)
-
-    def get_dt_mvs(self, add=False):
-        df = self.df_mvs
-        name = 'dt_mvs'
-
-        if name in df.columns:
-            new_df = df.loc[:, [name]].copy().dropna()
-            return new_df if add is False else df
-        else:
-            dt_mvs = df['date'].copy().dropna()
-            new_df = pd.DataFrame(dt_mvs.index.values, index=dt_mvs.index, columns=[name])
-            return self.return_df(df, new_df, add=add)
-
-    def get_last_report(self, add=False):
-        df = self.df_mvs
-        name = 'last_report'
-
-        if name in df.columns:
-            new_df = df.loc[:, [name]].copy().dropna()
-            return new_df if add is False else df
-        else:
-            dt_mvs = self.get_dt_mvs()
-            dt_fs = self.get_dt_fs()
-
-            dict0 = dt_fs.iloc[:, 0].to_dict()
-            it = iter(dt_fs.index.values[::-1])
-
-            last_report = pd.Series(index=dt_mvs.index, name=name)
-
-            d0 = 'a'
-            dates = dt_mvs.index.values[::-1]
-            index = dates.size
-            for date in dates:
-                index -= 1
-                while date < d0:
-                    try:
-                        d0 = it.__next__()
-                    except StopIteration:
-                        break
-                if d0 == 'a':
-                    break
-                last_report.iloc[index] = dict0[d0]
-
-            new_df = pd.DataFrame(last_report)
-            return self.return_df(df, new_df, add=add)
-
-    def get_equity(self, add=False):
-        res = self.get_smooth_data(
-            df=self.df_fs,
-            src='id_110_bs_toe',
-            name='s_002_equity',
-            add=add,
-            delta=False,
-        )
-        return res
-
-    def get_profit(self, add=False):
-        res = self.get_smooth_data(
-            df=self.df_fs,
-            src='id_211_ps_np',
-            name='s_003_profit',
-            add=add,
-            delta=True,
-            ttm=True,
-        )
-        return res
-
-    def get_main_profit(self, add=False):
-        res = self.get_smooth_data(
-            df=self.df_fs,
-            src='id_200_ps_op',
-            name='s_010_main_profit',
-            add=add,
-            delta=True,
-            ttm=True,
-        )
-        return res
-
-    def get_stocks(self, add=False):
-        res = self.get_smooth_data(
-            df=self.df_fs,
-            src='id_023_bs_i',
-            name='s_005_stocks',
-            add=add,
-            delta=False,
-        )
-        return res
-
-    def get_asset(self, add=False):
-        res = self.get_smooth_data(
-            df=self.df_fs,
-            src='id_001_bs_ta',
-            name='s_007_asset',
-            add=add,
-            delta=False,
-        )
-        return res
-
-    def get_revenue(self, add=False):
-        res = self.get_smooth_data(
-            df=self.df_fs,
-            src='id_157_ps_toi',
-            name='s_008_revenue',
-            add=add,
-            delta=True,
-            ttm=True,
-        )
-        return res
-
-    def get_revenue_rate(self, add=False):
-        name = 's_009_revenue_rate'
-        df = self.df_fs
-        if name in df.columns:
-            new_df = df.loc[:, [name]].copy().dropna()
-            return new_df if add is False else df
-        else:
-            df1 = self.get_revenue()
-            new_df = StandardFitModel.get_growth_rate(df1, name)
-            return self.return_df(df, new_df, add=add)
-
-    def get_roe(self, add=False):
-        name = 's_001_roe'
-        df = self.df_fs
-
-        if name in df.columns:
-            new_df = df.loc[:, [name]].copy().dropna()
-            return new_df if add is False else df
-        else:
-            df1 = self.get_profit()
-            df2 = self.get_equity()
-
-            con = pd.concat([df1, df2], axis=1, sort=True, join='inner')
-
-            a = con[df1.columns[0]].values
-            b = con[df2.columns[0]].values
-            c = b - a
-            c[c <= 0] = np.nan
-            d = a / c
-
-            if d.size > 0:
-                d[np.isnan(d)] = -np.inf
-                d[d <= -50] = -np.inf
-                d[d == -np.inf] = np.nan
-
-            con[name] = np.around(d, decimals=2)
-            new_df = con.loc[:, [name]].copy()
-            return self.return_df(df, new_df, add=add)
-
-    def get_pe(self, add=False):
-        name = 's_004_pe'
-        df = self.df_mvs
-
-        if name in df.columns:
-            new_df = df.loc[:, [name]].copy().dropna()
-            return new_df if add is False else df
-        else:
-            s1 = df['id_041_mvs_mc'].copy().dropna()
-            s2 = self.get_profit().iloc[:, 0]
-            last_report = self.get_last_report().iloc[:, 0]
-
-            new = pd.Series(index=last_report.index, name=name)
-            counter = 0
-            for index, value in last_report.iteritems():
-                try:
-                    a = s1[index]
-                except Exception as e:
-                    # print(e)
-                    a = np.nan
-                try:
-                    b = s2[value]
-                except Exception as e:
-                    # print(e)
-                    b = np.nan
-
-                new[counter] = a / b
-                counter += 1
-            new_df = pd.DataFrame(new)
-
-            return self.return_df(df, new_df, add=add)
-
-    def get_stocks_rate(self, add=False):
-        name = 's_006_stocks_rate'
-        df = self.df_fs
-
-        if name in df.columns:
-            new_df = df.loc[:, [name]].copy().dropna()
-            return new_df if add is False else df
-        else:
-            df1 = self.get_stocks()
-            df2 = self.get_asset()
-
-            con = pd.concat([df1, df2], axis=1, sort=True, join='inner')
-
-            a = con[df1.columns[0]].values
-            b = con[df2.columns[0]].values
-
-            con[name] = a / b
-            new_df = con.loc[:, [name]].copy()
-
-            return self.return_df(df, new_df, add=add)
-
-    def get_smooth_data(self, df, src, name, add=False, delta=False, ttm=False):
-        if name in df.columns:
-            new_df = df.loc[:, [name]].copy().dropna()
-            return new_df if add is False else df
-        else:
-            new_df = df.loc[:, [src]].copy().dropna()
-            if delta is False:
-                new_df = get_month_data(new_df, name)
-            else:
-                new_df = get_month_delta(new_df, name)
-                if ttm is True:
-                    new_df = new_df.rolling(4, min_periods=1).mean()
-            return self.return_df(df, new_df, add=add)
-
-    @staticmethod
-    def return_df(df, new_df, add=False):
-        if add is False:
-            return new_df
-        else:
-            return pd.concat([df, new_df], axis=1, sort=True)
-
-    # def get_growth_rate(self, df, name):
-    #     data = df
-    #     data[data <= 0] = np.nan
-    #     data3 = data.rolling(12, min_periods=1).apply(self.window_method, raw=True)
-    #     data4 = np.exp(data3) - 1
-    #
-    #     data4.columns = [name]
-    #
-    #     # arr_y = data2.iloc[:, 0].values
-    #     # arr_y2 = data4.iloc[:, 0].values
-    #     # arr_x = np.arange(0, arr_y.size, 1)
-    #     #
-    #     # plt.plot(arr_x, arr_y, 'b-', label='data2')
-    #     # plt.plot(arr_x, arr_y2, 'r', label='data4')
-    #     #
-    #     # plt.xlabel('x axis')
-    #     # plt.ylabel('y axis')
-    #     #
-    #     # plt.title('curve_fit')
-    #     # plt.show()
-    #
-    #     return data4
-    #
-    # def window_method(self, arr_y):
-    #     # arr_y[arr_y <= 0] = np.nan
-    #     tmp = np.where(np.isnan(arr_y))[0]
-    #     if tmp.size > 0:
-    #         index = tmp[-1] + 1
-    #         arr_y = arr_y[index:]
-    #
-    #     if arr_y.size == 0:
-    #         return 0
-    #
-    #     size = 12
-    #     pre = np.ones(size - arr_y.size) * arr_y[0]
-    #     arr_y = np.append(pre, arr_y)
-    #
-    #     # delta = self.potential_rate(arr_y) * 4
-    #     delta = self.curve_fit1(arr_y) * 4
-    #     return delta
-    #
-    # # @staticmethod
-    # # def potential_rate(arr_y):
-    # #     arr_x = np.arange(0, arr_y.size, 1)
-    # #     p = np.polyfit(arr_x, arr_y, 1)
-    # #     rate = p[0]
-    # #
-    # #     return rate
-    #
-    # def curve_fit1(self, arr_y):
-    #     arr_x = np.arange(0, arr_y.size, 1)
-    #     popt, pcov = curve_fit(self.curve_func, arr_x, arr_y)
-    #     return popt[0]
-    #
-    # @staticmethod
-    # def curve_func(x, a, b):
-    #     return np.exp(a * x + b)
-
-
-class DataAnalysis2:
-    def __init__(self, df_fs: pd.DataFrame, df_mvs: pd.DataFrame):
-        self.df_fs = df_fs
-
-        # self.get_df_after_date(self.df_fs, '2010-01-01')
-        self.df_mvs = df_mvs
-        self.df = pd.DataFrame()
-
-    def config_widget_data(self):
-        self.config_sub_fs()
-
-        self.df_fs = self.get_dt_fs(add=True)
-        self.df_mvs = self.get_dt_mvs(add=True)
-        self.df_mvs = self.get_last_report(add=True)
-
-        # self.df_fs = self.get_asset(add=True)
-        # self.df_fs = self.get_equity(add=True)
-        # self.df_fs = self.get_stocks(add=True)
-        # self.df_fs = self.get_profit(add=True)
-        #
-        # self.df_fs = self.get_roe(add=True)
-        # self.df_fs = self.get_stocks_rate(add=True)
-        #
-        # self.df_fs = self.get_revenue(add=True)
-        # self.df_fs = self.get_revenue_rate(add=True)
-
-        # self.config_fs_data()
-
-        self.df_mvs = self.get_pe(add=True)
-        self.set_df()
-
-    def config_sub_fs(self, inplace=True):
+    def config_sub_fs(self):
         df = self.df_fs.copy()
         sub_list = self.get_sub_date()
         last_date = ''
         df_list = list()
         for sub in sub_list:
             sub_df = df.loc[sub, :].copy()
-            sub_data = SubDataAnalysis(sub_df)
+            sub_data = DataAnalysis(sub_df, None)
             sub_data.config_fs_data()
 
             sub_data.df_fs = self.get_df_after_date(sub_data.df_fs, last_date)
@@ -702,23 +291,37 @@ class DataAnalysis2:
         return self.df_fs
 
     def config_fs_data(self):
-        self.fs_add(self.get_column())
+        df = self.df_fs
+        self.fs_add(self.get_column(df, 's_007_asset'))
+        self.fs_add(self.get_column(df, 's_002_equity'))
+        self.fs_add(self.get_column(df, 's_005_stocks'))
 
-        self.df_fs = self.get_asset(add=True)
-        self.df_fs = self.get_equity(add=True)
-        self.df_fs = self.get_stocks(add=True)
-        self.df_fs = self.get_profit(add=True)
-        self.df_fs = self.get_main_profit(add=True)
+        self.fs_add(self.get_column(df, 's_003_profit'))
+        self.fs_add(self.get_column(df, 's_010_main_profit'))
+        self.fs_add(self.get_column(df, 's_011_main_profit_rate'))
 
-        self.df_fs = self.get_roe(add=True)
-        self.df_fs = self.get_stocks_rate(add=True)
+        self.fs_add(self.get_column(df, 's_001_roe'))
+        self.fs_add(self.get_column(df, 's_006_stocks_rate'))
 
-        self.df_fs = self.get_revenue(add=True)
-        self.df_fs = self.get_revenue_rate(add=True)
+        self.fs_add(self.get_column(df, 's_008_revenue'))
+        self.fs_add(self.get_column(df, 's_009_revenue_rate'))
+
+    def config_widget_data(self):
+        self.config_sub_fs()
+        self.fs_add(self.get_column(self.df_fs, 'dt_fs'))
+        self.mvs_add(self.get_column(self.df_mvs, 'dt_mvs'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_004_pe'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_012_return_year'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_014_pe2'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_015_return_year2'))
+        self.set_df()
 
     def fs_add(self, new_df):
         self.df_fs = pd.concat([self.df_fs, new_df], axis=1, sort=True)
 
+    def mvs_add(self, new_df):
+        self.df_mvs = pd.concat([self.df_mvs, new_df], axis=1, sort=True)
+
     def set_df(self):
         self.df = pd.merge(
             self.df_fs,
@@ -730,26 +333,6 @@ class DataAnalysis2:
             suffixes=('_fs', '_mvs'),
             copy=True,
         )
-
-    def get_sub_date(self):
-        df = self.df_fs
-        dt_fs = df['id_001_bs_ta'].copy().dropna()
-
-        res = list()
-        sub = list()
-        val = np.inf
-        for index, value in dt_fs.iteritems():
-            if value > 2 * val:
-                res.append(sub)
-                sub = list()
-
-            sub.append(index)
-            val = value
-
-        if len(sub) > 0:
-            res.append(sub)
-
-        return res
 
     @staticmethod
     def get_df_after_date(df, date):
@@ -758,7 +341,7 @@ class DataAnalysis2:
     @if_column_exist
     def get_column(self, df, column):
         if column == 'dt_fs':
-            dt_fs = self.df_fs['reportDate'].copy().dropna()
+            dt_fs = df['reportDate'].copy().dropna()
             dict0 = dict()
             for index, value in dt_fs.iteritems():
                 dict0[value[:10]] = index
@@ -768,34 +351,9 @@ class DataAnalysis2:
             return dt_fs
 
         elif column == 'dt_mvs':
-            index = self.df_mvs['date'].copy().dropna().index.values
+            index = df['date'].copy().dropna().index.values
             dt_mvs = pd.Series(index, index=index, name=column)
             return dt_mvs
-
-        # elif column == 'last_report':
-        #     dt_fs = self.get_column(self.df_fs, 'dt_fs')
-        #     dt_mvs = self.get_column(self.df_mvs, 'dt_mvs')
-        #
-        #     dict0 = dt_fs.to_dict()
-        #     it = iter(dt_fs.index.values[::-1])
-        #
-        #     last_report = pd.Series(index=dt_mvs.index, name=column)
-        #
-        #     d0 = 'a'
-        #     dates = dt_mvs.index.values[::-1]
-        #     index = dates.size
-        #     for date in dates:
-        #         index -= 1
-        #         while date < d0:
-        #             try:
-        #                 d0 = it.__next__()
-        #             except StopIteration:
-        #                 break
-        #         if d0 == 'a':
-        #             break
-        #         last_report.iloc[index] = dict0[d0]
-        #
-        #     return last_report
 
         elif column == 's_001_roe':
             s1 = self.get_column(df, 's_003_profit')
@@ -815,34 +373,11 @@ class DataAnalysis2:
             return self.smooth_data(column, 'id_211_ps_np', delta=True, ttm=True)
 
         elif column == 's_004_pe':
-            s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
-            s2 = self.get_column(df, 's_003_profit')
-            s2 = s2.reindex_like(self.df_fs['reportDate'].copy().dropna())
-            #
-            # s3 = self.get_column('last_report')
-            #
-            # column1 = 's_003_profit'
-            # dict0 = s3.to_dict()
-            #
-            # new = pd.Series(index=s3.index, name=column)
-            # counter = 0
-            # for index, value in s3.iteritems():
-            #     try:
-            #         a = s1[index]
-            #     except Exception as e:
-            #         # print(e)
-            #         a = np.nan
-            #     try:
-            #         b = s2[value]
-            #     except Exception as e:
-            #         # print(e)
-            #         b = np.nan
-            #
-            #     new[counter] = a / b
-            #     counter += 1
-            # new_df = pd.DataFrame(new)
-
-            return 0
+            s1 = self.fs_to_mvs('tmp', 's_003_profit')
+            s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            s3 = s2 / s1
+            s3.name = column
+            return s3.dropna()
 
         elif column == 's_005_stocks':
             return self.smooth_data(column, 'id_023_bs_i')
@@ -861,60 +396,74 @@ class DataAnalysis2:
             return self.smooth_data(column, 'id_157_ps_toi', delta=True, ttm=True)
 
         elif column == 's_009_revenue_rate':
-            revenue = self.get_column('s_008_revenue')
-            return StandardFitModel.get_growth_rate(revenue, column)
+            s1 = self.get_column(df, 's_008_revenue')
+            return StandardFitModel.get_growth_rate(s1, column)
 
         elif column == 's_010_main_profit':
             return self.smooth_data(column, 'id_200_ps_op', delta=True, ttm=True)
 
-    def fs_to_mvs(self, column):
-        dt_fs = self.get_column('dt_fs')
-        dt_mvs = self.get_column('dt_mvs')
+        elif column == 's_011_main_profit_rate':
+            s1 = self.get_column(df, 's_010_main_profit')
+            return StandardFitModel.get_growth_rate(s1, column)
 
-        data = self.get_column(self.df_fs, column)
+        elif column == 's_012_return_year':
+            s1 = self.fs_to_mvs('tmp', 's_009_revenue_rate')
+            s2 = self.get_column(df, 's_004_pe')
+            s3 = self.get_return_year(s2, s1)
+            s3.name = column
+            return s3
+
+        elif column == 's_013_noc_asset':
+            s1 = self.fs_to_mvs('tmp', 's_003_profit')
+            s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            s3 = s2 / s1
+            s3.name = column
+            return s3.dropna()
+
+        elif column == 's_014_pe2':
+            s1 = self.fs_to_mvs('tmp', 's_003_profit')
+            s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            s3 = self.fs_to_mvs('tmp', 's_005_stocks')
+            s4 = (s2 + s3) / s1
+            s4.name = column
+            return s4.dropna()
+
+        elif column == 's_015_return_year2':
+            s1 = self.fs_to_mvs('tmp', 's_009_revenue_rate')
+            s2 = self.get_column(df, 's_014_pe2')
+            s3 = self.get_return_year(s2, s1)
+            s3.name = column
+            return s3
+
+    @staticmethod
+    def get_return_year(pe, rate):
+        a = 1 + rate
+        b = (rate / (1 + rate) * pe + 1)
+
+        a[a <= 0] = np.nan
+        b.dropna(inplace=True)
+        b[b <= 0] = np.nan
+
+        y = np.log(b) / np.log(a)
+        return y.dropna()
+
+    def fs_to_mvs(self, name, src):
+        dt_fs = self.get_column(self.df_fs, 'dt_fs')
+        dt_mvs = self.get_column(self.df_mvs, 'dt_mvs')
+
+        data = self.get_column(self.df_fs, src)
         data = data.reindex_like(pd.Series(index=dt_fs.values))
         data.fillna(np.inf, inplace=True)
         data.index = dt_fs.index
 
-        index = pd.concat([dt_mvs, data], axis=1).sort_index().index
+        index = pd.concat([dt_mvs, data], axis=1, sort=True).index
         data = data.reindex_like(pd.Series(index=index))
 
         data.fillna(method='ffill', inplace=True)
         data[data == np.inf] = np.nan
         data = data[dt_mvs.values]
+        data.name = name
         return data
-
-    def get_pe(self, add=False):
-        name = 's_004_pe'
-        df = self.df_mvs
-
-        if name in df.columns:
-            new_df = df.loc[:, [name]].copy().dropna()
-            return new_df if add is False else df
-        else:
-            s1 = df['id_041_mvs_mc'].copy().dropna()
-            s2 = self.get_profit().iloc[:, 0]
-            last_report = self.get_last_report().iloc[:, 0]
-
-            new = pd.Series(index=last_report.index, name=name)
-            counter = 0
-            for index, value in last_report.iteritems():
-                try:
-                    a = s1[index]
-                except Exception as e:
-                    # print(e)
-                    a = np.nan
-                try:
-                    b = s2[value]
-                except Exception as e:
-                    # print(e)
-                    b = np.nan
-
-                new[counter] = a / b
-                counter += 1
-            new_df = pd.DataFrame(new)
-
-            return self.return_df(df, new_df, add=add)
 
     def smooth_data(self, name, src, delta=False, ttm=False, df=None):
         if df is None:
@@ -944,12 +493,19 @@ class StandardFitModel:
         data[data <= 0] = np.nan
         data3 = data.rolling(12, min_periods=1).apply(cls.window_method, raw=True)
         data4 = np.exp(data3) - 1
-        data4.columns = [name]
+        data4.name = name
         return data4
 
     @classmethod
+    def window_method(cls, arr_y):
+        arr_y = cls.config_window_array(arr_y)
+        if arr_y is None:
+            return 0
+        delta = cls.curve_fit(arr_y) * 4
+        return delta
+
+    @classmethod
     def config_window_array(cls, arr_y):
-        # arr_y[arr_y <= 0] = np.nan
         tmp = np.where(np.isnan(arr_y))[0]
         if tmp.size > 0:
             index = tmp[-1] + 1
@@ -965,14 +521,6 @@ class StandardFitModel:
         return arr_y
 
     @classmethod
-    def window_method(cls, arr_y):
-        arr_y = cls.config_window_array(arr_y)
-        if arr_y is None:
-            return 0
-        delta = cls.curve_fit(arr_y) * 4
-        return delta
-
-    @classmethod
     def curve_fit(cls, arr_y):
         arr_x = np.arange(0, arr_y.size, 1)
         popt, pcov = curve_fit(cls.curve_func, arr_x, arr_y)
@@ -981,17 +529,6 @@ class StandardFitModel:
     @staticmethod
     def curve_func(x, a, b):
         return np.exp(a * x + b)
-
-
-class SubDataAnalysis(DataAnalysis):
-    def __init__(self, df_fs: pd.DataFrame):
-        self.df_fs = df_fs.copy()
-        self.df_mvs = None
-
-        # self.config_fs_data()
-        # self.df_fs = self.get_profit(add=True)
-        # self.df_fs = self.get_revenue(add=True)
-        # self.df_fs = self.get_revenue_rate(add=True)
 
 
 if __name__ == '__main__':
