@@ -364,7 +364,7 @@ class DataAnalysis:
             s4.dropna(inplace=True)
             s4[s4 <= -50] = np.nan
             s4.name = column
-            return s4.dropna(inplace=True)
+            return s4.dropna()
 
         elif column == 's_002_equity':
             return self.smooth_data(column, 'id_110_bs_toe')
