@@ -135,6 +135,7 @@ def test_window_roe(arr_y):
 
 
 def test_analysis():
+    import time
     with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
@@ -152,6 +153,7 @@ def test_analysis():
     while index < end:
         stock_code = code_list[index]
         # print(index, '-->', stock_code)
+        print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
         print(index)
         # df = load_df_from_mysql(stock_code, data_type)
         # data = DataAnalysis(df, None)
@@ -160,7 +162,7 @@ def test_analysis():
         df2 = load_df_from_mysql(stock_code, 'mvs')
         data = DataAnalysis(df1, df2)
         data.config_widget_data()
-        res = data.df
+        # res = data.df_mvs
 
         # revenue = data.get_revenue()
         # revenue_rate = data.get_growth_rate(revenue, stock_code)
@@ -168,20 +170,28 @@ def test_analysis():
         # res = data.config_sub_fs()
         # res_dict[stock_code] = res
 
-        revenue_rate = res['s_012_return_year'].copy().dropna()
+        # revenue_rate = res['s_012_return_year'].copy().dropna()
         # print(revenue_rate)
-        revenue_rate.name = stock_code
 
-        res_df = pd.concat([res_df, revenue_rate], axis=1, sort=True)
+        # revenue_rate.name = stock_code
+        #
+        # res_df = pd.concat([res_df, revenue_rate], axis=1, sort=True)
+
+        a1 = data.df['s_004_pe'].copy().dropna()
+        a2 = data.df['s_012_return_year'].copy().dropna()
+        a3 = data.df['s_014_pe2'].copy().dropna()
+        a4 = data.df['s_015_return_year2'].copy().dropna()
+
+        res_dict[stock_code] = (a1, a2, a3, a4)
         index += 1
 
         # print(res_df)
 
-    with open("../basicData/analyzedData/return_year.pkl", "wb") as f:
-        pickle.dump(res_df, f)
-    #
-    # with open("../basicData/analyzedData/res_dict.pkl", "wb") as f:
-    #     pickle.dump(res_dict, f)
+    # with open("../basicData/analyzedData/return_year.pkl", "wb") as f:
+    #     pickle.dump(res_df, f)
+
+    with open("../basicData/analyzedData/res_dict.pkl", "wb") as f:
+        pickle.dump(res_dict, f)
 
 
 def test_read():
@@ -203,21 +213,35 @@ def test_read():
 
 
 def test_read2():
-    with open("../basicData/analyzedData/res_dict.pkl", "rb") as f:
+    with open("../basicData/analyzedData/return_year.pkl", "rb") as f:
         res_dict = pickle.load(f)
 
-    code_list = list()
+    # code_list = list()
+    dict0 = dict()
     for key, value in res_dict.items():
-        profit = value['s_003_profit'].copy().dropna()
-        a = profit[profit.index.values > '2018-01-01'].values
-        b = a > 0
-        if False in b:
-            code_list.append(key)
-            print(key)
+        # s1 = value['s_003_profit'].copy().dropna()
+        a = value[value.index.values > '2021-06-01']
 
-    print(len(code_list))
+        if a.size > 0:
+            dict0[key] = a[-1]
+        else:
+            dict0[key] = np.nan
+
+        # print(dict0[key])
+
+    s1 = pd.Series(dict0)
+    s2 = s1.sort_values(ascending=True)
+    print(s2)
+    code_list = s2.index.tolist()
+
+        # b = a > 0
+    #     if False in b:
+    #         code_list.append(key)
+    #         print(key)
+    #
+    # print(len(code_list))
     res = json.dumps(code_list, indent=4, ensure_ascii=False)
-    with open("../basicData/analyzedData/loss_codes.txt", "w", encoding='utf-8') as f:
+    with open("../basicData/analyzedData/return_year_codes.txt", "w", encoding='utf-8') as f:
         f.write(res)
 
 
@@ -272,6 +296,10 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
     test_analysis()
+
+    # with open("../basicData/analyzedData/res_dict.pkl", "rb") as f:
+    #     res_dict = pickle.load(f)
+    # print(res_dict)
     # test_read()
     # test_read2()
     # show_data_jlr()
