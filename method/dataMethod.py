@@ -445,6 +445,8 @@ class DataAnalysis:
         b[b <= 0] = np.nan
 
         y = np.log(b) / np.log(a)
+        y.dropna(inplace=True)
+        y[y <= 0] = np.nan
         return y.dropna()
 
     def fs_to_mvs(self, name, src):

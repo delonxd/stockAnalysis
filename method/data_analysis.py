@@ -153,16 +153,22 @@ def test_analysis():
         stock_code = code_list[index]
         # print(index, '-->', stock_code)
         print(index)
-        df = load_df_from_mysql(stock_code, data_type)
-        data = DataAnalysis(df, None)
+        # df = load_df_from_mysql(stock_code, data_type)
+        # data = DataAnalysis(df, None)
+
+        df1 = load_df_from_mysql(stock_code, 'fs')
+        df2 = load_df_from_mysql(stock_code, 'mvs')
+        data = DataAnalysis(df1, df2)
+        data.config_widget_data()
+        res = data.df
 
         # revenue = data.get_revenue()
         # revenue_rate = data.get_growth_rate(revenue, stock_code)
         #
-        res = data.config_sub_fs()
+        # res = data.config_sub_fs()
         # res_dict[stock_code] = res
 
-        revenue_rate = res['s_009_revenue_rate'].copy().dropna()
+        revenue_rate = res['s_012_return_year'].copy().dropna()
         # print(revenue_rate)
         revenue_rate.name = stock_code
 
@@ -171,7 +177,7 @@ def test_analysis():
 
         # print(res_df)
 
-    with open("../basicData/analyzedData/revenue_rate2.pkl", "wb") as f:
+    with open("../basicData/analyzedData/return_year.pkl", "wb") as f:
         pickle.dump(res_df, f)
     #
     # with open("../basicData/analyzedData/res_dict.pkl", "wb") as f:
@@ -265,7 +271,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
-    # test_analysis()
-    test_read()
+    test_analysis()
+    # test_read()
     # test_read2()
     # show_data_jlr()
