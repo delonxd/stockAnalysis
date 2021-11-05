@@ -525,7 +525,11 @@ class StandardFitModel:
     @classmethod
     def curve_fit(cls, arr_y):
         arr_x = np.arange(0, arr_y.size, 1)
-        popt, pcov = curve_fit(cls.curve_func, arr_x, arr_y)
+        try:
+            popt, pcov = curve_fit(cls.curve_func, arr_x, arr_y)
+        except Exception as e:
+            print(e)
+            return 0
         return popt[0]
 
     @staticmethod

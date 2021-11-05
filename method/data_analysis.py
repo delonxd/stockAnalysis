@@ -213,14 +213,15 @@ def test_read():
 
 
 def test_read2():
-    with open("../basicData/analyzedData/return_year.pkl", "rb") as f:
+    with open("../basicData/analyzedData/res_dict.pkl", "rb") as f:
         res_dict = pickle.load(f)
 
     # code_list = list()
     dict0 = dict()
     for key, value in res_dict.items():
         # s1 = value['s_003_profit'].copy().dropna()
-        a = value[value.index.values > '2021-06-01']
+        data = value[3]
+        a = data[data.index.values > '2021-06-01']
 
         if a.size > 0:
             dict0[key] = a[-1]
@@ -295,11 +296,11 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
-    test_analysis()
+    # test_analysis()
 
     # with open("../basicData/analyzedData/res_dict.pkl", "rb") as f:
     #     res_dict = pickle.load(f)
     # print(res_dict)
     # test_read()
-    # test_read2()
+    test_read2()
     # show_data_jlr()
