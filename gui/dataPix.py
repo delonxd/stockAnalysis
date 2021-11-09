@@ -464,8 +464,61 @@ class DataPix(QObject):
         pix_painter.end()
 
     def draw_data_dict(self):
+        self.draw_percentage()
+        # for ds in self.data_dict.values():
+        #     self.draw_data(ds, self.pix)
+
+    def draw_percentage(self):
+        ds = self.data_dict['id_001_bs_ta']
+        df_assets = ds.df.iloc[:, 0].copy()
+        df0 = pd.DataFrame(index=df_assets.index)
+        p_dict = dict()
         for ds in self.data_dict.values():
-            self.draw_data(ds, self.pix)
+            if ds.ds_type == 'digit' and ds.frequency == 'QUARTERLY' and ds.data_type == 'assets':
+                data = ds.df.iloc[:, 0].copy() / df_assets
+                data.name = ds.info_priority
+                p_dict[ds.info_priority] = ds
+                df0 = pd.concat([df0, data], axis=1)
+        df0 = df0.reindex(df_assets.index)
+        df0.fillna(0, inplace=True)
+        # print(df0)
+
+        val_x = self.x_date_str2value_vector(df_assets.index.values)
+        px_x = self.x_value2px_vector(val_x)
+
+        top = self.data_rect.top()
+        p_list1 = [QPoint(x, top) for x in px_x]
+        percent = np.zeros(df0.index.size)
+
+        c_list = df0.columns.to_list()
+        c_list.sort()
+        for column in c_list:
+            percent = percent + df0[column].values.copy()
+
+            df_point = pd.DataFrame()
+            df_point['px_x'] = px_x
+            df_point['px_y'] = percent * self.data_rect.height() + self.data_rect.top()
+
+            p_list2 = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
+
+            p_list1.reverse()
+            p_list = p_list1 + p_list2
+
+            pix = self.pix
+            pix_painter = QPainter(pix)
+
+            ds = p_dict[column]
+            brush = QBrush(Qt.SolidPattern)
+            brush.setColor(ds.color)
+            pen = QPen(Qt.red, 0, Qt.NoPen)
+
+            pix_painter.setBrush(brush)
+            pix_painter.setPen(pen)
+
+            polygon = QPolygon(p_list)
+            pix_painter.drawPolygon(polygon)
+            pix_painter.end()
+            p_list1 = p_list2
 
     def draw_data(self, ds: DataSource, pix):
         if ds.df.index.size == 0:

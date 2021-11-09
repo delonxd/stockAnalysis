@@ -287,13 +287,13 @@ class MainWidget(QWidget):
         request_data2mysql(
             stock_code=code,
             data_type='fs',
-            start_date="1970-01-01",
+            start_date="2021-01-01",
         )
 
         request_data2mysql(
             stock_code=code,
             data_type='mvs',
-            start_date="1970-01-01",
+            start_date="2021-01-01",
         )
 
         self.df_dict[code] = sql2df(code=code)

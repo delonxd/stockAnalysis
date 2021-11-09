@@ -58,11 +58,11 @@ class InformationBox:
     def draw_pix(self, *args):
         text_list = self.load_value(*args)
 
-        pix = QPixmap(900, 800)
+        pix = QPixmap(900, 1000)
         pix.fill(QColor(0, 0, 0, 30))
 
         pix_painter = QPainter(pix)
-        pix_painter.setFont(QFont('Consolas', 14))
+        pix_painter.setFont(QFont('Consolas', 11))
 
         metrics = pix_painter.fontMetrics()
 

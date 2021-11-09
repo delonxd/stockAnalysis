@@ -101,6 +101,58 @@ class DataSource:
         # self.offsets = None
         # self.init_offsets()
 
+        assets_dict = {
+            'id_005_bs_cabb': '货币资金',
+            'id_007_bs_sr': '结算备付金',
+            'id_008_bs_pwbaofi': '拆出资金',
+            'id_009_bs_tfa': '交易性金融资产',
+            'id_010_bs_cdfa': '衍生金融资产(流动)',
+            'id_012_bs_nr': '应收票据',
+            'id_013_bs_ar': '应收账款',
+            'id_014_bs_rf': '应收款项融资',
+            'id_015_bs_ats': '预付款项',
+            'id_016_bs_pr': '应收保费',
+            'id_017_bs_rir': '应收分保账款',
+            'id_018_bs_crorir': '应收分保合同准备金',
+            'id_019_bs_or': '其他应收款',
+            'id_022_bs_fahursa': '买入返售金融资产',
+            'id_023_bs_i': '存货',
+            'id_024_bs_ca': '合同资产',
+            'id_025_bs_ahfs': '持有待售资产',
+            'id_026_bs_claatc': '发放贷款及垫款(流动)',
+            'id_027_bs_pe': '待摊费用',
+            'id_028_bs_ncadwioy': '一年内到期的非流动资产',
+            'id_029_bs_oca': '其他流动资产',
+
+            'id_035_bs_nclaatc': '发放贷款及垫款(非流动)',
+            'id_036_bs_cri': '债权投资',
+            'id_037_bs_ocri': '其他债权投资',
+            'id_038_bs_ncafsfa': '可供出售金融资产(非流动)',
+            'id_039_bs_htmi': '持有至到期投资',
+            'id_040_bs_ltar': '长期应收款',
+            'id_041_bs_ltei': '长期股权投资',
+            'id_042_bs_oeii': '其他权益工具投资',
+            'id_043_bs_oncfa': '其他非流动金融资产',
+            'id_044_bs_rei': '投资性房地产',
+            'id_045_bs_fa': '固定资产',
+            'id_048_bs_cip': '在建工程',
+            'id_051_bs_pba': '生产性生物资产',
+            'id_052_bs_oaga': '油气资产',
+            'id_053_bs_pwba': '公益性生物资产',
+            'id_054_bs_roua': '使用权资产',
+            'id_055_bs_ia': '无形资产',
+            'id_056_bs_rade': '开发支出',
+            'id_057_bs_gw': '商誉',
+            'id_059_bs_ltpe': '长期待摊费用',
+            'id_060_bs_dita': '递延所得税资产',
+            'id_061_bs_onca': '其他非流动资产',
+        }
+
+        if self.index_name in assets_dict.keys():
+            self.data_type = 'assets'
+        else:
+            self.data_type = None
+
     def format(self, value):
         if value is None:
             return 'None'
