@@ -59,10 +59,10 @@ class InformationBox:
         text_list = self.load_value(*args)
 
         pix = QPixmap(900, 1000)
-        pix.fill(QColor(0, 0, 0, 30))
+        pix.fill(QColor(0, 0, 0, 255))
 
         pix_painter = QPainter(pix)
-        pix_painter.setFont(QFont('Consolas', 11))
+        pix_painter.setFont(QFont('Consolas', 9))
 
         metrics = pix_painter.fontMetrics()
 
