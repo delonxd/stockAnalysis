@@ -148,6 +148,52 @@ class DataSource:
             'id_061_bs_onca': '其他非流动资产',
         }
 
+        equity_dict = {
+            'id_068_bs_stl': '短期借款',
+            'id_069_bs_bfcb': '向中央银行借款',
+            'id_070_bs_pfbaofi': '拆入资金',
+            'id_071_bs_dfl': '衍生金融负债',
+            'id_072_bs_tfl': '交易性金融负债',
+            'id_074_bs_np': '(其中) 应付票据',
+            'id_075_bs_ap': '(其中) 应付账款',
+            'id_076_bs_afc': '预收账款',
+            'id_077_bs_cl': '合同负债',
+            'id_078_bs_fasurpa': '卖出回购金融资产',
+            'id_079_bs_dfcab': '吸收存款及同业存放',
+            'id_080_bs_stoa': '代理买卖证券款',
+            'id_081_bs_ssoa': '代理承销证券款',
+            'id_082_bs_sawp': '应付职工薪酬',
+            'id_083_bs_tp': '应交税费',
+            'id_084_bs_oap': '其他应付款',
+            'id_087_bs_facp': '应付手续费及佣金',
+            'id_088_bs_rip': '应付分保账款',
+            'id_089_bs_lhfs': '持有待售负债',
+            'id_090_bs_ncldwioy': '一年内到期的非流动负债',
+            'id_091_bs_didwioy': '一年内到期的递延收益',
+            'id_093_bs_stbp': '短期应付债券',
+            'id_094_bs_ocl': '其他流动负债',
+
+            'id_097_bs_icr': '保险合同准备金',
+            'id_098_bs_ltl': '长期借款',
+            'id_099_bs_bp': '应付债券',
+            'id_102_bs_ll': '租赁负债',
+            'id_103_bs_ltap': '长期应付款',
+            'id_105_bs_ltpoe': '长期应付职工薪酬',
+            'id_106_bs_ncal': '预计负债(非流动)',
+            'id_107_bs_ltdi': '长期递延收益',
+            'id_108_bs_ditl': '递延所得税负债',
+            'id_109_bs_oncl': '其他非流动负债',
+
+            'id_112_bs_sc': '股本',
+            'id_113_bs_oei': '其他权益工具',
+            'id_116_bs_capr': '资本公积',
+            'id_118_bs_oci': '其他综合收益',
+            'id_119_bs_rr': '专项储备',
+            'id_120_bs_surr': '盈余公积',
+            'id_121_bs_pogr': '一般风险准备金',
+            'id_122_bs_rtp': '未分配利润',
+        }
+
         if self.index_name in assets_dict.keys():
             self.data_type = 'assets'
         else:

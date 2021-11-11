@@ -43,6 +43,7 @@ class DataPix(QObject):
 
         # pix
         self.pix = QPixmap()
+        self.pix2 = QPixmap()
         self.pix_show = QPixmap()
         self.struct_pix = QPixmap()
 
@@ -130,7 +131,6 @@ class DataPix(QObject):
                 self.default_ds = ds
 
         self.draw_pix()
-        # self.config_report_date()
 
     def config_data(self, data, row):
         index_name = row['index_name']
@@ -175,33 +175,6 @@ class DataPix(QObject):
         data.columns = [index_name]
         return data
 
-    # def config_report_date(self):
-    #     dict0 = dict()
-    #     for index, value in self.dt_fs.iteritems():
-    #         dict0[value[:10]] = index
-    #
-    #     self.dt_fs = pd.Series(dict0, name='dt_fs')
-    #     self.dt_fs.sort_index(inplace=True)
-    #
-    #     self.dt_mvs = pd.Series(self.dt_mvs.index, name='dt_mvs', index=self.dt_mvs.index)
-    #
-    #     if 'reportDate' in self.data_dict.keys():
-    #         df = self.data_dict['reportDate'].df
-    #         dates1 = np.vectorize(lambda x: x[:10])(df.iloc[:, 0].values)
-    #         val_x1 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates1)
-    #
-    #         dates2 = df.index.values
-    #         val_x2 = np.vectorize(lambda x: (dt.datetime.strptime(x, "%Y-%m-%d").date() - self.date_min).days)(dates2)
-    #
-    #         dict0 = defaultdict(int)
-    #         for index in range(val_x1.shape[0]):
-    #             dict0[val_x1[index]] = val_x2[index]
-    #
-    #         self.report_dict = dict0
-    #         list0 = list(dict0.keys())
-    #         list0.sort()
-    #         self.report_date = list0
-
     def reset_scale_all(self):
         style_df = self.style_df[self.style_df['selected'].values]
 
@@ -238,46 +211,6 @@ class DataPix(QObject):
             return list(rrule(YEARLY, bymonthday=-1, bymonth=[3, 6, 9, 12], dtstart=self.date_min, until=self.date_max))
         return None
 
-    # def get_px_list(self):
-    #     px_dict = dict()
-    #     px_list = list()
-    #     for datetime in self.date_list:
-    #         date = datetime.date()
-    #         px = self.x_data2px(date)
-    #         px_dict[px] = date
-    #         px_list.append(px)
-    #
-    #     # px_list.sort()
-    #
-    #     return px_list, px_dict
-
-    # def get_px_dict(self):
-    #     res_dict = defaultdict(str)
-    #
-    #     val_x = np.arange(0, self.d_date + 1)
-    #     px_x = self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
-    #     px_x = np.floor(px_x)
-    #     res_list = np.unique(px_x).tolist()
-    #     # res_list.sort()
-    #     date0 = self.date_min
-    #     for i in val_x:
-    #         px = px_x[i]
-    #         index = date0.strftime("%Y-%m-%d")
-    #         res_dict[px] = index
-    #         date0 = date0 + dt.timedelta(days=1)
-    #
-    #     return res_list, res_dict
-
-    # @staticmethod
-    # def iter_delta_date(date_min, date_iter):
-    #     return map(lambda x: (x - date_min).days, date_iter)
-    #
-    # def indexes_2_val_x(self, indexes):
-    #     return np.vectorize(lambda x1: (dt.datetime.strptime(x1, "%Y-%m-%d").date() - self.date_min).days)(indexes)
-    #
-    # def val_x_2_px_x(self, val_x):
-    #     return self.data_rect.x() + val_x * (self.data_rect.width() - 1) / self.d_date
-
     ###############################################################################################
 
     def init_pix(self):
@@ -294,6 +227,7 @@ class DataPix(QObject):
         self.draw_auxiliary_line(self.default_ds)
 
         self.struct_pix = QPixmap(self.pix)
+        self.pix2 = QPixmap(self.pix)
         self.draw_data_dict()
         self.pix_show = self.pix
 
@@ -385,48 +319,6 @@ class DataPix(QObject):
 
         pix_painter.end()
 
-    # def draw_y_metrics2(self, data: DataSource):
-    #     pix_painter = QPainter(self.pix)
-    #
-    #     pix_painter.setFont(QFont('Consolas', 10))
-    #     pen1 = QPen(Qt.red, 1, Qt.SolidLine)
-    #     pen2 = QPen(Qt.red, 1, Qt.DotLine)
-    #
-    #     d_left = self.data_rect.left()
-    #     d_right = self.data_rect.right()
-    #     d_top = self.data_rect.top()
-    #     d_bottom = self.data_rect.bottom()
-    #
-    #     ratio = data.ratio
-    #     data_list = [(2 ** x) * ratio for x in range(-10, 20)]
-    #
-    #     for data_y in data_list:
-    #         y = self.y_data2px(data_y, data)
-    #         txt = data.format(data_y)
-    #
-    #         width = pix_painter.fontMetrics().width(txt) + 2
-    #         height = pix_painter.fontMetrics().height() + 2
-    #         rect = QRect(
-    #             self.data_rect.right() + 1, y - height / 2,
-    #             width, height)
-    #
-    #         if rect.top() < d_top or rect.bottom() > d_bottom:
-    #             continue
-    #
-    #         pix_painter.setPen(pen1)
-    #         pix_painter.drawText(rect, Qt.AlignCenter, txt)
-    #
-    #         pix_painter.setPen(pen2)
-    #         pix_painter.drawLine(QPoint(d_left, y), QPoint(d_right, y))
-    #
-    #     # val_list = [x / 10 for x in range(1, 10)]
-    #     # for val_y in val_list:
-    #     #     y = self.y_value2px(val_y, data)
-    #     #     pix_painter.setPen(pen2)
-    #     #     pix_painter.drawLine(QPoint(d_left, y), QPoint(d_right, y))
-    #
-    #     pix_painter.end()
-
     def draw_auxiliary_line(self, data: DataSource):
         pix_painter = QPainter(self.pix)
 
@@ -464,18 +356,18 @@ class DataPix(QObject):
         pix_painter.end()
 
     def draw_data_dict(self):
-        self.draw_percentage()
+        self.draw_percentage(self.pix, 'assets')
         for ds in self.data_dict.values():
             if ds.ds_type == 'digit' and ds.data_type != 'assets':
                 self.draw_data(ds, self.pix)
 
-    def draw_percentage(self):
+    def draw_percentage(self, pix, data_type):
         ds = self.data_dict['id_001_bs_ta']
         df_assets = ds.df.iloc[:, 0].copy()
         df0 = pd.DataFrame(index=df_assets.index)
         p_dict = dict()
         for ds in self.data_dict.values():
-            if ds.ds_type == 'digit' and ds.frequency == 'QUARTERLY' and ds.data_type == 'assets':
+            if ds.ds_type == 'digit' and ds.frequency == 'QUARTERLY' and ds.data_type == data_type:
                 data = ds.df.iloc[:, 0].copy() / df_assets
                 data.name = ds.info_priority
                 p_dict[ds.info_priority] = ds
@@ -505,7 +397,7 @@ class DataPix(QObject):
             p_list1.reverse()
             p_list = p_list1 + p_list2
 
-            pix = self.pix
+            # pix = self.pix
             pix_painter = QPainter(pix)
 
             ds = p_dict[column]

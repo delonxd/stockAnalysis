@@ -31,7 +31,7 @@ class PriorityTable(QDialog):
 
     def init_ui(self):
         self.setWindowTitle('QTableViewDemo')
-        self.resize(500, 300)
+        self.resize(500, 800)
 
         layout1 = QVBoxLayout()
         layout1.addWidget(self.button1)

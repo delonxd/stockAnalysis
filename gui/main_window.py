@@ -9,6 +9,8 @@ from gui.stockListView import QStockListView, CodesDataFrame
 
 from gui.styleDataFrame import load_default_style
 from gui.styleDataFrame import save_default_style
+from gui.priorityTable import PriorityTable
+from gui.showPix import ShowPix
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -137,6 +139,8 @@ class MainWidget(QWidget):
         self.button5 = QPushButton('request')
         self.button6 = QPushButton('save code')
         self.button7 = QPushButton('code list')
+        self.button8 = QPushButton('priority')
+        self.button9 = QPushButton('new_window')
 
         self.editor1 = QLineEdit()
         self.editor1.setValidator(QIntValidator())
@@ -208,6 +212,8 @@ class MainWidget(QWidget):
         layout2.addWidget(self.button5, 0, Qt.AlignCenter)
         layout2.addWidget(self.button6, 0, Qt.AlignCenter)
         layout2.addWidget(self.button7, 0, Qt.AlignCenter)
+        layout2.addWidget(self.button8, 0, Qt.AlignCenter)
+        layout2.addWidget(self.button9, 0, Qt.AlignCenter)
         layout2.addWidget(self.editor1, 0, Qt.AlignCenter)
         layout2.addStretch(1)
         # layout2.addWidget(button1, 0, Qt.AlignCenter)
@@ -241,6 +247,8 @@ class MainWidget(QWidget):
         self.button5.clicked.connect(self.request_data)
         self.button6.clicked.connect(self.save_code)
         self.button7.clicked.connect(self.show_code_list)
+        self.button8.clicked.connect(self.config_priority)
+        self.button9.clicked.connect(self.show_new_window)
         self.editor1.textChanged.connect(self.editor1_changed)
 
         palette1 = QPalette()
@@ -312,6 +320,7 @@ class MainWidget(QWidget):
         if txt in code_list:
             new_index = code_list.index(txt)
             self.change_stock(new_index)
+            self.editor1.setText('')
 
     def scale_up(self):
         self.data_pix.scale_ratio = self.data_pix.scale_ratio * 2
@@ -452,6 +461,19 @@ class MainWidget(QWidget):
         #     code_list.reverse()
         return code_list
 
+    def config_priority(self):
+        widget = PriorityTable(self.style_df)
+        widget.update_style.connect(self.config_style_df)
+        widget.exec()
+        self.update_data()
+
+    def config_style_df(self, df):
+        self.style_df.loc[df.index, 'info_priority'] = df.values
+
+    def show_new_window(self):
+        new_window = ShowPix(self)
+        new_window.show()
+
 
 class MainWindow(QMainWindow):
 
@@ -483,6 +505,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     # main = MainWindow()
     main = MainWidget()
-    # main.showMaximized()
-    main.showMinimized()
+    main.showMaximized()
+    # main.showMinimized()
     sys.exit(app.exec_())
