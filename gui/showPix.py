@@ -15,7 +15,7 @@ class ShowPix(QDialog):
         # color = QColor(40, 40, 40, 255)
         # self.pix.fill(color)
         #
-        self.pix = parent.data_pix.pix
+        self.pix = parent.data_pix.pix2
         self.init_ui()
 
     def init_ui(self):

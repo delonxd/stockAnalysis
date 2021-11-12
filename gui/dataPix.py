@@ -356,9 +356,10 @@ class DataPix(QObject):
         pix_painter.end()
 
     def draw_data_dict(self):
-        self.draw_percentage(self.pix, 'assets')
+        self.draw_percentage(self.pix2, 'assets')
+        self.draw_percentage(self.pix, 'equity')
         for ds in self.data_dict.values():
-            if ds.ds_type == 'digit' and ds.data_type != 'assets':
+            if ds.ds_type == 'digit' and ds.data_type is None:
                 self.draw_data(ds, self.pix)
 
     def draw_percentage(self, pix, data_type):

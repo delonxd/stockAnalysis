@@ -16,6 +16,8 @@ class InformationBox:
         box_df = pd.DataFrame(columns=['priority', 'data_source', 'show_name', 'value', 'real_date'])
 
         for ds in self.parent.data_dict.values():
+            if ds.data_type == 'assets':
+                continue
             if ds.frequency == 'DAILY':
                 date = d1
             else:

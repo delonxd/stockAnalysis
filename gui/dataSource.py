@@ -154,6 +154,7 @@ class DataSource:
             'id_070_bs_pfbaofi': '拆入资金',
             'id_071_bs_dfl': '衍生金融负债',
             'id_072_bs_tfl': '交易性金融负债',
+            'id_073_bs_npaap': '应付票据及应付账款',
             'id_074_bs_np': '(其中) 应付票据',
             'id_075_bs_ap': '(其中) 应付账款',
             'id_076_bs_afc': '预收账款',
@@ -170,6 +171,7 @@ class DataSource:
             'id_089_bs_lhfs': '持有待售负债',
             'id_090_bs_ncldwioy': '一年内到期的非流动负债',
             'id_091_bs_didwioy': '一年内到期的递延收益',
+            'id_092_bs_cal': '预计负债(流动)',
             'id_093_bs_stbp': '短期应付债券',
             'id_094_bs_ocl': '其他流动负债',
 
@@ -192,10 +194,13 @@ class DataSource:
             'id_120_bs_surr': '盈余公积',
             'id_121_bs_pogr': '一般风险准备金',
             'id_122_bs_rtp': '未分配利润',
+            'id_126_bs_etmsh': '少数股东权益',
         }
 
         if self.index_name in assets_dict.keys():
             self.data_type = 'assets'
+        elif self.index_name in equity_dict.keys():
+            self.data_type = 'equity'
         else:
             self.data_type = None
 
