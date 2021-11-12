@@ -46,6 +46,7 @@ class DataPix(QObject):
         self.pix2 = QPixmap()
         self.pix_show = QPixmap()
         self.struct_pix = QPixmap()
+        self.pix_list = list()
 
         # date metrics
         self.date_max = dt.date(2022, 7, 20)
@@ -134,6 +135,15 @@ class DataPix(QObject):
 
     def config_data(self, data, row):
         index_name = row['index_name']
+
+        config_name = 'config_' + index_name
+
+        if config_name in self.df.columns:
+            data = self.df.loc[:, [config_name]].copy()
+            data.dropna(inplace=True)
+            data.columns = [index_name]
+            return data
+
         if index_name == 'id_141_bs_mc':
             return np.trim_zeros(data.iloc[:, 0]).to_frame()
 
@@ -228,8 +238,11 @@ class DataPix(QObject):
 
         self.struct_pix = QPixmap(self.pix)
         self.pix2 = QPixmap(self.pix)
+
         self.draw_data_dict()
+
         self.pix_show = self.pix
+        self.pix_list = [self.pix, self.pix2]
 
     def draw_struct(self):
         pix_painter = QPainter(self.pix)
@@ -462,10 +475,15 @@ class DataPix(QObject):
             pix_painter.end()
 
     ###############################################################################################
-
     def draw_cross(self, x, y, state):
+        show1 = self.draw_sub_cross(x, y, state, self.pix)
+        show2 = self.draw_sub_cross(x, y, False, self.pix2)
 
-        self.pix_show = QPixmap(self.pix)
+        self.pix_list = [show1, show2]
+
+    def draw_sub_cross(self, x, y, state, pix):
+
+        pix_show = QPixmap(pix)
 
         if x is None and y is None:
             return
@@ -500,10 +518,10 @@ class DataPix(QObject):
         px_x2 = x if d2 is None else self.x_data2px(dt.datetime.strptime(d2, "%Y-%m-%d").date())
 
         if state is True:
-            self.draw_mask(px_x0, px_x2)
+            self.draw_mask(px_x0, px_x2, pix_show)
 
         # draw cross
-        pix_painter = QPainter(self.pix_show)
+        pix_painter = QPainter(pix_show)
         pen = QPen(Qt.gray, 1, Qt.SolidLine)
         pix_painter.setPen(pen)
 
@@ -511,11 +529,13 @@ class DataPix(QObject):
         pix_painter.drawLine(QPoint(d_left, y), QPoint(d_right, y))
         pix_painter.end()
 
-        self.draw_tooltip(px_x0, self.data_rect.bottom() + 1, d0)
-        self.draw_tooltip(px_x2, self.data_rect.top(), d2)
-        self.draw_tooltip(self.data_rect.right() + 1, y, val_str)
+        self.draw_tooltip(px_x0, self.data_rect.bottom() + 1, d0, pix_show)
+        self.draw_tooltip(px_x2, self.data_rect.top(), d2, pix_show)
+        self.draw_tooltip(self.data_rect.right() + 1, y, val_str, pix_show)
 
-        self.draw_information(d1, d2)
+        self.draw_information(d1, d2, pix_show)
+
+        return pix_show
 
     @staticmethod
     def get_last_date(d0, arr):
@@ -527,19 +547,19 @@ class DataPix(QObject):
 
         return res
 
-    def draw_mask(self, px_x0, px_x2):
+    def draw_mask(self, px_x0, px_x2, pix):
         if px_x2:
             self.draw_mask_pix(
-                pix=self.pix_show,
+                pix=pix,
                 x=px_x2,
             )
 
         for ds in self.data_dict.values():
             if ds.frequency == 'DAILY':
-                self.draw_data(ds, self.pix_show)
+                self.draw_data(ds, pix)
 
         self.draw_mask_pix(
-            pix=self.pix_show,
+            pix=pix,
             x=px_x0,
         )
 
@@ -555,8 +575,9 @@ class DataPix(QObject):
         pix_painter.drawPixmap(x, y, mask)
         pix_painter.end()
 
-    def draw_tooltip(self, x, y, text):
-        pix_painter = QPainter(self.pix_show)
+    @staticmethod
+    def draw_tooltip(x, y, text, pix):
+        pix_painter = QPainter(pix)
         pix_painter.setFont(QFont('Consolas', 10))
 
         metrics = pix_painter.fontMetrics()

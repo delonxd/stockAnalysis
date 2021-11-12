@@ -222,6 +222,8 @@ def sql2df(code):
     # print(df2)
     data = DataAnalysis(df1, df2)
     data.config_widget_data()
+
+    # print(data.df.columns.values)
     # print(data.df['s_012_return_year'])
 
     return data.df
@@ -314,7 +316,122 @@ class DataAnalysis:
         self.mvs_add(self.get_column(self.df_mvs, 's_012_return_year'))
         self.mvs_add(self.get_column(self.df_mvs, 's_014_pe2'))
         self.mvs_add(self.get_column(self.df_mvs, 's_015_return_year2'))
+
+        self.config_balance_sheet()
         self.set_df()
+
+    def config_balance_sheet(self):
+        assets_dict = {
+            'id_005_bs_cabb': '货币资金',
+            'id_007_bs_sr': '结算备付金',
+            'id_008_bs_pwbaofi': '拆出资金',
+            'id_009_bs_tfa': '交易性金融资产',
+            'id_010_bs_cdfa': '衍生金融资产(流动)',
+            'id_012_bs_nr': '应收票据',
+            'id_013_bs_ar': '应收账款',
+            'id_014_bs_rf': '应收款项融资',
+            'id_015_bs_ats': '预付款项',
+            'id_016_bs_pr': '应收保费',
+            'id_017_bs_rir': '应收分保账款',
+            'id_018_bs_crorir': '应收分保合同准备金',
+            'id_019_bs_or': '其他应收款',
+            'id_022_bs_fahursa': '买入返售金融资产',
+            'id_023_bs_i': '存货',
+            'id_024_bs_ca': '合同资产',
+            'id_025_bs_ahfs': '持有待售资产',
+            'id_026_bs_claatc': '发放贷款及垫款(流动)',
+            'id_027_bs_pe': '待摊费用',
+            'id_028_bs_ncadwioy': '一年内到期的非流动资产',
+            'id_029_bs_oca': '其他流动资产',
+
+            'id_035_bs_nclaatc': '发放贷款及垫款(非流动)',
+            'id_036_bs_cri': '债权投资',
+            'id_037_bs_ocri': '其他债权投资',
+            'id_038_bs_ncafsfa': '可供出售金融资产(非流动)',
+            'id_039_bs_htmi': '持有至到期投资',
+            'id_040_bs_ltar': '长期应收款',
+            'id_041_bs_ltei': '长期股权投资',
+            'id_042_bs_oeii': '其他权益工具投资',
+            'id_043_bs_oncfa': '其他非流动金融资产',
+            'id_044_bs_rei': '投资性房地产',
+            'id_045_bs_fa': '固定资产',
+            'id_048_bs_cip': '在建工程',
+            'id_051_bs_pba': '生产性生物资产',
+            'id_052_bs_oaga': '油气资产',
+            'id_053_bs_pwba': '公益性生物资产',
+            'id_054_bs_roua': '使用权资产',
+            'id_055_bs_ia': '无形资产',
+            'id_056_bs_rade': '开发支出',
+            'id_057_bs_gw': '商誉',
+            'id_059_bs_ltpe': '长期待摊费用',
+            'id_060_bs_dita': '递延所得税资产',
+            'id_061_bs_onca': '其他非流动资产',
+        }
+
+        equity_dict = {
+            'id_068_bs_stl': '短期借款',
+            'id_069_bs_bfcb': '向中央银行借款',
+            'id_070_bs_pfbaofi': '拆入资金',
+            'id_071_bs_dfl': '衍生金融负债',
+            'id_072_bs_tfl': '交易性金融负债',
+            'id_073_bs_npaap': '应付票据及应付账款',
+            'id_074_bs_np': '(其中) 应付票据',
+            'id_075_bs_ap': '(其中) 应付账款',
+            'id_076_bs_afc': '预收账款',
+            'id_077_bs_cl': '合同负债',
+            'id_078_bs_fasurpa': '卖出回购金融资产',
+            'id_079_bs_dfcab': '吸收存款及同业存放',
+            'id_080_bs_stoa': '代理买卖证券款',
+            'id_081_bs_ssoa': '代理承销证券款',
+            'id_082_bs_sawp': '应付职工薪酬',
+            'id_083_bs_tp': '应交税费',
+            'id_084_bs_oap': '其他应付款',
+            'id_087_bs_facp': '应付手续费及佣金',
+            'id_088_bs_rip': '应付分保账款',
+            'id_089_bs_lhfs': '持有待售负债',
+            'id_090_bs_ncldwioy': '一年内到期的非流动负债',
+            'id_091_bs_didwioy': '一年内到期的递延收益',
+            'id_092_bs_cal': '预计负债(流动)',
+            'id_093_bs_stbp': '短期应付债券',
+            'id_094_bs_ocl': '其他流动负债',
+
+            'id_097_bs_icr': '保险合同准备金',
+            'id_098_bs_ltl': '长期借款',
+            'id_099_bs_bp': '应付债券',
+            'id_102_bs_ll': '租赁负债',
+            'id_103_bs_ltap': '长期应付款',
+            'id_105_bs_ltpoe': '长期应付职工薪酬',
+            'id_106_bs_ncal': '预计负债(非流动)',
+            'id_107_bs_ltdi': '长期递延收益',
+            'id_108_bs_ditl': '递延所得税负债',
+            'id_109_bs_oncl': '其他非流动负债',
+
+            'id_112_bs_sc': '股本',
+            'id_113_bs_oei': '其他权益工具',
+            'id_116_bs_capr': '资本公积',
+            'id_118_bs_oci': '其他综合收益',
+            'id_119_bs_rr': '专项储备',
+            'id_120_bs_surr': '盈余公积',
+            'id_121_bs_pogr': '一般风险准备金',
+            'id_122_bs_rtp': '未分配利润',
+            'id_126_bs_etmsh': '少数股东权益',
+        }
+
+        index_list = list()
+        index_list.extend(assets_dict.keys())
+        index_list.extend(equity_dict.keys())
+
+        res_df = pd.DataFrame()
+
+        df = self.df_fs
+        for index in index_list:
+            src_df = df.loc[:, [index]].copy().dropna()
+            name = 'config_' + index
+            new_df = get_month_data(src_df, name)
+
+            res_df = pd.concat([res_df, new_df], axis=1, sort=True)
+
+        self.df_fs = pd.concat([self.df_fs, res_df], axis=1, sort=True)
 
     def fs_add(self, new_df):
         self.df_fs = pd.concat([self.df_fs, new_df], axis=1, sort=True)

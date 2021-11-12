@@ -152,6 +152,8 @@ class MainWidget(QWidget):
         self.tree = CheckTree(self.style_df)
         self.code_widget = QStockListView(self.codes_df)
 
+        self.window2 = ShowPix(self)
+
         self.tree.update_style.connect(self.update_data)
         self.data_pix.update_tree.connect(self.tree.update_tree)
         self.code_widget.table_view.change_signal.connect(self.change_stock)
@@ -406,10 +408,14 @@ class MainWidget(QWidget):
 
     def draw_cross(self, x, y):
         self.data_pix.draw_cross(x, y, self.cross)
+        self.window2.pix = self.data_pix.pix_list[1]
+
         self.update()
+        self.window2.update()
 
     def paintEvent(self, e):
-        self.label.setPixmap(self.data_pix.pix_show)
+        # self.label.setPixmap(self.data_pix.pix_show)
+        self.label.setPixmap(self.data_pix.pix_list[0])
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -471,8 +477,7 @@ class MainWidget(QWidget):
         self.style_df.loc[df.index, 'info_priority'] = df.values
 
     def show_new_window(self):
-        new_window = ShowPix(self)
-        new_window.show()
+        self.window2.show()
 
 
 class MainWindow(QMainWindow):
@@ -505,6 +510,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     # main = MainWindow()
     main = MainWidget()
-    main.showMaximized()
-    # main.showMinimized()
+    # main.showMaximized()
+    main.showMinimized()
     sys.exit(app.exec_())

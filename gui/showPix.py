@@ -11,11 +11,10 @@ class ShowPix(QDialog):
         super().__init__(parent=parent)
 
         self.label = QLabel()
+        self.pix = QPixmap(1600, 900)
         # self.pix = QPixmap(300, 200)
-        # color = QColor(40, 40, 40, 255)
-        # self.pix.fill(color)
-        #
-        self.pix = parent.data_pix.pix2
+        color = QColor(40, 40, 40, 255)
+        self.pix.fill(color)
         self.init_ui()
 
     def init_ui(self):
@@ -26,6 +25,9 @@ class ShowPix(QDialog):
         layout.addWidget(self.label)
 
         self.setLayout(layout)
+
+    def paintEvent(self, e):
+        self.label.setPixmap(self.pix)
 
 
 if __name__ == '__main__':

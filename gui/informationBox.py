@@ -53,12 +53,29 @@ class InformationBox:
 
             row_txt = '%s: %s' % (name, txt)
             pen = QPen(ds.color, ds.line_thick, ds.pen_type)
-            res.append((row_txt, pen))
+            res.append((row_txt, pen, ds))
 
         return res
 
     def draw_pix(self, *args):
         text_list = self.load_value(*args)
+
+        text_list1 = list()
+        text_list2 = list()
+        for row in text_list:
+            ds = row[2]
+            if ds.data_type == 'assets':
+                text_list2.append(row)
+            else:
+                text_list1.append(row)
+
+        pix1 = self.draw_text(text_list1)
+        pix2 = self.draw_text(text_list2)
+
+        return pix1, pix2
+
+    @staticmethod
+    def draw_text(text_list):
 
         pix = QPixmap(900, 1000)
         pix.fill(QColor(0, 0, 0, 255))
@@ -72,7 +89,7 @@ class InformationBox:
         max_width = 0
         row_height = metrics.height() + blank * 2
 
-        for row_txt, pen in text_list:
+        for row_txt, pen, _ in text_list:
             pix_painter.setPen(pen)
 
             width = metrics.width(row_txt)
