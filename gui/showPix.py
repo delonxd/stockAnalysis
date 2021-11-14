@@ -6,10 +6,11 @@ import pandas as pd
 import numpy as np
 
 
-class ShowPix(QDialog):
-    def __init__(self, parent):
-        super().__init__(parent=parent)
+class ShowPix(QWidget):
+    def __init__(self, main_window):
+        super().__init__()
 
+        self.main_window = main_window
         self.label = QLabel()
         self.pix = QPixmap(1600, 900)
         # self.pix = QPixmap(300, 200)
@@ -18,7 +19,7 @@ class ShowPix(QDialog):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle('QTableViewDemo')
+        self.setWindowTitle('sub_window')
         self.label.setPixmap(self.pix)
 
         layout = QHBoxLayout()
@@ -26,8 +27,15 @@ class ShowPix(QDialog):
 
         self.setLayout(layout)
 
+        self.setMouseTracking(True)
+        self.label.setMouseTracking(True)
+
     def paintEvent(self, e):
         self.label.setPixmap(self.pix)
+
+    def mouseMoveEvent(self, event):
+        pos = event.pos() - self.label.pos()
+        self.main_window.draw_cross(pos.x(), pos.y())
 
 
 if __name__ == '__main__':

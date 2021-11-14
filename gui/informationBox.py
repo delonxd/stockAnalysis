@@ -16,8 +16,8 @@ class InformationBox:
         box_df = pd.DataFrame(columns=['priority', 'data_source', 'show_name', 'value', 'real_date'])
 
         for ds in self.parent.data_dict.values():
-            if ds.data_type == 'assets':
-                continue
+            # if ds.data_type == 'assets':
+            #     continue
             if ds.frequency == 'DAILY':
                 date = d1
             else:
@@ -62,12 +62,17 @@ class InformationBox:
 
         text_list1 = list()
         text_list2 = list()
+
         for row in text_list:
+            if len(row) == 2:
+                text_list1.append((row[0], row[1]))
+                continue
+
             ds = row[2]
             if ds.data_type == 'assets':
-                text_list2.append(row)
+                text_list2.append((row[0], row[1]))
             else:
-                text_list1.append(row)
+                text_list1.append((row[0], row[1]))
 
         pix1 = self.draw_text(text_list1)
         pix2 = self.draw_text(text_list2)
@@ -89,7 +94,7 @@ class InformationBox:
         max_width = 0
         row_height = metrics.height() + blank * 2
 
-        for row_txt, pen, _ in text_list:
+        for row_txt, pen in text_list:
             pix_painter.setPen(pen)
 
             width = metrics.width(row_txt)
@@ -106,3 +111,9 @@ class InformationBox:
 
         res = pix.copy(0, 0, max_width, max_height)
         return res
+
+    @staticmethod
+    def draw_box(box, pix):
+        pix_painter = QPainter(pix)
+        pix_painter.drawPixmap(10, 10, box)
+        pix_painter.end()

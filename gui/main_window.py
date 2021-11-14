@@ -33,9 +33,10 @@ class GuiLog(MainLog):
 class ReadSQLThread(QThread):
     signal1 = pyqtSignal(object)
 
-    def __init__(self):
+    def __init__(self, style_df):
         super().__init__()
-        self.code_list = list()
+
+        self.buffer_list = list()
         self.lock = threading.Lock()
 
     def run(self):
@@ -43,61 +44,56 @@ class ReadSQLThread(QThread):
 
         while True:
             self.lock.acquire()
-            if len(self.code_list) > 0:
-                code = self.code_list[0]
-                self.code_list.pop(0)
+            if len(self.buffer_list) > 0:
+                code, style_df, df = self.buffer_list.pop(0)
             else:
                 break
             self.lock.release()
 
-            res0 = (code, sql2df(code))
+            res0 = DataPix(code=code, style_df=style_df, df=df)
             GuiLog.add_log('    add buffer %s' % code)
             self.signal1.emit(res0)
 
         GuiLog.add_log('thread end')
         self.lock.release()
 
-    def append(self, code):
+    def extend(self, message_list):
         self.lock.acquire()
-        if code in self.code_list:
-            index = self.code_list.index(code)
-            self.code_list.pop(index)
-        self.code_list.insert(0, code)
-        self.lock.release()
+        message_list.reverse()
+        for message in message_list:
+            code = message[0]
 
-    def extend(self, code_list):
-        self.lock.acquire()
-        code_list.reverse()
-        for code in code_list:
-            if code in self.code_list:
-                index = self.code_list.index(code)
-                self.code_list.pop(index)
-            self.code_list.insert(0, code)
+            if len(self.buffer_list) > 0:
+                x, _, _ = zip(*self.buffer_list)
+                if code in x:
+                    index = x.index(code)
+                    self.buffer_list.pop(index)
+
+            self.buffer_list.insert(0, message)
         self.lock.release()
 
     def clear(self):
         self.lock.acquire()
-        self.code_list.clear()
+        self.buffer_list.clear()
         self.lock.release()
 
 
-class QDataFrameModel(QStandardItemModel):
-    def __init__(self, df: pd.DataFrame):
-        self.df = df
-        super().__init__(*df.shape)
-        h_header = np.vectorize(lambda x: str(x))(df.columns.values)
-        v_header = np.vectorize(lambda x: str(x))(df.index.values)
-        self.setHorizontalHeaderLabels(h_header)
-        self.setVerticalHeaderLabels(v_header)
-
-        arr = df.values
-        for i in range(df.shape[0]):
-            for j in range(df.shape[1]):
-                self.setItem(i, j, QStandardItem(str(arr[i, j])))
+# class QDataFrameModel(QStandardItemModel):
+#     def __init__(self, df: pd.DataFrame):
+#         self.df = df
+#         super().__init__(*df.shape)
+#         h_header = np.vectorize(lambda x: str(x))(df.columns.values)
+#         v_header = np.vectorize(lambda x: str(x))(df.index.values)
+#         self.setHorizontalHeaderLabels(h_header)
+#         self.setVerticalHeaderLabels(v_header)
+#
+#         arr = df.values
+#         for i in range(df.shape[0]):
+#             for j in range(df.shape[1]):
+#                 self.setItem(i, j, QStandardItem(str(arr[i, j])))
 
 
 class MainWidget(QWidget):
-    # code_index = 0
 
     def __init__(self):
         super().__init__()
@@ -109,26 +105,20 @@ class MainWidget(QWidget):
         # self.codes_df.init_current_index(code='603836')
         # self.codes_df.init_current_index(code='000921')
 
+        self.style_df = load_default_style()
+
         time0 = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
         self.log_path = '../bufferData/logs/gui_log/gui_log_%s.txt' % time0
 
         self.df_dict = dict()
-        self.buffer = ReadSQLThread()
-        self.buffer.signal1.connect(self.update_df_dict)
+        self.pix_dict = dict()
 
-        # self.code_index = 21
+        self.buffer = ReadSQLThread(self.style_df)
+        self.buffer.signal1.connect(self.update_data_pix)
 
         code = self.stock_code
-        self.df = sql2df(code=code)
-        self.df_dict[code] = self.df
         self.style_df = load_default_style()
-
-        self.data_pix = DataPix(
-            parent=self,
-            style_df=self.style_df,
-            m_width=1600,
-            m_height=900,
-        )
+        self.data_pix = DataPix(code=code, style_df=pd.DataFrame(), df=pd.DataFrame())
 
         self.label = QLabel(self)
 
@@ -152,16 +142,16 @@ class MainWidget(QWidget):
         self.tree = CheckTree(self.style_df)
         self.code_widget = QStockListView(self.codes_df)
 
-        self.window2 = ShowPix(self)
+        self.window2 = ShowPix(main_window=self)
 
-        self.tree.update_style.connect(self.update_data)
-        self.data_pix.update_tree.connect(self.tree.update_tree)
+        self.tree.update_style.connect(self.update_style)
         self.code_widget.table_view.change_signal.connect(self.change_stock)
 
         self.cross = False
         self.init_ui()
 
-        self.buffer_df()
+        self.window_flag = 0
+        self.run_buffer()
 
     @property
     def code_index(self):
@@ -179,12 +169,9 @@ class MainWidget(QWidget):
     def len_list(self):
         return int(self.codes_df.df.shape[0])
 
-    def update_df_dict(self, tup):
-        self.df_dict[tup[0]] = tup[1]
-
     def init_ui(self):
 
-        self.setWindowTitle('绘制图形')
+        self.setWindowTitle('main_window')
         self.resize(1600, 900)
 
         p = QPalette()
@@ -239,8 +226,6 @@ class MainWidget(QWidget):
         self.setMouseTracking(True)
         self.label.setMouseTracking(True)
         self.center()
-
-        self.show_stock_name()
 
         self.button1.clicked.connect(self.export_style)
         self.button2.clicked.connect(self.scale_up)
@@ -308,11 +293,9 @@ class MainWidget(QWidget):
 
         self.df_dict[code] = sql2df(code=code)
         self.change_stock(self.code_index)
-        # self.tree.exec_()
 
     def show_tree(self):
         self.tree.show()
-        # self.tree.exec_()
 
     def show_code_list(self):
         self.code_widget.show()
@@ -323,25 +306,22 @@ class MainWidget(QWidget):
             new_index = code_list.index(txt)
             self.change_stock(new_index)
             self.editor1.setText('')
+            self.label.setFocus()
 
     def scale_up(self):
         self.data_pix.scale_ratio = self.data_pix.scale_ratio * 2
-        self.update_data()
+        self.update_style()
 
     def scale_down(self):
         self.data_pix.scale_ratio = self.data_pix.scale_ratio / 2
-        self.update_data()
+        self.update_style()
 
     def export_style(self):
         df = self.tree.df.copy()
         df['child'] = None
         save_default_style(df)
 
-    def update_data(self):
-        self.data_pix.update_pix()
-        self.update()
-
-    def buffer_df(self):
+    def run_buffer(self):
         index1 = self.code_index
         index2 = self.code_index
         arr = np.array([], dtype='int32')
@@ -354,6 +334,7 @@ class MainWidget(QWidget):
 
         offset = int(min(l1, l2))
 
+        arr = np.append(arr, index1)
         for i in range(offset):
             if i < 10:
                 index1 += 1
@@ -364,30 +345,55 @@ class MainWidget(QWidget):
                 arr = np.append(arr, index2)
         arr = arr % l0
 
-        tmp = list()
+        message_list = list()
         for index in arr:
-            stock_code = codes_df.iloc[index]['code']
-            if stock_code in self.df_dict.keys():
-                pass
-            else:
-                tmp.append(stock_code)
+            code = codes_df.iloc[index]['code']
+            message = self.emit_code_message(code)
+            if message is not None:
+                message_list.append(message)
 
-        self.buffer.extend(tmp)
+        self.buffer.extend(message_list)
         self.buffer.start()
+
+    def emit_code_message(self, code):
+        if code in self.pix_dict.keys():
+            return
+        else:
+            df = None
+            if code in self.df_dict.keys():
+                df = self.df_dict[code].copy()
+            style_df = self.style_df.copy()
+            return code, style_df, df
+
+    def update_data_pix(self, data_pix):
+        self.pix_dict[data_pix.code] = data_pix
+        self.df_dict[data_pix.code] = data_pix.df
+
+        if data_pix.code == self.stock_code:
+            self.data_pix = data_pix
+            self.update_window()
+
+    def update_window(self):
+        self.label.setPixmap(self.data_pix.pix_list[self.window_flag])
+        self.show_stock_name()
+
+    def update_style(self):
+        self.pix_dict.clear()
+        self.run_buffer()
 
     def change_stock(self, new_index):
         if abs(new_index - self.codes_df.current_index) > 1:
             self.buffer.clear()
 
         self.codes_df.current_index = new_index
-        self.buffer_df()
+        self.run_buffer()
+
         code = self.stock_code
-        if code in self.df_dict.keys():
-            self.df = self.df_dict[code]
+        if code in self.pix_dict.keys():
+            self.data_pix = self.pix_dict[code]
         else:
-            self.df = sql2df(code=code)
-        self.update_data()
-        self.show_stock_name()
+            self.data_pix = DataPix(code=code, style_df=pd.DataFrame(), df=pd.DataFrame())
+        self.update_window()
 
     def show_stock_name(self):
         row = self.codes_df.df.iloc[self.code_index]
@@ -408,14 +414,10 @@ class MainWidget(QWidget):
 
     def draw_cross(self, x, y):
         self.data_pix.draw_cross(x, y, self.cross)
-        self.window2.pix = self.data_pix.pix_list[1]
+        self.label.setPixmap(self.data_pix.pix_list[self.window_flag])
 
-        self.update()
-        self.window2.update()
-
-    def paintEvent(self, e):
-        # self.label.setPixmap(self.data_pix.pix_show)
-        self.label.setPixmap(self.data_pix.pix_list[0])
+        # self.window2.pix = self.data_pix.pix_list[1]
+        # self.window2.update()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -424,6 +426,8 @@ class MainWidget(QWidget):
             pos = event.pos() - self.label.pos()
             self.draw_cross(pos.x(), pos.y())
             GuiLog.write(self.log_path)
+
+            self.label.setFocus()
 
         # elif event.button() == Qt.RightButton:
         #     self.close()
@@ -471,13 +475,20 @@ class MainWidget(QWidget):
         widget = PriorityTable(self.style_df)
         widget.update_style.connect(self.config_style_df)
         widget.exec()
-        self.update_data()
 
     def config_style_df(self, df):
         self.style_df.loc[df.index, 'info_priority'] = df.values
+        self.update_style()
 
     def show_new_window(self):
         self.window2.show()
+
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key_1:
+            self.window_flag = 0
+        elif e.key() == Qt.Key_2:
+            self.window_flag = 1
+        self.update_window()
 
 
 class MainWindow(QMainWindow):
@@ -503,6 +514,10 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
+    import warnings
+    from scipy.optimize import OptimizeWarning
+    warnings.simplefilter("ignore", OptimizeWarning)
+
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 100000)

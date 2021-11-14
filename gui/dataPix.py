@@ -6,6 +6,9 @@ from gui.informationBox import InformationBox
 from method.dataMethod import get_month_delta
 from method.dataMethod import get_month_data
 
+from method.dataMethod import sql2df
+from gui.styleDataFrame import load_default_style
+
 from dateutil.rrule import *
 from collections import defaultdict
 
@@ -18,18 +21,16 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 
-class DataPix(QObject):
-    update_tree = pyqtSignal()
+class DataPix:
+    def __init__(self, code, style_df: pd.DataFrame, df=None):
+        self.code = code
 
-    def __init__(self, parent, m_width, m_height, style_df: pd.DataFrame):
-        super().__init__()
-
-        self.parent = parent
-        self.style_df = style_df
+        self.df = pd.DataFrame()
+        self.load_df(df)
 
         # structure
-        self.m_width = m_width
-        self.m_height = m_height
+        self.m_width = 1600
+        self.m_height = 900
 
         self.d_width = d_width = 1400
         self.d_height = d_height = 700
@@ -38,15 +39,15 @@ class DataPix(QObject):
         right_blank = 80
         bottom_blank = 50
 
-        self.main_rect = QRect(0, 0, m_width, m_height)
+        self.main_rect = QRect(0, 0, self.m_width, self.m_height)
         self.data_rect = QRect(left_blank, 100, d_width, d_height)
 
         # pix
-        self.pix = QPixmap()
-        self.pix2 = QPixmap()
-        self.pix_show = QPixmap()
-        self.struct_pix = QPixmap()
-        self.pix_list = list()
+        self.pix = QPixmap(self.m_width, self.m_height)
+        self.pix2 = QPixmap(self.pix)
+        self.pix_show = QPixmap(self.pix)
+        self.struct_pix = QPixmap(self.pix)
+        self.pix_list = [self.pix, self.pix2]
 
         # date metrics
         self.date_max = dt.date(2022, 7, 20)
@@ -56,31 +57,29 @@ class DataPix(QObject):
         self.date_metrics1 = self.get_date_list('INTERIM')
         self.date_metrics2 = self.get_date_list('YEARLY')
 
-        # px_list
         # self.date_list = self.get_date_list('MONTHLY')
         self.date_list = self.get_date_list('QUARTERLY')
-        # self.px_list, self.px_dict = self.get_px_list()
-        # self.px_list, self.px_dict = self.get_px_dict()
 
-        # data_source
         self.data_dict = None
         self.default_ds = None
-
-        # self.report_dict = dict()
-        # self.report_date = list()
 
         self.dt_fs = pd.Series()
         self.dt_mvs = pd.Series()
 
         self.scale_ratio = 4
 
-        self.update_pix()
+        self.update_pix(style_df)
 
-    @property
-    def df(self):
-        return self.parent.df
+    def load_df(self, df):
+        if df is None:
+            self.df = sql2df(self.code)
+        else:
+            self.df = df
 
-    def update_pix(self):
+    def update_pix(self, style_df):
+        if style_df.shape[0] == 0:
+            return
+
         self.dt_fs = self.df['dt_fs'].copy().dropna()
         self.dt_mvs = self.df['dt_mvs'].copy().dropna()
 
@@ -93,9 +92,9 @@ class DataPix(QObject):
             self.pix_show = self.pix
             return
 
-        self.reset_scale_all()
+        style_df = style_df[style_df['selected'].values]
+        d_min, d_max = self.reset_scale_all(style_df)
 
-        style_df = self.style_df[self.style_df['selected'].values]
         for index, row in style_df.iterrows():
             if not row['index_name'] in self.df.columns:
                 continue
@@ -106,6 +105,10 @@ class DataPix(QObject):
                 continue
             data = self.config_data(data, row)
 
+            scale_min, scale_max = row[['scale_min', 'scale_max']]
+            scale_min = d_min if scale_min == 'auto' else scale_min
+            scale_max = d_max if scale_max == 'auto' else scale_max
+
             ds = DataSource(
                 parent=self,
                 df=data,
@@ -114,8 +117,8 @@ class DataPix(QObject):
                 color=row['color'],
                 line_thick=row['line_thick'],
                 pen_type=row['pen_style'],
-                scale_min=row['scale_min'],
-                scale_max=row['scale_max'],
+                scale_min=scale_min,
+                scale_max=scale_max,
                 scale_div=row['scale_div'],
                 logarithmic=row['logarithmic'],
                 info_priority=row['info_priority'],
@@ -185,8 +188,8 @@ class DataPix(QObject):
         data.columns = [index_name]
         return data
 
-    def reset_scale_all(self):
-        style_df = self.style_df[self.style_df['selected'].values]
+    def reset_scale_all(self, style_df):
+        # style_df = self.style_df[self.style_df['selected'].values]
 
         default_row = style_df[style_df['default_ds'].values].iloc[0]
         ratio = get_units_dict()[default_row['units']]
@@ -199,14 +202,7 @@ class DataPix(QObject):
         scale_max = max0 * self.scale_ratio / ratio
         scale_min = scale_max / 1024
 
-        self.style_df.loc[
-            self.style_df['selected'].values &
-            self.style_df['logarithmic'].values &
-            (self.style_df['units'].values == '亿'),
-            ['scale_max', 'scale_min']
-            ] = [scale_max, scale_min]
-
-        self.update_tree.emit()
+        return scale_min, scale_max
 
     def get_date_list(self, mode):
         if mode == 'WEEKLY':
@@ -476,8 +472,16 @@ class DataPix(QObject):
 
     ###############################################################################################
     def draw_cross(self, x, y, state):
-        show1 = self.draw_sub_cross(x, y, state, self.pix)
-        show2 = self.draw_sub_cross(x, y, False, self.pix2)
+        if self.df.shape[0] == 0:
+            return
+
+        d1, d2, show1 = self.draw_sub_cross(x, y, state, self.pix)
+        d1, d2, show2 = self.draw_sub_cross(x, y, False, self.pix2)
+        box = InformationBox(parent=self)
+        box1, box2 = box.draw_pix(d1, d2)
+
+        box.draw_box(box1, show1)
+        box.draw_box(box2, show2)
 
         self.pix_list = [show1, show2]
 
@@ -533,9 +537,9 @@ class DataPix(QObject):
         self.draw_tooltip(px_x2, self.data_rect.top(), d2, pix_show)
         self.draw_tooltip(self.data_rect.right() + 1, y, val_str, pix_show)
 
-        self.draw_information(d1, d2, pix_show)
+        # self.draw_information(d1, d2, pix_show)
 
-        return pix_show
+        return d1, d2, pix_show
 
     @staticmethod
     def get_last_date(d0, arr):
@@ -599,54 +603,13 @@ class DataPix(QObject):
 
         pix_painter.end()
 
-    def draw_information(self, *args):
-        box = InformationBox(parent=self)
-        pix = box.draw_pix(*args)
-
-        pix_painter = QPainter(self.pix_show)
-        pix_painter.drawPixmap(10, 10, pix)
-        pix_painter.end()
-
-    # @staticmethod
-    # def get_last_value(x, x_list):
-    #     if not x_list:
-    #         return x
+    # def draw_information(self, *args):
+    #     box = InformationBox(parent=self)
+    #     pix = box.draw_pix(*args)
     #
-    #     last = None
-    #     for px in x_list:
-    #         if x < px:
-    #             return last
-    #         last = px
-    #     return last
-
-    # @staticmethod
-    # def get_nearest_value(x, x_list):
-    #     nearest = None
-    #
-    #     if len(x_list) > 0:
-    #         if x <= x_list[0]:
-    #             return x_list[0]
-    #         elif x >= x_list[-1]:
-    #             return x_list[-1]
-    #
-    #     px1 = np.inf
-    #     for px in x_list:
-    #         px2 = px
-    #         if px1 <= x < px2:
-    #             if (x - px1) <= (px2 - x):
-    #                 nearest = px1
-    #             else:
-    #                 nearest = px2
-    #             break
-    #         px1 = px
-    #     return nearest
-
-    # def get_nearest_date(self, x):
-    #     px = self.get_nearest_px(x)
-    #     if px is not None:
-    #         return self.px_dict[px]
-    #     else:
-    #         return None
+    #     pix_painter = QPainter(self.pix_show)
+    #     pix_painter.drawPixmap(10, 10, pix)
+    #     pix_painter.end()
 
     ###############################################################################################
 
