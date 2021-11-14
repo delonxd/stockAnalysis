@@ -317,7 +317,10 @@ class CheckTree(QTreeWidget):
             elif column_name in ["scale_min", "scale_max"]:
                 text, _ = QInputDialog.getText(self, column_name, column_name + ': ')
                 try:
-                    val = float(text)
+                    if text == 'auto':
+                        val = text
+                    else:
+                        val = float(text)
                     df.loc[index_name, column_name] = val
                     item.setText(column, text)
                     self.update_style.emit()
