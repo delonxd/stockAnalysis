@@ -33,7 +33,7 @@ class GuiLog(MainLog):
 class ReadSQLThread(QThread):
     signal1 = pyqtSignal(object)
 
-    def __init__(self, style_df):
+    def __init__(self):
         super().__init__()
 
         self.buffer_list = list()
@@ -78,21 +78,6 @@ class ReadSQLThread(QThread):
         self.lock.release()
 
 
-# class QDataFrameModel(QStandardItemModel):
-#     def __init__(self, df: pd.DataFrame):
-#         self.df = df
-#         super().__init__(*df.shape)
-#         h_header = np.vectorize(lambda x: str(x))(df.columns.values)
-#         v_header = np.vectorize(lambda x: str(x))(df.index.values)
-#         self.setHorizontalHeaderLabels(h_header)
-#         self.setVerticalHeaderLabels(v_header)
-#
-#         arr = df.values
-#         for i in range(df.shape[0]):
-#             for j in range(df.shape[1]):
-#                 self.setItem(i, j, QStandardItem(str(arr[i, j])))
-
-
 class MainWidget(QWidget):
 
     def __init__(self):
@@ -101,7 +86,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=0)
+        self.codes_df.init_current_index(index=305)
         # self.codes_df.init_current_index(code='603836')
         # self.codes_df.init_current_index(code='000921')
 
@@ -113,7 +98,7 @@ class MainWidget(QWidget):
         self.df_dict = dict()
         self.pix_dict = dict()
 
-        self.buffer = ReadSQLThread(self.style_df)
+        self.buffer = ReadSQLThread()
         self.buffer.signal1.connect(self.update_data_pix)
 
         code = self.stock_code
@@ -291,8 +276,15 @@ class MainWidget(QWidget):
             start_date="2021-01-01",
         )
 
-        self.df_dict[code] = sql2df(code=code)
-        self.change_stock(self.code_index)
+        if code in self.df_dict.keys():
+            self.df_dict.pop(code)
+
+        if code in self.pix_dict.keys():
+            self.pix_dict.pop(code)
+
+        self.run_buffer()
+        # self.df_dict[code] = sql2df(code=code)
+        # self.change_stock(self.code_index)
 
     def show_tree(self):
         self.tree.show()

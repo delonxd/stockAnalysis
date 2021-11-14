@@ -42,8 +42,8 @@ class InformationBox:
         box_df.sort_values('priority', inplace=True)
 
         res = list()
-        res.append(('报告日期1: %s' % d1, QPen(Qt.white, 1, Qt.SolidLine)))
-        res.append(('报告日期2: %s' % d2, QPen(Qt.white, 1, Qt.SolidLine)))
+        # res.append(('报告日期1: %s' % d1, QPen(Qt.white, 1, Qt.SolidLine)))
+        # res.append(('报告日期2: %s' % d2, QPen(Qt.white, 1, Qt.SolidLine)))
 
         for _, row in box_df.iterrows():
             name, value, ds = row['show_name'], row['value'], row['data_source']

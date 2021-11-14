@@ -198,25 +198,25 @@ def sql2df(code):
     df1 = load_df_from_mysql(code, 'fs')
     d0 = '' if df1.shape[0] == 0 else df1.iloc[-1, :]['last_update'][:10]
 
-    # if not d0 == today:
-    #     request_data2mysql(
-    #         stock_code=code,
-    #         data_type='fs',
-    #         start_date="2021-04-01",
-    #     )
-    #     df1 = load_df_from_mysql(code, 'fs')
+    if not d0 == today:
+        request_data2mysql(
+            stock_code=code,
+            data_type='fs',
+            start_date="2021-04-01",
+        )
+        df1 = load_df_from_mysql(code, 'fs')
 
     df2 = load_df_from_mysql(code, 'mvs')
     d0 = '' if df2.shape[0] == 0 else df2.iloc[-1, :]['last_update'][:10]
 
-    # if not d0 == today:
-    #     request_data2mysql(
-    #         stock_code=code,
-    #         data_type='mvs',
-    #         start_date="2021-04-01",
-    #         # start_date="1970-01-01",
-    #     )
-    #     df2 = load_df_from_mysql(code, 'mvs')
+    if not d0 == today:
+        request_data2mysql(
+            stock_code=code,
+            data_type='mvs',
+            start_date="2021-04-01",
+            # start_date="1970-01-01",
+        )
+        df2 = load_df_from_mysql(code, 'mvs')
 
     # print(df1)
     # print(df2)
