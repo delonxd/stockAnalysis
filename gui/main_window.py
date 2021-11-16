@@ -45,12 +45,12 @@ class ReadSQLThread(QThread):
         while True:
             self.lock.acquire()
             if len(self.buffer_list) > 0:
-                code, style_df, df = self.buffer_list.pop(0)
+                code, style_df, df, ratio = self.buffer_list.pop(0)
             else:
                 break
             self.lock.release()
 
-            res0 = DataPix(code=code, style_df=style_df, df=df)
+            res0 = DataPix(code=code, style_df=style_df, df=df, ratio=ratio)
             GuiLog.add_log('    add buffer %s' % code)
             self.signal1.emit(res0)
 
@@ -64,7 +64,7 @@ class ReadSQLThread(QThread):
             code = message[0]
 
             if len(self.buffer_list) > 0:
-                x, _, _ = zip(*self.buffer_list)
+                x, _, _, _ = zip(*self.buffer_list)
                 if code in x:
                     index = x.index(code)
                     self.buffer_list.pop(index)
@@ -86,7 +86,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=305)
+        self.codes_df.init_current_index(index=109)
         # self.codes_df.init_current_index(code='603836')
         # self.codes_df.init_current_index(code='000921')
 
@@ -133,6 +133,7 @@ class MainWidget(QWidget):
         self.code_widget.table_view.change_signal.connect(self.change_stock)
 
         self.cross = False
+        self.ratio = 8
         self.init_ui()
 
         self.window_flag = 0
@@ -301,12 +302,16 @@ class MainWidget(QWidget):
             self.label.setFocus()
 
     def scale_up(self):
-        self.data_pix.scale_ratio = self.data_pix.scale_ratio * 2
-        self.update_style()
+        code = self.stock_code
+        self.ratio = self.ratio * 2
+        self.pix_dict.pop(code)
+        self.run_buffer()
 
     def scale_down(self):
-        self.data_pix.scale_ratio = self.data_pix.scale_ratio / 2
-        self.update_style()
+        code = self.stock_code
+        self.ratio = self.ratio / 2
+        self.pix_dict.pop(code)
+        self.run_buffer()
 
     def export_style(self):
         df = self.tree.df.copy()
@@ -355,7 +360,7 @@ class MainWidget(QWidget):
             if code in self.df_dict.keys():
                 df = self.df_dict[code].copy()
             style_df = self.style_df.copy()
-            return code, style_df, df
+            return code, style_df, df, self.ratio
 
     def update_data_pix(self, data_pix):
         self.pix_dict[data_pix.code] = data_pix
@@ -450,8 +455,8 @@ class MainWidget(QWidget):
         #     code_list = json.loads(f.read())
 
         # with open("..\\basicData\\analyzedData\\jlr_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\analyzedData\\roe_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\analyzedData\\return_year_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\analyzedData\\roe_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\analyzedData\\return_year_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
         code_list = get_part_codes(code_list, blacklist=blacklist)

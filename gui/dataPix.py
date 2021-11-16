@@ -22,7 +22,7 @@ from PyQt5.QtGui import *
 
 
 class DataPix:
-    def __init__(self, code, style_df: pd.DataFrame, df=None):
+    def __init__(self, code, style_df: pd.DataFrame, df=None, ratio=None):
         self.code = code
 
         self.df = pd.DataFrame()
@@ -66,7 +66,8 @@ class DataPix:
         self.dt_fs = pd.Series()
         self.dt_mvs = pd.Series()
 
-        self.scale_ratio = 4
+        # self.scale_ratio = 4
+        self.scale_ratio = 4 if ratio is None else ratio
 
         self.update_pix(style_df)
 

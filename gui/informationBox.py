@@ -72,7 +72,10 @@ class InformationBox:
             if ds.data_type == 'assets':
                 text_list2.append((row[0], row[1]))
             else:
-                text_list1.append((row[0], row[1]))
+                if len(text_list1) > 54:
+                    text_list2.append((row[0], row[1]))
+                else:
+                    text_list1.append((row[0], row[1]))
 
         pix1 = self.draw_text(text_list1)
         pix2 = self.draw_text(text_list2)
