@@ -181,8 +181,11 @@ def test_analysis():
         a2 = data.df['s_012_return_year'].copy().dropna()
         a3 = data.df['s_014_pe2'].copy().dropna()
         a4 = data.df['s_015_return_year2'].copy().dropna()
+        a5 = data.df['s_001_roe'].copy().dropna()
+        a6 = data.df['s_008_revenue'].copy().dropna()
+        a7 = data.df['s_009_revenue_rate'].copy().dropna()
 
-        res_dict[stock_code] = (a1, a2, a3, a4)
+        res_dict[stock_code] = (a1, a2, a3, a4, a5, a6, a7)
         index += 1
 
         # print(res_df)
@@ -190,7 +193,7 @@ def test_analysis():
     # with open("../basicData/analyzedData/return_year.pkl", "wb") as f:
     #     pickle.dump(res_df, f)
 
-    with open("../basicData/analyzedData/res_dict.pkl", "wb") as f:
+    with open("../basicData/analyzedData/res_dict_all_01.pkl", "wb") as f:
         pickle.dump(res_dict, f)
 
 
@@ -243,6 +246,57 @@ def test_read2():
     # print(len(code_list))
     res = json.dumps(code_list, indent=4, ensure_ascii=False)
     with open("../basicData/analyzedData/roe_codes2.txt", "w", encoding='utf-8') as f:
+        f.write(res)
+
+
+def test_read3():
+    with open("../basicData/analyzedData/res_dict_all_01.pkl", "rb") as f:
+        res_dict = pickle.load(f)
+
+    dict0 = dict()
+    for key, value in res_dict.items():
+        # print(key)
+        roe = value[4]
+        # print(roe)
+
+        a1 = roe[roe.index.values > '2019-06-01']
+
+        flg = False
+        code = key
+        if code[0] == '0' or code[0] == '6':
+            if code[:3] != '688':
+                flg = True
+
+        for x in a1:
+            if x < 0.13:
+                flg = False
+                # print(a)
+                break
+
+        pe = value[0]
+        if pe.size == 0:
+            flg = False
+        else:
+            x = pe[-1]
+            if x > 22:
+                flg = False
+
+        if a1.size == 0 or flg is False:
+            dict0[key] = np.nan
+        else:
+            dict0[key] = a1[-1]
+
+        # print(dict0[key])
+
+    s1 = pd.Series(dict0)
+    s1.dropna(inplace=True)
+    s2 = s1.sort_values(ascending=False)
+    print(s2)
+    code_list = s2.index.tolist()
+
+    print(s2.size)
+    res = json.dumps(code_list, indent=4, ensure_ascii=False)
+    with open("../basicData/analyzedData/sift_code_002.txt", "w", encoding='utf-8') as f:
         f.write(res)
 
 
@@ -302,5 +356,6 @@ if __name__ == '__main__':
     #     res_dict = pickle.load(f)
     # print(res_dict)
     # test_read()
-    test_read2()
+    # test_read2()
+    test_read3()
     # show_data_jlr()
