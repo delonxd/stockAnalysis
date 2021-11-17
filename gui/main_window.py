@@ -86,7 +86,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=109)
+        self.codes_df.init_current_index(index=0)
         # self.codes_df.init_current_index(code='603836')
         # self.codes_df.init_current_index(code='000921')
 
@@ -268,13 +268,13 @@ class MainWidget(QWidget):
         request_data2mysql(
             stock_code=code,
             data_type='fs',
-            start_date="2021-01-01",
+            start_date="1970-01-01",
         )
 
         request_data2mysql(
             stock_code=code,
             data_type='mvs',
-            start_date="2021-01-01",
+            start_date="1970-01-01",
         )
 
         if code in self.df_dict.keys():
@@ -455,7 +455,7 @@ class MainWidget(QWidget):
         #     code_list = json.loads(f.read())
 
         # with open("..\\basicData\\analyzedData\\jlr_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\analyzedData\\roe_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\analyzedData\\roe_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\return_year_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 

@@ -213,14 +213,14 @@ def test_read():
 
 
 def test_read2():
-    with open("../basicData/analyzedData/res_dict.pkl", "rb") as f:
+    with open("../basicData/analyzedData/res_dict_roe.pkl", "rb") as f:
         res_dict = pickle.load(f)
 
     # code_list = list()
     dict0 = dict()
     for key, value in res_dict.items():
         # s1 = value['s_003_profit'].copy().dropna()
-        data = value[3]
+        data = value[4]
         a = data[data.index.values > '2021-06-01']
 
         if a.size > 0:
@@ -231,7 +231,7 @@ def test_read2():
         # print(dict0[key])
 
     s1 = pd.Series(dict0)
-    s2 = s1.sort_values(ascending=True)
+    s2 = s1.sort_values(ascending=False)
     print(s2)
     code_list = s2.index.tolist()
 
@@ -242,7 +242,7 @@ def test_read2():
     #
     # print(len(code_list))
     res = json.dumps(code_list, indent=4, ensure_ascii=False)
-    with open("../basicData/analyzedData/return_year_codes.txt", "w", encoding='utf-8') as f:
+    with open("../basicData/analyzedData/roe_codes2.txt", "w", encoding='utf-8') as f:
         f.write(res)
 
 
