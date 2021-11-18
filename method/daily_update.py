@@ -1,4 +1,5 @@
 from request.requestData import request_data2mysql
+from request.requestBasicData import request_basic, request_industry_sample
 from method.mainMethod import get_part_codes
 
 from method.dataMethod import load_df_from_mysql
@@ -10,16 +11,37 @@ import pickle
 import numpy as np
 import pandas as pd
 import datetime as dt
+import os
 
 
 def daily_update():
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
 
+    res_dir = '..\\basicData\\dailyUpdate\\update_%s' % timestamp
+
+    if not os.path.exists(res_dir):
+        os.makedirs(res_dir)
+
+    # res_dir = '..\\basicData\\dailyUpdate'
+
+    code_list, name_dict = request_basic()
+
+    res = json.dumps(name_dict, indent=4, ensure_ascii=False)
+    file = '%s\\name_dict.txt' % res_dir
+    with open(file, "w", encoding='utf-8') as f:
+        f.write(res)
+
+    industry_dict = request_industry_sample()
+    res = json.dumps(industry_dict, indent=4, ensure_ascii=False)
+    file = '%s\\industry_dict.txt' % res_dir
+    with open(file, "w", encoding='utf-8') as f:
+        f.write(res)
+
     # with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
     #     blacklist = json.loads(f.read())
 
-    with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
-        code_list = json.loads(f.read())
+    # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
+    #     code_list = json.loads(f.read())
 
     # code_list = get_part_codes(code_list, blacklist=blacklist)
     # code_list = get_part_codes(code_list)
@@ -28,12 +50,15 @@ def daily_update():
     print(length)
 
     # start = code_list.index('600000')
-    start = 3
-    end = 4
+    start = 10
+    end = 12
 
     res_list = list()
 
     today = dt.date.today().strftime("%Y-%m-%d")
+
+    # start_date = (dt.date.today() - dt.timedelta(days=10)).strftime("%Y-%m-%d")
+    start_date = '2021-04-01'
 
     columns = [
         's_001_roe',
@@ -67,7 +92,7 @@ def daily_update():
             request_data2mysql(
                 stock_code=code_list[index],
                 data_type='fs',
-                start_date='2021-04-01',
+                start_date=start_date,
             )
 
         df2 = load_df_from_mysql(code, 'mvs')
@@ -76,7 +101,7 @@ def daily_update():
             request_data2mysql(
                 stock_code=code_list[index],
                 data_type='mvs',
-                start_date='2021-04-01',
+                start_date=start_date,
             )
 
         data = DataAnalysis(df1, df2)
@@ -87,8 +112,8 @@ def daily_update():
 
         index += 1
 
-    file = 'res_daily_%s.pkl' % timestamp
-    with open("../basicData/dailyUpdate/%s" % file, "wb") as f:
+    file = '%s\\res_daily_%s.pkl' % (res_dir, timestamp)
+    with open(file, "wb") as f:
         pickle.dump(res_list, f)
 
     ####################################################################################################
@@ -135,11 +160,11 @@ def daily_update():
     print(s2)
     print(s2.size)
 
-    code_list = s2.index.tolist()
+    sift_list = s2.index.tolist()
 
-    res = json.dumps(code_list, indent=4, ensure_ascii=False)
-    file = 'sift_daily_%s.txt' % timestamp
-    with open("../basicData/dailyUpdate/%s" % file, "w", encoding='utf-8') as f:
+    res = json.dumps(sift_list, indent=4, ensure_ascii=False)
+    file = '%s\\sift_list_%s.txt' % (res_dir, timestamp)
+    with open(file, "w", encoding='utf-8') as f:
         f.write(res)
 
 
