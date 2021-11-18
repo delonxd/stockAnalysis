@@ -455,11 +455,13 @@ class MainWidget(QWidget):
         #     code_list = json.loads(f.read())
 
         # with open("..\\basicData\\analyzedData\\jlr_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\analyzedData\\roe_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\analyzedData\\roe_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\return_year_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\analyzedData\\sift_code_003.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
-        code_list = get_part_codes(code_list, blacklist=blacklist)
+        # code_list = get_part_codes(code_list, blacklist=blacklist)
         # code_list = get_part_codes(code_list)
 
         # with open("..\\basicData\\selected_0514.txt", "r", encoding="utf-8", errors="ignore") as f:

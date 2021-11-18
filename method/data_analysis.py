@@ -254,6 +254,7 @@ def test_read3():
         res_dict = pickle.load(f)
 
     dict0 = dict()
+    print(len(res_dict))
     for key, value in res_dict.items():
         # print(key)
         roe = value[4]
@@ -296,7 +297,7 @@ def test_read3():
 
     print(s2.size)
     res = json.dumps(code_list, indent=4, ensure_ascii=False)
-    with open("../basicData/analyzedData/sift_code_002.txt", "w", encoding='utf-8') as f:
+    with open("../basicData/analyzedData/sift_code_004.txt", "w", encoding='utf-8') as f:
         f.write(res)
 
 
