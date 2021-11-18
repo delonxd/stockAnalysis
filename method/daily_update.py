@@ -31,11 +31,16 @@ def daily_update():
     with open(file, "w", encoding='utf-8') as f:
         f.write(res)
 
-    industry_dict = request_industry_sample()
-    res = json.dumps(industry_dict, indent=4, ensure_ascii=False)
-    file = '%s\\industry_dict.txt' % res_dir
+    res = json.dumps(code_list, indent=4, ensure_ascii=False)
+    file = '%s\\code_list.txt' % res_dir
     with open(file, "w", encoding='utf-8') as f:
         f.write(res)
+
+    # industry_dict = request_industry_sample()
+    # res = json.dumps(industry_dict, indent=4, ensure_ascii=False)
+    # file = '%s\\industry_dict.txt' % res_dir
+    # with open(file, "w", encoding='utf-8') as f:
+    #     f.write(res)
 
     # with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
     #     blacklist = json.loads(f.read())
