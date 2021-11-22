@@ -250,7 +250,8 @@ def test_read2():
 
 
 def test_read3():
-    with open("../basicData/analyzedData/res_dict_all_01.pkl", "rb") as f:
+    # with open("../basicData/analyzedData/res_dict_all_01.pkl", "rb") as f:
+    with open("../basicData/analyzedData/res_dict_roe.pkl", "rb") as f:
         res_dict = pickle.load(f)
 
     dict0 = dict()
@@ -269,7 +270,7 @@ def test_read3():
                 flg = True
 
         for x in a1:
-            if x < 0.13:
+            if x < 0.11:
                 flg = False
                 # print(a)
                 break
@@ -298,6 +299,67 @@ def test_read3():
     print(s2.size)
     res = json.dumps(code_list, indent=4, ensure_ascii=False)
     with open("../basicData/analyzedData/sift_code_004.txt", "w", encoding='utf-8') as f:
+        f.write(res)
+
+
+def test_read_res_daily():
+
+    timestamp = '20211118222745'
+    update_dir = "..\\basicData\\dailyUpdate\\update_%s" % timestamp
+
+    file = "..\\basicData\\dailyUpdate\\update_%s\\code_list.txt" % timestamp
+    with open(file, "r", encoding='utf-8') as f:
+        code_list = json.loads(f.read())
+
+    file = "..\\basicData\\dailyUpdate\\update_%s\\res_daily_%s.pkl" % (timestamp, timestamp)
+    with open(file, "rb") as f:
+        res_list = pickle.load(f)
+
+    dict0 = dict()
+    for index, df in enumerate(res_list):
+
+        code = code_list[index]
+
+        roe = df['s_001_roe'].copy().dropna()
+        a1 = roe[roe.index.values > '2019-06-01']
+
+        flg = False
+
+        if code[0] == '0' or code[0] == '6':
+            if code[:3] != '688':
+                flg = True
+
+        for x in a1:
+            if x < 0.11:
+                flg = False
+                # print(a)
+                break
+
+        # pe = df['s_004_pe'].copy().dropna()
+        # if pe.size == 0:
+        #     flg = False
+        # else:
+        #     x = pe[-1]
+        #     if x > 30:
+        #         flg = False
+
+        if a1.size == 0 or flg is False:
+            dict0[code] = np.nan
+        else:
+            dict0[code] = a1[-1]
+
+        # print(dict0[key])
+
+    s1 = pd.Series(dict0)
+    s1.dropna(inplace=True)
+    s2 = s1.sort_values(ascending=False)
+
+    print(s2)
+    print(s2.size)
+
+    sift_list = s2.index.tolist()
+    res = json.dumps(sift_list, indent=4, ensure_ascii=False)
+    with open("../basicData/analyzedData/sift_code_006.txt", "w", encoding='utf-8') as f:
         f.write(res)
 
 
@@ -358,5 +420,5 @@ if __name__ == '__main__':
     # print(res_dict)
     # test_read()
     # test_read2()
-    test_read3()
+    test_read_res_daily()
     # show_data_jlr()

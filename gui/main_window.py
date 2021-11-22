@@ -133,7 +133,7 @@ class MainWidget(QWidget):
         self.code_widget.table_view.change_signal.connect(self.change_stock)
 
         self.cross = False
-        self.ratio = 8
+        self.ratio = 16
         self.init_ui()
 
         self.window_flag = 0
@@ -457,8 +457,9 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\analyzedData\\jlr_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\roe_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\return_year_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\analyzedData\\sift_code_003.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\analyzedData\\sift_code_006.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\dailyUpdate\\update_20211118222745\\sift_list_20211118222745.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
         # code_list = get_part_codes(code_list, blacklist=blacklist)

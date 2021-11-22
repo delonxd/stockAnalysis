@@ -55,12 +55,13 @@ def daily_update():
     print(length)
 
     # start = code_list.index('600000')
-    start = 10
-    end = 12
+    start = 0
+    end = length
 
     res_list = list()
 
-    today = dt.date.today().strftime("%Y-%m-%d")
+    # today = dt.date.today().strftime("%Y-%m-%d")
+    today = '2021-11-20'
 
     # start_date = (dt.date.today() - dt.timedelta(days=10)).strftime("%Y-%m-%d")
     start_date = '2021-04-01'
