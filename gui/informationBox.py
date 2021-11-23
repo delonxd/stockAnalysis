@@ -52,7 +52,7 @@ class InformationBox:
                 txt = '%s (%s)' % (txt, row['real_date'])
 
             row_txt = '%s: %s' % (name, txt)
-            pen = QPen(ds.color, ds.line_thick, ds.pen_type)
+            pen = QPen(ds.color)
             res.append((row_txt, pen, ds))
 
         return res

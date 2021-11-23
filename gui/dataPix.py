@@ -304,12 +304,14 @@ class DataPix:
         pix_painter.setFont(QFont('Consolas', 10))
         pen1 = QPen(Qt.red, 1, Qt.SolidLine)
         pen2 = QPen(Qt.red, 1, Qt.DotLine)
+        pen3 = QPen(Qt.yellow, 1, Qt.DotLine)
 
         d_left = self.data_rect.left()
         d_right = self.data_rect.right()
 
         val_list = [x / 10 for x in range(1, 10)]
 
+        counter = 1
         for val_y in val_list:
             y = self.y_value2px(val_y, data)
             data_y = self.y_value2data(val_y, data)
@@ -324,8 +326,13 @@ class DataPix:
             pix_painter.setPen(pen1)
             pix_painter.drawText(rect, Qt.AlignCenter, txt)
 
-            pix_painter.setPen(pen2)
+            if counter == 3:
+                pix_painter.setPen(pen3)
+            else:
+                pix_painter.setPen(pen2)
             pix_painter.drawLine(QPoint(d_left, y), QPoint(d_right, y))
+
+            counter += 1
 
         pix_painter.end()
 
@@ -450,6 +457,12 @@ class DataPix:
             df_point.dropna(inplace=True)
 
             point_list = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
+
+            if ds.frequency == 'DAILY':
+                if point_list:
+                    x = point_list[-1].x() + 30
+                    y = point_list[-1].y()
+                    point_list.append(QPoint(x, y))
 
             # draw line
             pix_painter = QPainter(pix)
