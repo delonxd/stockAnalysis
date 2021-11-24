@@ -67,7 +67,7 @@ class DataPix:
         self.dt_mvs = pd.Series()
 
         # self.scale_ratio = 4
-        self.scale_ratio = 4 if ratio is None else ratio
+        self.scale_ratio = 16 if ratio is None else ratio
 
         self.update_pix(style_df)
 
@@ -486,28 +486,28 @@ class DataPix:
 
     ###############################################################################################
     def draw_cross(self, x, y, state):
+        if x is None and y is None:
+            return
+
+        if not self.data_dict:
+            return
+
         if self.df.shape[0] == 0:
             return
 
-        d1, d2, show1 = self.draw_sub_cross(x, y, state, self.pix)
-        d1, d2, show2 = self.draw_sub_cross(x, y, False, self.pix2)
+        x, y, d0, d1, d2 = self.get_d1_d2(x, y)
         box = InformationBox(parent=self)
         box1, box2 = box.draw_pix(d1, d2)
+
+        show1 = self.draw_sub_cross(x, y, d0, d1, d2, state, self.pix)
+        show2 = self.draw_sub_cross(x, y, d0, d1, d2, False, self.pix2)
 
         box.draw_box(box1, show1)
         box.draw_box(box2, show2)
 
         self.pix_list = [show1, show2]
 
-    def draw_sub_cross(self, x, y, state, pix):
-
-        pix_show = QPixmap(pix)
-
-        if x is None and y is None:
-            return
-
-        if not self.data_dict:
-            return
+    def get_d1_d2(self, x, y):
 
         d_left = self.data_rect.left()
         d_right = self.data_rect.right()
@@ -523,14 +523,25 @@ class DataPix:
         elif y > d_bottom:
             y = d_bottom
 
-        val = self.y_px2data(y, self.default_ds)
-        val_str = self.default_ds.format(val)
-
         d0 = self.x_px2data(x).strftime("%Y-%m-%d")
 
         d1 = self.get_last_date(d0, self.dt_mvs.values)
         d_report = self.get_last_date(d0, self.dt_fs.index.values)
         d2 = None if d_report is None else self.dt_fs[d_report]
+
+        return x, y, d0, d1, d2
+
+    def draw_sub_cross(self, x, y, d0, d1, d2, state, pix):
+
+        pix_show = QPixmap(pix)
+
+        d_left = self.data_rect.left()
+        d_right = self.data_rect.right()
+        d_top = self.data_rect.top()
+        d_bottom = self.data_rect.bottom() + 1
+
+        val = self.y_px2data(y, self.default_ds)
+        val_str = self.default_ds.format(val)
 
         px_x0 = x
         px_x2 = x if d2 is None else self.x_data2px(dt.datetime.strptime(d2, "%Y-%m-%d").date())
@@ -553,7 +564,7 @@ class DataPix:
 
         # self.draw_information(d1, d2, pix_show)
 
-        return d1, d2, pix_show
+        return pix_show
 
     @staticmethod
     def get_last_date(d0, arr):

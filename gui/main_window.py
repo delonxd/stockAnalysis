@@ -64,7 +64,7 @@ class ReadSQLThread(QThread):
             code = message[0]
 
             if len(self.buffer_list) > 0:
-                x, _, _, _ = zip(*self.buffer_list)
+                x = list(zip(*self.buffer_list))[0]
                 if code in x:
                     index = x.index(code)
                     self.buffer_list.pop(index)
@@ -302,16 +302,24 @@ class MainWidget(QWidget):
             self.label.setFocus()
 
     def scale_up(self):
-        code = self.stock_code
         self.ratio = self.ratio * 2
-        self.pix_dict.pop(code)
-        self.run_buffer()
+        self.refresh_ratio()
 
     def scale_down(self):
-        code = self.stock_code
         self.ratio = self.ratio / 2
-        self.pix_dict.pop(code)
-        self.run_buffer()
+        self.refresh_ratio()
+
+    def refresh_ratio(self):
+        code = self.stock_code
+        if code in self.df_dict.keys():
+            df = self.df_dict[code].copy()
+        else:
+            return
+        style_df = self.style_df.copy()
+        message_list = [[code, style_df, df, self.ratio]]
+        self.buffer.extend(message_list)
+        self.buffer.start()
+        print('buffer start')
 
     def export_style(self):
         df = self.tree.df.copy()
@@ -360,7 +368,7 @@ class MainWidget(QWidget):
             if code in self.df_dict.keys():
                 df = self.df_dict[code].copy()
             style_df = self.style_df.copy()
-            return code, style_df, df, self.ratio
+            return code, style_df, df, None
 
     def update_data_pix(self, data_pix):
         self.pix_dict[data_pix.code] = data_pix
