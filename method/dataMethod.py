@@ -193,12 +193,13 @@ def get_month_delta(df: pd.DataFrame, new_name, mode='QUARTERLY'):
 
 
 def sql2df(code):
-    today = dt.date.today().strftime("%Y-%m-%d")
+    # today = dt.date.today().strftime("%Y-%m-%d")
+    today = (dt.datetime.now() - dt.timedelta(hours=16)).date().strftime("%Y-%m-%d") + ' 16:00:00'
 
     df1 = load_df_from_mysql(code, 'fs')
-    d0 = '' if df1.shape[0] == 0 else df1.iloc[-1, :]['last_update'][:10]
+    d0 = '' if df1.shape[0] == 0 else df1.iloc[-1, :]['last_update']
 
-    if not d0 == today:
+    if d0 < today:
         request_data2mysql(
             stock_code=code,
             data_type='fs',
@@ -207,9 +208,9 @@ def sql2df(code):
         df1 = load_df_from_mysql(code, 'fs')
 
     df2 = load_df_from_mysql(code, 'mvs')
-    d0 = '' if df2.shape[0] == 0 else df2.iloc[-1, :]['last_update'][:10]
+    d0 = '' if df2.shape[0] == 0 else df2.iloc[-1, :]['last_update']
 
-    if not d0 == today:
+    if d0 < today:
         request_data2mysql(
             stock_code=code,
             data_type='mvs',
@@ -664,4 +665,8 @@ if __name__ == '__main__':
     #
     # res = sql2df('600006')
     # print(res)
+
+    a = (dt.datetime.now() - dt.timedelta(hours=16)).date().strftime("%Y-%m-%d") + ' 16:00:00'
+    # a = a + ' 16:00:00'
+    print(a)
     pass

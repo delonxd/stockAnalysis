@@ -62,6 +62,7 @@ class InformationBox:
 
         text_list1 = list()
         text_list2 = list()
+        text_list3 = list()
 
         for row in text_list:
             if len(row) == 2:
@@ -77,10 +78,14 @@ class InformationBox:
                 else:
                     text_list1.append((row[0], row[1]))
 
+            if ds.data_type != 'assets' and ds.data_type != 'equity':
+                text_list3.append((row[0], row[1]))
+
         pix1 = self.draw_text(text_list1)
         pix2 = self.draw_text(text_list2)
+        pix3 = self.draw_text(text_list3)
 
-        return pix1, pix2
+        return pix1, pix2, pix3
 
     @staticmethod
     def draw_text(text_list):

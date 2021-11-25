@@ -496,6 +496,8 @@ class MainWidget(QWidget):
             self.window_flag = 0
         elif e.key() == Qt.Key_2:
             self.window_flag = 1
+        elif e.key() == Qt.Key_3:
+            self.window_flag = 2
         self.update_window()
 
 

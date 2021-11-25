@@ -45,9 +45,10 @@ class DataPix:
         # pix
         self.pix = QPixmap(self.m_width, self.m_height)
         self.pix2 = QPixmap(self.pix)
+        self.pix3 = QPixmap(self.pix)
         self.pix_show = QPixmap(self.pix)
         self.struct_pix = QPixmap(self.pix)
-        self.pix_list = [self.pix, self.pix2]
+        self.pix_list = [self.pix, self.pix2, self.pix3]
 
         # date metrics
         self.date_max = dt.date(2022, 7, 20)
@@ -235,11 +236,12 @@ class DataPix:
 
         self.struct_pix = QPixmap(self.pix)
         self.pix2 = QPixmap(self.pix)
+        self.pix3 = QPixmap(self.pix)
 
         self.draw_data_dict()
 
         self.pix_show = self.pix
-        self.pix_list = [self.pix, self.pix2]
+        self.pix_list = [self.pix, self.pix2, self.pix3]
 
     def draw_struct(self):
         pix_painter = QPainter(self.pix)
@@ -378,6 +380,7 @@ class DataPix:
         for ds in self.data_dict.values():
             if ds.ds_type == 'digit' and ds.data_type is None:
                 self.draw_data(ds, self.pix)
+                self.draw_data(ds, self.pix3)
 
     def draw_percentage(self, pix, data_type):
         ds = self.data_dict['id_001_bs_ta']
@@ -497,15 +500,13 @@ class DataPix:
 
         x, y, d0, d1, d2 = self.get_d1_d2(x, y)
         box = InformationBox(parent=self)
-        box1, box2 = box.draw_pix(d1, d2)
+        box = box.draw_pix(d1, d2)
 
-        show1 = self.draw_sub_cross(x, y, d0, d1, d2, state, self.pix)
-        show2 = self.draw_sub_cross(x, y, d0, d1, d2, False, self.pix2)
+        show1 = self.draw_sub_cross(x, y, d0, d1, d2, state, box[0], self.pix)
+        show2 = self.draw_sub_cross(x, y, d0, d1, d2, False, box[1], self.pix2)
+        show3 = self.draw_sub_cross(x, y, d0, d1, d2, False, box[2], self.pix3)
 
-        box.draw_box(box1, show1)
-        box.draw_box(box2, show2)
-
-        self.pix_list = [show1, show2]
+        self.pix_list = [show1, show2, show3]
 
     def get_d1_d2(self, x, y):
 
@@ -531,7 +532,7 @@ class DataPix:
 
         return x, y, d0, d1, d2
 
-    def draw_sub_cross(self, x, y, d0, d1, d2, state, pix):
+    def draw_sub_cross(self, x, y, d0, d1, d2, state, box, pix):
 
         pix_show = QPixmap(pix)
 
@@ -563,6 +564,10 @@ class DataPix:
         self.draw_tooltip(self.data_rect.right() + 1, y, val_str, pix_show)
 
         # self.draw_information(d1, d2, pix_show)
+
+        pix_painter = QPainter(pix_show)
+        pix_painter.drawPixmap(10, 10, box)
+        pix_painter.end()
 
         return pix_show
 

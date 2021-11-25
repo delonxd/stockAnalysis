@@ -26,6 +26,9 @@ def daily_update():
 
     code_list, name_dict = request_basic()
 
+    with open("..\\basicData\\analyzedData\\sift_code_006.txt", "r", encoding="utf-8", errors="ignore") as f:
+        code_list = json.loads(f.read())
+
     res = json.dumps(name_dict, indent=4, ensure_ascii=False)
     file = '%s\\name_dict.txt' % res_dir
     with open(file, "w", encoding='utf-8') as f:
@@ -60,8 +63,8 @@ def daily_update():
 
     res_list = list()
 
-    # today = dt.date.today().strftime("%Y-%m-%d")
-    today = '2021-11-20'
+    today = (dt.datetime.now() - dt.timedelta(hours=16)).date().strftime("%Y-%m-%d") + ' 16:00:00'
+    # today = '2021-11-20'
 
     # start_date = (dt.date.today() - dt.timedelta(days=10)).strftime("%Y-%m-%d")
     start_date = '2021-04-01'
@@ -92,7 +95,7 @@ def daily_update():
         print(index, '-->', code)
 
         df1 = load_df_from_mysql(code, 'fs')
-        d0 = '' if df1.shape[0] == 0 else df1.iloc[-1, :]['last_update'][:10]
+        d0 = '' if df1.shape[0] == 0 else df1.iloc[-1, :]['last_update']
 
         if d0 < today:
             request_data2mysql(
@@ -102,7 +105,7 @@ def daily_update():
             )
 
         df2 = load_df_from_mysql(code, 'mvs')
-        d0 = '' if df2.shape[0] == 0 else df2.iloc[-1, :]['last_update'][:10]
+        d0 = '' if df2.shape[0] == 0 else df2.iloc[-1, :]['last_update']
         if d0 < today:
             request_data2mysql(
                 stock_code=code_list[index],
