@@ -329,11 +329,11 @@ def test_read_res_daily():
             if code[:3] != '688':
                 flg = True
 
-        for x in a1:
-            if x < 0.11:
-                flg = False
-                # print(a)
-                break
+        # for x in a1:
+        #     if x < 0.11:
+        #         flg = False
+        #         # print(a)
+        #         break
 
         # pe = df['s_004_pe'].copy().dropna()
         # if pe.size == 0:
@@ -343,23 +343,34 @@ def test_read_res_daily():
         #     if x > 30:
         #         flg = False
 
-        if a1.size == 0 or flg is False:
+        # if a1.size == 0 or flg is False:
+        #     dict0[code] = np.nan
+        # else:
+        #     dict0[code] = a1[-1]
+
+        pe = df['s_004_pe'].copy().dropna()
+        if pe.size == 0 or flg is False:
             dict0[code] = np.nan
         else:
-            dict0[code] = a1[-1]
+            tmp = pe[-1]
+            if tmp > 0:
+                dict0[code] = tmp
+            else:
+                dict0[code] = tmp + 1e8
 
         # print(dict0[key])
 
     s1 = pd.Series(dict0)
     s1.dropna(inplace=True)
-    s2 = s1.sort_values(ascending=False)
+    # s2 = s1.sort_values(ascending=False)
+    s2 = s1.sort_values(ascending=True)
 
     print(s2)
     print(s2.size)
 
     sift_list = s2.index.tolist()
     res = json.dumps(sift_list, indent=4, ensure_ascii=False)
-    with open("../basicData/analyzedData/sift_code_006.txt", "w", encoding='utf-8') as f:
+    with open("../basicData/analyzedData/sift_code_009.txt", "w", encoding='utf-8') as f:
         f.write(res)
 
 

@@ -138,14 +138,17 @@ if __name__ == '__main__':
     # df0 = add_new_style(df0, 's_012_return_year', src='id_001_mvs_pe_ttm')
     # df0 = add_new_style(df0, 's_014_pe2', src='id_001_mvs_pe_ttm')
     # df0 = add_new_style(df0, 's_015_return_year2', src='id_001_mvs_pe_ttm')
+    df0 = add_new_style(df0, 's_016_roe_parent', src='id_004_bs_tca_ta_r')
+    df0 = add_new_style(df0, 's_017_equity_parent')
+    df0 = add_new_style(df0, 's_018_profit_parent')
     # df0.drop('s_012_return_year', inplace=True)
 
-    df0.loc[
-        df0['logarithmic'].values &
-        (df0['units'].values == '亿'),
-        ['scale_max', 'scale_min']
-    ] = ['auto', 'auto']
-
-    print(df0[['scale_min', 'scale_max', 'units']])
+    # df0.loc[
+    #     df0['logarithmic'].values &
+    #     (df0['units'].values == '亿'),
+    #     ['scale_max', 'scale_min']
+    # ] = ['auto', 'auto']
+    #
+    # print(df0[['scale_min', 'scale_max', 'units']])
     save_default_style(df0)
     pass

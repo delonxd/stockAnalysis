@@ -162,6 +162,12 @@ class DataPix:
             data.columns = [index_name]
             return data
 
+        if index_name == 'id_217_ps_npatoshopc':
+            data = self.df.loc[:, ['s_018_profit_parent']].copy()
+            data.dropna(inplace=True)
+            data.columns = [index_name]
+            return data
+
         if index_name == 'id_200_ps_op':
             data = self.df.loc[:, ['s_010_main_profit']].copy()
             data.dropna(inplace=True)

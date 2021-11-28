@@ -86,8 +86,8 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=0)
-        # self.codes_df.init_current_index(code='603836')
+        self.codes_df.init_current_index(index=97)
+        # self.codes_df.init_current_index(code='002493')
         # self.codes_df.init_current_index(code='000921')
 
         self.style_df = load_default_style()
@@ -465,7 +465,7 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\analyzedData\\jlr_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\roe_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\return_year_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\analyzedData\\sift_code_006.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\analyzedData\\sift_code_009.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\dailyUpdate\\update_20211118222745\\sift_list_20211118222745.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
@@ -473,10 +473,10 @@ class MainWidget(QWidget):
         # code_list = get_part_codes(code_list, blacklist=blacklist)
         # code_list = get_part_codes(code_list)
 
-        # with open("..\\basicData\\selected_0514.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\self_selected\\板块50.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     txt = f.read()
         #     code_list = re.findall(r'([0-9]{6})', txt)
-        #     code_list.reverse()
+            # code_list.reverse()
         return code_list
 
     def config_priority(self):

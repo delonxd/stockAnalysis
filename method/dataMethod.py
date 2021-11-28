@@ -295,6 +295,10 @@ class DataAnalysis:
 
     def config_fs_data(self):
         df = self.df_fs
+        self.fs_add(self.get_column(df, 's_017_equity_parent'))
+        self.fs_add(self.get_column(df, 's_018_profit_parent'))
+        self.fs_add(self.get_column(df, 's_016_roe_parent'))
+
         self.fs_add(self.get_column(df, 's_007_asset'))
         self.fs_add(self.get_column(df, 's_002_equity'))
         self.fs_add(self.get_column(df, 's_005_stocks'))
@@ -491,7 +495,7 @@ class DataAnalysis:
             return self.smooth_data(column, 'id_211_ps_np', delta=True, ttm=True)
 
         elif column == 's_004_pe':
-            s1 = self.fs_to_mvs('tmp', 's_003_profit')
+            s1 = self.fs_to_mvs('tmp', 's_018_profit_parent')
             s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
             s3 = s2 / s1
             s3.name = column
@@ -532,14 +536,14 @@ class DataAnalysis:
             return s3
 
         elif column == 's_013_noc_asset':
-            s1 = self.fs_to_mvs('tmp', 's_003_profit')
+            s1 = self.fs_to_mvs('tmp', 's_018_profit_parent')
             s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
             s3 = s2 / s1
             s3.name = column
             return s3.dropna()
 
         elif column == 's_014_pe2':
-            s1 = self.fs_to_mvs('tmp', 's_003_profit')
+            s1 = self.fs_to_mvs('tmp', 's_018_profit_parent')
             s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
             s3 = self.fs_to_mvs('tmp', 's_005_stocks')
             s4 = (s2 + s3) / s1
@@ -552,6 +556,23 @@ class DataAnalysis:
             s3 = self.get_return_year(s2, s1)
             s3.name = column
             return s3
+
+        elif column == 's_016_roe_parent':
+            s1 = self.get_column(df, 's_018_profit_parent')
+            s2 = self.get_column(df, 's_017_equity_parent')
+            s3 = s2 - s1
+            s3[s3 <= 0] = np.nan
+            s4 = s1 / s3
+            s4.dropna(inplace=True)
+            s4[s4 <= -50] = np.nan
+            s4.name = column
+            return s4.dropna()
+
+        elif column == 's_017_equity_parent':
+            return self.smooth_data(column, 'id_124_bs_tetoshopc')
+
+        elif column == 's_018_profit_parent':
+            return self.smooth_data(column, 'id_217_ps_npatoshopc', delta=True, ttm=True)
 
     @staticmethod
     def get_return_year(pe, rate):
