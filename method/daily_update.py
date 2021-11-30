@@ -26,8 +26,10 @@ def daily_update():
 
     code_list, name_dict = request_basic()
 
-    with open("..\\basicData\\analyzedData\\sift_code_006.txt", "r", encoding="utf-8", errors="ignore") as f:
+    with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
+    # with open("..\\basicData\\analyzedData\\sift_code_006.txt", "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
+    code_list = get_part_codes(code_list)
 
     res = json.dumps(name_dict, indent=4, ensure_ascii=False)
     file = '%s\\name_dict.txt' % res_dir
