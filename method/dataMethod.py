@@ -313,6 +313,13 @@ class DataAnalysis:
         self.fs_add(self.get_column(df, 's_008_revenue'))
         self.fs_add(self.get_column(df, 's_009_revenue_rate'))
 
+        self.fs_add(self.get_column(df, 's_019_monetary_asset'))
+        self.fs_add(self.get_column(df, 's_020_cap_asset'))
+        self.fs_add(self.get_column(df, 's_021_cap_expenditure'))
+        self.fs_add(self.get_column(df, 's_022_profit_no_expenditure'))
+        self.fs_add(self.get_column(df, 's_023_liabilities'))
+        self.fs_add(self.get_column(df, 's_024_real_liabilities'))
+
     def config_widget_data(self):
         self.config_sub_fs()
         self.fs_add(self.get_column(self.df_fs, 'dt_fs'))
@@ -321,6 +328,7 @@ class DataAnalysis:
         self.mvs_add(self.get_column(self.df_mvs, 's_012_return_year'))
         self.mvs_add(self.get_column(self.df_mvs, 's_014_pe2'))
         self.mvs_add(self.get_column(self.df_mvs, 's_015_return_year2'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_025_real_cost'))
 
         self.config_balance_sheet()
         self.set_df()
@@ -573,6 +581,69 @@ class DataAnalysis:
 
         elif column == 's_018_profit_parent':
             return self.smooth_data(column, 'id_217_ps_npatoshopc', delta=True, ttm=True)
+
+        elif column == 's_019_monetary_asset':
+            monetary_dict = {
+                'id_005_bs_cabb': '货币资金',
+                'id_007_bs_sr': '结算备付金',
+                'id_008_bs_pwbaofi': '拆出资金',
+                'id_009_bs_tfa': '交易性金融资产',
+                'id_010_bs_cdfa': '衍生金融资产(流动)',
+                'id_024_bs_ca': '合同资产',
+            }
+
+            index_list = list(monetary_dict.keys())
+
+            res_df = df.loc[:, index_list].copy()
+            res_df = res_df.replace(0, np.nan)
+            res_df = res_df.dropna(axis=0, how='all')
+            res_df = pd.DataFrame(res_df.apply(lambda x: x.sum(), axis=1))
+
+            new_df = get_month_data(res_df, column)
+            return new_df[column]
+
+        elif column == 's_020_cap_asset':
+            s1 = self.get_column(df, 's_007_asset')
+            s2 = self.get_column(df, 's_019_monetary_asset')
+            s3 = s1 - s2
+            s3.name = column
+            return s3.dropna()
+
+        elif column == 's_021_cap_expenditure':
+            s1 = self.get_column(df, 's_020_cap_asset')
+            s2 = s1 - s1.shift(1)
+            s2 = s2.fillna(0)
+            s2.name = column
+            return s2.dropna()
+
+        elif column == 's_022_profit_no_expenditure':
+            s1 = self.smooth_data('tmp', 'id_217_ps_npatoshopc', delta=True)
+            s2 = self.get_column(df, 's_021_cap_expenditure')
+            s2 = s2.reindex_like(s1)
+            s2 = s2.fillna(0)
+            s3 = s1 - s2
+            s3 = s3.rolling(4, min_periods=1).mean()
+            s3.name = column
+            return s3.dropna()
+
+        elif column == 's_023_liabilities':
+            return self.smooth_data(column, 'id_062_bs_tl')
+
+        elif column == 's_024_real_liabilities':
+            s1 = self.get_column(df, 's_023_liabilities')
+            s2 = self.get_column(df, 's_019_monetary_asset')
+            s2 = s2.reindex_like(s1)
+            s2 = s2.fillna(0)
+            s3 = s1 - s2
+            s3.name = column
+            return s3.dropna()
+
+        elif column == 's_025_real_cost':
+            s1 = self.fs_to_mvs('tmp', 's_024_real_liabilities')
+            s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            s3 = s1 + s2
+            s3.name = column
+            return s3.dropna()
 
     @staticmethod
     def get_return_year(pe, rate):

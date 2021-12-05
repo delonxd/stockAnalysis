@@ -86,7 +86,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=97)
+        self.codes_df.init_current_index(index=691)
         # self.codes_df.init_current_index(code='002493')
         # self.codes_df.init_current_index(code='000921')
 
@@ -498,6 +498,8 @@ class MainWidget(QWidget):
             self.window_flag = 1
         elif e.key() == Qt.Key_3:
             self.window_flag = 2
+        elif e.key() == Qt.Key_4:
+            self.window_flag = 3
         self.update_window()
 
 

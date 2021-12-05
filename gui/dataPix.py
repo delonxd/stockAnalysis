@@ -46,9 +46,10 @@ class DataPix:
         self.pix = QPixmap(self.m_width, self.m_height)
         self.pix2 = QPixmap(self.pix)
         self.pix3 = QPixmap(self.pix)
+        self.pix4 = QPixmap(self.pix)
         self.pix_show = QPixmap(self.pix)
         self.struct_pix = QPixmap(self.pix)
-        self.pix_list = [self.pix, self.pix2, self.pix3]
+        self.pix_list = [self.pix, self.pix2, self.pix3, self.pix4]
 
         # date metrics
         self.date_max = dt.date(2022, 7, 20)
@@ -180,6 +181,12 @@ class DataPix:
             data.columns = [index_name]
             return data
 
+        if index_name == 's_022_profit_no_expenditure':
+            data = self.df.loc[:, [index_name]].copy()
+            data.dropna(inplace=True)
+            data.columns = [index_name]
+            return data
+
         if row['ds_type'] == 'digit':
             if row['frequency'] == 'DAILY':
                 return data
@@ -243,11 +250,12 @@ class DataPix:
         self.struct_pix = QPixmap(self.pix)
         self.pix2 = QPixmap(self.pix)
         self.pix3 = QPixmap(self.pix)
+        self.pix4 = QPixmap(self.pix)
 
         self.draw_data_dict()
 
         self.pix_show = self.pix
-        self.pix_list = [self.pix, self.pix2, self.pix3]
+        self.pix_list = [self.pix, self.pix2, self.pix3, self.pix4]
 
     def draw_struct(self):
         pix_painter = QPainter(self.pix)
@@ -381,12 +389,30 @@ class DataPix:
         pix_painter.end()
 
     def draw_data_dict(self):
+        tmp_dict = {
+            's_022_profit_no_expenditure': '股东盈余',
+            's_025_real_cost': '真实成本',
+            'id_041_mvs_mc': '市值',
+            'id_217_ps_npatoshopc': '归母净利润',
+            's_018_profit_parent': '归母净利润',
+            'id_124_bs_tetoshopc': '归母股东权益',
+            's_017_equity_parent': '归母股东权益',
+            'id_001_bs_ta': '资产合计',
+            's_020_cap_asset': '资本化资产',
+            'id_261_cfs_ncffoa': '经营现金流净额',
+        }
+
+        tmp_list = list(tmp_dict.keys())
+
         self.draw_percentage(self.pix2, 'assets')
         self.draw_percentage(self.pix, 'equity')
         for ds in self.data_dict.values():
             if ds.ds_type == 'digit' and ds.data_type is None:
                 self.draw_data(ds, self.pix)
                 self.draw_data(ds, self.pix3)
+
+            if ds.index_name in tmp_list:
+                self.draw_data(ds, self.pix4)
 
     def draw_percentage(self, pix, data_type):
         ds = self.data_dict['id_001_bs_ta']
@@ -511,8 +537,9 @@ class DataPix:
         show1 = self.draw_sub_cross(x, y, d0, d1, d2, state, box[0], self.pix)
         show2 = self.draw_sub_cross(x, y, d0, d1, d2, False, box[1], self.pix2)
         show3 = self.draw_sub_cross(x, y, d0, d1, d2, False, box[2], self.pix3)
+        show4 = self.draw_sub_cross(x, y, d0, d1, d2, False, box[2], self.pix4)
 
-        self.pix_list = [show1, show2, show3]
+        self.pix_list = [show1, show2, show3, show4]
 
     def get_d1_d2(self, x, y):
 
