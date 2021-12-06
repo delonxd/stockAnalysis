@@ -1,20 +1,23 @@
-from request.requestData import request_data2mysql
-from request.requestBasicData import request_basic, request_industry_sample
-from method.mainMethod import get_part_codes
-
-from method.dataMethod import load_df_from_mysql
-from method.dataMethod import DataAnalysis
-
-import json
-import time
-import pickle
-import numpy as np
-import pandas as pd
-import datetime as dt
-import os
-
-
 def daily_update():
+    import sys
+    sys.path.append('D:\\PycharmProjects\\stockAnalysis')
+
+    import os
+    os.chdir("D:\\PycharmProjects\\stockAnalysis\\method")
+
+    from request.requestData import request_data2mysql
+    from request.requestBasicData import request_basic, request_industry_sample
+    from method.mainMethod import get_part_codes
+
+    from method.dataMethod import load_df_from_mysql
+    from method.dataMethod import DataAnalysis
+
+    import json
+    import time
+    import pickle
+
+    import datetime as dt
+
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
 
     res_dir = '..\\basicData\\dailyUpdate\\update_%s' % timestamp
@@ -106,6 +109,8 @@ def daily_update():
     index = start
     while index < end:
         code = code_list[index]
+        print('\n')
+        print('############################################################################################')
         print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
         print(index, '-->', code)
 
@@ -207,8 +212,10 @@ def daily_update():
 
 
 if __name__ == '__main__':
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', None)
-    pd.set_option('display.width', 10000)
+    import pandas as pd
+
+    # pd.set_option('display.max_columns', None)
+    # pd.set_option('display.max_rows', None)
+    # pd.set_option('display.width', 10000)
 
     daily_update()
