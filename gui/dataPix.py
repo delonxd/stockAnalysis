@@ -400,6 +400,8 @@ class DataPix:
             'id_001_bs_ta': '资产合计',
             's_020_cap_asset': '资本化资产',
             'id_261_cfs_ncffoa': '经营现金流净额',
+            's_026_holder_return_rate': '股东回报率',
+            's_027_pe_return_rate': 'pe回报率',
         }
 
         tmp_list = list(tmp_dict.keys())

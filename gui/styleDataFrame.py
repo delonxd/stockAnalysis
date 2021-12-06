@@ -145,9 +145,12 @@ if __name__ == '__main__':
     # df0 = add_new_style(df0, 's_020_cap_asset')
     # df0 = add_new_style(df0, 's_021_cap_expenditure')
     # df0 = add_new_style(df0, 's_022_profit_no_expenditure')
-    df0 = add_new_style(df0, 's_023_liabilities')
-    df0 = add_new_style(df0, 's_024_real_liabilities')
-    df0 = add_new_style(df0, 's_025_real_cost', src='id_041_mvs_mc')
+    # df0 = add_new_style(df0, 's_023_liabilities')
+    # df0 = add_new_style(df0, 's_024_real_liabilities')
+    # df0 = add_new_style(df0, 's_025_real_cost', src='id_041_mvs_mc')
+    df0 = add_new_style(df0, 's_026_holder_return_rate', src='id_041_mvs_mc')
+    df0 = add_new_style(df0, 's_027_pe_return_rate', src='id_041_mvs_mc')
+    df0 = add_new_style(df0, 's_028_market_value', src='id_041_mvs_mc')
     # df0.drop('s_012_return_year', inplace=True)
 
     # df0.loc[
