@@ -269,14 +269,14 @@ class DataAnalysis:
 
         return res
 
-    def config_sub_fs(self):
+    def config_sub_fs(self, class_sub):
         df = self.df_fs.copy()
         sub_list = self.get_sub_date()
         last_date = ''
         df_list = list()
         for sub in sub_list:
             sub_df = df.loc[sub, :].copy()
-            sub_data = DataAnalysis(sub_df, None)
+            sub_data = class_sub(sub_df, None)
             sub_data.config_fs_data()
 
             sub_data.df_fs = self.get_df_after_date(sub_data.df_fs, last_date)
@@ -321,7 +321,7 @@ class DataAnalysis:
         self.fs_add(self.get_column(df, 's_024_real_liabilities'))
 
     def config_widget_data(self):
-        self.config_sub_fs()
+        self.config_sub_fs(DataAnalysis)
         self.fs_add(self.get_column(self.df_fs, 'dt_fs'))
         self.mvs_add(self.get_column(self.df_mvs, 'dt_mvs'))
         self.mvs_add(self.get_column(self.df_mvs, 's_004_pe'))
@@ -331,6 +331,17 @@ class DataAnalysis:
         self.mvs_add(self.get_column(self.df_mvs, 's_025_real_cost'))
 
         self.config_balance_sheet()
+        self.set_df()
+
+    def config_daily_data(self):
+        self.config_sub_fs(DailyDataAnalysis)
+        self.fs_add(self.get_column(self.df_fs, 'dt_fs'))
+        self.mvs_add(self.get_column(self.df_mvs, 'dt_mvs'))
+        # self.mvs_add(self.get_column(self.df_mvs, 's_004_pe'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_025_real_cost'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_026_holder_return_rate'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_027_pe_return_rate'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_028_market_value'))
         self.set_df()
 
     def config_balance_sheet(self):
@@ -645,6 +656,25 @@ class DataAnalysis:
             s3.name = column
             return s3.dropna()
 
+        elif column == 's_026_holder_return_rate':
+            s1 = self.fs_to_mvs('tmp', 's_022_profit_no_expenditure')
+            s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            s3 = s1 / s2
+            s3.name = column
+            return s3.dropna()
+
+        elif column == 's_027_pe_return_rate':
+            s1 = self.fs_to_mvs('tmp', 's_018_profit_parent')
+            s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            s3 = s1 / s2
+            s3.name = column
+            return s3.dropna()
+
+        elif column == 's_028_market_value':
+            s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            s1.name = column
+            return s1
+
     @staticmethod
     def get_return_year(pe, rate):
         a = 1 + rate
@@ -747,6 +777,39 @@ class StandardFitModel:
         return np.exp(a * x + b)
 
 
+class DailyDataAnalysis(DataAnalysis):
+    def __init__(self, df_fs: pd.DataFrame, df_mvs: pd.DataFrame):
+        super().__init__(df_fs, df_mvs)
+
+    def config_fs_data(self):
+        df = self.df_fs
+        self.fs_add(self.get_column(df, 's_017_equity_parent'))
+        self.fs_add(self.get_column(df, 's_018_profit_parent'))
+        self.fs_add(self.get_column(df, 's_016_roe_parent'))
+
+        self.fs_add(self.get_column(df, 's_007_asset'))
+        # self.fs_add(self.get_column(df, 's_002_equity'))
+        # self.fs_add(self.get_column(df, 's_005_stocks'))
+
+        # self.fs_add(self.get_column(df, 's_003_profit'))
+        # self.fs_add(self.get_column(df, 's_010_main_profit'))
+        # self.fs_add(self.get_column(df, 's_011_main_profit_rate'))
+
+        # self.fs_add(self.get_column(df, 's_001_roe'))
+        # self.fs_add(self.get_column(df, 's_006_stocks_rate'))
+
+        # self.fs_add(self.get_column(df, 's_008_revenue'))
+        # self.fs_add(self.get_column(df, 's_009_revenue_rate'))
+
+        self.fs_add(self.get_column(df, 's_019_monetary_asset'))
+        self.fs_add(self.get_column(df, 's_020_cap_asset'))
+        self.fs_add(self.get_column(df, 's_021_cap_expenditure'))
+        self.fs_add(self.get_column(df, 's_022_profit_no_expenditure'))
+
+        self.fs_add(self.get_column(df, 's_023_liabilities'))
+        self.fs_add(self.get_column(df, 's_024_real_liabilities'))
+
+
 if __name__ == '__main__':
     # # sql2df('000002')
     # str2 = "from __main__ import sql2df_mvs"
@@ -758,7 +821,7 @@ if __name__ == '__main__':
     # res = sql2df('600006')
     # print(res)
 
-    a = (dt.datetime.now() - dt.timedelta(hours=16)).date().strftime("%Y-%m-%d") + ' 16:00:00'
+    # a = (dt.datetime.now() - dt.timedelta(hours=16)).date().strftime("%Y-%m-%d") + ' 16:00:00'
     # a = a + ' 16:00:00'
-    print(a)
+    # print(a)
     pass

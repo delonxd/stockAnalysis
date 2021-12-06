@@ -62,6 +62,7 @@ def daily_update():
     # start = code_list.index('600000')
     start = 0
     end = length
+    # end = 3
 
     res_list = list()
 
@@ -72,22 +73,34 @@ def daily_update():
     start_date = '2021-04-01'
 
     columns = [
-        's_001_roe',
+        # 's_001_roe',
         # 's_002_equity',
-        's_003_profit',
-        's_004_pe',
+        # 's_003_profit',
+        # 's_004_pe',
         # 's_005_stocks',
         # 's_006_stocks_rate',
-        # 's_007_asset',
-        # 's_007_asset',
+        's_007_asset',
         # 's_008_revenue',
-        's_009_revenue_rate',
+        # 's_009_revenue_rate',
         # 's_010_main_profit',
         # 's_011_main_profit_rate',
         # 's_012_return_year',
-        # # 's_013_noc_asset',
+        # 's_013_noc_asset',
         # 's_014_pe2',
         # 's_015_return_year2',
+        's_016_roe_parent',
+        's_017_equity_parent',
+        # 's_018_profit_parent',
+        # 's_019_monetary_asset',
+        # 's_020_cap_asset',
+        # 's_021_cap_expenditure',
+        's_022_profit_no_expenditure',
+        # 's_023_liabilities',
+        # 's_024_real_liabilities',
+        # 's_025_real_cost',
+        's_026_holder_return_rate',
+        's_027_pe_return_rate',
+        's_028_market_value',
     ]
 
     index = start
@@ -116,10 +129,13 @@ def daily_update():
             )
 
         data = DataAnalysis(df1, df2)
-        data.config_widget_data()
+        # data.config_widget_data()
+        data.config_daily_data()
 
         df = data.df[columns].copy()
         res_list.append(df)
+
+        print(df.columns)
 
         index += 1
 
@@ -127,67 +143,67 @@ def daily_update():
     with open(file, "wb") as f:
         pickle.dump(res_list, f)
 
-    ####################################################################################################
-
-    dict0 = dict()
-    for index, df in enumerate(res_list):
-
-        code = code_list[index]
-
-        roe = df['s_001_roe'].copy().dropna()
-        a1 = roe[roe.index.values > '2019-06-01']
-
-        flg = False
-
-        if code[0] == '0' or code[0] == '6':
-            if code[:3] != '688':
-                flg = True
-
-        # for x in a1:
-        #     if x < 0.13:
-        #         flg = False
-        #         # print(a)
-        #         break
-        #
-        # pe = df['s_004_pe'].copy().dropna()
-        # if pe.size == 0:
-        #     flg = False
-        # else:
-        #     x = pe[-1]
-        #     if x > 22:
-        #         flg = False
-        #
-        # if a1.size == 0 or flg is False:
-        #     dict0[code] = np.nan
-        # else:
-        #     dict0[code] = a1[-1]
-
-        pe = df['s_004_pe'].copy().dropna()
-        if pe.size == 0 or flg is False:
-            dict0[code] = np.nan
-        else:
-            tmp = pe[-1]
-            if tmp > 0:
-                dict0[code] = tmp
-            else:
-                dict0[code] = tmp + 1e8
-
-        # print(dict0[key])
-
-    s1 = pd.Series(dict0)
-    s1.dropna(inplace=True)
-    # s2 = s1.sort_values(ascending=False)
-    s2 = s1.sort_values(ascending=True)
-
-    print(s2)
-    print(s2.size)
-
-    sift_list = s2.index.tolist()
-
-    res = json.dumps(sift_list, indent=4, ensure_ascii=False)
-    file = '%s\\sift_list_%s.txt' % (res_dir, timestamp)
-    with open(file, "w", encoding='utf-8') as f:
-        f.write(res)
+    # ####################################################################################################
+    #
+    # dict0 = dict()
+    # for index, df in enumerate(res_list):
+    #
+    #     code = code_list[index]
+    #
+    #     roe = df['s_001_roe'].copy().dropna()
+    #     a1 = roe[roe.index.values > '2019-06-01']
+    #
+    #     flg = False
+    #
+    #     if code[0] == '0' or code[0] == '6':
+    #         if code[:3] != '688':
+    #             flg = True
+    #
+    #     # for x in a1:
+    #     #     if x < 0.13:
+    #     #         flg = False
+    #     #         # print(a)
+    #     #         break
+    #     #
+    #     # pe = df['s_004_pe'].copy().dropna()
+    #     # if pe.size == 0:
+    #     #     flg = False
+    #     # else:
+    #     #     x = pe[-1]
+    #     #     if x > 22:
+    #     #         flg = False
+    #     #
+    #     # if a1.size == 0 or flg is False:
+    #     #     dict0[code] = np.nan
+    #     # else:
+    #     #     dict0[code] = a1[-1]
+    #
+    #     pe = df['s_004_pe'].copy().dropna()
+    #     if pe.size == 0 or flg is False:
+    #         dict0[code] = np.nan
+    #     else:
+    #         tmp = pe[-1]
+    #         if tmp > 0:
+    #             dict0[code] = tmp
+    #         else:
+    #             dict0[code] = tmp + 1e8
+    #
+    #     # print(dict0[key])
+    #
+    # s1 = pd.Series(dict0)
+    # s1.dropna(inplace=True)
+    # # s2 = s1.sort_values(ascending=False)
+    # s2 = s1.sort_values(ascending=True)
+    #
+    # print(s2)
+    # print(s2.size)
+    #
+    # sift_list = s2.index.tolist()
+    #
+    # res = json.dumps(sift_list, indent=4, ensure_ascii=False)
+    # file = '%s\\sift_list_%s.txt' % (res_dir, timestamp)
+    # with open(file, "w", encoding='utf-8') as f:
+    #     f.write(res)
 
 
 if __name__ == '__main__':
