@@ -86,7 +86,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=1133)
+        self.codes_df.init_current_index(index=0)
         # self.codes_df.init_current_index(code='002493')
         # self.codes_df.init_current_index(code='000921')
 
@@ -341,7 +341,7 @@ class MainWidget(QWidget):
 
         arr = np.append(arr, index1)
         for i in range(offset):
-            if i < 10:
+            if i < 20:
                 index1 += 1
                 arr = np.append(arr, index1)
 
