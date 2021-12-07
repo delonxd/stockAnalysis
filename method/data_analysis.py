@@ -305,7 +305,7 @@ def test_read3():
 def test_read_res_daily():
 
     # timestamp = '20211118222745'
-    timestamp = '20211129234244'
+    timestamp = '20211207003931'
     update_dir = "..\\basicData\\dailyUpdate\\update_%s" % timestamp
 
     file = "..\\basicData\\dailyUpdate\\update_%s\\code_list.txt" % timestamp
@@ -321,8 +321,8 @@ def test_read_res_daily():
 
         code = code_list[index]
 
-        roe = df['s_001_roe'].copy().dropna()
-        a1 = roe[roe.index.values > '2019-06-01']
+        # roe = df['s_001_roe'].copy().dropna()
+        # a1 = roe[roe.index.values > '2019-06-01']
 
         flg = False
 
@@ -349,29 +349,34 @@ def test_read_res_daily():
         # else:
         #     dict0[code] = a1[-1]
 
-        pe = df['s_004_pe'].copy().dropna()
+        # pe = df['s_004_pe'].copy().dropna()
+        # if pe.size == 0 or flg is False:
+        #     dict0[code] = np.nan
+        # else:
+        #     tmp = pe[-1]
+        #     if tmp > 0:
+        #         dict0[code] = tmp
+        #     else:
+        #         dict0[code] = tmp + 1e8
+
+        pe = df['s_026_holder_return_rate'].copy().dropna()
         if pe.size == 0 or flg is False:
             dict0[code] = np.nan
         else:
-            tmp = pe[-1]
-            if tmp > 0:
-                dict0[code] = tmp
-            else:
-                dict0[code] = tmp + 1e8
-
+            dict0[code] = pe[-1]
         # print(dict0[key])
 
     s1 = pd.Series(dict0)
     s1.dropna(inplace=True)
-    # s2 = s1.sort_values(ascending=False)
-    s2 = s1.sort_values(ascending=True)
+    s2 = s1.sort_values(ascending=False)
+    # s2 = s1.sort_values(ascending=True)
 
     print(s2)
     print(s2.size)
 
     sift_list = s2.index.tolist()
     res = json.dumps(sift_list, indent=4, ensure_ascii=False)
-    with open("../basicData/analyzedData/sift_code_009.txt", "w", encoding='utf-8') as f:
+    with open("../basicData/analyzedData/sift_code_010.txt", "w", encoding='utf-8') as f:
         f.write(res)
 
 
