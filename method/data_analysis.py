@@ -305,7 +305,7 @@ def test_read3():
 def test_read_res_daily():
 
     # timestamp = '20211118222745'
-    timestamp = '20211207003931'
+    timestamp = '20211207161002'
     update_dir = "..\\basicData\\dailyUpdate\\update_%s" % timestamp
 
     file = "..\\basicData\\dailyUpdate\\update_%s\\code_list.txt" % timestamp
@@ -359,11 +359,13 @@ def test_read_res_daily():
         #     else:
         #         dict0[code] = tmp + 1e8
 
-        pe = df['s_026_holder_return_rate'].copy().dropna()
-        if pe.size == 0 or flg is False:
-            dict0[code] = np.nan
-        else:
-            dict0[code] = pe[-1]
+        tmp = df['s_026_holder_return_rate'].copy().dropna()
+        x1 = np.nan if tmp.size == 0 or flg is False else tmp[-1]
+
+        tmp = df['s_027_pe_return_rate'].copy().dropna()
+        x2 = np.nan if tmp.size == 0 or flg is False else tmp[-1]
+
+        dict0[code] = max(x1, x2)
         # print(dict0[key])
 
     s1 = pd.Series(dict0)
@@ -376,7 +378,7 @@ def test_read_res_daily():
 
     sift_list = s2.index.tolist()
     res = json.dumps(sift_list, indent=4, ensure_ascii=False)
-    with open("../basicData/analyzedData/sift_code_010.txt", "w", encoding='utf-8') as f:
+    with open("../basicData/analyzedData/sift_code_011.txt", "w", encoding='utf-8') as f:
         f.write(res)
 
 
