@@ -119,19 +119,21 @@ def daily_update():
 
         if d0 < today:
             request_data2mysql(
-                stock_code=code_list[index],
+                stock_code=code,
                 data_type='fs',
                 start_date=start_date,
             )
+            df1 = load_df_from_mysql(code, 'fs')
 
         df2 = load_df_from_mysql(code, 'mvs')
         d0 = '' if df2.shape[0] == 0 else df2.iloc[-1, :]['last_update']
         if d0 < today:
             request_data2mysql(
-                stock_code=code_list[index],
+                stock_code=code,
                 data_type='mvs',
                 start_date=start_date,
             )
+            df2 = load_df_from_mysql(code, 'mvs')
 
         data = DataAnalysis(df1, df2)
         # data.config_widget_data()

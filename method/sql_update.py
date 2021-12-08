@@ -46,7 +46,7 @@ def mysql_update():
 
         if d0 < today:
             request_data2mysql(
-                stock_code=code_list[index],
+                stock_code=code,
                 data_type='fs',
                 start_date=start_date,
             )
@@ -55,7 +55,7 @@ def mysql_update():
         d0 = '' if df2.shape[0] == 0 else df2.iloc[-1, :]['last_update']
         if d0 < today:
             request_data2mysql(
-                stock_code=code_list[index],
+                stock_code=code,
                 data_type='mvs',
                 start_date=start_date,
             )
