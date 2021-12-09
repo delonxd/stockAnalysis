@@ -14,7 +14,7 @@ def mysql_update():
     import datetime as dt
 
     # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
-    with open("..\\basicData\\analyzedData\\sift_code_010.txt", "r", encoding="utf-8", errors="ignore") as f:
+    with open("..\\basicData\\analyzedData\\sift_code_011.txt", "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
     code_list = get_part_codes(code_list)
@@ -23,7 +23,7 @@ def mysql_update():
     print(length)
 
     # start = code_list.index('600000')
-    start = 280
+    start = 350
     end = length
     # end = 3
 
@@ -31,7 +31,7 @@ def mysql_update():
     # today = '2021-11-20'
 
     # start_date = (dt.date.today() - dt.timedelta(days=10)).strftime("%Y-%m-%d")
-    start_date = '2021-04-01'
+    start_date = '2021-09-01'
 
     index = start
     while index < end:

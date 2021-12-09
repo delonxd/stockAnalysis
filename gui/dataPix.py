@@ -402,6 +402,9 @@ class DataPix:
             'id_261_cfs_ncffoa': '经营现金流净额',
             's_026_holder_return_rate': '股东回报率',
             's_027_pe_return_rate': 'pe回报率',
+            'id_157_ps_toi': '主营收入',
+            's_009_revenue_rate': '主营收入增速',
+            's_029_return_predict': '预测回报率',
         }
 
         tmp_list = list(tmp_dict.keys())

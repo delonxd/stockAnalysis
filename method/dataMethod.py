@@ -332,6 +332,7 @@ class DataAnalysis:
         self.mvs_add(self.get_column(self.df_mvs, 's_026_holder_return_rate'))
         self.mvs_add(self.get_column(self.df_mvs, 's_027_pe_return_rate'))
         self.mvs_add(self.get_column(self.df_mvs, 's_028_market_value'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_029_return_predict'))
 
         self.config_balance_sheet()
         self.set_df()
@@ -677,6 +678,13 @@ class DataAnalysis:
             s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
             s1.name = column
             return s1
+
+        elif column == 's_029_return_predict':
+            s1 = self.fs_to_mvs('tmp', 's_009_revenue_rate')
+            s2 = self.get_column(df, 's_027_pe_return_rate')
+            s3 = (s1 * 5 + 1) * s2
+            s3.name = column
+            return s3.dropna()
 
     @staticmethod
     def get_return_year(pe, rate):

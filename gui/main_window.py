@@ -87,7 +87,7 @@ class MainWidget(QWidget):
 
         self.codes_df = CodesDataFrame(code_list)
         # self.codes_df.init_current_index(index=321)
-        self.codes_df.init_current_index(index=0)
+        self.codes_df.init_current_index(index=283)
         # self.codes_df.init_current_index(code='002493')
         # self.codes_df.init_current_index(code='000921')
 
@@ -122,8 +122,9 @@ class MainWidget(QWidget):
         self.editor1.setValidator(QIntValidator())
         self.editor1.setMaxLength(6)
 
-        self.stock_label = QLabel()
-        self.industry_label = QLabel()
+        self.head_label1 = QLabel()
+        self.head_label2 = QLabel()
+        self.head_label3 = QLabel()
 
         self.tree = CheckTree(self.style_df)
         self.code_widget = QStockListView(self.codes_df)
@@ -163,14 +164,16 @@ class MainWidget(QWidget):
 
         p = QPalette()
         p.setColor(QPalette.WindowText, Qt.red)
-        self.stock_label.setFont(QFont('Consolas', 20))
-        self.stock_label.setPalette(p)
-        self.industry_label.setFont(QFont('Consolas', 16))
-        self.industry_label.setPalette(p)
+        self.head_label1.setFont(QFont('Consolas', 20))
+        self.head_label1.setPalette(p)
+        self.head_label2.setFont(QFont('Consolas', 16))
+        self.head_label2.setPalette(p)
+        self.head_label3.setFont(QFont('Consolas', 16))
+        self.head_label3.setPalette(p)
 
         layout0 = QHBoxLayout()
-        layout0.addWidget(self.industry_label, 1, Qt.AlignLeft | Qt.AlignBottom)
-        layout0.addWidget(self.stock_label, 0, Qt.AlignCenter)
+        layout0.addWidget(self.head_label2, 1, Qt.AlignLeft | Qt.AlignBottom)
+        layout0.addWidget(self.head_label1, 0, Qt.AlignCenter)
         layout0.addStretch(1)
 
         layout1 = QHBoxLayout()
@@ -336,7 +339,7 @@ class MainWidget(QWidget):
 
         l0 = codes_df.shape[0]
         l1 = (l0 - 1) / 2
-        l2 = 10
+        l2 = 20
 
         offset = int(min(l1, l2))
 
@@ -409,8 +412,8 @@ class MainWidget(QWidget):
         txt2 = '行业: %s-%s-%s' % (row['level1'], row['level2'], row['level3'])
 
         GuiLog.add_log('show stock --> ' + txt1)
-        self.stock_label.setText(txt1)
-        self.industry_label.setText(txt2)
+        self.head_label1.setText(txt1)
+        self.head_label2.setText(txt2)
 
     def center(self):
         qr = self.frameGeometry()
