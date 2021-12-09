@@ -305,7 +305,7 @@ def test_read3():
 def test_read_res_daily():
 
     # timestamp = '20211118222745'
-    timestamp = '20211207161002'
+    timestamp = '20211208161003'
     update_dir = "..\\basicData\\dailyUpdate\\update_%s" % timestamp
 
     file = "..\\basicData\\dailyUpdate\\update_%s\\code_list.txt" % timestamp
