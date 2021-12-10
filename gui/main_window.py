@@ -174,7 +174,8 @@ class MainWidget(QWidget):
         layout0 = QHBoxLayout()
         layout0.addWidget(self.head_label2, 1, Qt.AlignLeft | Qt.AlignBottom)
         layout0.addWidget(self.head_label1, 0, Qt.AlignCenter)
-        layout0.addStretch(1)
+        layout0.addWidget(self.head_label3, 1, Qt.AlignRight | Qt.AlignBottom)
+        # layout0.addStretch(1)
 
         layout1 = QHBoxLayout()
         layout1.addStretch(1)
@@ -233,28 +234,37 @@ class MainWidget(QWidget):
         self.setPalette(palette1)
         self.setAutoFillBackground(True)
 
-    def save_code(self):
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.show_menu)  # 开放右键策略
+
+    def show_menu(self, pos):  # 添加右键菜单
+        menu = QMenu(self)
+
+        action1 = QAction('更新数据', menu)
+        action2 = QAction('添加自选', menu)
+        action3 = QAction('删除自选', menu)
+        action4 = QAction('添加黑名单', menu)
+        action5 = QAction('删除黑名单', menu)
+
+        menu.addAction(action1)
+        menu.addSeparator()
+        menu.addAction(action2)
+        menu.addAction(action3)
+        menu.addSeparator()
+        menu.addAction(action4)
+        menu.addAction(action5)
+
+        action1.triggered.connect(self.request_data)
+        action2.triggered.connect(self.add_selected)
+        action3.triggered.connect(self.del_selected)
+        action4.triggered.connect(self.add_blacklist)
+        action5.triggered.connect(self.del_blacklist)
+        menu.exec_(QCursor.pos())
+
+    def add_code(self, path):
         row = self.codes_df.df.iloc[self.code_index]
-
         code = row['code']
-        name = row['name']
 
-        # path = "../bufferData/codes/self_select.txt"
-        # with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        #     code_list = json.loads(f.read())
-        #
-        # if code_list:
-        #     x, y = zip(*code_list)
-        #
-        #     if code in x:
-        #         return
-        #
-        # code_list.append((code, name))
-        # res = json.dumps(code_list, indent=4, ensure_ascii=False)
-        # with open(path, "w", encoding='utf-8') as f:
-        #     f.write(res)
-
-        path = "../bufferData/codes/blacklist.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
@@ -265,6 +275,45 @@ class MainWidget(QWidget):
         res = json.dumps(code_list, indent=4, ensure_ascii=False)
         with open(path, "w", encoding='utf-8') as f:
             f.write(res)
+        self.show_stock_name()
+
+    def del_code(self, path):
+        row = self.codes_df.df.iloc[self.code_index]
+        code = row['code']
+
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            code_list = json.loads(f.read())
+
+        if code in code_list:
+            index = code_list.index(code)
+            code_list.pop(index)
+        else:
+            return
+
+        res = json.dumps(code_list, indent=4, ensure_ascii=False)
+        with open(path, "w", encoding='utf-8') as f:
+            f.write(res)
+
+        self.show_stock_name()
+
+    def add_selected(self):
+        path = "../basicData/self_selected/gui_selected.txt"
+        self.add_code(path)
+
+    def add_blacklist(self):
+        path = "../basicData/self_selected/gui_blacklist.txt"
+        self.add_code(path)
+
+    def del_selected(self):
+        path = "../basicData/self_selected/gui_selected.txt"
+        self.del_code(path)
+
+    def del_blacklist(self):
+        path = "../basicData/self_selected/gui_blacklist.txt"
+        self.del_code(path)
+
+    def save_code(self):
+        pass
 
     def request_data(self):
         code = self.stock_code
@@ -411,9 +460,27 @@ class MainWidget(QWidget):
         txt1 = '%s: %s(%s/%s)' % (row['code'], row['name'], self.code_index, len_df)
         txt2 = '行业: %s-%s-%s' % (row['level1'], row['level2'], row['level3'])
 
+        code = row['code']
+        list0 = []
+
+        path = "../basicData/self_selected/gui_selected.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            code_list = json.loads(f.read())
+        if code in code_list:
+            list0.append('自选股')
+
+        path = "../basicData/self_selected/gui_blacklist.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            code_list = json.loads(f.read())
+        if code in code_list:
+            list0.append('黑名单')
+
+        txt3 = '/'.join(list0)
+
         GuiLog.add_log('show stock --> ' + txt1)
         self.head_label1.setText(txt1)
         self.head_label2.setText(txt2)
+        self.head_label3.setText(txt3)
 
     def center(self):
         qr = self.frameGeometry()
