@@ -69,11 +69,11 @@ def daily_update():
 
     res_list = list()
 
-    today = (dt.datetime.now() - dt.timedelta(hours=16)).date().strftime("%Y-%m-%d") + ' 16:00:00'
+    # today = (dt.datetime.now() - dt.timedelta(hours=16)).date().strftime("%Y-%m-%d") + ' 16:00:00'
     # today = '2021-11-20'
 
     # start_date = (dt.date.today() - dt.timedelta(days=10)).strftime("%Y-%m-%d")
-    start_date = '2021-04-01'
+    start_date = '2021-11-01'
 
     columns = [
         # 's_001_roe',
@@ -114,26 +114,19 @@ def daily_update():
         print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
         print(index, '-->', code)
 
+        request_data2mysql(
+            stock_code=code,
+            data_type='fs',
+            start_date=start_date,
+        )
         df1 = load_df_from_mysql(code, 'fs')
-        d0 = '' if df1.shape[0] == 0 else df1.iloc[-1, :]['last_update']
 
-        if d0 < today:
-            request_data2mysql(
-                stock_code=code,
-                data_type='fs',
-                start_date=start_date,
-            )
-            df1 = load_df_from_mysql(code, 'fs')
-
+        request_data2mysql(
+            stock_code=code,
+            data_type='mvs',
+            start_date=start_date,
+        )
         df2 = load_df_from_mysql(code, 'mvs')
-        d0 = '' if df2.shape[0] == 0 else df2.iloc[-1, :]['last_update']
-        if d0 < today:
-            request_data2mysql(
-                stock_code=code,
-                data_type='mvs',
-                start_date=start_date,
-            )
-            df2 = load_df_from_mysql(code, 'mvs')
 
         data = DataAnalysis(df1, df2)
         # data.config_widget_data()

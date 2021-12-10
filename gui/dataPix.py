@@ -405,6 +405,7 @@ class DataPix:
             'id_157_ps_toi': '主营收入',
             's_009_revenue_rate': '主营收入增速',
             's_029_return_predict': '预测回报率',
+            's_016_roe_parent': 'roe',
         }
 
         tmp_list = list(tmp_dict.keys())
