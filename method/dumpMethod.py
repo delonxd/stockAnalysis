@@ -66,11 +66,11 @@ def dump_fs_metrics_list():
 
     metrics_list = split_list(
         source=api_all,
-        length=100,
+        length=48,
     )
 
     res = json.dumps(metrics_list, indent=4, ensure_ascii=False)
-    with open("../basicData/metrics/metrics_fs.txt", "w", encoding='utf-8') as f:
+    with open("../basicData/metrics/metrics_fs_latest.txt", "w", encoding='utf-8') as f:
         f.write(res)
 
 
@@ -249,5 +249,6 @@ if __name__ == '__main__':
     # dump_code_list()
     # dump_industry3_list()
     # dump_code_industry_dict()
-    dump_empty_list()
+    # dump_empty_list()
+    dump_fs_metrics_list()
     pass

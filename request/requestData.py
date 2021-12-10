@@ -85,6 +85,51 @@ def request_data(stock_code, start_date, data_type):
         return res
 
 
+@try_request(None)
+@log_it(None)
+def request_latest_data(stock_codes, data_type):
+    MainLog.add_log('    stock_codes --> %s' % stock_codes)
+    token = "e7a7f2e5-181b-4caa-9142-592ab6787871"
+
+    if data_type == 'fs':
+        with open('../basicData/metrics/metrics_fs_latest.txt', 'r', encoding='utf-8') as f:
+            metrics_list = json.loads(f.read())
+
+        res_list = list()
+        for metrics in metrics_list:
+            url = 'https://open.lixinger.com/api/a/company/fs/non_financial'
+            api = {
+                "token": token,
+                "date": "latest",
+                "stockCodes": stock_codes,
+                "metricsList": metrics,
+            }
+
+            res = data_request(url=url, api_dict=api)
+            res_list.append(res)
+
+            time.sleep(0.2)
+
+        return res_list
+
+    elif data_type == 'mvs':
+        with open('../basicData/metrics/metrics_mvs.txt', 'r', encoding='utf-8') as f:
+            metrics = json.loads(f.read())
+
+        url = 'https://open.lixinger.com/api/a/company/fundamental/non_financial'
+        api = {
+            "token": token,
+            "date": "lates",
+            "stockCodes": stock_codes,
+            "metricsList": metrics,
+        }
+
+        res = data_request(url=url, api_dict=api)
+
+        time.sleep(0.2)
+        return res
+
+
 @log_it(None)
 def dump_res2buffer(res, stock_code, data_type):
     time_str = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
@@ -341,4 +386,6 @@ def test_request_data():
 
 if __name__ == '__main__':
     # test_request_fs_data()
-    test_request_data()
+    # test_request_data()
+    res = request_latest_data(['600519', '600004'], 'fs')
+    # res = request_latest_data(['600519'], 'fs')

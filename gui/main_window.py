@@ -245,6 +245,8 @@ class MainWidget(QWidget):
         action3 = QAction('删除自选', menu)
         action4 = QAction('添加黑名单', menu)
         action5 = QAction('删除黑名单', menu)
+        action6 = QAction('上移', menu)
+        action7 = QAction('下移', menu)
 
         menu.addAction(action1)
         menu.addSeparator()
@@ -253,12 +255,17 @@ class MainWidget(QWidget):
         menu.addSeparator()
         menu.addAction(action4)
         menu.addAction(action5)
+        menu.addSeparator()
+        menu.addAction(action6)
+        menu.addAction(action7)
 
         action1.triggered.connect(self.request_data)
         action2.triggered.connect(self.add_selected)
         action3.triggered.connect(self.del_selected)
         action4.triggered.connect(self.add_blacklist)
         action5.triggered.connect(self.del_blacklist)
+        action6.triggered.connect(self.scale_up)
+        action7.triggered.connect(self.scale_down)
         menu.exec_(QCursor.pos())
 
     def add_code(self, path):
