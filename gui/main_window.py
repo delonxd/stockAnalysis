@@ -86,7 +86,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=133)
+        self.codes_df.init_current_index(index=0)
         # self.codes_df.init_current_index(index=100)
         # self.codes_df.init_current_index(code='002493')
         # self.codes_df.init_current_index(code='000921')
@@ -247,6 +247,8 @@ class MainWidget(QWidget):
         action5 = QAction('删除黑名单', menu)
         action6 = QAction('上移', menu)
         action7 = QAction('下移', menu)
+        action8 = QAction('添加白名单', menu)
+        action9 = QAction('删除白名单', menu)
 
         menu.addAction(action1)
         menu.addSeparator()
@@ -256,6 +258,10 @@ class MainWidget(QWidget):
         menu.addAction(action4)
         menu.addAction(action5)
         menu.addSeparator()
+        menu.addAction(action8)
+        menu.addAction(action9)
+
+        menu.addSeparator()
         menu.addAction(action6)
         menu.addAction(action7)
 
@@ -264,8 +270,11 @@ class MainWidget(QWidget):
         action3.triggered.connect(self.del_selected)
         action4.triggered.connect(self.add_blacklist)
         action5.triggered.connect(self.del_blacklist)
-        action6.triggered.connect(self.scale_up)
-        action7.triggered.connect(self.scale_down)
+        action6.triggered.connect(self.scale_down)
+        action7.triggered.connect(self.scale_up)
+        action8.triggered.connect(self.add_whitelist)
+        action9.triggered.connect(self.del_whitelist)
+
         menu.exec_(QCursor.pos())
 
     def add_code(self, path):
@@ -307,16 +316,24 @@ class MainWidget(QWidget):
         path = "../basicData/self_selected/gui_selected.txt"
         self.add_code(path)
 
-    def add_blacklist(self):
-        path = "../basicData/self_selected/gui_blacklist.txt"
-        self.add_code(path)
-
     def del_selected(self):
         path = "../basicData/self_selected/gui_selected.txt"
         self.del_code(path)
 
+    def add_blacklist(self):
+        path = "../basicData/self_selected/gui_blacklist.txt"
+        self.add_code(path)
+
     def del_blacklist(self):
         path = "../basicData/self_selected/gui_blacklist.txt"
+        self.del_code(path)
+
+    def add_whitelist(self):
+        path = "../basicData/self_selected/gui_whitelist.txt"
+        self.add_code(path)
+
+    def del_whitelist(self):
+        path = "../basicData/self_selected/gui_whitelist.txt"
         self.del_code(path)
 
     def save_code(self):
@@ -476,6 +493,12 @@ class MainWidget(QWidget):
         if code in code_list:
             list0.append('自选股')
 
+        path = "../basicData/self_selected/gui_whitelist.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            code_list = json.loads(f.read())
+        if code in code_list:
+            list0.append('白名单')
+
         path = "../basicData/self_selected/gui_blacklist.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
@@ -543,7 +566,8 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\analyzedData\\jlr_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\roe_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\return_year_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\analyzedData\\sift_code_006.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\analyzedData\\sift_code_006.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\self_selected\\gui_whitelist.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\dailyUpdate\\update_20211118222745\\sift_list_20211118222745.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
