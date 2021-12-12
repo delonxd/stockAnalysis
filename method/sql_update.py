@@ -23,11 +23,11 @@ def mysql_update():
     print(length)
 
     # start = code_list.index('600000')
-    start = 180
+    start = 0
     end = length
     # end = 3
 
-    today = (dt.datetime.now() - dt.timedelta(hours=15)).date().strftime("%Y-%m-%d") + ' 16:00:00'
+    today = (dt.datetime.now() - dt.timedelta(hours=15)).date().strftime("%Y-%m-%d") + ' 15:30:00'
     # today = '2021-11-20'
 
     # start_date = (dt.date.today() - dt.timedelta(days=10)).strftime("%Y-%m-%d")

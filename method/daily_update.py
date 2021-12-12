@@ -73,7 +73,7 @@ def daily_update():
     # today = '2021-11-20'
 
     # start_date = (dt.date.today() - dt.timedelta(days=10)).strftime("%Y-%m-%d")
-    start_date = '2021-11-01'
+    start_date = '2021-08-01'
 
     columns = [
         # 's_001_roe',

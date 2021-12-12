@@ -406,6 +406,7 @@ class DataPix:
             's_009_revenue_rate': '主营收入增速',
             's_029_return_predict': '预测回报率',
             's_016_roe_parent': 'roe',
+            's_032_remain_rate': '资金留存率',
         }
 
         tmp_list = list(tmp_dict.keys())

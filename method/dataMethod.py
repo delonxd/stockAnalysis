@@ -197,27 +197,27 @@ def sql2df(code):
     today = (dt.datetime.now() - dt.timedelta(hours=15)).date().strftime("%Y-%m-%d") + ' 15:30:00'
 
     df1 = load_df_from_mysql(code, 'fs')
-    d0 = '' if df1.shape[0] == 0 else df1.iloc[-1, :]['last_update']
-
-    if d0 < today:
-        request_data2mysql(
-            stock_code=code,
-            data_type='fs',
-            start_date="2021-04-01",
-        )
-        df1 = load_df_from_mysql(code, 'fs')
+    # d0 = '' if df1.shape[0] == 0 else df1.iloc[-1, :]['last_update']
+    #
+    # if d0 < today:
+    #     request_data2mysql(
+    #         stock_code=code,
+    #         data_type='fs',
+    #         start_date="2021-04-01",
+    #     )
+    #     df1 = load_df_from_mysql(code, 'fs')
 
     df2 = load_df_from_mysql(code, 'mvs')
-    d0 = '' if df2.shape[0] == 0 else df2.iloc[-1, :]['last_update']
-
-    if d0 < today:
-        request_data2mysql(
-            stock_code=code,
-            data_type='mvs',
-            start_date="2021-04-01",
-            # start_date="1970-01-01",
-        )
-        df2 = load_df_from_mysql(code, 'mvs')
+    # d0 = '' if df2.shape[0] == 0 else df2.iloc[-1, :]['last_update']
+    #
+    # if d0 < today:
+    #     request_data2mysql(
+    #         stock_code=code,
+    #         data_type='mvs',
+    #         start_date="2021-04-01",
+    #         # start_date="1970-01-01",
+    #     )
+    #     df2 = load_df_from_mysql(code, 'mvs')
 
     # print(df1)
     # print(df2)
@@ -333,6 +333,11 @@ class DataAnalysis:
         self.mvs_add(self.get_column(self.df_mvs, 's_027_pe_return_rate'))
         self.mvs_add(self.get_column(self.df_mvs, 's_028_market_value'))
         self.mvs_add(self.get_column(self.df_mvs, 's_029_return_predict'))
+
+        self.fs_add(self.get_column(self.df_mvs, 's_030_parent_equity_delta'))
+        self.fs_add(self.get_column(self.df_mvs, 's_031_financing_outflow'))
+        self.fs_add(self.get_column(self.df_mvs, 's_032_remain_rate'))
+        self.fs_add(self.get_column(self.df_mvs, 's_033_profit_compound'))
 
         self.config_balance_sheet()
         self.set_df()
@@ -685,6 +690,40 @@ class DataAnalysis:
             s3 = (s1 * 5 + 1) * s2
             s3.name = column
             return s3.dropna()
+
+        elif column == 's_030_parent_equity_delta':
+            s1 = self.smooth_data(column, 'id_124_bs_tetoshopc')
+            s2 = s1 - s1.shift(1)
+            s2 = s2.fillna(0)
+            s2.name = column
+            return s2.dropna()
+
+        elif column == 's_031_financing_outflow':
+            s1 = self.smooth_data('tmp', 'id_217_ps_npatoshopc', delta=True)
+            s1 = s1 / 4
+            s2 = self.get_column(df, 's_030_parent_equity_delta')
+            s3 = s2 - s1
+            s3.name = column
+            return s3.dropna()
+
+        elif column == 's_032_remain_rate':
+            s1 = self.get_column(df, 's_030_parent_equity_delta')
+            s1 = s1.rolling(4, min_periods=1).mean()
+            s1 = s1 * 4
+            s2 = self.get_column(df, 's_017_equity_parent')
+            s3 = s2 - s1
+            s3[s3 <= 0] = np.nan
+            s4 = s1 / s3
+            s4.dropna(inplace=True)
+            s4[s4 <= -50] = np.nan
+            s4.name = column
+            return s4.dropna()
+
+        elif column == 's_033_profit_compound':
+            s1 = self.get_column(df, 's_032_remain_rate')
+            s2 = (s1 + 1) ** 5
+            s2.name = column
+            return s2.dropna()
 
     @staticmethod
     def get_return_year(pe, rate):
