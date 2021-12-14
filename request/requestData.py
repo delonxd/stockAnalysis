@@ -87,7 +87,7 @@ def request_data(stock_code, start_date, data_type):
 
 @try_request(None)
 @log_it(None)
-def request_latest_data(stock_codes, data_type):
+def request_daily_data(stock_codes, date, data_type):
     MainLog.add_log('    stock_codes --> %s' % stock_codes)
     token = "e7a7f2e5-181b-4caa-9142-592ab6787871"
 
@@ -100,7 +100,7 @@ def request_latest_data(stock_codes, data_type):
             url = 'https://open.lixinger.com/api/a/company/fs/non_financial'
             api = {
                 "token": token,
-                "date": "latest",
+                "date": date,
                 "stockCodes": stock_codes,
                 "metricsList": metrics,
             }
@@ -119,7 +119,7 @@ def request_latest_data(stock_codes, data_type):
         url = 'https://open.lixinger.com/api/a/company/fundamental/non_financial'
         api = {
             "token": token,
-            "date": "lates",
+            "date": date,
             "stockCodes": stock_codes,
             "metricsList": metrics,
         }
@@ -338,6 +338,72 @@ def request_data2mysql(stock_code, data_type, start_date):
     return new_data
 
 
+def request_daily_data2mysql(stock_codes, date, data_type):
+    res = request_daily_data(
+        stock_codes=stock_codes,
+        date=date,
+        data_type=data_type,
+    )
+
+    dict0 = config_daily_res(
+        res=res,
+        data_type=data_type,
+    )
+
+    for code, txt in dict0.items():
+        print('############################################################################################')
+
+        path = dump_res2buffer(
+            res=txt,
+            stock_code=code,
+            data_type=data_type,
+        )
+
+        db, cursor = get_cursor(data_type)
+
+        new_data = buffer2mysql(
+            path=path,
+            db=db,
+            cursor=cursor,
+            stock_code=code,
+            data_type=data_type,
+        )
+
+        db.close()
+        move_buffer_file(path, data_type)
+
+
+def config_daily_res(res, data_type):
+    dict0 = dict()
+    if data_type == 'fs':
+        for subRes in res:
+            for data in json.loads(subRes.decode())['data']:
+                code = data["stockCode"]
+                tmp = dict()
+                tmp["code"] = 1
+                tmp["message"] = "success"
+                tmp["data"] = [data.copy()]
+                txt = json.dumps(tmp, ensure_ascii=False)
+                b_txt = bytes(txt, encoding='utf-8')
+
+                if code in dict0.keys():
+                    dict0[code].append(b_txt)
+                else:
+                    dict0[code] = [b_txt]
+
+    elif data_type == 'mvs':
+        for data in json.loads(res.decode())['data']:
+            code = data["stockCode"]
+            tmp = dict()
+            tmp["code"] = 1
+            tmp["message"] = "success"
+            tmp["data"] = [data.copy()]
+            txt = json.dumps(tmp, ensure_ascii=False)
+            b_txt = bytes(txt, encoding='utf-8')
+            dict0[code] = b_txt
+    return dict0
+
+
 def test_request_data():
     with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
         blacklist = json.loads(f.read())
@@ -387,5 +453,6 @@ def test_request_data():
 if __name__ == '__main__':
     # test_request_fs_data()
     # test_request_data()
-    res = request_latest_data(['600519', '600004'], 'fs')
+    codes = ['600519', '600004']
+    request_latest_data2mysql(codes, 'fs')
     # res = request_latest_data(['600519'], 'fs')

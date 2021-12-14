@@ -63,6 +63,57 @@ def mysql_update():
         index += 1
 
 
+def mysql_update_daily():
+    from request.requestData import request_daily_data2mysql
+    from method.mainMethod import get_part_codes
+
+    import json
+    import time
+
+    # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
+    with open("..\\basicData\\analyzedData\\sift_code_011.txt", "r", encoding="utf-8", errors="ignore") as f:
+        code_list = json.loads(f.read())
+
+    code_list = get_part_codes(code_list)
+
+    list0 = []
+    counter = 0
+    for code in code_list:
+        if counter == 0:
+            list0.append([])
+            counter = 100
+        list0[-1].append(code)
+        counter -= 1
+
+    length = len(list0)
+    print(length)
+    print(list0)
+
+    start = 0
+    end = length
+
+    index = start
+    while index < end:
+        stock_codes = list0[index]
+        print('\n')
+        print('############################################################################################')
+        print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
+        print(index, '-->', stock_codes)
+
+        # request_daily_data2mysql(
+        #     stock_codes=stock_codes,
+        #     date='latest',
+        #     data_type='fs',
+        # )
+
+        request_daily_data2mysql(
+            stock_codes=stock_codes,
+            date='latest',
+            data_type='mvs',
+        )
+        index += 1
+
+
 if __name__ == '__main__':
     import pandas as pd
 
@@ -70,4 +121,5 @@ if __name__ == '__main__':
     # pd.set_option('display.max_rows', None)
     # pd.set_option('display.width', 10000)
 
-    mysql_update()
+    # mysql_update()
+    mysql_update_daily()
