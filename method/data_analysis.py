@@ -305,7 +305,7 @@ def test_read3():
 def test_read_res_daily():
 
     # timestamp = '20211118222745'
-    timestamp = '20211208161003'
+    timestamp = '20211213153503'
     update_dir = "..\\basicData\\dailyUpdate\\update_%s" % timestamp
 
     file = "..\\basicData\\dailyUpdate\\update_%s\\code_list.txt" % timestamp
@@ -378,7 +378,10 @@ def test_read_res_daily():
 
     sift_list = s2.index.tolist()
     res = json.dumps(sift_list, indent=4, ensure_ascii=False)
-    with open("../basicData/analyzedData/sift_code_011.txt", "w", encoding='utf-8') as f:
+
+    file = "..\\basicData\\dailyUpdate\\update_%s\\sift_code_%s.txt" % (timestamp, timestamp)
+    # with open("../basicData/analyzedData/sift_code_011.txt", "w", encoding='utf-8') as f:
+    with open(file, "w", encoding='utf-8') as f:
         f.write(res)
 
 

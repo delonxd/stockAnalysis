@@ -567,13 +567,21 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\analyzedData\\roe_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\return_year_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\sift_code_006.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\self_selected\\gui_whitelist.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\self_selected\\gui_whitelist.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\dailyUpdate\\update_20211118222745\\sift_list_20211118222745.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\dailyUpdate\\update_20211213153503\\sift_code_20211213153503.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
         # code_list = get_part_codes(code_list, blacklist=blacklist)
-        # code_list = get_part_codes(code_list)
+        industry_list = [
+            "C110101",
+            "C110102",
+            "C110103",
+            "C030201",
+            "C020203",
+            "C070101",
+        ]
+        code_list = get_part_codes(code_list, exclude_industry=industry_list)
 
         # with open("..\\basicData\\self_selected\\板块50.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     txt = f.read()

@@ -122,9 +122,20 @@ def get_units_dict():
     return res
 
 
-def get_part_codes(code_list, blacklist=None):
+def get_part_codes(code_list, blacklist=None, exclude_industry=None):
     if blacklist is None:
         blacklist = []
+
+    if exclude_industry is not None:
+        tmp = []
+        with open("..\\basicData\\industry\\code_industry_dict.txt", "r", encoding="utf-8", errors="ignore") as f:
+            code_dict = json.loads(f.read())
+
+        for code, industry in code_dict.items():
+            if industry in exclude_industry:
+                tmp.append(code)
+        blacklist.extend(tmp)
+
     new_list = []
     for code in code_list:
         if code in blacklist:
