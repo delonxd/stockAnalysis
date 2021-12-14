@@ -86,7 +86,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=0)
+        self.codes_df.init_current_index(index=98)
         # self.codes_df.init_current_index(index=100)
         # self.codes_df.init_current_index(code='002493')
         # self.codes_df.init_current_index(code='000921')
@@ -139,6 +139,7 @@ class MainWidget(QWidget):
         self.init_ui()
 
         self.window_flag = 0
+        self.show_list = list()
         self.run_buffer()
 
     @property
@@ -512,6 +513,16 @@ class MainWidget(QWidget):
         self.head_label2.setText(txt2)
         self.head_label3.setText(txt3)
 
+        if code in self.show_list:
+            index = self.show_list.index(code)
+            self.show_list.pop(index)
+        self.show_list.append(code)
+        if len(self.show_list) > 30:
+            code = self.show_list.pop(0)
+            self.df_dict.pop(code)
+            self.pix_dict.pop(code)
+            GuiLog.add_log('release stock --> ' + code)
+
     def center(self):
         qr = self.frameGeometry()
         cp = QDesktopWidget().screenGeometry().center()
@@ -566,7 +577,7 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\analyzedData\\jlr_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\roe_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\return_year_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\analyzedData\\sift_code_011.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\analyzedData\\sift_code_012.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\self_selected\\gui_whitelist.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\dailyUpdate\\update_20211213153503\\sift_code_20211213153503.txt", "r", encoding="utf-8", errors="ignore") as f:
