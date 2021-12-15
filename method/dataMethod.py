@@ -6,6 +6,7 @@ from request.requestData import request_data2mysql
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 
 import datetime as dt
 from dateutil.relativedelta import relativedelta
@@ -338,6 +339,7 @@ class DataAnalysis:
         self.fs_add(self.get_column(self.df_mvs, 's_031_financing_outflow'))
         self.fs_add(self.get_column(self.df_mvs, 's_032_remain_rate'))
         self.fs_add(self.get_column(self.df_mvs, 's_033_profit_compound'))
+        self.mvs_add(self.get_column(self.df_mvs, 'mir_y10'))
 
         self.config_balance_sheet()
         self.set_df()
@@ -504,6 +506,13 @@ class DataAnalysis:
             index = df['date'].copy().dropna().index.values
             dt_mvs = pd.Series(index, index=index, name=column)
             return dt_mvs
+
+        elif column == 'mir_y10':
+            with open("..\\basicData\\nationalDebt\\mir_y10.txt", "r", encoding="utf-8", errors="ignore") as f:
+                tmp = json.loads(f.read())
+            s1 = pd.Series(tmp)
+            s1.name = 'mir_y10'
+            return s1
 
         elif column == 's_001_roe':
             s1 = self.get_column(df, 's_003_profit')

@@ -407,6 +407,7 @@ class DataPix:
             's_029_return_predict': '预测回报率',
             's_016_roe_parent': 'roe',
             's_032_remain_rate': '资金留存率',
+            'mir_y10': '十年期国债利率',
         }
 
         tmp_list = list(tmp_dict.keys())
