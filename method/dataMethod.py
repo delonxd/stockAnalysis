@@ -722,6 +722,7 @@ class DataAnalysis:
         elif column == 's_033_profit_compound':
             s1 = self.get_column(df, 's_032_remain_rate')
             s2 = (s1 + 1) ** 5
+            s2[s2 > 1e8] = 1e8
             s2.name = column
             return s2.dropna()
 

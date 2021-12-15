@@ -498,7 +498,11 @@ class DataPix:
             df_point['px_y'] = self.y_data2px_vector(data_y, ds)
             df_point.dropna(inplace=True)
 
-            point_list = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
+            try:
+                point_list = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
+            except Exception as e:
+                print(df_point)
+                print(e)
 
             if ds.frequency == 'DAILY':
                 if point_list:

@@ -49,7 +49,6 @@ class ReadSQLThread(QThread):
             else:
                 break
             self.lock.release()
-
             res0 = DataPix(code=code, style_df=style_df, df=df, ratio=ratio)
             GuiLog.add_log('    add buffer %s' % code)
             self.signal1.emit(res0)
@@ -86,7 +85,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=98)
+        self.codes_df.init_current_index(index=108)
         # self.codes_df.init_current_index(index=100)
         # self.codes_df.init_current_index(code='002493')
         # self.codes_df.init_current_index(code='000921')
