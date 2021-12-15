@@ -85,7 +85,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=162)
+        self.codes_df.init_current_index(index=217)
         # self.codes_df.init_current_index(index=100)
         # self.codes_df.init_current_index(code='002493')
         # self.codes_df.init_current_index(code='000921')
@@ -454,9 +454,13 @@ class MainWidget(QWidget):
         if data_pix.code == self.stock_code:
             self.data_pix = data_pix
             self.update_window()
+            # self.show_pix()
+
+    def show_pix(self):
+        self.label.setPixmap(self.data_pix.pix_list[self.window_flag])
 
     def update_window(self):
-        self.label.setPixmap(self.data_pix.pix_list[self.window_flag])
+        self.show_pix()
         self.show_stock_name()
 
     def update_style(self):
@@ -620,7 +624,8 @@ class MainWidget(QWidget):
             self.window_flag = 2
         elif e.key() == Qt.Key_4:
             self.window_flag = 3
-        self.update_window()
+        # self.update_window()
+        self.show_pix()
 
 
 class MainWindow(QMainWindow):
