@@ -350,8 +350,11 @@ def request_daily_data2mysql(stock_codes, date, data_type):
         data_type=data_type,
     )
 
+    counter = 0
     for code, txt in dict0.items():
         print('############################################################################################')
+        print(counter)
+        counter += 1
 
         path = dump_res2buffer(
             res=txt,
@@ -451,8 +454,4 @@ def test_request_data():
 
 
 if __name__ == '__main__':
-    # test_request_fs_data()
-    # test_request_data()
-    codes = ['600519', '600004']
-    request_latest_data2mysql(codes, 'fs')
-    # res = request_latest_data(['600519'], 'fs')
+    pass
