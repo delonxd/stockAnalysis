@@ -1,22 +1,4 @@
 def daily_update():
-    import sys
-    sys.path.append('D:\\PycharmProjects\\stockAnalysis')
-
-    import os
-    os.chdir("D:\\PycharmProjects\\stockAnalysis\\method")
-
-    from request.requestData import request_data2mysql
-    from request.requestBasicData import request_basic, request_industry_sample
-    from method.mainMethod import get_part_codes
-
-    from method.dataMethod import load_df_from_mysql
-    from method.dataMethod import DataAnalysis
-
-    import json
-    import time
-    import pickle
-
-    import datetime as dt
 
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
 
@@ -206,11 +188,171 @@ def daily_update():
     #     f.write(res)
 
 
+def daily_update2():
+
+    timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
+
+    res_dir = '..\\basicData\\dailyUpdate\\update_%s' % timestamp
+
+    if not os.path.exists(res_dir):
+        os.makedirs(res_dir)
+
+    # res_dir = '..\\basicData\\dailyUpdate'
+
+    code_list, name_dict = request_basic()
+
+    with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
+        code_list = json.loads(f.read())
+    code_list = get_part_codes(code_list)
+
+    res = json.dumps(name_dict, indent=4, ensure_ascii=False)
+    file = '%s\\name_dict.txt' % res_dir
+    with open(file, "w", encoding='utf-8') as f:
+        f.write(res)
+
+    res = json.dumps(code_list, indent=4, ensure_ascii=False)
+    file = '%s\\code_list.txt' % res_dir
+    with open(file, "w", encoding='utf-8') as f:
+        f.write(res)
+
+    # industry_dict = request_industry_sample()
+    # res = json.dumps(industry_dict, indent=4, ensure_ascii=False)
+    # file = '%s\\industry_dict.txt' % res_dir
+    # with open(file, "w", encoding='utf-8') as f:
+    #     f.write(res)
+
+    list0 = []
+    counter = 0
+    for code in code_list:
+        if counter == 0:
+            list0.append([])
+            counter = 100
+        list0[-1].append(code)
+        counter -= 1
+
+    length = len(list0)
+    print(length)
+    print(list0)
+
+    start = 0
+    end = length
+
+    index = start
+    while index < end:
+        stock_codes = list0[index]
+        print('\n')
+        print('############################################################################################')
+        print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
+        print(index, '-->', stock_codes)
+
+        request_daily_data2mysql(
+            stock_codes=stock_codes,
+            date='latest',
+            data_type='fs',
+        )
+
+        request_daily_data2mysql(
+            stock_codes=stock_codes,
+            date='latest',
+            data_type='mvs',
+        )
+        index += 1
+
+    daily_analysis(code_list, res_dir, timestamp)
+
+
+def daily_analysis(code_list, res_dir, timestamp):
+    import time
+    import pickle
+
+    length = len(code_list)
+    print(length)
+
+    start = 0
+    end = length
+    columns = [
+        # 's_001_roe',
+        # 's_002_equity',
+        # 's_003_profit',
+        # 's_004_pe',
+        # 's_005_stocks',
+        # 's_006_stocks_rate',
+        's_007_asset',
+        # 's_008_revenue',
+        # 's_009_revenue_rate',
+        # 's_010_main_profit',
+        # 's_011_main_profit_rate',
+        # 's_012_return_year',
+        # 's_013_noc_asset',
+        # 's_014_pe2',
+        # 's_015_return_year2',
+        's_016_roe_parent',
+        's_017_equity_parent',
+        # 's_018_profit_parent',
+        # 's_019_monetary_asset',
+        # 's_020_cap_asset',
+        # 's_021_cap_expenditure',
+        's_022_profit_no_expenditure',
+        # 's_023_liabilities',
+        # 's_024_real_liabilities',
+        # 's_025_real_cost',
+        's_026_holder_return_rate',
+        's_027_pe_return_rate',
+        's_028_market_value',
+    ]
+
+    res_list = list()
+    index = start
+    while index < end:
+        code = code_list[index]
+        print('\n')
+        print('############################################################################################')
+        print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
+        print(index, '-->', code)
+
+        df1 = load_df_from_mysql(code, 'fs')
+        df2 = load_df_from_mysql(code, 'mvs')
+
+        data = DataAnalysis(df1, df2)
+
+        # data.config_widget_data()
+        data.config_daily_data()
+
+        df = data.df[columns].copy()
+        res_list.append(df)
+
+        print(df.columns)
+
+        index += 1
+
+    file = '%s\\res_daily_%s.pkl' % (res_dir, timestamp)
+    with open(file, "wb") as f:
+        pickle.dump(res_list, f)
+
+
 if __name__ == '__main__':
-    import pandas as pd
+    import sys
+    sys.path.append('D:\\PycharmProjects\\stockAnalysis')
+
+    import os
+    os.chdir("D:\\PycharmProjects\\stockAnalysis\\method")
+
+    from request.requestData import request_data2mysql, request_daily_data2mysql
+    from request.requestBasicData import request_basic, request_industry_sample
+
+    from method.mainMethod import get_part_codes
+
+    from method.dataMethod import load_df_from_mysql
+    from method.dataMethod import DataAnalysis
+
+    import json
+    import time
+    import pickle
+    import datetime as dt
 
     # pd.set_option('display.max_columns', None)
     # pd.set_option('display.max_rows', None)
     # pd.set_option('display.width', 10000)
 
-    daily_update()
+    # daily_update()
+    # daily_update2()

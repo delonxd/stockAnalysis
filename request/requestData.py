@@ -239,13 +239,14 @@ def get_header_df(data_type):
 
 
 @log_it(None)
-def buffer2mysql(path, db, cursor, stock_code, data_type):
+def buffer2mysql(path, db, cursor, stock_code, data_type, res=None):
 
     MainLog.add_log('    read buffer %s' % path)
     MainLog.add_log('    stock_code --> %s' % stock_code)
 
-    with open(path, 'rb') as pk_f:
-        res = pickle.load(pk_f)
+    if res is None:
+        with open(path, 'rb') as pk_f:
+            res = pickle.load(pk_f)
 
     header_df = get_header_df(data_type)
 
@@ -356,24 +357,25 @@ def request_daily_data2mysql(stock_codes, date, data_type):
         print(counter)
         counter += 1
 
-        path = dump_res2buffer(
-            res=txt,
-            stock_code=code,
-            data_type=data_type,
-        )
+        # path = dump_res2buffer(
+        #     res=txt,
+        #     stock_code=code,
+        #     data_type=data_type,
+        # )
 
         db, cursor = get_cursor(data_type)
 
         new_data = buffer2mysql(
-            path=path,
+            path=None,
             db=db,
             cursor=cursor,
             stock_code=code,
             data_type=data_type,
+            res=txt,
         )
 
         db.close()
-        move_buffer_file(path, data_type)
+        # move_buffer_file(path, data_type)
 
 
 def config_daily_res(res, data_type):
