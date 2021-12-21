@@ -100,11 +100,11 @@ def mysql_update_daily():
         print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
         print(index, '-->', stock_codes)
 
-        request_daily_data2mysql(
-            stock_codes=stock_codes,
-            date='latest',
-            data_type='fs',
-        )
+        # request_daily_data2mysql(
+        #     stock_codes=stock_codes,
+        #     date='latest',
+        #     data_type='fs',
+        # )
 
         request_daily_data2mysql(
             stock_codes=stock_codes,
