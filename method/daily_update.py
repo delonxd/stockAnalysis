@@ -1,4 +1,22 @@
 def daily_update():
+    import sys
+    sys.path.append('D:\\PycharmProjects\\stockAnalysis')
+
+    import os
+    os.chdir("D:\\PycharmProjects\\stockAnalysis\\method")
+
+    from request.requestData import request_data2mysql, request_daily_data2mysql
+    from request.requestBasicData import request_basic, request_industry_sample
+
+    from method.mainMethod import get_part_codes
+
+    from method.dataMethod import load_df_from_mysql
+    from method.dataMethod import DataAnalysis
+
+    import json
+    import time
+    import pickle
+    import datetime as dt
 
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
 
@@ -331,28 +349,28 @@ def daily_analysis(code_list, res_dir, timestamp):
 
 
 if __name__ == '__main__':
-    import sys
-    sys.path.append('D:\\PycharmProjects\\stockAnalysis')
-
-    import os
-    os.chdir("D:\\PycharmProjects\\stockAnalysis\\method")
-
-    from request.requestData import request_data2mysql, request_daily_data2mysql
-    from request.requestBasicData import request_basic, request_industry_sample
-
-    from method.mainMethod import get_part_codes
-
-    from method.dataMethod import load_df_from_mysql
-    from method.dataMethod import DataAnalysis
-
-    import json
-    import time
-    import pickle
-    import datetime as dt
+    # import sys
+    # sys.path.append('D:\\PycharmProjects\\stockAnalysis')
+    #
+    # import os
+    # os.chdir("D:\\PycharmProjects\\stockAnalysis\\method")
+    #
+    # from request.requestData import request_data2mysql, request_daily_data2mysql
+    # from request.requestBasicData import request_basic, request_industry_sample
+    #
+    # from method.mainMethod import get_part_codes
+    #
+    # from method.dataMethod import load_df_from_mysql
+    # from method.dataMethod import DataAnalysis
+    #
+    # import json
+    # import time
+    # import pickle
+    # import datetime as dt
 
     # pd.set_option('display.max_columns', None)
     # pd.set_option('display.max_rows', None)
     # pd.set_option('display.width', 10000)
 
-    # daily_update()
+    daily_update()
     # daily_update2()

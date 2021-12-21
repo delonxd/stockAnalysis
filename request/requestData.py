@@ -44,7 +44,7 @@ def try_request(time0):
 @log_it(None)
 def request_data(stock_code, start_date, data_type):
     MainLog.add_log('    stock_code --> %s' % stock_code)
-    token = "e7a7f2e5-181b-4caa-9142-592ab6787871"
+    token = "f819be3a-e030-4ff0-affe-764440759b5c"
 
     if data_type == 'fs':
         with open('../basicData/metrics/metrics_fs.txt', 'r', encoding='utf-8') as f:
@@ -89,7 +89,7 @@ def request_data(stock_code, start_date, data_type):
 @log_it(None)
 def request_daily_data(stock_codes, date, data_type):
     MainLog.add_log('    stock_codes --> %s' % stock_codes)
-    token = "e7a7f2e5-181b-4caa-9142-592ab6787871"
+    token = "f819be3a-e030-4ff0-affe-764440759b5c"
 
     if data_type == 'fs':
         with open('../basicData/metrics/metrics_fs_latest.txt', 'r', encoding='utf-8') as f:

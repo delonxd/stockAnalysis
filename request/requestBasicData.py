@@ -8,7 +8,8 @@ from collections import defaultdict
 def request_basic():
     url = 'https://open.lixinger.com/api/a/company'
 
-    data = {"token": "e7a7f2e5-181b-4caa-9142-592ab6787871"}
+    data = {"token": "f819be3a-e030-4ff0-affe-764440759b5c"}
+
     post_data = json.dumps(data)
     header_dict = {'Content-Type': 'application/json'}
 
@@ -18,9 +19,10 @@ def request_basic():
 
     name_dict = defaultdict(str)
     for data in data_list:
-        code = data["stockCode"]
-        name = data["name"]
-        name_dict[code] = name
+        if "name" in data:
+            code = data["stockCode"]
+            name = data["name"]
+            name_dict[code] = name
 
     code_list = list(name_dict.keys())
 
@@ -34,7 +36,7 @@ def request_industry_sample():
         industry3_list = json.loads(f.read())
 
     data = dict()
-    data["token"] = "e7a7f2e5-181b-4caa-9142-592ab6787871"
+    data["token"] = "f819be3a-e030-4ff0-affe-764440759b5c"
 
     data["date"] = "latest"
     data["stockCodes"] = industry3_list
