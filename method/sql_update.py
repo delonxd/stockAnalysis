@@ -64,17 +64,20 @@ def mysql_update():
 
 
 def mysql_update_daily():
-    from request.requestData import request_daily_data2mysql
     from method.mainMethod import get_part_codes
-
     import json
-    import time
 
     # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
     with open("..\\basicData\\analyzedData\\sift_code_011.txt", "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
     code_list = get_part_codes(code_list)
+    update_latest_data(code_list)
+
+
+def update_latest_data(code_list):
+    import time
+    from request.requestData import request_daily_data2mysql
 
     list0 = []
     counter = 0
@@ -98,18 +101,46 @@ def mysql_update_daily():
         print('\n')
         print('############################################################################################')
         print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
-        print(index, '-->', stock_codes)
+        print('%s/%s --> %s' % (index, end, stock_codes))
 
-        # request_daily_data2mysql(
-        #     stock_codes=stock_codes,
-        #     date='latest',
-        #     data_type='fs',
-        # )
+        request_daily_data2mysql(
+            stock_codes=stock_codes,
+            date='latest',
+            data_type='fs',
+        )
 
         request_daily_data2mysql(
             stock_codes=stock_codes,
             date='latest',
             data_type='mvs',
+        )
+        index += 1
+
+
+def update_all_data(code_list, start_date):
+    import time
+    from request.requestData import request_data2mysql
+
+    index = 0
+    end = len(code_list)
+
+    while index < end:
+        code = code_list[index]
+        print('\n')
+        print('############################################################################################')
+        print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
+        print('%s/%s --> %s' % (index, end, code))
+
+        request_data2mysql(
+            stock_code=code,
+            data_type='fs',
+            start_date=start_date,
+        )
+
+        request_data2mysql(
+            stock_code=code,
+            data_type='mvs',
+            start_date=start_date,
         )
         index += 1
 

@@ -18,15 +18,21 @@ def request_basic():
     data_list = json.loads(res_txt)['data']
 
     name_dict = defaultdict(str)
+    date_dict = defaultdict(str)
     for data in data_list:
+        code = data["stockCode"]
         if "name" in data:
-            code = data["stockCode"]
             name = data["name"]
             name_dict[code] = name
+        if "ipoDate" in data:
+            ipo_date = data["ipoDate"]
+            date_dict[code] = ipo_date
+        else:
+            date_dict[code] = None
 
     code_list = list(name_dict.keys())
 
-    return code_list, name_dict
+    return code_list, name_dict, date_dict
 
 
 def request_industry_sample():
