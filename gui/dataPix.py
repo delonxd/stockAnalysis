@@ -409,6 +409,8 @@ class DataPix:
             's_016_roe_parent': 'roe',
             's_032_remain_rate': '资金留存率',
             'mir_y10': '十年期国债利率',
+            's_004_pe': 'pe',
+            's_034_real_pe': 'real_pe',
         }
 
         tmp_list = list(tmp_dict.keys())

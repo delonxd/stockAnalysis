@@ -340,6 +340,7 @@ class DataAnalysis:
         self.fs_add(self.get_column(self.df_mvs, 's_032_remain_rate'))
         self.fs_add(self.get_column(self.df_mvs, 's_033_profit_compound'))
         self.mvs_add(self.get_column(self.df_mvs, 'mir_y10'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_034_real_pe'))
 
         self.config_balance_sheet()
         self.set_df()
@@ -734,6 +735,13 @@ class DataAnalysis:
             s2[s2 > 1e8] = 1e8
             s2.name = column
             return s2.dropna()
+
+        elif column == 's_034_real_pe':
+            s1 = self.fs_to_mvs('tmp', 's_018_profit_parent')
+            s2 = self.get_column(df, 's_025_real_cost')
+            s3 = s2 / s1
+            s3.name = column
+            return s3.dropna()
 
     @staticmethod
     def get_return_year(pe, rate):

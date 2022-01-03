@@ -156,7 +156,8 @@ if __name__ == '__main__':
     # df0 = add_new_style(df0, 's_031_financing_outflow')
     # df0 = add_new_style(df0, 's_032_remain_rate', src='id_004_bs_tca_ta_r')
     # df0 = add_new_style(df0, 's_033_profit_compound', src='id_004_bs_tca_ta_r')
-    df0 = add_new_style(df0, 'mir_y10', src='s_027_pe_return_rate')
+    # df0 = add_new_style(df0, 'mir_y10', src='s_027_pe_return_rate')
+    df0 = add_new_style(df0, 's_034_real_pe', src='s_004_pe')
     # df0.drop('s_012_return_year', inplace=True)
 
     # df0.loc[
