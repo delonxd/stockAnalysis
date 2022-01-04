@@ -85,8 +85,8 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        # self.codes_df.init_current_index(index=481)
-        self.codes_df.init_current_index(index=61)
+        self.codes_df.init_current_index(index=0)
+        # self.codes_df.init_current_index(index=100)
         # self.codes_df.init_current_index(code='002493')
         # self.codes_df.init_current_index(code='000921')
 
@@ -586,6 +586,10 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\dailyUpdate\\update_20211213153503\\sift_code_20211213153503.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
+
+        with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+            tmp = json.loads(f.read())
+            code_list = list(zip(*tmp).__next__())
 
         # code_list = get_part_codes(code_list, blacklist=blacklist)
         industry_list = [
