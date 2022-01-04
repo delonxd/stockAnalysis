@@ -155,9 +155,21 @@ def cal_kelly(p1, p2, k):
     print("Max_Percent: {:.0f}%".format(max_a * 100))
 
 
+def get_index(list0, val):
+    res = 0
+    for index, x in enumerate(list0):
+        if val <= x:
+            res = index
+            break
+    if val > list0[-1]:
+        res = len(list0)
+    return res
+
+
 if __name__ == '__main__':
 
-    for r1 in np.arange(-10, 25, 0.01):
+    v_list = []
+    for r1 in np.arange(-10, 50.01, 0.01):
         if r1 <= 5:
             r2 = r1
         else:
@@ -169,7 +181,17 @@ if __name__ == '__main__':
             rate0=-10,
         )
 
+        v_list.append(m.value/2)
         m.show_value()
+
+    import random
+    for i in range(1000):
+        a = random.random() * 300 + 3
+
+        ii = get_index(v_list, a)
+        rr = round(ii * 0.01 - 10, 2)
+        # print(rr)
+
     # m = ValueModel(
     #     pe=10,
     #     rate=[25, 5],

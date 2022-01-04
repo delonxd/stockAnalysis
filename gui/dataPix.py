@@ -411,6 +411,8 @@ class DataPix:
             'mir_y10': '十年期国债利率',
             's_004_pe': 'pe',
             's_034_real_pe': 'real_pe',
+            's_035_pe2rate': 's_035_pe2rate',
+            's_036_real_pe2rate': 's_036_real_pe2rate',
         }
 
         tmp_list = list(tmp_dict.keys())

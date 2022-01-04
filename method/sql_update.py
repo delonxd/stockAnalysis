@@ -103,11 +103,11 @@ def update_latest_data(code_list):
         print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
         print('%s/%s --> %s' % (index, end, stock_codes))
 
-        request_daily_data2mysql(
-            stock_codes=stock_codes,
-            date='latest',
-            data_type='fs',
-        )
+        # request_daily_data2mysql(
+        #     stock_codes=stock_codes,
+        #     date='latest',
+        #     data_type='fs',
+        # )
 
         request_daily_data2mysql(
             stock_codes=stock_codes,

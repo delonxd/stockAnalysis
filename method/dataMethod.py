@@ -2,6 +2,7 @@ from method.sqlMethod import get_data_frame, sql_if_table_exists
 from request.requestData import get_cursor
 from request.requestData import get_header_df
 from request.requestData import request_data2mysql
+from discount.discountModel import ValueModel
 
 import pandas as pd
 import numpy as np
@@ -341,6 +342,8 @@ class DataAnalysis:
         self.fs_add(self.get_column(self.df_mvs, 's_033_profit_compound'))
         self.mvs_add(self.get_column(self.df_mvs, 'mir_y10'))
         self.mvs_add(self.get_column(self.df_mvs, 's_034_real_pe'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_035_pe2rate'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_036_real_pe2rate'))
 
         self.config_balance_sheet()
         self.set_df()
@@ -743,6 +746,18 @@ class DataAnalysis:
             s3.name = column
             return s3.dropna()
 
+        elif column == 's_035_pe2rate':
+            s1 = self.get_column(df, 's_004_pe')
+            s2 = self.transform_pe(s1)
+            s2.name = column
+            return s2.dropna()
+
+        elif column == 's_036_real_pe2rate':
+            s1 = self.get_column(df, 's_034_real_pe')
+            s2 = self.transform_pe(s1)
+            s2.name = column
+            return s2.dropna()
+
     @staticmethod
     def get_return_year(pe, rate):
         a = 1 + rate
@@ -794,6 +809,42 @@ class DataAnalysis:
             return new_df
         else:
             return pd.concat([df, new_df], axis=1, sort=True)
+
+    @staticmethod
+    def transform_pe(s1):
+        v_list = []
+        start = -10
+        end = 50
+        for r1 in np.arange(start, end+0.01, 0.01):
+            if r1 <= 5:
+                r2 = r1
+            else:
+                r2 = 5
+            m = ValueModel(
+                pe=10,
+                rate=[r1, r2],
+                year=[10, 10],
+                rate0=-10,
+            )
+
+            v_list.append(m.value / 2)
+            # m.show_value()
+
+        res_list = []
+        for val in s1.values:
+            res = 0
+            for index, x in enumerate(v_list):
+                if val <= x:
+                    res = index
+                    break
+            if val > v_list[-1]:
+                res = len(v_list) - 1
+            tmp = (res * 0.01 + start) / 100
+            res_list.append(tmp)
+        s2 = pd.Series(res_list, index=s1.index)
+
+        # print(s2)
+        return s2
 
 
 class StandardFitModel:
