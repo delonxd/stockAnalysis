@@ -34,8 +34,9 @@ def load_df_from_mysql(stock_code, data_type):
         sql_df = sql_df.set_index(check_field, drop=False)
         # sql_df = sql_df.where(sql_df.notnull(), None)
         sql_df.sort_index(inplace=True)
+        if 'Invalid date' in sql_df.index:
+            sql_df.drop('Invalid date', inplace=True)
         sql_df.index = sql_df.index.map(lambda x: x[:10])
-
         return sql_df
     else:
         header_df = get_header_df(data_type)

@@ -419,6 +419,7 @@ class DataPix:
 
         self.draw_percentage(self.pix2, 'assets')
         self.draw_percentage(self.pix, 'equity')
+
         for ds in self.data_dict.values():
             if ds.ds_type == 'digit' and ds.data_type is None:
                 self.draw_data(ds, self.pix)
@@ -428,6 +429,8 @@ class DataPix:
                 self.draw_data(ds, self.pix4)
 
     def draw_percentage(self, pix, data_type):
+        if 'id_001_bs_ta' not in self.data_dict.keys():
+            return
         ds = self.data_dict['id_001_bs_ta']
         df_assets = ds.df.iloc[:, 0].copy()
         df0 = pd.DataFrame(index=df_assets.index)
