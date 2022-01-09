@@ -4,7 +4,7 @@ def load_daily_res():
     import numpy as np
     import json
 
-    datetime = '20220107153503'
+    datetime = '20220109191422'
     res_dir = '..\\basicData\\dailyUpdate\\update_%s' % datetime
 
     file = '%s\\res_daily_%s.pkl' % (res_dir, datetime)
@@ -17,7 +17,8 @@ def load_daily_res():
         df = tup[1]
 
         # s1 = df.loc[:, 's_016_roe_parent'].dropna()
-        s1 = df.loc[:, 's_027_pe_return_rate'].dropna()
+        # s1 = df.loc[:, 's_027_pe_return_rate'].dropna()
+        s1 = df.loc[:, 's_037_real_pe_return_rate'].dropna()
         val = s1[-1] if s1.size > 0 else -np.inf
 
         val_list.append((code, val))

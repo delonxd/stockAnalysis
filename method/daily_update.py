@@ -91,6 +91,7 @@ def daily_update():
         's_026_holder_return_rate',
         's_027_pe_return_rate',
         's_028_market_value',
+        's_037_real_pe_return_rate',
     ]
 
     index = 0

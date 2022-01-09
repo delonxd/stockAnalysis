@@ -86,8 +86,8 @@ class MainWidget(QWidget):
 
         self.codes_df = CodesDataFrame(code_list)
         self.codes_df.init_current_index(index=0)
-        # self.codes_df.init_current_index(index=100)
-        # self.codes_df.init_current_index(code='002493')
+        # self.codes_df.init_current_index(index=511)
+        # self.codes_df.init_current_index(code='300646')
         # self.codes_df.init_current_index(code='000921')
 
         self.style_df = load_default_style()
@@ -580,16 +580,18 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\analyzedData\\jlr_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\roe_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\return_year_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\analyzedData\\sift_code_006.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\analyzedData\\sift_code_006.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\sift_code_011.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\analyzedData\\sift_002_real_pe.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\self_selected\\gui_selected.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\dailyUpdate\\update_20211213153503\\sift_code_20211213153503.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\dailyUpdate\\update_20220107153503\\code_sorted_1.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\dailyUpdate\\update_20220107153503\\code_sorted_2.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
-        with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
-            tmp = json.loads(f.read())
-            code_list = list(zip(*tmp).__next__())
+        # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+        #     tmp = json.loads(f.read())
+        #     code_list = list(zip(*tmp).__next__())
 
         # code_list = get_part_codes(code_list, blacklist=blacklist)
         industry_list = [
