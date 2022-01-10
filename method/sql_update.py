@@ -145,6 +145,53 @@ def update_all_data(code_list, start_date):
         index += 1
 
 
+def update_latest_data2():
+    import json
+
+    with open("..\\basicData\\analyzedData\\sift_code_011.txt", "r", encoding="utf-8", errors="ignore") as f:
+        code_list = json.loads(f.read())
+
+    import time
+    from request.requestData import request_daily_data2mysql
+
+    list0 = []
+    counter = 0
+    for code in code_list:
+        if counter == 0:
+            list0.append([])
+            counter = 100
+        list0[-1].append(code)
+        counter -= 1
+
+    length = len(list0)
+    print(length)
+    print(list0)
+
+    start = 0
+    end = length
+
+    index = start
+    while index < end:
+        stock_codes = list0[index]
+        print('\n')
+        print('############################################################################################')
+        print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
+        print('%s/%s --> %s' % (index, end, stock_codes))
+
+        # request_daily_data2mysql(
+        #     stock_codes=stock_codes,
+        #     date='latest',
+        #     data_type='fs',
+        # )
+
+        request_daily_data2mysql(
+            stock_codes=stock_codes,
+            date='latest',
+            data_type='mvs',
+        )
+        index += 1
+
+
 if __name__ == '__main__':
     import pandas as pd
 
@@ -153,4 +200,5 @@ if __name__ == '__main__':
     # pd.set_option('display.width', 10000)
 
     # mysql_update()
-    mysql_update_daily()
+    # mysql_update_daily()
+    update_latest_data2()
