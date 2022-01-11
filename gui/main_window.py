@@ -85,7 +85,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=0)
+        self.codes_df.init_current_index(index=331)
         # self.codes_df.init_current_index(index=511)
         # self.codes_df.init_current_index(code='300646')
         # self.codes_df.init_current_index(code='000921')
@@ -593,7 +593,7 @@ class MainWidget(QWidget):
         #     tmp = json.loads(f.read())
         #     code_list = list(zip(*tmp).__next__())
 
-        # code_list = get_part_codes(code_list, blacklist=blacklist)
+        code_list = get_part_codes(code_list)
         industry_list = [
             "C110101",
             "C110102",
