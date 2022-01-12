@@ -136,13 +136,19 @@ def get_part_codes(code_list, blacklist=None, exclude_industry=None):
                 tmp.append(code)
         blacklist.extend(tmp)
 
+        # with open("..\\basicData\\self_selected\\gui_selected.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\self_selected\\gui_whitelist.txt", "r", encoding="utf-8", errors="ignore") as f:
+            selected = json.loads(f.read())
+
     new_list = []
     for code in code_list:
         if code in blacklist:
             continue
         if code[0] == '0' or code[0] == '6':
             if code[:3] != '688':
-                new_list.append(code)
+                # new_list.append(code)
+                if code in selected:
+                    new_list.append(code)
     return new_list
 
 
