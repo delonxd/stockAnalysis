@@ -593,7 +593,7 @@ class MainWidget(QWidget):
         #     tmp = json.loads(f.read())
         #     code_list = list(zip(*tmp).__next__())
 
-        code_list = get_part_codes(code_list)
+        # code_list = get_part_codes(code_list)
         industry_list = [
             "C110101",
             "C110102",
