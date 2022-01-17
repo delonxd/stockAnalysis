@@ -85,8 +85,8 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=0)
-        # self.codes_df.init_current_index(index=511)
+        # self.codes_df.init_current_index(index=0)
+        self.codes_df.init_current_index(index=300)
         # self.codes_df.init_current_index(code='300646')
         # self.codes_df.init_current_index(code='000921')
 
@@ -582,7 +582,7 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\analyzedData\\return_year_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\sift_code_006.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\analyzedData\\sift_code_011.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\analyzedData\\sift_002_real_pe.txt", "r", encoding="utf-8", errors="ignore") as f:
+        with open("..\\basicData\\analyzedData\\sift_003_real_pe.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\self_selected\\gui_selected.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\dailyUpdate\\update_20220107153503\\code_sorted_1.txt", "r", encoding="utf-8", errors="ignore") as f:
@@ -602,7 +602,7 @@ class MainWidget(QWidget):
             "C020203",
             "C070101",
         ]
-        code_list = get_part_codes(code_list, exclude_industry=industry_list)
+        # code_list = get_part_codes(code_list, exclude_industry=industry_list)
 
         # with open("..\\basicData\\self_selected\\板块50.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     txt = f.read()

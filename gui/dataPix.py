@@ -375,6 +375,17 @@ class DataPix:
         pix_painter.setPen(pen)
         pix_painter.drawLine(QPoint(d_left, y1), QPoint(d_right, y2))
 
+        # 20% 辅助线
+        ratio_year = 1.2
+        value1 = get_value_from_ratio(date0, value0, self.date_min, ratio_year)
+        value2 = get_value_from_ratio(date0, value0, self.date_max, ratio_year)
+        y1 = self.y_data2px(value1, self.default_ds)
+        y2 = self.y_data2px(value2, self.default_ds)
+
+        pen = QPen(Qt.red, 1, Qt.DotLine)
+        pix_painter.setPen(pen)
+        pix_painter.drawLine(QPoint(d_left, y1), QPoint(d_right, y2))
+
         # 10% 辅助线
         ratio_year = 1.1
         value1 = get_value_from_ratio(date0, value0, self.date_min, ratio_year)

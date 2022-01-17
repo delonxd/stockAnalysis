@@ -4,7 +4,7 @@ def load_daily_res():
     import numpy as np
     import json
 
-    datetime = '20220109191422'
+    datetime = '20220114153503'
     res_dir = '..\\basicData\\dailyUpdate\\update_%s' % datetime
 
     file = '%s\\res_daily_%s.pkl' % (res_dir, datetime)
