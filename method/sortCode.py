@@ -4,7 +4,9 @@ def load_daily_res():
     import numpy as np
     import json
 
-    datetime = '20220114153503'
+    dir_str = 'update_20220117153503'
+
+    datetime = dir_str[-14:]
     res_dir = '..\\basicData\\dailyUpdate\\update_%s' % datetime
 
     file = '%s\\res_daily_%s.pkl' % (res_dir, datetime)
@@ -18,18 +20,28 @@ def load_daily_res():
 
         # s1 = df.loc[:, 's_016_roe_parent'].dropna()
         # s1 = df.loc[:, 's_027_pe_return_rate'].dropna()
-        s1 = df.loc[:, 's_037_real_pe_return_rate'].dropna()
-        val = s1[-1] if s1.size > 0 else -np.inf
+        # s1 = df.loc[:, 's_037_real_pe_return_rate'].dropna()
+        s1 = df.loc[:, 's_028_market_value'].dropna()
+        # val = s1[-1] if s1.size > 0 else -np.inf
+
+        if s1.size > 1:
+            if s1[-1] < 0:
+                val = np.inf
+            else:
+                size = min(s1.size, 5)
+                val = s1[-1] / s1[-size] - 1
+        else:
+            val = np.inf
 
         val_list.append((code, val))
 
-    res_list = sorted(val_list, key=lambda x: x[1], reverse=True)
+    res_list = sorted(val_list, key=lambda x: x[1], reverse=False)
 
     code_sorted = zip(*res_list).__next__()
     print(code_sorted)
 
     res = json.dumps(code_sorted, indent=4, ensure_ascii=False)
-    file = '%s\\code_sorted_2.txt' % res_dir
+    file = '%s\\code_sorted_3.txt' % res_dir
     with open(file, "w", encoding='utf-8') as f:
         f.write(res)
 

@@ -586,7 +586,7 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\self_selected\\gui_selected.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         # with open("..\\basicData\\dailyUpdate\\update_20220107153503\\code_sorted_1.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\dailyUpdate\\update_20220107153503\\code_sorted_2.txt", "r", encoding="utf-8", errors="ignore") as f:
+        # with open("..\\basicData\\dailyUpdate\\update_20220117153503\\code_sorted_3.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
         # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
