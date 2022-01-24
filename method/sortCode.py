@@ -90,6 +90,28 @@ def sort_daily_code(dir_str):
         f.write(res)
 
 
+def generate_list():
+    import json
+
+    with open("..\\basicData\\analyzedData\\sift_002_real_pe.txt", "r", encoding="utf-8", errors="ignore") as f:
+        code_list = json.loads(f.read())
+
+    # with open("..\\basicData\\self_selected\\gui_selected.txt", "r", encoding="utf-8", errors="ignore") as f:
+    with open("..\\basicData\\self_selected\\gui_whitelist.txt", "r", encoding="utf-8", errors="ignore") as f:
+        select_list = json.loads(f.read())
+
+    new_list = []
+    for code in code_list:
+        if code in select_list:
+            new_list.append(code)
+
+    res = json.dumps(new_list, indent=4, ensure_ascii=False)
+    # file = '..\\basicData\\self_selected\\gui_selected2.txt'
+    file = '..\\basicData\\self_selected\\gui_whitelist2.txt'
+    with open(file, "w", encoding='utf-8') as f:
+        f.write(res)
+
+
 if __name__ == '__main__':
     import pandas as pd
     pd.set_option('display.max_columns', None)
@@ -99,4 +121,5 @@ if __name__ == '__main__':
     date_dir = 'update_20220121153503'
 
     # load_daily_res(date_dir)
-    sort_daily_code(date_dir)
+    # sort_daily_code(date_dir)
+    generate_list()
