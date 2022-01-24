@@ -85,8 +85,8 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        # self.codes_df.init_current_index(index=0)
-        self.codes_df.init_current_index(index=300)
+        # self.codes_df.init_current_index(index=550)
+        self.codes_df.init_current_index(index=69)
         # self.codes_df.init_current_index(code='300646')
         # self.codes_df.init_current_index(code='000921')
 
@@ -577,16 +577,24 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     code_list = json.loads(f.read())
 
-        # with open("..\\basicData\\analyzedData\\jlr_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\analyzedData\\roe_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\analyzedData\\return_year_codes.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\analyzedData\\sift_code_006.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\analyzedData\\sift_code_011.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\analyzedData\\sift_003_real_pe.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\self_selected\\gui_selected.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\dailyUpdate\\update_20220107153503\\code_sorted_1.txt", "r", encoding="utf-8", errors="ignore") as f:
-        # with open("..\\basicData\\dailyUpdate\\update_20220117153503\\code_sorted_3.txt", "r", encoding="utf-8", errors="ignore") as f:
+        dir0 = 'update_20220121153503'
+
+        # root = "..\\basicData\\analyzedData"
+        root = "..\\basicData\\dailyUpdate\\%s" % dir0
+
+        # file = "code_sorted_real_pe.txt"
+        file = "code_sorted_roe_parent.txt"
+
+        # with open("%s\\jlr_codes.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
+        # with open("%s\\roe_codes2.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
+        # with open("%s\\return_year_codes.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
+        # with open("%s\\sift_code_006.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
+        # with open("%s\\sift_code_011.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
+        # with open("%s\\sift_003_real_pe.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
+        # with open("%s\\gui_selected.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
+        # with open("%s\\code_list.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
+
+        with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
         # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
