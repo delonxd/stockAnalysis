@@ -86,7 +86,7 @@ class MainWidget(QWidget):
 
         self.codes_df = CodesDataFrame(code_list)
         # self.codes_df.init_current_index(index=550)
-        self.codes_df.init_current_index(index=69)
+        self.codes_df.init_current_index(index=0)
         # self.codes_df.init_current_index(code='300646')
         # self.codes_df.init_current_index(code='000921')
 
@@ -266,14 +266,15 @@ class MainWidget(QWidget):
         menu.addAction(action7)
 
         action1.triggered.connect(self.request_data)
-        action2.triggered.connect(self.add_selected)
-        action3.triggered.connect(self.del_selected)
-        action4.triggered.connect(self.add_blacklist)
-        action5.triggered.connect(self.del_blacklist)
         action6.triggered.connect(self.scale_down)
         action7.triggered.connect(self.scale_up)
-        action8.triggered.connect(self.add_whitelist)
-        action9.triggered.connect(self.del_whitelist)
+
+        action2.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_selected.txt"))
+        action3.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_selected.txt"))
+        action4.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_blacklist.txt"))
+        action5.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_blacklist.txt"))
+        action8.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_whitelist.txt"))
+        action9.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_whitelist.txt"))
 
         menu.exec_(QCursor.pos())
 
@@ -311,30 +312,6 @@ class MainWidget(QWidget):
             f.write(res)
 
         self.show_stock_name()
-
-    def add_selected(self):
-        path = "../basicData/self_selected/gui_selected.txt"
-        self.add_code(path)
-
-    def del_selected(self):
-        path = "../basicData/self_selected/gui_selected.txt"
-        self.del_code(path)
-
-    def add_blacklist(self):
-        path = "../basicData/self_selected/gui_blacklist.txt"
-        self.add_code(path)
-
-    def del_blacklist(self):
-        path = "../basicData/self_selected/gui_blacklist.txt"
-        self.del_code(path)
-
-    def add_whitelist(self):
-        path = "../basicData/self_selected/gui_whitelist.txt"
-        self.add_code(path)
-
-    def del_whitelist(self):
-        path = "../basicData/self_selected/gui_whitelist.txt"
-        self.del_code(path)
 
     def save_code(self):
         pass
@@ -579,11 +556,15 @@ class MainWidget(QWidget):
 
         dir0 = 'update_20220121153503'
 
-        # root = "..\\basicData\\analyzedData"
-        root = "..\\basicData\\dailyUpdate\\%s" % dir0
+        root = "..\\basicData\\analyzedData"
+        # root = "..\\basicData\\self_selected"
+        # root = "..\\basicData\\dailyUpdate\\%s" % dir0
 
         # file = "code_sorted_real_pe.txt"
-        file = "code_sorted_roe_parent.txt"
+        # file = "code_sorted_roe_parent.txt"
+        # file = "sift_001_roe.txt"
+        file = "sift_002_real_pe.txt"
+        # file = "hs300.txt"
 
         # with open("%s\\jlr_codes.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
         # with open("%s\\roe_codes2.txt" % root, "r", encoding="utf-8", errors="ignore") as f:

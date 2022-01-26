@@ -9,8 +9,8 @@ from method.sqlMethod import sql_format_header_df
 def test_output_sql():
     host = 'localhost'
     port = '3306'
-    # database = 'marketData'
-    database = 'fsData'
+    database = 'marketData'
+    # database = 'fsData'
 
     config = {
         'user': 'root',
@@ -30,13 +30,16 @@ def test_output_sql():
     cursor.execute(sql_str)
     tmp_res = cursor.fetchall()
 
-    # print(tmp_res)
+    print(tmp_res)
     # print(type(tmp_res))
+
+    dir_path = "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/mvs_20220126/"
 
     for index in tmp_res:
         table = index[0]
         print(table)
-        sql_str = 'SELECT * FROM %s INTO OUTFILE "F:/MysqlUploads/fs_backups/%s_backups.sql";' % (table, table)
+        file = "%s%s_backups.sql" % (dir_path, table)
+        sql_str = 'SELECT * FROM %s INTO OUTFILE "%s";' % (table, file)
         print(sql_str)
         cursor.execute(sql_str)
         db.commit()
@@ -45,7 +48,8 @@ def test_output_sql():
 def load_data_infile():
     host = 'localhost'
     port = '3306'
-    database = 'marketdata'
+    # database = 'marketdata'
+    database = 'testdata'
 
     config = {
         'user': 'root',
@@ -68,9 +72,9 @@ def load_data_infile():
     length = len(list0)
     a = list0.index('mvs_600007_backups.sql')
 
-    print(a)
-    index = a + 30
-    while index < a + 52:
+    # print(a)
+    index = a
+    while index < length:
         file = list0[index]
         header_df = get_header_df('mvs')
         header_str = sql_format_header_df(header_df)
@@ -95,5 +99,5 @@ def load_data_infile():
 
 
 if __name__ == '__main__':
-    # test_output_sql()
-    load_data_infile()
+    test_output_sql()
+    # load_data_infile()

@@ -112,6 +112,21 @@ def generate_list():
         f.write(res)
 
 
+def get_codes_from_sel():
+    import re
+    import json
+
+    with open("..\\basicData\\self_selected\\hs300_src.txt", "r", encoding="utf-8", errors="ignore") as f:
+        txt = f.read()
+        code_list = re.findall(r'([0-9]{6})', txt)
+    code_list.reverse()
+
+    res = json.dumps(code_list, indent=4, ensure_ascii=False)
+    file = '..\\basicData\\self_selected\\hs300.txt'
+    with open(file, "w", encoding='utf-8') as f:
+        f.write(res)
+
+
 if __name__ == '__main__':
     import pandas as pd
     pd.set_option('display.max_columns', None)
@@ -122,4 +137,5 @@ if __name__ == '__main__':
 
     # load_daily_res(date_dir)
     # sort_daily_code(date_dir)
-    generate_list()
+    # generate_list()
+    get_codes_from_sel()
