@@ -9,8 +9,8 @@ from method.sqlMethod import sql_format_header_df
 def test_output_sql():
     host = 'localhost'
     port = '3306'
-    database = 'marketData'
-    # database = 'fsData'
+    # database = 'marketData'
+    database = 'fsData'
 
     config = {
         'user': 'root',
@@ -33,7 +33,8 @@ def test_output_sql():
     print(tmp_res)
     # print(type(tmp_res))
 
-    dir_path = "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/mvs_20220126/"
+    # dir_path = "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/mvs_20220126/"
+    dir_path = "F:/MysqlUploads/fs_backups_20220126/"
 
     for index in tmp_res:
         table = index[0]
