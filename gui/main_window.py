@@ -11,6 +11,7 @@ from gui.styleDataFrame import load_default_style
 from gui.styleDataFrame import save_default_style
 from gui.priorityTable import PriorityTable
 from gui.showPix import ShowPix
+from gui.remarkWidget import RemarkWidget
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -86,7 +87,7 @@ class MainWidget(QWidget):
 
         self.codes_df = CodesDataFrame(code_list)
         # self.codes_df.init_current_index(index=550)
-        self.codes_df.init_current_index(index=0)
+        self.codes_df.init_current_index(index=198)
         # self.codes_df.init_current_index(code='300646')
         # self.codes_df.init_current_index(code='000921')
 
@@ -112,7 +113,7 @@ class MainWidget(QWidget):
         self.button3 = QPushButton('/2')
         self.button4 = QPushButton('style')
         self.button5 = QPushButton('request')
-        self.button6 = QPushButton('save code')
+        self.button6 = QPushButton('remark')
         self.button7 = QPushButton('code list')
         self.button8 = QPushButton('priority')
         self.button9 = QPushButton('new_window')
@@ -127,6 +128,7 @@ class MainWidget(QWidget):
 
         self.tree = CheckTree(self.style_df)
         self.code_widget = QStockListView(self.codes_df)
+        self.remark_widget = RemarkWidget(self)
 
         self.window2 = ShowPix(main_window=self)
 
@@ -223,7 +225,7 @@ class MainWidget(QWidget):
         self.button3.clicked.connect(self.scale_down)
         self.button4.clicked.connect(self.show_tree)
         self.button5.clicked.connect(self.request_data)
-        self.button6.clicked.connect(self.save_code)
+        self.button6.clicked.connect(self.show_remark)
         self.button7.clicked.connect(self.show_code_list)
         self.button8.clicked.connect(self.config_priority)
         self.button9.clicked.connect(self.show_new_window)
@@ -313,8 +315,8 @@ class MainWidget(QWidget):
 
         self.show_stock_name()
 
-    def save_code(self):
-        pass
+    def show_remark(self):
+        self.remark_widget.show()
 
     def request_data(self):
         code = self.stock_code
@@ -439,6 +441,7 @@ class MainWidget(QWidget):
     def update_window(self):
         self.show_pix()
         self.show_stock_name()
+        self.remark_widget.download()
 
     def update_style(self):
         self.pix_dict.clear()
