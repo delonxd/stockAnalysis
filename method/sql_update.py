@@ -147,12 +147,14 @@ def update_all_data(code_list, start_date):
 
 def update_latest_data2():
     import json
-
-    with open("..\\basicData\\analyzedData\\sift_code_011.txt", "r", encoding="utf-8", errors="ignore") as f:
-        code_list = json.loads(f.read())
-
     import time
+
+    from request.requestBasicData import request_basic
     from request.requestData import request_daily_data2mysql
+
+    # with open("..\\basicData\\analyzedData\\sift_code_011.txt", "r", encoding="utf-8", errors="ignore") as f:
+    #     code_list = json.loads(f.read())
+    code_list, _, _ = request_basic()
 
     list0 = []
     counter = 0
