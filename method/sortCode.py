@@ -63,21 +63,24 @@ def sort_daily_code(dir_str):
         code = tup[0]
         df = tup[1]
 
-        # s1 = df.loc[:, 's_016_roe_parent'].dropna()
-        # s1 = df.loc[:, 's_027_pe_return_rate'].dropna()
         s1 = df.loc[:, 's_037_real_pe_return_rate'].dropna()
         val1 = s1[-1] if s1.size > 0 else -np.inf
 
         s2 = df.loc[:, 's_016_roe_parent'].dropna()
         val2 = s2[-1] if s2.size > 0 else -np.inf
 
-        val_list.append((code, val1, val2))
+        s1 = df.loc[:, 's_027_pe_return_rate'].dropna()
+        val3 = s1[-1] if s1.size > 0 else -np.inf
+
+        val_list.append((code, val1, val2, val3))
 
     res1 = sorted(val_list, key=lambda x: x[1], reverse=True)
     res2 = sorted(val_list, key=lambda x: x[2], reverse=True)
+    res3 = sorted(val_list, key=lambda x: x[3], reverse=True)
 
     sorted1 = zip(*res1).__next__()
     sorted2 = zip(*res2).__next__()
+    sorted3 = zip(*res3).__next__()
 
     res = json.dumps(sorted1, indent=4, ensure_ascii=False)
     file = '%s\\code_sorted_real_pe.txt' % res_dir
@@ -86,6 +89,11 @@ def sort_daily_code(dir_str):
 
     res = json.dumps(sorted2, indent=4, ensure_ascii=False)
     file = '%s\\code_sorted_roe_parent.txt' % res_dir
+    with open(file, "w", encoding='utf-8') as f:
+        f.write(res)
+
+    res = json.dumps(sorted3, indent=4, ensure_ascii=False)
+    file = '%s\\code_sorted_pe.txt' % res_dir
     with open(file, "w", encoding='utf-8') as f:
         f.write(res)
 
