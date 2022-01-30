@@ -50,18 +50,23 @@ def sort_daily_code(dir_str):
     import pickle
     import numpy as np
     import json
+    import os
 
     datetime = dir_str[-14:]
     res_dir = '..\\basicData\\dailyUpdate\\update_%s' % datetime
 
-    file = '%s\\res_daily_%s.pkl' % (res_dir, datetime)
-    with open(file, "rb") as f:
-        res = pickle.load(f)
+    sub_dir = '%s\\res_daily' % res_dir
+    list0 = [x for x in os.listdir(sub_dir) if os.path.isfile(sub_dir + x)]
+
+    res = list()
+    for file in list0:
+        path = '%s\\%s' % (sub_dir, file)
+        with open(path, "rb") as f:
+            res.extend(pickle.load(f))
 
     val_list = list()
-    for tup in res:
-        code = tup[0]
-        df = tup[1]
+    for df in res:
+        code = df.name
 
         s1 = df.loc[:, 's_037_real_pe_return_rate'].dropna()
         val1 = s1[-1] if s1.size > 0 else -np.inf
