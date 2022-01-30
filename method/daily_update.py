@@ -57,8 +57,11 @@ def daily_update():
     print('Length of all codes: ', len(all_codes))
     print('Length of new codes: ', len(new_codes))
 
-    update_all_data(new_codes, start_date='1970-01-01')
-    update_latest_data(all_codes)
+    # update_all_data(new_codes, start_date='1970-01-01')
+    # update_latest_data(all_codes)
+
+    MainLog.write('%s\\logs1.txt' % res_dir)
+    MainLog.init_log()
 
     res_list = list()
 
@@ -97,34 +100,35 @@ def daily_update():
     index = 0
     end = len(all_codes)
     while index < end:
-        code = all_codes[index]
-        print('\n')
-        print('############################################################################################')
-        print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
-        print('Analysis: %s/%s --> %s' % (index, end, code))
+        try:
+            code = all_codes[index]
+            print('\n')
+            print('############################################################################################')
+            print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
+            print('Analysis: %s/%s --> %s' % (index, end, code))
 
-        df1 = load_df_from_mysql(code, 'fs')
-        df2 = load_df_from_mysql(code, 'mvs')
+            df1 = load_df_from_mysql(code, 'fs')
+            df2 = load_df_from_mysql(code, 'mvs')
 
-        data = DataAnalysis(df1, df2)
-        # data.config_widget_data()
-        data.config_daily_data()
+            data = DataAnalysis(df1, df2)
+            # data.config_widget_data()
+            data.config_daily_data()
 
-        df = data.df[columns].copy()
+            df = data.df[columns].copy()
+
+        except Exception as e:
+            print(e)
+            continue
+
         res_list.append((code, df))
-
         print(df.columns)
-
         index += 1
 
     file = '%s\\res_daily_%s.pkl' % (res_dir, timestamp)
     with open(file, "wb") as f:
         pickle.dump(res_list, f)
 
-    res = MainLog.content
-    file = '%s\\logs.txt' % res_dir
-    with open(file, "w", encoding='utf-8') as f:
-        f.write(res)
+    MainLog.write('%s\\logs2.txt' % res_dir)
 
 
 if __name__ == '__main__':
