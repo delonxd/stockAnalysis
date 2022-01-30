@@ -60,6 +60,9 @@ def daily_update():
     # update_all_data(new_codes, start_date='1970-01-01')
     # update_latest_data(all_codes)
 
+    sub_dir = '%s\\res_daily' % res_dir
+    os.makedirs(sub_dir)
+
     MainLog.write('%s\\logs1.txt' % res_dir)
     MainLog.init_log()
 
@@ -125,7 +128,7 @@ def daily_update():
         tmp_list.append(df)
         print(df.columns)
         if len(tmp_list) == 1000:
-            file = '%s\\res_daily_%s_%s.pkl' % (res_dir, timestamp, counter)
+            file = '%s\\%s_%s.pkl' % (sub_dir, timestamp, counter)
             with open(file, "wb") as f:
                 pickle.dump(tmp_list, f)
 
@@ -135,7 +138,7 @@ def daily_update():
         index += 1
 
     if len(tmp_list) > 0:
-        file = '%s\\res_daily_%s_%s.pkl' % (res_dir, timestamp, counter)
+        file = '%s\\%s_%s.pkl' % (sub_dir, timestamp, counter)
         with open(file, "wb") as f:
             pickle.dump(tmp_list, f)
 
