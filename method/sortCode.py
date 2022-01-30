@@ -55,18 +55,20 @@ def sort_daily_code(dir_str):
     datetime = dir_str[-14:]
     res_dir = '..\\basicData\\dailyUpdate\\update_%s' % datetime
 
-    sub_dir = '%s\\res_daily' % res_dir
+    sub_dir = '%s\\res_daily\\' % res_dir
     list0 = [x for x in os.listdir(sub_dir) if os.path.isfile(sub_dir + x)]
 
     res = list()
     for file in list0:
         path = '%s\\%s' % (sub_dir, file)
+        print(path)
         with open(path, "rb") as f:
             res.extend(pickle.load(f))
 
     val_list = list()
-    for df in res:
-        code = df.name
+    for tmp in res:
+        code = tmp[0]
+        df = tmp[1]
 
         s1 = df.loc[:, 's_037_real_pe_return_rate'].dropna()
         val1 = s1[-1] if s1.size > 0 else -np.inf
@@ -146,7 +148,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    date_dir = 'update_20220126153503'
+    date_dir = 'update_20220130123548'
 
     # load_daily_res(date_dir)
     sort_daily_code(date_dir)
