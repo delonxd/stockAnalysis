@@ -63,8 +63,6 @@ def daily_update():
     MainLog.write('%s\\logs1.txt' % res_dir)
     MainLog.init_log()
 
-    res_list = list()
-
     columns = [
         # 's_001_roe',
         # 's_002_equity',
@@ -99,6 +97,9 @@ def daily_update():
 
     index = 0
     end = len(all_codes)
+    tmp_list = []
+    counter = 1
+
     while index < end:
         try:
             code = all_codes[index]
@@ -115,18 +116,28 @@ def daily_update():
             data.config_daily_data()
 
             df = data.df[columns].copy()
+            df.name = code
 
         except Exception as e:
             print(e)
             continue
 
-        res_list.append((code, df))
+        tmp_list.append(df)
         print(df.columns)
+        if len(tmp_list) == 1000:
+            file = '%s\\res_daily_%s_%s.pkl' % (res_dir, timestamp, counter)
+            with open(file, "wb") as f:
+                pickle.dump(tmp_list, f)
+
+            tmp_list = []
+            counter += 1
+
         index += 1
 
-    file = '%s\\res_daily_%s.pkl' % (res_dir, timestamp)
-    with open(file, "wb") as f:
-        pickle.dump(res_list, f)
+    if len(tmp_list) > 0:
+        file = '%s\\res_daily_%s_%s.pkl' % (res_dir, timestamp, counter)
+        with open(file, "wb") as f:
+            pickle.dump(tmp_list, f)
 
     MainLog.write('%s\\logs2.txt' % res_dir)
 
