@@ -119,13 +119,12 @@ def daily_update():
             data.config_daily_data()
 
             df = data.df[columns].copy()
-            df.name = code
 
         except Exception as e:
             print(e)
             continue
 
-        tmp_list.append(df)
+        tmp_list.append((code, df))
         print(df.columns)
         if len(tmp_list) == 1000:
             file = '%s\\%s_%s.pkl' % (sub_dir, timestamp, counter)
