@@ -57,8 +57,8 @@ def daily_update():
     print('Length of all codes: ', len(all_codes))
     print('Length of new codes: ', len(new_codes))
 
-    # update_all_data(new_codes, start_date='1970-01-01')
-    # update_latest_data(all_codes)
+    update_all_data(new_codes, start_date='1970-01-01')
+    update_latest_data(all_codes)
 
     sub_dir = '%s\\res_daily' % res_dir
     os.makedirs(sub_dir)

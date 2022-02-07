@@ -87,7 +87,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=0)
+        self.codes_df.init_current_index(index=624)
         # self.codes_df.init_current_index(index=544)
         # self.codes_df.init_current_index(code='300646')
         # self.codes_df.init_current_index(code='000921')
@@ -256,6 +256,8 @@ class MainWidget(QWidget):
         action7 = QAction('下移', menu)
         action8 = QAction('添加白名单', menu)
         action9 = QAction('删除白名单', menu)
+        action10 = QAction('添加非周期', menu)
+        action11 = QAction('删除非周期', menu)
 
         menu.addAction(action1)
         menu.addSeparator()
@@ -267,7 +269,9 @@ class MainWidget(QWidget):
         menu.addSeparator()
         menu.addAction(action8)
         menu.addAction(action9)
-
+        menu.addSeparator()
+        menu.addAction(action10)
+        menu.addAction(action11)
         menu.addSeparator()
         menu.addAction(action6)
         menu.addAction(action7)
@@ -282,7 +286,8 @@ class MainWidget(QWidget):
         action5.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_blacklist.txt"))
         action8.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_whitelist.txt"))
         action9.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_whitelist.txt"))
-
+        action10.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_non_cyclical.txt"))
+        action11.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_non_cyclical.txt"))
         menu.exec_(QCursor.pos())
 
     def add_code(self, path):
@@ -495,6 +500,12 @@ class MainWidget(QWidget):
         if code in code_list:
             list0.append('黑名单')
 
+        path = "../basicData/self_selected/gui_non_cyclical.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            code_list = json.loads(f.read())
+        if code in code_list:
+            list0.append('非周期')
+
         txt3 = '/'.join(list0)
 
         GuiLog.add_log('show stock --> ' + txt1)
@@ -571,8 +582,8 @@ class MainWidget(QWidget):
 
         # file = "code_sorted_real_pe.txt"
         # file = "code_sorted_roe_parent.txt"
-        file = "sift_001_roe.txt"
-        # file = "sift_002_real_pe.txt"
+        # file = "sift_001_roe.txt"
+        file = "sift_002_real_pe.txt"
         # file = "hs300.txt"
 
         # with open("%s\\jlr_codes.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
