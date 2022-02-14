@@ -105,6 +105,75 @@ def sort_daily_code(dir_str):
         f.write(res)
 
 
+def new_enter_code(dir_str):
+    import pickle
+    import numpy as np
+    import json
+    import os
+
+    datetime = dir_str[-14:]
+    res_dir = '..\\basicData\\dailyUpdate\\update_%s' % datetime
+
+    sub_dir = '%s\\res_daily\\' % res_dir
+    list0 = [x for x in os.listdir(sub_dir) if os.path.isfile(sub_dir + x)]
+
+    res = list()
+    for file in list0:
+        path = '%s\\%s' % (sub_dir, file)
+        print(path)
+        with open(path, "rb") as f:
+            res.extend(pickle.load(f))
+
+    base_line = 1 / 22
+    offset = 30
+
+    val_list1 = list()
+    val_list2 = list()
+    val_list3 = list()
+    for tmp in res:
+        code = tmp[0]
+        df = tmp[1]
+
+        s1 = df.loc[:, 's_037_real_pe_return_rate'].dropna()
+
+        # print(s1)
+
+        val1 = s1[-1] if s1.size > 0 else -np.inf
+        val2 = s1[-1-offset] if s1.size > offset else -np.inf
+
+        if val1 >= base_line:
+            val_list1.append((code, val1))
+            val3 = (val1 - val2) / val1
+            val_list3.append((code, val3))
+
+        if val2 >= base_line:
+            val_list2.append((code, val2))
+
+    res1 = sorted(val_list1, key=lambda x: x[1], reverse=True)
+    res2 = sorted(val_list2, key=lambda x: x[1], reverse=True)
+
+    sorted1 = zip(*res1).__next__()
+    sorted2 = zip(*res2).__next__()
+
+    sorted3 = list()
+    for code in sorted1:
+        if code not in sorted2:
+            sorted3.append(code)
+
+    # res = json.dumps(sorted3, indent=4, ensure_ascii=False)
+    # file = '%s\\new_enter_code.txt' % res_dir
+    # with open(file, "w", encoding='utf-8') as f:
+    #     f.write(res)
+
+    res4 = sorted(val_list3, key=lambda x: x[1], reverse=True)
+    sorted4 = zip(*res4).__next__()
+
+    res = json.dumps(sorted4, indent=4, ensure_ascii=False)
+    file = '%s\\increase_code.txt' % res_dir
+    with open(file, "w", encoding='utf-8') as f:
+        f.write(res)
+
+
 def generate_list():
     import json
 
@@ -148,9 +217,10 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    date_dir = 'update_20220130153503'
+    date_dir = 'update_20220210155137'
 
     # load_daily_res(date_dir)
     sort_daily_code(date_dir)
+    # new_enter_code(date_dir)
     # generate_list()
     # get_codes_from_sel()

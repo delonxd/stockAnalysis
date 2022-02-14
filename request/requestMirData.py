@@ -5,7 +5,7 @@ from method.urlMethod import data_request
 
 
 def request_mir_y10():
-    token = "e7a7f2e5-181b-4caa-9142-592ab6787871"
+    token = "f819be3a-e030-4ff0-affe-764440759b5c"
     today = dt.date.today().strftime("%Y-%m-%d")
     url = 'https://open.lixinger.com/api/macro/national-debt'
     api = {
@@ -44,6 +44,6 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 100000)
 
-    # request_mir_y10()
-    load_mir_y10()
+    request_mir_y10()
+    # load_mir_y10()
 

@@ -87,8 +87,8 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=624)
-        # self.codes_df.init_current_index(index=544)
+        # self.codes_df.init_current_index(index=345)
+        self.codes_df.init_current_index(index=0)
         # self.codes_df.init_current_index(code='300646')
         # self.codes_df.init_current_index(code='000921')
 
@@ -574,16 +574,20 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     code_list = json.loads(f.read())
 
-        dir0 = 'update_20220121153503'
+        dir0 = 'update_20220210155137'
 
         root = "..\\basicData\\analyzedData"
         # root = "..\\basicData\\self_selected"
-        # root = "..\\basicData\\dailyUpdate\\%s" % dir0
+        root = "..\\basicData\\dailyUpdate\\%s" % dir0
+
+        # file = "new_enter_code.txt"
+        # file = "increase_code.txt"
+        file = "code_sorted_real_pe.txt"
 
         # file = "code_sorted_real_pe.txt"
         # file = "code_sorted_roe_parent.txt"
         # file = "sift_001_roe.txt"
-        file = "sift_002_real_pe.txt"
+        # file = "sift_002_real_pe.txt"
         # file = "hs300.txt"
 
         # with open("%s\\jlr_codes.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
@@ -598,9 +602,9 @@ class MainWidget(QWidget):
         with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
 
-        # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
-        #     tmp = json.loads(f.read())
-        #     code_list = list(zip(*tmp).__next__())
+        with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+            tmp = json.loads(f.read())
+            code_list = list(zip(*tmp).__next__())
 
         # code_list = get_part_codes(code_list)
         industry_list = [
