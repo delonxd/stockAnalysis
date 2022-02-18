@@ -189,7 +189,7 @@ def update_latest_data2():
         request_daily_data2mysql(
             stock_codes=stock_codes,
             date='latest',
-            # date='2022-01-21',
+            # date='2022-02-16',
             data_type='mvs',
         )
         index += 1

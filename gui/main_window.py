@@ -599,12 +599,34 @@ class MainWidget(QWidget):
         # with open("%s\\gui_selected.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
         # with open("%s\\code_list.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
 
-        with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
-            code_list = json.loads(f.read())
+        # with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
+        #     code_list = json.loads(f.read())
 
-        with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+        ################################################################################################################
+
+        # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+        #     tmp = json.loads(f.read())
+        #     code_list = list(zip(*tmp).__next__())
+
+        ################################################################################################################
+
+        with open('../basicData/code_names_dict.txt', 'r', encoding='utf-8') as f:
+            code_name_dict = json.loads(f.read())
+
+        name_code_dict = dict()
+        for code, name in code_name_dict.items():
+            name_code_dict[name] = code
+
+        with open("..\\basicData\\self_selected\\gui_daily_select.txt", "r", encoding="utf-8", errors="ignore") as f:
             tmp = json.loads(f.read())
-            code_list = list(zip(*tmp).__next__())
+            tmp0 = list(zip(*tmp))
+        name_list = list(tmp0[1])
+        code_list = []
+
+        for name in name_list:
+            code_list.append(name_code_dict.get(name))
+
+        ################################################################################################################
 
         # code_list = get_part_codes(code_list)
         industry_list = [
@@ -617,10 +639,15 @@ class MainWidget(QWidget):
         ]
         # code_list = get_part_codes(code_list, exclude_industry=industry_list)
 
+        ################################################################################################################
+
         # with open("..\\basicData\\self_selected\\板块50.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     txt = f.read()
         #     code_list = re.findall(r'([0-9]{6})', txt)
-            # code_list.reverse()
+        #     code_list.reverse()
+
+        ################################################################################################################
+
         return code_list
 
     def config_priority(self):
