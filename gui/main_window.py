@@ -13,6 +13,7 @@ from gui.priorityTable import PriorityTable
 from gui.showPix import ShowPix
 from gui.remarkWidget import RemarkWidget
 from gui.webWidget import WebWidget
+from gui.equityChangeWidget import EquityChangeWidget
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -119,6 +120,7 @@ class MainWidget(QWidget):
         self.button8 = QPushButton('priority')
         self.button9 = QPushButton('new_window')
         self.button10 = QPushButton('web')
+        self.button11 = QPushButton('equity_change')
 
         self.editor1 = QLineEdit()
         self.editor1.setValidator(QIntValidator())
@@ -132,6 +134,7 @@ class MainWidget(QWidget):
         self.code_widget = QStockListView(self.codes_df)
         self.remark_widget = RemarkWidget(self)
         self.web_widget = WebWidget()
+        self.equity_change_widget = EquityChangeWidget()
 
         self.window2 = ShowPix(main_window=self)
 
@@ -200,6 +203,7 @@ class MainWidget(QWidget):
         layout2.addWidget(self.button8, 0, Qt.AlignCenter)
         layout2.addWidget(self.button9, 0, Qt.AlignCenter)
         layout2.addWidget(self.button10, 0, Qt.AlignCenter)
+        layout2.addWidget(self.button11, 0, Qt.AlignCenter)
         layout2.addWidget(self.editor1, 0, Qt.AlignCenter)
         layout2.addStretch(1)
         # layout2.addWidget(button1, 0, Qt.AlignCenter)
@@ -234,6 +238,7 @@ class MainWidget(QWidget):
         self.button8.clicked.connect(self.config_priority)
         self.button9.clicked.connect(self.show_new_window)
         self.button10.clicked.connect(self.show_web)
+        self.button11.clicked.connect(self.show_equity_change)
         self.editor1.textChanged.connect(self.editor1_changed)
 
         palette1 = QPalette()
@@ -453,6 +458,7 @@ class MainWidget(QWidget):
         self.show_stock_name()
         self.remark_widget.download()
         self.web_widget.load_code(self.stock_code)
+        self.equity_change_widget.load_code(self.stock_code)
 
     def update_style(self):
         self.pix_dict.clear()
@@ -664,6 +670,9 @@ class MainWidget(QWidget):
 
     def show_web(self):
         self.web_widget.show()
+
+    def show_equity_change(self):
+        self.equity_change_widget.show()
 
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_1:
