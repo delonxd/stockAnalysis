@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
 from method.urlMethod import data_request
 
@@ -12,18 +13,12 @@ class EquityChangeWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('EquityChangeWidget')
-        self.resize(1200, 800)
+        self.resize(940, 800)
 
         self.table_widget = QTableWidget()
+        self.table_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         self.code = None
-        # self.table_widget.setRowCount(40)
-        # self.table_widget.setColumnCount(4)
-        #
-        # for i in range(40):
-        #     for j in range(4):
-        #         text = '(%s, %s)' % (i, j)
-        #         self.table_widget.setItem(i, j, QTableWidgetItem(text))
 
         layout = QHBoxLayout()
         layout.addWidget(self.table_widget)
@@ -39,11 +34,43 @@ class EquityChangeWidget(QWidget):
         list0 = config_equity_change_data(data)
 
         self.table_widget.setRowCount(len(list0))
-        self.table_widget.setColumnCount(11)
-
+        self.table_widget.setColumnCount(12)
+        header = [
+            '日期',
+            '原因',
+            '稀释',
+            '变动',
+            '总股本',
+            '流通',
+            '限售',
+            '其他',
+            'Δ总股本',
+            'Δ流通',
+            'Δ限售',
+            'Δ其他',
+        ]
+        self.table_widget.setHorizontalHeaderLabels(header)
         for i, row in enumerate(list0):
-            for j, value in enumerate(row):
-                self.table_widget.setItem(i, j, QTableWidgetItem(str(value)))
+            if abs(row[11]-1) > 0.03:
+                brush = QBrush(Qt.red)
+            else:
+                brush = QBrush(Qt.black)
+
+            show = [
+                row[0], row[5], row[10], row[11],
+                row[1], row[2], row[3], row[4],
+                row[6],  row[7], row[8], row[9],
+            ]
+            for j, value in enumerate(show):
+                item = QTableWidgetItem(str(value))
+                # item.setBackground(brush)
+                item.setForeground(brush)
+                self.table_widget.setItem(i, j, item)
+
+        self.table_widget.resizeColumnsToContents()
+        self.table_widget.setColumnWidth(0, 100)
+        self.table_widget.setColumnWidth(2, 55)
+        self.table_widget.setColumnWidth(3, 55)
 
 
 def request_equity_change(code):
@@ -114,6 +141,7 @@ def config_equity_change_data(data):
 
     func = lambda x: '-' if x == 0 else x
 
+    ipo_rate = 1
     for row in res:
         if last:
             d1 = row[1] - last[1]
@@ -125,13 +153,16 @@ def config_equity_change_data(data):
                 pass
             else:
                 rate = row[1] / last[1]
-                if row[5] == '送、转股':
-                    if abs(row[2] - last[2] * rate) <= 10:
-                        if abs(row[3] - last[3] * rate) <= 10:
-                            if abs(row[4] - last[4] * rate) <= 10:
-                                rate = 1
+                if row[5] == '送、转股' or row[5] == '拆细':
+                    # if abs(row[2] - last[2] * rate) <= 50:
+                    #     if abs(row[3] - last[3] * rate) <= 50:
+                    #         if abs(row[4] - last[4] * rate) <= 50:
+                    rate = 1.0
 
-                new = [*row, func(d1), func(d2), func(d3), func(d4), last[-1]*rate]
+                tmp = last[10]*rate
+                if row[5] == 'IPO':
+                    ipo_rate = tmp
+                new = [*row, func(d1), func(d2), func(d3), func(d4), tmp, round(rate, 4)]
                 res2.append(new)
         else:
             d1 = row[1]
@@ -139,9 +170,12 @@ def config_equity_change_data(data):
             d3 = row[3]
             d4 = row[4]
 
-            new = [*row, func(d1), func(d2), func(d3), func(d4), 1]
+            new = [*row, func(d1), func(d2), func(d3), func(d4), 1, 1]
             res2.append(new)
         last = res2[-1]
+
+    for row in res2:
+        row[10] = round(row[10] / ipo_rate, 4)
 
     return res2
 
@@ -149,7 +183,7 @@ def config_equity_change_data(data):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main = EquityChangeWidget()
-    main.load_code('600426')
+    main.load_code('000820')
     main.show()
     sys.exit(app.exec_())
 

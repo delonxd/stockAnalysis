@@ -89,7 +89,7 @@ class MainWidget(QWidget):
 
         self.codes_df = CodesDataFrame(code_list)
         # self.codes_df.init_current_index(index=345)
-        self.codes_df.init_current_index(index=0)
+        self.codes_df.init_current_index(index=173)
         # self.codes_df.init_current_index(code='300646')
         # self.codes_df.init_current_index(code='000921')
 
@@ -457,8 +457,20 @@ class MainWidget(QWidget):
         self.show_pix()
         self.show_stock_name()
         self.remark_widget.download()
-        self.web_widget.load_code(self.stock_code)
-        self.equity_change_widget.load_code(self.stock_code)
+        code = self.stock_code
+
+        self.web_widget.load_code(code)
+        self.equity_change_widget.load_code(code)
+
+        path = "../basicData/self_selected/gui_counter.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            counter = json.loads(f.read())
+            number = counter.get(code)
+            counter[code] = number + 1 if number else 1
+
+        res = json.dumps(counter, indent=4, ensure_ascii=False)
+        with open(path, "w", encoding='utf-8') as f:
+            f.write(res)
 
     def update_style(self):
         self.pix_dict.clear()
@@ -482,7 +494,13 @@ class MainWidget(QWidget):
         row = self.codes_df.df.iloc[self.code_index]
         len_df = self.codes_df.df.shape[0]
 
-        txt1 = '%s: %s(%s/%s)' % (row['code'], row['name'], self.code_index, len_df)
+        code = self.stock_code
+        path = "../basicData/self_selected/gui_counter.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            counter = json.loads(f.read())
+            number = counter.get(code)
+
+        txt1 = '%s: %s(%s/%s)(%s)' % (row['code'], row['name'], self.code_index, len_df, number)
         txt2 = '行业: %s-%s-%s' % (row['level1'], row['level2'], row['level3'])
 
         code = row['code']
@@ -580,7 +598,7 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     code_list = json.loads(f.read())
 
-        dir0 = 'update_20220210155137'
+        dir0 = 'update_20220218153503'
 
         root = "..\\basicData\\analyzedData"
         # root = "..\\basicData\\self_selected"
@@ -605,8 +623,8 @@ class MainWidget(QWidget):
         # with open("%s\\gui_selected.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
         # with open("%s\\code_list.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
 
-        # with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
-        #     code_list = json.loads(f.read())
+        with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
+            code_list = json.loads(f.read())
 
         ################################################################################################################
 
@@ -616,21 +634,21 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        with open('../basicData/code_names_dict.txt', 'r', encoding='utf-8') as f:
-            code_name_dict = json.loads(f.read())
-
-        name_code_dict = dict()
-        for code, name in code_name_dict.items():
-            name_code_dict[name] = code
-
-        with open("..\\basicData\\self_selected\\gui_daily_select.txt", "r", encoding="utf-8", errors="ignore") as f:
-            tmp = json.loads(f.read())
-            tmp0 = list(zip(*tmp))
-        name_list = list(tmp0[1])
-        code_list = []
-
-        for name in name_list:
-            code_list.append(name_code_dict.get(name))
+        # with open('../basicData/code_names_dict.txt', 'r', encoding='utf-8') as f:
+        #     code_name_dict = json.loads(f.read())
+        #
+        # name_code_dict = dict()
+        # for code, name in code_name_dict.items():
+        #     name_code_dict[name] = code
+        #
+        # with open("..\\basicData\\self_selected\\gui_daily_select.txt", "r", encoding="utf-8", errors="ignore") as f:
+        #     tmp = json.loads(f.read())
+        #     tmp0 = list(zip(*tmp))
+        # name_list = list(tmp0[1])
+        # code_list = []
+        #
+        # for name in name_list:
+        #     code_list.append(name_code_dict.get(name))
 
         ################################################################################################################
 
