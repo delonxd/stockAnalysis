@@ -88,8 +88,8 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        # self.codes_df.init_current_index(index=345)
-        self.codes_df.init_current_index(index=173)
+        self.codes_df.init_current_index(index=0)
+        # self.codes_df.init_current_index(index=652)
         # self.codes_df.init_current_index(code='300646')
         # self.codes_df.init_current_index(code='000921')
 
@@ -628,9 +628,9 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
-        #     tmp = json.loads(f.read())
-        #     code_list = list(zip(*tmp).__next__())
+        with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+            tmp = json.loads(f.read())
+            code_list = list(zip(*tmp).__next__())
 
         ################################################################################################################
 

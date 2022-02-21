@@ -67,6 +67,14 @@ def request_industry_sample():
     #     f.write(res)
 
 
+def update_basic_data():
+    _, name_dict, _ = request_basic()
+
+    txt = json.dumps(name_dict, indent=4, ensure_ascii=False)
+    with open("../basicData/code_names_dict.txt", "w", encoding='utf-8') as f:
+        f.write(txt)
+
+
 if __name__ == '__main__':
     #
     # dict0 = request_basic()
@@ -76,6 +84,7 @@ if __name__ == '__main__':
     # with open("../basicData/res_basicData.txt", "w", encoding='utf-8') as f:
     #     f.write(res)
 
-    res = request_basic()
-    print(res[0])
-    print(res[1])
+    # res = request_basic()
+    # print(res[0])
+    # print(res[1])
+    update_basic_data()
