@@ -454,23 +454,49 @@ class MainWidget(QWidget):
         self.label.setPixmap(self.data_pix.pix_list[self.window_flag])
 
     def update_window(self):
+        code = self.stock_code
+        self.update_counter(code)
         self.show_pix()
         self.show_stock_name()
         self.remark_widget.download()
-        code = self.stock_code
 
         self.web_widget.load_code(code)
         self.equity_change_widget.load_code(code)
 
+    def update_counter(self, code):
+        df = self.data_pix.df
+
+        last_date = ''
+        last_real_pe = np.inf
+        number = 0
+
+        date = ''
+        real_pe = None
+        if 's_034_real_pe' in df.columns:
+            s0 = self.data_pix.df['s_034_real_pe'].copy().dropna()
+            if s0.size > 0:
+                date = s0.index[-1]
+                real_pe = s0[-1]
+
         path = "../basicData/self_selected/gui_counter.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            counter = json.loads(f.read())
-            number = counter.get(code)
-            counter[code] = number + 1 if number else 1
+            res_dict = json.loads(f.read())
+            data = res_dict.get(code)
 
-        res = json.dumps(counter, indent=4, ensure_ascii=False)
-        with open(path, "w", encoding='utf-8') as f:
-            f.write(res)
+        if isinstance(data, list):
+            last_date = data[1]
+            number = data[2]
+            last_real_pe = data[3]
+        elif data is not None:
+            number = data
+
+        if not date == last_date:
+            number += 1
+            delta = last_real_pe / real_pe - 1
+            res_dict[code] = (last_date, date, number, real_pe, delta)
+            res = json.dumps(res_dict, indent=4, ensure_ascii=False)
+            with open(path, "w", encoding='utf-8') as f:
+                f.write(res)
 
     def update_style(self):
         self.pix_dict.clear()
@@ -497,10 +523,13 @@ class MainWidget(QWidget):
         code = self.stock_code
         path = "../basicData/self_selected/gui_counter.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            counter = json.loads(f.read())
-            number = counter.get(code)
+            data = json.loads(f.read()).get(code)
+        if isinstance(data, list):
+            txt_counter = '%.2f%%(%s)(%s)' % (data[4]*100, data[0], data[2])
+        else:
+            txt_counter = '%.2f%%(%s)(%s)' % (np.inf, '', data)
 
-        txt1 = '%s: %s(%s/%s)(%s)' % (row['code'], row['name'], self.code_index, len_df, number)
+        txt1 = '%s: %s(%s/%s)' % (row['code'], row['name'], self.code_index, len_df)
         txt2 = '行业: %s-%s-%s' % (row['level1'], row['level2'], row['level3'])
 
         code = row['code']
@@ -510,19 +539,19 @@ class MainWidget(QWidget):
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
         if code in code_list:
-            list0.append('自选股')
+            list0.append('自选')
 
         path = "../basicData/self_selected/gui_whitelist.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
         if code in code_list:
-            list0.append('白名单')
+            list0.append('白')
 
         path = "../basicData/self_selected/gui_blacklist.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
         if code in code_list:
-            list0.append('黑名单')
+            list0.append('黑')
 
         path = "../basicData/self_selected/gui_non_cyclical.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
@@ -530,6 +559,7 @@ class MainWidget(QWidget):
         if code in code_list:
             list0.append('非周期')
 
+        list0.append(txt_counter)
         txt3 = '/'.join(list0)
 
         GuiLog.add_log('show stock --> ' + txt1)
@@ -602,7 +632,7 @@ class MainWidget(QWidget):
 
         root = "..\\basicData\\analyzedData"
         # root = "..\\basicData\\self_selected"
-        root = "..\\basicData\\dailyUpdate\\%s" % dir0
+        # root = "..\\basicData\\dailyUpdate\\%s" % dir0
 
         # file = "new_enter_code.txt"
         # file = "increase_code.txt"
@@ -611,7 +641,7 @@ class MainWidget(QWidget):
         # file = "code_sorted_real_pe.txt"
         # file = "code_sorted_roe_parent.txt"
         # file = "sift_001_roe.txt"
-        # file = "sift_002_real_pe.txt"
+        file = "sift_002_real_pe.txt"
         # file = "hs300.txt"
 
         # with open("%s\\jlr_codes.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
@@ -628,9 +658,9 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
-            tmp = json.loads(f.read())
-            code_list = list(zip(*tmp).__next__())
+        # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+        #     tmp = json.loads(f.read())
+        #     code_list = list(zip(*tmp).__next__())
 
         ################################################################################################################
 

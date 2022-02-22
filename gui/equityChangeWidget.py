@@ -26,51 +26,54 @@ class EquityChangeWidget(QWidget):
         self.setLayout(layout)
 
     def load_code(self, code):
-        if code == self.code:
-            return
-        self.code = code
+        try:
+            if code == self.code:
+                return
+            self.code = code
 
-        data = request_equity_change(code)
-        list0 = config_equity_change_data(data)
+            data = request_equity_change(code)
+            list0 = config_equity_change_data(data)
 
-        self.table_widget.setRowCount(len(list0))
-        self.table_widget.setColumnCount(12)
-        header = [
-            '日期',
-            '原因',
-            '稀释',
-            '变动',
-            '总股本',
-            '流通',
-            '限售',
-            '其他',
-            'Δ总股本',
-            'Δ流通',
-            'Δ限售',
-            'Δ其他',
-        ]
-        self.table_widget.setHorizontalHeaderLabels(header)
-        for i, row in enumerate(list0):
-            if abs(row[11]-1) > 0.03:
-                brush = QBrush(Qt.red)
-            else:
-                brush = QBrush(Qt.black)
-
-            show = [
-                row[0], row[5], row[10], row[11],
-                row[1], row[2], row[3], row[4],
-                row[6],  row[7], row[8], row[9],
+            self.table_widget.setRowCount(len(list0))
+            self.table_widget.setColumnCount(12)
+            header = [
+                '日期',
+                '原因',
+                '稀释',
+                '变动',
+                '总股本',
+                '流通',
+                '限售',
+                '其他',
+                'Δ总股本',
+                'Δ流通',
+                'Δ限售',
+                'Δ其他',
             ]
-            for j, value in enumerate(show):
-                item = QTableWidgetItem(str(value))
-                # item.setBackground(brush)
-                item.setForeground(brush)
-                self.table_widget.setItem(i, j, item)
+            self.table_widget.setHorizontalHeaderLabels(header)
+            for i, row in enumerate(list0):
+                if abs(row[11]-1) > 0.03:
+                    brush = QBrush(Qt.red)
+                else:
+                    brush = QBrush(Qt.black)
 
-        self.table_widget.resizeColumnsToContents()
-        self.table_widget.setColumnWidth(0, 100)
-        self.table_widget.setColumnWidth(2, 55)
-        self.table_widget.setColumnWidth(3, 55)
+                show = [
+                    row[0], row[5], row[10], row[11],
+                    row[1], row[2], row[3], row[4],
+                    row[6],  row[7], row[8], row[9],
+                ]
+                for j, value in enumerate(show):
+                    item = QTableWidgetItem(str(value))
+                    # item.setBackground(brush)
+                    item.setForeground(brush)
+                    self.table_widget.setItem(i, j, item)
+
+            self.table_widget.resizeColumnsToContents()
+            self.table_widget.setColumnWidth(0, 100)
+            self.table_widget.setColumnWidth(2, 55)
+            self.table_widget.setColumnWidth(3, 55)
+        except Exception as e:
+            print(e)
 
 
 def request_equity_change(code):
