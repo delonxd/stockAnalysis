@@ -135,6 +135,7 @@ class MainWidget(QWidget):
         self.remark_widget = RemarkWidget(self)
         self.web_widget = WebWidget()
         self.equity_change_widget = EquityChangeWidget()
+        self.counter_info = None
 
         self.window2 = ShowPix(main_window=self)
 
@@ -490,13 +491,16 @@ class MainWidget(QWidget):
         elif data is not None:
             number = data
 
-        if not date == last_date:
+        if date > last_date:
             number += 1
             delta = last_real_pe / real_pe - 1
-            res_dict[code] = (last_date, date, number, real_pe, delta)
+            self.counter_info = [last_date, date, number, real_pe, delta]
+            res_dict[code] = self.counter_info
             res = json.dumps(res_dict, indent=4, ensure_ascii=False)
             with open(path, "w", encoding='utf-8') as f:
                 f.write(res)
+        else:
+            self.counter_info = res_dict[code]
 
     def update_style(self):
         self.pix_dict.clear()
@@ -519,15 +523,6 @@ class MainWidget(QWidget):
     def show_stock_name(self):
         row = self.codes_df.df.iloc[self.code_index]
         len_df = self.codes_df.df.shape[0]
-
-        code = self.stock_code
-        path = "../basicData/self_selected/gui_counter.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            data = json.loads(f.read()).get(code)
-        if isinstance(data, list):
-            txt_counter = '%.2f%%(%s)(%s)' % (data[4]*100, data[0], data[2])
-        else:
-            txt_counter = '%.2f%%(%s)(%s)' % (np.inf, '', data)
 
         txt1 = '%s: %s(%s/%s)' % (row['code'], row['name'], self.code_index, len_df)
         txt2 = '行业: %s-%s-%s' % (row['level1'], row['level2'], row['level3'])
@@ -558,6 +553,12 @@ class MainWidget(QWidget):
             code_list = json.loads(f.read())
         if code in code_list:
             list0.append('非周期')
+
+        data = self.counter_info
+        if isinstance(data, list):
+            txt_counter = '%.2f%%(%s)(%s)' % (data[4]*100, data[0], data[2])
+        else:
+            txt_counter = '%.2f%%(%s)(%s)' % (np.inf, '', data)
 
         list0.append(txt_counter)
         txt3 = '/'.join(list0)
