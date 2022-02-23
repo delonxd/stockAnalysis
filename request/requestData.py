@@ -1,6 +1,6 @@
 
 from method.urlMethod import data_request
-from method.mainMethod import get_part_codes
+from method.mainMethod import sift_codes
 from method.mainMethod import res2df_fs, res2df_mvs
 # from method.mainMethod import get_header_df, get_header_df_mvs
 
@@ -432,7 +432,7 @@ def test_request_data():
     with open("..\\basicData\\analyzedData\\revenue_rate_codes2.txt", "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
-    code_list = get_part_codes(code_list, blacklist=blacklist)
+    code_list = sift_codes(code_list, blacklist=blacklist)
     # code_list = get_part_codes(code_list)
 
     print(code_list)

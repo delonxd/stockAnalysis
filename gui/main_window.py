@@ -1,7 +1,7 @@
 from method.dataMethod import sql2df
 from request.requestData import request_data2mysql
 from method.logMethod import log_it, MainLog
-from method.mainMethod import get_part_codes
+from method.mainMethod import sift_codes
 
 from gui.checkTree import CheckTree
 from gui.dataPix import DataPix
@@ -621,8 +621,14 @@ class MainWidget(QWidget):
 
     @staticmethod
     def get_code_list():
-        with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
-            blacklist = json.loads(f.read())
+        # with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
+        #     blacklist = json.loads(f.read())
+
+        with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
+            result = json.loads(f.read())
+            blacklist = list(result.keys())
+
+        # print(blacklist)
 
         # code_list = ['000002', '000004', '600004', '600006', '600007', '600008']
 
@@ -659,9 +665,9 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
-            tmp = json.loads(f.read())
-            code_list = list(zip(*tmp).__next__())
+        # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+        #     tmp = json.loads(f.read())
+        #     code_list = list(zip(*tmp).__next__())
 
         ################################################################################################################
 
@@ -683,7 +689,8 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        # code_list = get_part_codes(code_list)
+        all_list = code_list
+        code_list = sift_codes(code_list, blacklist=blacklist)
         industry_list = [
             "C110101",
             "C110102",

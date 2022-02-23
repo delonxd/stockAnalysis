@@ -122,34 +122,44 @@ def get_units_dict():
     return res
 
 
-def get_part_codes(code_list, blacklist=None, exclude_industry=None):
-    if blacklist is None:
+def sift_codes(
+        code_list,
+        whitelist=None,
+        blacklist=None,
+        industry_blacklist=None,
+        all_market=True):
+
+    if not isinstance(whitelist, list):
+        whitelist = []
+
+    if not isinstance(blacklist, list):
         blacklist = []
 
-    if exclude_industry is not None:
+    if isinstance(industry_blacklist, list):
         tmp = []
         with open("..\\basicData\\industry\\code_industry_dict.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_dict = json.loads(f.read())
 
         for code, industry in code_dict.items():
-            if industry in exclude_industry:
+            if industry in industry_blacklist:
                 tmp.append(code)
         blacklist.extend(tmp)
 
-        # with open("..\\basicData\\self_selected\\gui_selected.txt", "r", encoding="utf-8", errors="ignore") as f:
-        with open("..\\basicData\\self_selected\\gui_whitelist.txt", "r", encoding="utf-8", errors="ignore") as f:
-            selected = json.loads(f.read())
+    res_list = []
 
-    new_list = []
     for code in code_list:
         if code in blacklist:
             continue
-        if code[0] == '0' or code[0] == '6':
-            if code[:3] != '688':
-                # new_list.append(code)
-                if code in selected:
-                    new_list.append(code)
-    return new_list
+
+        if all_market is not True:
+            if code[:3] == '688':
+                continue
+            if code[0] != '0' and code[0] != '6':
+                continue
+        res_list.append(code)
+
+    res_list.extend(whitelist)
+    return res_list
 
 
 if __name__ == '__main__':
