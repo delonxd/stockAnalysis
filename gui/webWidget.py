@@ -15,6 +15,8 @@ class WebWidget(QMainWindow):
         self.code = None
 
     def load_code(self, code):
+        if self.isHidden():
+            return
         if code == self.code:
             return
         self.code = code

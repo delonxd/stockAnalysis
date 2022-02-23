@@ -659,9 +659,9 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
-        #     tmp = json.loads(f.read())
-        #     code_list = list(zip(*tmp).__next__())
+        with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+            tmp = json.loads(f.read())
+            code_list = list(zip(*tmp).__next__())
 
         ################################################################################################################
 
@@ -719,9 +719,11 @@ class MainWidget(QWidget):
 
     def show_web(self):
         self.web_widget.show()
+        self.web_widget.load_code(self.stock_code)
 
     def show_equity_change(self):
         self.equity_change_widget.show()
+        self.equity_change_widget.load_code(self.stock_code)
 
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_1:

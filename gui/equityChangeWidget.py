@@ -27,6 +27,8 @@ class EquityChangeWidget(QWidget):
 
     def load_code(self, code):
         try:
+            if self.isHidden():
+                return
             if code == self.code:
                 return
             self.code = code
