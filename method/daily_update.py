@@ -7,7 +7,7 @@ def daily_update():
 
     from request.requestBasicData import request_basic, request_industry_sample
 
-    from method.mainMethod import get_part_codes
+    from method.mainMethod import sift_codes
 
     from method.dataMethod import load_df_from_mysql
     from method.dataMethod import DataAnalysis

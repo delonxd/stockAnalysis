@@ -690,7 +690,7 @@ class MainWidget(QWidget):
         ################################################################################################################
 
         all_list = code_list
-        code_list = sift_codes(code_list, blacklist=blacklist)
+        # code_list = sift_codes(code_list, blacklist=blacklist)
         industry_list = [
             "C110101",
             "C110102",

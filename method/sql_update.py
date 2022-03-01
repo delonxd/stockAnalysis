@@ -6,7 +6,7 @@ def mysql_update():
     # os.chdir("D:\\PycharmProjects\\stockAnalysis\\method")
 
     from request.requestData import request_data2mysql
-    from method.mainMethod import get_part_codes
+    from method.mainMethod import sift_codes
     from method.dataMethod import load_df_from_mysql
 
     import json
@@ -17,7 +17,7 @@ def mysql_update():
     with open("..\\basicData\\analyzedData\\sift_code_011.txt", "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
-    code_list = get_part_codes(code_list)
+    code_list = sift_codes(code_list)
 
     length = len(code_list)
     print(length)
@@ -64,14 +64,14 @@ def mysql_update():
 
 
 def mysql_update_daily():
-    from method.mainMethod import get_part_codes
+    from method.mainMethod import sift_codes
     import json
 
     # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
     with open("..\\basicData\\analyzedData\\sift_code_011.txt", "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
-    code_list = get_part_codes(code_list)
+    code_list = sift_codes(code_list)
     update_latest_data(code_list)
 
 
@@ -189,7 +189,7 @@ def update_latest_data2():
         request_daily_data2mysql(
             stock_codes=stock_codes,
             date='latest',
-            # date='2022-02-18',
+            # date='2022-02-25',
             data_type='mvs',
         )
         index += 1
