@@ -217,7 +217,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    date_dir = 'update_20220218153503'
+    date_dir = 'update_20220301153504'
 
     # load_daily_res(date_dir)
     sort_daily_code(date_dir)
