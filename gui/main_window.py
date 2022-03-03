@@ -130,12 +130,16 @@ class MainWidget(QWidget):
         self.head_label2 = QLabel()
         self.head_label3 = QLabel()
 
+        self.bottom_label1 = QLabel()
+        self.bottom_label2 = QLabel()
+
         self.tree = CheckTree(self.style_df)
         self.code_widget = QStockListView(self.codes_df)
         self.remark_widget = RemarkWidget(self)
         self.web_widget = WebWidget()
         self.equity_change_widget = EquityChangeWidget()
         self.counter_info = None
+        self.max_increase_30 = 0
 
         self.window2 = ShowPix(main_window=self)
 
@@ -146,7 +150,7 @@ class MainWidget(QWidget):
         self.ratio = 16
         self.init_ui()
 
-        self.window_flag = 0
+        self.window_flag = 3
         self.show_list = list()
         self.run_buffer()
 
@@ -180,6 +184,11 @@ class MainWidget(QWidget):
         self.head_label3.setFont(QFont('Consolas', 16))
         self.head_label3.setPalette(p)
 
+        self.bottom_label1.setFont(QFont('Consolas', 16))
+        self.bottom_label1.setPalette(p)
+        self.bottom_label2.setFont(QFont('Consolas', 16))
+        self.bottom_label2.setPalette(p)
+
         layout0 = QHBoxLayout()
         layout0.addWidget(self.head_label2, 1, Qt.AlignLeft | Qt.AlignBottom)
         layout0.addWidget(self.head_label1, 0, Qt.AlignCenter)
@@ -209,12 +218,18 @@ class MainWidget(QWidget):
         layout2.addStretch(1)
         # layout2.addWidget(button1, 0, Qt.AlignCenter)
 
+        layout3 = QHBoxLayout()
+        layout3.addWidget(self.bottom_label1, 1, Qt.AlignLeft | Qt.AlignTop)
+        layout3.addWidget(self.bottom_label2, 1, Qt.AlignRight | Qt.AlignTop)
+        # layout0.addStretch(1)
+
         layout = QVBoxLayout()
         layout.addStretch(1)
         # layout.addWidget(self.stock_label, 0, Qt.AlignCenter)
         layout.addLayout(layout0, 0)
         layout.addLayout(layout1, 0)
         layout.addLayout(layout2, 0)
+        layout.addLayout(layout3, 0)
         layout.addStretch(1)
 
         m_layout = QHBoxLayout()
@@ -479,6 +494,15 @@ class MainWidget(QWidget):
                 date = s0.index[-1]
                 real_pe = s0[-1]
 
+        self.max_increase_30 = np.inf
+        if 's_028_market_value' in df.columns:
+            s0 = self.data_pix.df['s_028_market_value'].copy().dropna()
+            if s0.size > 0:
+                recent = s0[-1]
+                size0 = min(s0.size, 30)
+                minimum = min(s0[-size0:])
+                self.max_increase_30 = recent / minimum - 1
+
         path = "../basicData/self_selected/gui_counter.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             res_dict = json.loads(f.read())
@@ -493,14 +517,14 @@ class MainWidget(QWidget):
 
         if date > last_date:
             number += 1
-            delta = last_real_pe / real_pe - 1
+            delta = (1/real_pe - 1/last_real_pe) / abs(1/last_real_pe)
             self.counter_info = [last_date, date, number, real_pe, delta]
             res_dict[code] = self.counter_info
             res = json.dumps(res_dict, indent=4, ensure_ascii=False)
             with open(path, "w", encoding='utf-8') as f:
                 f.write(res)
         else:
-            self.counter_info = res_dict[code]
+            self.counter_info = res_dict.get(code)
 
     def update_style(self):
         self.pix_dict.clear()
@@ -556,11 +580,13 @@ class MainWidget(QWidget):
 
         data = self.counter_info
         if isinstance(data, list):
-            txt_counter = '%.2f%%(%s)(%s)' % (data[4]*100, data[0], data[2])
+            txt_counter = '%s次-%.2f%%-[%s]' % (data[2], data[4]*100, data[0])
         else:
-            txt_counter = '%.2f%%(%s)(%s)' % (np.inf, '', data)
+            txt_counter = '%s次-%.2f%%-[%s]' % (data, np.inf, '')
 
+        list0.append('%.2f%%%s' % (self.max_increase_30, self.get_sign(self.max_increase_30)))
         list0.append(txt_counter)
+
         txt3 = '/'.join(list0)
 
         GuiLog.add_log('show stock --> ' + txt1)
@@ -577,6 +603,17 @@ class MainWidget(QWidget):
             self.df_dict.pop(code)
             self.pix_dict.pop(code)
             GuiLog.add_log('release stock --> ' + code)
+
+    @staticmethod
+    def get_sign(data):
+        if not isinstance(data, (int, float)):
+            return ''
+        elif data > 0:
+            return '↑'
+        elif data < 0:
+            return '↓'
+        else:
+            return '-'
 
     def center(self):
         qr = self.frameGeometry()
