@@ -229,7 +229,7 @@ class MainWidget(QWidget):
         layout.addLayout(layout0, 0)
         layout.addLayout(layout1, 0)
         layout.addLayout(layout2, 0)
-        layout.addLayout(layout3, 0)
+        # layout.addLayout(layout3, 0)
         layout.addStretch(1)
 
         m_layout = QHBoxLayout()
@@ -580,11 +580,11 @@ class MainWidget(QWidget):
 
         data = self.counter_info
         if isinstance(data, list):
-            txt_counter = '%s次-%.2f%%-[%s]' % (data[2], data[4]*100, data[0])
+            txt_counter = '%s次/%.2f%%[%s]' % (data[2], data[4]*100, data[0])
         else:
-            txt_counter = '%s次-%.2f%%-[%s]' % (data, np.inf, '')
+            txt_counter = '%s次/%.2f%%[%s]' % (data, np.inf, '')
 
-        list0.append('%.2f%%%s' % (self.max_increase_30, self.get_sign(self.max_increase_30)))
+        list0.append('%.2f%%%s' % (self.max_increase_30*100, self.get_sign(self.max_increase_30)))
         list0.append(txt_counter)
 
         txt3 = '/'.join(list0)
@@ -672,11 +672,11 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     code_list = json.loads(f.read())
 
-        dir0 = 'update_20220218153503'
+        dir0 = 'update_20220303153504'
 
         root = "..\\basicData\\analyzedData"
         # root = "..\\basicData\\self_selected"
-        # root = "..\\basicData\\dailyUpdate\\%s" % dir0
+        root = "..\\basicData\\dailyUpdate\\%s" % dir0
 
         # file = "new_enter_code.txt"
         # file = "increase_code.txt"
@@ -685,7 +685,7 @@ class MainWidget(QWidget):
         # file = "code_sorted_real_pe.txt"
         # file = "code_sorted_roe_parent.txt"
         # file = "sift_001_roe.txt"
-        file = "sift_002_real_pe.txt"
+        # file = "sift_002_real_pe.txt"
         # file = "hs300.txt"
 
         # with open("%s\\jlr_codes.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
