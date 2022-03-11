@@ -88,8 +88,8 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=224)
-        # self.codes_df.init_current_index(index=652)
+        # self.codes_df.init_current_index(index=403)
+        self.codes_df.init_current_index(index=0)
         # self.codes_df.init_current_index(code='300646')
         # self.codes_df.init_current_index(code='000921')
 
@@ -684,8 +684,9 @@ class MainWidget(QWidget):
 
         # file = "code_sorted_real_pe.txt"
         # file = "code_sorted_roe_parent.txt"
-        # file = "sift_001_roe.txt"
-        file = "sift_002_real_pe.txt"
+        file = "sift_001_roe.txt"
+        # file = "sift_002_real_pe.txt"
+        # file = "sift_003_real_pe_current.txt"
         # file = "hs300.txt"
 
         # with open("%s\\jlr_codes.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
@@ -693,7 +694,7 @@ class MainWidget(QWidget):
         # with open("%s\\return_year_codes.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
         # with open("%s\\sift_code_006.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
         # with open("%s\\sift_code_011.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
-        # with open("%s\\sift_003_real_pe.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
+        # with open("%s\\sift_003_real_pe_current.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
         # with open("%s\\gui_selected.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
         # with open("%s\\code_list.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
 
@@ -702,9 +703,9 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
-        #     tmp = json.loads(f.read())
-        #     code_list = list(zip(*tmp).__next__())
+        with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+            tmp = json.loads(f.read())
+            code_list = list(zip(*tmp).__next__())
 
         ################################################################################################################
 
