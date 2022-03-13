@@ -88,7 +88,7 @@ class MainWidget(QWidget):
         code_list = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=1060)
+        self.codes_df.init_current_index(index=1100)
         # self.codes_df.init_current_index(index=0)
         # self.codes_df.init_current_index(code='300646')
         # self.codes_df.init_current_index(code='600420')
