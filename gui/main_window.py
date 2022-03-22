@@ -703,9 +703,9 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
-            tmp = json.loads(f.read())
-            code_list = list(zip(*tmp).__next__())
+        # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+        #     tmp = json.loads(f.read())
+        #     code_list = list(zip(*tmp).__next__())
 
         ################################################################################################################
 
@@ -728,7 +728,7 @@ class MainWidget(QWidget):
         ################################################################################################################
 
         all_list = code_list
-        # code_list = sift_codes(code_list, blacklist=blacklist)
+        code_list = sift_codes(code_list, blacklist=blacklist)
         industry_list = [
             "C110101",
             "C110102",
