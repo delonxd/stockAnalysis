@@ -14,6 +14,7 @@ def daily_update():
     from method.sql_update import update_latest_data
     from method.sql_update import update_all_data
     from method.logMethod import MainLog
+    from method.sortCode import sort_daily_code
 
     import json
     import time
@@ -22,7 +23,9 @@ def daily_update():
 
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
 
-    res_dir = '..\\basicData\\dailyUpdate\\update_%s' % timestamp
+    dir_name = 'update_%s' % timestamp
+
+    res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
 
     if not os.path.exists(res_dir):
         os.makedirs(res_dir)
@@ -142,6 +145,7 @@ def daily_update():
             pickle.dump(tmp_list, f)
 
     MainLog.write('%s\\logs2.txt' % res_dir)
+    sort_daily_code(dir_name)
 
 
 if __name__ == '__main__':
