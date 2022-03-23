@@ -127,38 +127,36 @@ def sift_codes(
         whitelist=None,
         blacklist=None,
         industry_blacklist=None,
-        all_market=True):
+        market='all'):
 
-    if not isinstance(whitelist, list):
-        whitelist = []
-
-    if not isinstance(blacklist, list):
-        blacklist = []
+    set_all = set(code_list)
+    set_white = set() if whitelist is None else set(whitelist)
+    set_black = set() if blacklist is None else set(blacklist)
 
     if isinstance(industry_blacklist, list):
-        tmp = []
         with open("..\\basicData\\industry\\code_industry_dict.txt", "r", encoding="utf-8", errors="ignore") as f:
             code_dict = json.loads(f.read())
 
         for code, industry in code_dict.items():
             if industry in industry_blacklist:
-                tmp.append(code)
-        blacklist.extend(tmp)
+                set_black.update(code)
+
+    if market == 'all':
+        pass
+    elif market == 'main':
+        for code in set_all:
+            if code[:3] == '688':
+                set_black.update(code)
+            elif code[0] != '0' and code[0] != '6':
+                set_black.update(code)
+
+    set_sift = set_all - set_black
+    set_sift.update(set_white)
 
     res_list = []
-
     for code in code_list:
-        if code in blacklist:
-            continue
-
-        if all_market is not True:
-            if code[:3] == '688':
-                continue
-            if code[0] != '0' and code[0] != '6':
-                continue
-        res_list.append(code)
-
-    res_list.extend(whitelist)
+        if code in set_sift:
+            res_list.append(code)
     return res_list
 
 

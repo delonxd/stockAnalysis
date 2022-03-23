@@ -665,6 +665,13 @@ class MainWidget(QWidget):
             result = json.loads(f.read())
             blacklist = list(result.keys())
 
+            tup_list = []
+            for key, value in result.items():
+                tup_list.append((key, value[1]))
+
+            tup_list = sorted(tup_list, key=lambda x: x[1])
+            whitelist = tup_list[:50]
+
         # print(blacklist)
 
         # code_list = ['000002', '000004', '600004', '600006', '600007', '600008']
@@ -727,8 +734,7 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        all_list = code_list
-        code_list = sift_codes(code_list, blacklist=blacklist)
+        code_list = sift_codes(code_list, blacklist=blacklist, whitelist=whitelist)
         industry_list = [
             "C110101",
             "C110102",
