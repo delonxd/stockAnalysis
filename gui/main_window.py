@@ -670,9 +670,8 @@ class MainWidget(QWidget):
                 tup_list.append((key, value[1]))
 
             tup_list = sorted(tup_list, key=lambda x: x[1])
-            whitelist = tup_list[:50]
-
-        # print(blacklist)
+            whitelist = zip(*tup_list).__next__()
+            whitelist = whitelist[:50]
 
         # code_list = ['000002', '000004', '600004', '600006', '600007', '600008']
 
