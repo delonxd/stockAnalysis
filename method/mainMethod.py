@@ -123,13 +123,14 @@ def get_units_dict():
 
 
 def sift_codes(
-        code_list,
+        source=None,
         whitelist=None,
         blacklist=None,
         industry_blacklist=None,
+        sort=None,
         market='all'):
 
-    set_all = set(code_list)
+    set_all = set(source)
     set_white = set() if whitelist is None else set(whitelist)
     set_black = set() if blacklist is None else set(blacklist)
 
@@ -154,7 +155,7 @@ def sift_codes(
     set_sift.update(set_white)
 
     res_list = []
-    for code in code_list:
+    for code in sort:
         if code in set_sift:
             res_list.append(code)
     return res_list

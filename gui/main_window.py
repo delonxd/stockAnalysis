@@ -733,15 +733,14 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        code_list = sift_codes(code_list, blacklist=blacklist, whitelist=whitelist)
-        industry_list = [
-            "C110101",
-            "C110102",
-            "C110103",
-            "C030201",
-            "C020203",
-            "C070101",
-        ]
+        # industry_list = [
+        #     "C110101",
+        #     "C110102",
+        #     "C110103",
+        #     "C030201",
+        #     "C020203",
+        #     "C070101",
+        # ]
         # code_list = get_part_codes(code_list, exclude_industry=industry_list)
 
         ################################################################################################################
@@ -752,6 +751,13 @@ class MainWidget(QWidget):
         #     code_list.reverse()
 
         ################################################################################################################
+
+        code_list = sift_codes(
+            source=code_list,
+            blacklist=blacklist,
+            whitelist=whitelist,
+            sort=code_list,
+        )
 
         return code_list
 

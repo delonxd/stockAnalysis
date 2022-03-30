@@ -351,6 +351,8 @@ def request_daily_data2mysql(stock_codes, date, data_type):
         data_type=data_type,
     )
 
+    ret = []
+
     counter = 0
     for code, txt in dict0.items():
         print('############################################################################################')
@@ -374,8 +376,13 @@ def request_daily_data2mysql(stock_codes, date, data_type):
             res=txt,
         )
 
+        if new_data is not None:
+            ret.append(code)
+
         db.close()
         # move_buffer_file(path, data_type)
+
+    return ret
 
 
 def config_daily_res(res, data_type):

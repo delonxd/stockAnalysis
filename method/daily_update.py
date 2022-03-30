@@ -60,8 +60,16 @@ def daily_update():
     print('Length of all codes: ', len(all_codes))
     print('Length of new codes: ', len(new_codes))
 
-    update_all_data(new_codes, start_date='1970-01-01')
-    update_latest_data(all_codes)
+    ret1 = update_all_data(new_codes, start_date='1970-01-01')
+    ret2 = update_latest_data(all_codes)
+
+    updated_code = list(set(ret1) or set(ret2))
+    updated_code.sort()
+
+    res = json.dumps(updated_code, indent=4, ensure_ascii=False)
+    file = '%s\\code_latest_update.txt' % res_dir
+    with open(file, "w", encoding='utf-8') as f:
+        f.write(res)
 
     sub_dir = '%s\\res_daily' % res_dir
     os.makedirs(sub_dir)

@@ -95,6 +95,8 @@ def update_latest_data(code_list):
     start = 0
     end = length
 
+    ret = []
+
     index = start
     while index < end:
         stock_codes = list0[index]
@@ -103,11 +105,13 @@ def update_latest_data(code_list):
         print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
         print('%s/%s --> %s' % (index, end, stock_codes))
 
-        request_daily_data2mysql(
+        new_data = request_daily_data2mysql(
             stock_codes=stock_codes,
             date='latest',
             data_type='fs',
         )
+
+        ret.extend(new_data)
 
         request_daily_data2mysql(
             stock_codes=stock_codes,
@@ -115,6 +119,8 @@ def update_latest_data(code_list):
             data_type='mvs',
         )
         index += 1
+
+    return ret
 
 
 def update_all_data(code_list, start_date):
@@ -124,6 +130,8 @@ def update_all_data(code_list, start_date):
     index = 0
     end = len(code_list)
 
+    ret = []
+
     while index < end:
         code = code_list[index]
         print('\n')
@@ -131,7 +139,7 @@ def update_all_data(code_list, start_date):
         print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
         print('%s/%s --> %s' % (index, end, code))
 
-        request_data2mysql(
+        new_data = request_data2mysql(
             stock_code=code,
             data_type='fs',
             start_date=start_date,
@@ -143,6 +151,11 @@ def update_all_data(code_list, start_date):
             start_date=start_date,
         )
         index += 1
+
+        if new_data is not None:
+            ret.append(code)
+
+    return ret
 
 
 def update_latest_data2():
