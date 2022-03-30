@@ -121,6 +121,7 @@ class MainWidget(QWidget):
         self.button9 = QPushButton('new_window')
         self.button10 = QPushButton('web')
         self.button11 = QPushButton('equity_change')
+        self.button12 = QPushButton('relocate')
 
         self.editor1 = QLineEdit()
         self.editor1.setValidator(QIntValidator())
@@ -214,6 +215,7 @@ class MainWidget(QWidget):
         layout2.addWidget(self.button9, 0, Qt.AlignCenter)
         layout2.addWidget(self.button10, 0, Qt.AlignCenter)
         layout2.addWidget(self.button11, 0, Qt.AlignCenter)
+        layout2.addWidget(self.button12, 0, Qt.AlignCenter)
         layout2.addWidget(self.editor1, 0, Qt.AlignCenter)
         layout2.addStretch(1)
         # layout2.addWidget(button1, 0, Qt.AlignCenter)
@@ -255,6 +257,7 @@ class MainWidget(QWidget):
         self.button9.clicked.connect(self.show_new_window)
         self.button10.clicked.connect(self.show_web)
         self.button11.clicked.connect(self.show_equity_change)
+        self.button12.clicked.connect(self.relocate)
         self.editor1.textChanged.connect(self.editor1_changed)
 
         palette1 = QPalette()
@@ -780,6 +783,15 @@ class MainWidget(QWidget):
     def show_equity_change(self):
         self.equity_change_widget.show()
         self.equity_change_widget.load_code(self.stock_code)
+
+    def relocate(self):
+        self.web_widget.resize(960, 1008)
+        self.web_widget.move(-971, -10)
+
+        self.equity_change_widget.resize(940, 1008)
+        self.equity_change_widget.move(-1916, -10)
+
+        self.showMaximized()
 
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_1:
