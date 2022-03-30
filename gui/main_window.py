@@ -123,6 +123,8 @@ class MainWidget(QWidget):
         self.button11 = QPushButton('equity_change')
         self.button12 = QPushButton('relocate')
 
+        self.location_state = False
+
         self.editor1 = QLineEdit()
         self.editor1.setValidator(QIntValidator())
         self.editor1.setMaxLength(6)
@@ -712,9 +714,9 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        # with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
-        #     tmp = json.loads(f.read())
-        #     code_list = list(zip(*tmp).__next__())
+        with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
+            tmp = json.loads(f.read())
+            hold_list = list(zip(*tmp).__next__())
 
         ################################################################################################################
 
@@ -761,6 +763,7 @@ class MainWidget(QWidget):
             whitelist=whitelist,
             sort=code_list,
         )
+        code_list = hold_list + code_list
 
         return code_list
 
@@ -785,13 +788,25 @@ class MainWidget(QWidget):
         self.equity_change_widget.load_code(self.stock_code)
 
     def relocate(self):
-        self.web_widget.resize(960, 1008)
-        self.web_widget.move(-971, -10)
 
-        self.equity_change_widget.resize(940, 1008)
-        self.equity_change_widget.move(-1916, -10)
+        if self.location_state is False:
 
-        self.showMaximized()
+            self.web_widget.resize(960, 1008)
+            self.web_widget.move(-971, -10)
+
+            self.equity_change_widget.resize(940, 1008)
+            self.equity_change_widget.move(-1916, -10)
+
+            self.showMaximized()
+            self.location_state = True
+
+        else:
+            self.web_widget.resize(960, 500)
+            self.web_widget.move(0, 0)
+
+            self.equity_change_widget.resize(940, 800)
+            self.equity_change_widget.move(0, 0)
+            self.location_state = False
 
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_1:
