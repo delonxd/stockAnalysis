@@ -683,21 +683,21 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     code_list = json.loads(f.read())
 
-        dir0 = 'update_20220303153504'
+        dir0 = 'update_20220331153503'
 
-        root = "..\\basicData\\analyzedData"
+        # root = "..\\basicData\\analyzedData"
         # root = "..\\basicData\\self_selected"
         # root = "..\\basicData\\dailyUpdate\\%s" % dir0
 
         # file = "new_enter_code.txt"
         # file = "increase_code.txt"
-        file = "code_sorted_real_pe.txt"
+        # file = "code_sorted_real_pe.txt"
 
         # file = "code_sorted_real_pe.txt"
         # file = "code_sorted_roe_parent.txt"
         # file = "sift_001_roe.txt"
         # file = "sift_002_real_pe.txt"
-        file = "sift_003_real_pe_current.txt"
+        # file = "sift_003_real_pe_current.txt"
         # file = "hs300.txt"
 
         # with open("%s\\jlr_codes.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
@@ -709,8 +709,24 @@ class MainWidget(QWidget):
         # with open("%s\\gui_selected.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
         # with open("%s\\code_list.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
 
+        # with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
+        #     code_list = json.loads(f.read())
+
+        ################################################################################################################
+
+        root = "..\\basicData\\dailyUpdate\\%s" % dir0
+        file = "code_sorted_real_pe.txt"
+
         with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
+
+        ################################################################################################################
+
+        root = "..\\basicData\\dailyUpdate\\%s" % dir0
+        file = "code_latest_update.txt"
+
+        with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
+            latest_update = json.loads(f.read())
 
         ################################################################################################################
 
@@ -760,10 +776,11 @@ class MainWidget(QWidget):
         code_list = sift_codes(
             source=code_list,
             blacklist=blacklist,
-            whitelist=whitelist,
+            # whitelist=whitelist,
             sort=code_list,
         )
-        code_list = hold_list + code_list
+        # code_list = hold_list + code_list
+        # code_list = latest_update + code_list
 
         return code_list
 
