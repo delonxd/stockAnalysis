@@ -17,6 +17,7 @@ def daily_update():
     from method.sortCode import sort_daily_code
     from method.sortCode import save_latest_list
     from sql.load_data_infile import output_databases
+    from request.requestMirData import request_mir_y10
 
     import json
     import time
@@ -158,6 +159,7 @@ def daily_update():
     sort_daily_code(dir_name)
     save_latest_list(dir_name)
     output_databases()
+    request_mir_y10()
 
 
 if __name__ == '__main__':
