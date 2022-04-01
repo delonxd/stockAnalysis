@@ -5,8 +5,7 @@ def output_database(database, target_dir):
     import os
     import shutil
 
-    date = time.strftime("%Y%m%d", time.localtime(time.time()))
-    dir_path = '%s/%s_backups_%s' % (target_dir, database, date)
+    dir_path = '%s/%s' % (target_dir, database)
 
     if os.path.exists(dir_path):
         shutil.rmtree(dir_path)
@@ -43,7 +42,7 @@ def output_database(database, target_dir):
         db.commit()
 
 
-def input_database(dir_path, database):
+def input_database(dir_path, database=None):
     import mysql.connector
     import time
     import os
@@ -79,7 +78,7 @@ def input_database(dir_path, database):
         header_str = sql_format_header_df(header_df)
 
         path = dir_path + file
-        print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())), path, table)
+        print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())), path, database, table)
 
         cursor.execute(sql_format_drop_table(table, if_exists=True))
         db.commit()
@@ -95,24 +94,38 @@ def input_database(dir_path, database):
 
 
 def output_databases():
+    import time
+    import os
+
     # target_dir = "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads"
     target_dir = "F:/MysqlUploads"
 
-    output_database('fsData', target_dir)
-    output_database('marketData', target_dir)
+    datetime = time.strftime("%Y%m%d", time.localtime(time.time()))
+
+    dir_path = '%s/backups_%s' % (target_dir, datetime)
+
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
+    output_database('fsData', dir_path)
+    output_database('marketData', dir_path)
 
 
 def input_databases():
+    import os
     src_dir = "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads"
     # src_dir = "F:/MysqlUploads"
 
-    dir_path = src_dir + '/fsData_backups_20220401/'
-    input_database(dir_path, 'testData')
+    backups = 'backups_20220401'
 
-    dir_path = src_dir + '/marketData_backups_20220401/'
-    input_database(dir_path, 'testData')
+    root = '%s/%s/' % (src_dir, backups)
+    dir_list = [x for x in os.listdir(root) if os.path.isdir(root + x)]
+
+    for database in dir_list:
+        dir_path = root + database + '/'
+        input_database(dir_path, 'testData')
 
 
 if __name__ == '__main__':
-    output_databases()
-    # input_databases()
+    # output_databases()
+    input_databases()
