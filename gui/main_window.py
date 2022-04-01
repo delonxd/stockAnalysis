@@ -783,7 +783,7 @@ class MainWidget(QWidget):
             sort=code_list,
         )
         # code_list = hold_list + code_list
-        code_list = latest_update + hold_list + code_list
+        # code_list = latest_update + hold_list + code_list
 
         return code_list
 
