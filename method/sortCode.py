@@ -211,16 +211,46 @@ def get_codes_from_sel():
         f.write(res)
 
 
+def save_latest_list(dir_str):
+    src_dir = '..\\basicData\\dailyUpdate\\%s' % dir_str
+    target_dir = '..\\basicData\\dailyUpdate\\latest'
+
+    files = [
+        'a001_code_list.txt',
+        'a002_name_dict.txt',
+        's001_code_sorted_pe.txt',
+        's002_code_sorted_real_pe.txt',
+        's003_code_sorted_roe_parent.txt',
+        's004_code_latest_update.txt',
+    ]
+
+    for file in files:
+        path1 = '%s\\%s' % (src_dir, file[5:])
+        path2 = '%s\\%s' % (target_dir, file)
+        copy_file(path1, path2)
+
+
+def copy_file(path1, path2):
+    import json
+    with open(path1, "r", encoding='utf-8') as f:
+        data = json.loads(f.read())
+
+    res = json.dumps(data, indent=4, ensure_ascii=False)
+    with open(path2, "w", encoding='utf-8') as f:
+        f.write(res)
+
+
 if __name__ == '__main__':
     import pandas as pd
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    date_dir = 'update_20220321153503'
+    date_dir = 'update_20220331153503'
 
+    save_latest_list(date_dir)
     # load_daily_res(date_dir)
-    sort_daily_code(date_dir)
+    # sort_daily_code(date_dir)
     # new_enter_code(date_dir)
     # generate_list()
     # get_codes_from_sel()
