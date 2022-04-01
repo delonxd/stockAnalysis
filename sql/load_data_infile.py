@@ -127,5 +127,5 @@ def input_databases():
 
 
 if __name__ == '__main__':
-    # output_databases()
-    input_databases()
+    output_databases()
+    # input_databases()
