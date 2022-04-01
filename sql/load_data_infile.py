@@ -102,7 +102,8 @@ def output_databases():
 
     datetime = time.strftime("%Y%m%d", time.localtime(time.time()))
 
-    dir_path = '%s/backups_%s' % (target_dir, datetime)
+    # dir_path = '%s/backups_%s' % (target_dir, datetime)
+    dir_path = '%s/backups' % target_dir
 
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)

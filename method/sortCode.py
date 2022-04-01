@@ -246,7 +246,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    date_dir = 'update_20220331153503'
+    date_dir = 'update_20220401153504'
 
     save_latest_list(date_dir)
     # load_daily_res(date_dir)

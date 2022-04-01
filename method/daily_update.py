@@ -15,6 +15,8 @@ def daily_update():
     from method.sql_update import update_all_data
     from method.logMethod import MainLog
     from method.sortCode import sort_daily_code
+    from method.sortCode import save_latest_list
+    from sql.load_data_infile import output_databases
 
     import json
     import time
@@ -154,6 +156,8 @@ def daily_update():
 
     MainLog.write('%s\\logs2.txt' % res_dir)
     sort_daily_code(dir_name)
+    save_latest_list(dir_name)
+    output_databases()
 
 
 if __name__ == '__main__':

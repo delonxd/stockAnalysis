@@ -683,7 +683,8 @@ class MainWidget(QWidget):
         # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     code_list = json.loads(f.read())
 
-        dir0 = 'update_20220331153503'
+        # dir0 = 'update_20220331153503'
+        dir0 = 'latest'
 
         # root = "..\\basicData\\analyzedData"
         # root = "..\\basicData\\self_selected"
@@ -715,7 +716,8 @@ class MainWidget(QWidget):
         ################################################################################################################
 
         root = "..\\basicData\\dailyUpdate\\%s" % dir0
-        file = "code_sorted_real_pe.txt"
+        # file = "code_sorted_real_pe.txt"
+        file = "s002_code_sorted_real_pe.txt"
 
         with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
@@ -723,7 +725,8 @@ class MainWidget(QWidget):
         ################################################################################################################
 
         root = "..\\basicData\\dailyUpdate\\%s" % dir0
-        file = "code_latest_update.txt"
+        # file = "code_latest_update.txt"
+        file = "s004_code_latest_update.txt"
 
         with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
             latest_update = json.loads(f.read())
@@ -776,11 +779,11 @@ class MainWidget(QWidget):
         code_list = sift_codes(
             source=code_list,
             blacklist=blacklist,
-            # whitelist=whitelist,
+            whitelist=whitelist,
             sort=code_list,
         )
         # code_list = hold_list + code_list
-        # code_list = latest_update + code_list
+        code_list = latest_update + hold_list + code_list
 
         return code_list
 
