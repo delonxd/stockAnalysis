@@ -40,6 +40,10 @@ def daily_update():
     with open(file, "w", encoding='utf-8') as f:
         f.write(res)
 
+    file = '../basicData/code_names_dict.txt'
+    with open(file, "w", encoding='utf-8') as f:
+        f.write(res)
+
     res = json.dumps(all_codes, indent=4, ensure_ascii=False)
     file = '%s\\code_list.txt' % res_dir
     with open(file, "w", encoding='utf-8') as f:
