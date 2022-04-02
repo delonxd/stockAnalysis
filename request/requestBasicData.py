@@ -61,10 +61,24 @@ def request_industry_sample():
         for val in sub_data:
             dict0[val["stockCode"]] = industry
 
-    return dict0
-    # res = json.dumps(dict0, indent=4, ensure_ascii=False)
-    # with open("../basicData/industry/code_industry_dict.txt", "w", encoding='utf-8') as f:
-    #     f.write(res)
+    dict1 = dict()
+    for data in data_list:
+        sub_data = data["constituents"]
+        industry = data["stockCode"]
+        tmp = []
+        for val in sub_data:
+            tmp.append(val["stockCode"])
+        dict1[industry] = tmp
+
+    res = json.dumps(dict0, indent=4, ensure_ascii=False)
+    with open("../basicData/industry/code_industry_dict.txt", "w", encoding='utf-8') as f:
+        f.write(res)
+
+    res = json.dumps(dict1, indent=4, ensure_ascii=False)
+    with open("../basicData/industry/industry_code_dict.txt", "w", encoding='utf-8') as f:
+        f.write(res)
+
+    return dict0, dict1
 
 
 def update_basic_data():
@@ -87,4 +101,11 @@ if __name__ == '__main__':
     # res = request_basic()
     # print(res[0])
     # print(res[1])
-    update_basic_data()
+    # update_basic_data()
+
+    a = request_industry_sample()
+    # txt = json.dumps(a, indent=4, ensure_ascii=False)
+    # with open("../basicData/industry/code_industry_dict.txt", "w", encoding='utf-8') as f:
+    #     f.write(txt)
+
+    print(a)

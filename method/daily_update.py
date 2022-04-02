@@ -155,11 +155,24 @@ def daily_update():
         with open(file, "wb") as f:
             pickle.dump(tmp_list, f)
 
-    MainLog.write('%s\\logs2.txt' % res_dir)
+    MainLog.add_log('data analysis complete')
+
     sort_daily_code(dir_name)
+    MainLog.add_log('sort_daily_code complete')
+
     save_latest_list(dir_name)
+    MainLog.add_log('save_latest_list complete')
+
     output_databases()
+    MainLog.add_log('output_databases complete')
+
     request_mir_y10()
+    MainLog.add_log('request_mir_y10 complete')
+
+    request_industry_sample()
+    MainLog.add_log('request_industry_sample complete')
+
+    MainLog.write('%s\\logs2.txt' % res_dir)
 
 
 if __name__ == '__main__':

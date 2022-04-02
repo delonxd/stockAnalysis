@@ -126,21 +126,15 @@ def sift_codes(
         source=None,
         whitelist=None,
         blacklist=None,
-        industry_blacklist=None,
         sort=None,
         market='all'):
 
-    set_all = set(source)
-    set_white = set() if whitelist is None else set(whitelist)
-    set_black = set() if blacklist is None else set(blacklist)
+    with open("..\\basicData\\industry\\industry_code_dict.txt", "r", encoding="utf-8", errors="ignore") as f:
+        ind_dict = json.loads(f.read())
 
-    if isinstance(industry_blacklist, list):
-        with open("..\\basicData\\industry\\code_industry_dict.txt", "r", encoding="utf-8", errors="ignore") as f:
-            code_dict = json.loads(f.read())
-
-        for code, industry in code_dict.items():
-            if industry in industry_blacklist:
-                set_black.update(code)
+    set_all = list_to_set(source, ind_dict)
+    set_white = list_to_set(whitelist, ind_dict)
+    set_black = list_to_set(blacklist, ind_dict)
 
     if market == 'all':
         pass
@@ -159,6 +153,22 @@ def sift_codes(
         if code in set_sift:
             res_list.append(code)
     return res_list
+
+
+def list_to_set(src, ind_dict):
+    ret = set()
+    if src is None:
+        return ret
+    else:
+        for code in src:
+            if code[0] == 'C':
+                length = len(code)
+                for key, value in ind_dict.items():
+                    if code == key[:length]:
+                        ret.update(set(value))
+            else:
+                ret.add(code)
+        return ret
 
 
 if __name__ == '__main__':
