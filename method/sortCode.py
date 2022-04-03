@@ -269,26 +269,29 @@ def random_code_list(code_list):
     set_whitelist = set_all & tmp_whitelist - set_selected
     set_normal = set_all - set_selected - set_whitelist
 
-    weight_dict = dict.fromkeys(set_all, 1000)
+    weight_dict = dict.fromkeys(set_all, 10000000)
 
     date1 = dt.date.today()
     with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
         result = json.loads(f.read())
 
-    dict000 = dict()
     for key, value in result.items():
         date2 = dt.datetime.strptime(value[1], '%Y-%m-%d').date()
         margin = (date1 - date2).days
         weight = margin ** 2
         weight_dict[key] = weight
-        if weight in dict000:
-            dict000[weight] += 1
+
+    tmp_dict = dict()
+    for weight in weight_dict.values():
+        if weight in tmp_dict:
+            tmp_dict[weight] += 1
         else:
-            dict000[weight] = 1
-    date_list = list(dict000.keys())
+            tmp_dict[weight] = 1
+
+    date_list = list(tmp_dict.keys())
     date_list.sort()
     for date in date_list:
-        print(date, dict000[date])
+        print(date, tmp_dict[date])
 
     list1 = generate_random_list(set_normal, weight_dict)
     list2 = generate_random_list(set_selected, weight_dict)
