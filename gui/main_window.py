@@ -666,6 +666,10 @@ class MainWidget(QWidget):
         # with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     blacklist = json.loads(f.read())
 
+        path = "../basicData/dailyUpdate/latest/s005_code_random.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            random_list = json.loads(f.read())
+
         with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
             result = json.loads(f.read())
             blacklist = list(result.keys())
@@ -778,13 +782,14 @@ class MainWidget(QWidget):
 
         code_list = sift_codes(
             source=code_list,
+            # source=['C01'],
             blacklist=blacklist,
-            whitelist=whitelist,
+            # whitelist=whitelist,
             sort=code_list,
         )
         # code_list = hold_list + code_list
         # code_list = latest_update + hold_list + code_list
-
+        code_list = random_list
         return code_list
 
     def config_priority(self):

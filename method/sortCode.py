@@ -240,6 +240,157 @@ def copy_file(path1, path2):
         f.write(res)
 
 
+def random_code_list(code_list):
+    import json
+    import datetime as dt
+    from method.mainMethod import sift_codes
+
+    path = "../basicData/dailyUpdate/latest/s002_code_sorted_real_pe.txt"
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        sorted_list = json.loads(f.read())
+
+    path = "../basicData/dailyUpdate/latest/a001_code_list.txt"
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        code_list = json.loads(f.read())
+
+    path = "../basicData/self_selected/gui_selected.txt"
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        gui_selected = json.loads(f.read())
+
+    path = "../basicData/self_selected/gui_whitelist.txt"
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        gui_whitelist = json.loads(f.read())
+
+    set_all = set(code_list)
+    tmp_selected = set(gui_selected)
+    tmp_whitelist = set(gui_whitelist)
+
+    set_selected = set_all & tmp_selected
+    set_whitelist = set_all & tmp_whitelist - set_selected
+    set_normal = set_all - set_selected - set_whitelist
+
+    weight_dict = dict.fromkeys(set_all, 1000)
+
+    date1 = dt.date.today()
+    with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
+        result = json.loads(f.read())
+
+    dict000 = dict()
+    for key, value in result.items():
+        date2 = dt.datetime.strptime(value[1], '%Y-%m-%d').date()
+        margin = (date1 - date2).days
+        weight = margin ** 2
+        weight_dict[key] = weight
+        if weight in dict000:
+            dict000[weight] += 1
+        else:
+            dict000[weight] = 1
+    date_list = list(dict000.keys())
+    date_list.sort()
+    for date in date_list:
+        print(date, dict000[date])
+
+    list1 = generate_random_list(set_normal, weight_dict)
+    list2 = generate_random_list(set_selected, weight_dict)
+    list3 = generate_random_list(set_whitelist, weight_dict)
+    total_list = [list1, list2, list3]
+    pick_weight = [30, 40, 30]
+
+    ret_list = []
+    while True:
+        picked_list = []
+        src_number = [len(list1), len(list2), len(list3)]
+        if sum(src_number) == 0:
+            break
+
+        picked = pick_number(src_number, pick_weight, 100)
+        for index, value in enumerate(picked):
+            for _ in range(value):
+                code = total_list[index].pop(0)
+                picked_list.append(code)
+
+        sub_list = sift_codes(source=picked_list, sort=sorted_list)
+        ret_list.extend(sub_list)
+
+    path = "../basicData/dailyUpdate/latest/s005_code_random.txt"
+    tmp = json.dumps(ret_list, indent=4, ensure_ascii=False)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(tmp)
+
+
+def pick_number(src, weight, total):
+    if sum(src) == 0:
+        return [0] * len(src)
+
+    if sum(weight) == 0:
+        return [0] * len(src)
+
+    ret = allot_weight(weight, total)
+    left = src.copy()
+    left_weight = weight.copy()
+    for index, value in enumerate(src):
+        if src[index] >= ret[index]:
+            left[index] = src[index] - ret[index]
+        else:
+            ret[index] = src[index]
+            left[index] = 0
+            left_weight[index] = 0
+
+    margin = total - sum(ret)
+    if margin > 0:
+        left_ret = pick_number(left, left_weight, margin)
+
+        for index, value in enumerate(left_ret):
+            ret[index] += value
+
+    return ret
+
+
+def allot_weight(weight, total):
+    import random
+    ret = list(map(lambda x: int(x * total / sum(weight)), weight))
+
+    tmp = []
+
+    for index, value in enumerate(weight):
+        if value > 0:
+            tmp.append(index)
+        elif value < 0:
+            raise KeyboardInterrupt('权重错误：权重小于0')
+
+    for _ in range(total - sum(ret)):
+        index = random.randint(0, len(tmp)-1)
+        ret[tmp[index]] += 1
+    return ret
+
+
+def generate_random_list(src, weight_dict: dict):
+    length = len(src)
+    set_all = set(src)
+
+    ret = []
+    for _ in range(length):
+        code = random_by_weight(set_all, weight_dict)
+        set_all -= {code}
+        ret.append(code)
+    return ret
+
+
+def random_by_weight(src, weight_dict: dict):
+    import random
+
+    total = 0
+    for code in src:
+        total += weight_dict.get(code)
+    ra = random.uniform(0, total)
+
+    current = 0
+    for code in src:
+        current += weight_dict.get(code)
+        if ra <= current:
+            return code
+
+
 if __name__ == '__main__':
     import pandas as pd
     pd.set_option('display.max_columns', None)
@@ -248,9 +399,18 @@ if __name__ == '__main__':
 
     date_dir = 'update_20220401153504'
 
-    save_latest_list(date_dir)
+    # save_latest_list(date_dir)
     # load_daily_res(date_dir)
     # sort_daily_code(date_dir)
     # new_enter_code(date_dir)
     # generate_list()
     # get_codes_from_sel()
+    random_code_list(1)
+    # aa = [1, 0, 3]
+    # bb = [96, 50, 80]
+    # # for i in range(100):
+    # #     res = allot_weight(aa, 100)
+    # #     print(res)
+    #
+    # res = pick_number(bb, aa, 100)
+    # print(res)
