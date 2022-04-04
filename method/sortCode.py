@@ -323,6 +323,8 @@ def random_code_list(code_list):
     with open(path, "w", encoding="utf-8") as f:
         f.write(tmp)
 
+    return ret_list
+
 
 def pick_number(src, weight, total):
     if sum(src) == 0:
@@ -411,7 +413,8 @@ def get_random_list():
     #     market='main',
     # )
 
-    random_code_list(code_list)
+    ret = random_code_list(code_list)
+    return ret
 
 
 if __name__ == '__main__':
