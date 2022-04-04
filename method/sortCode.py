@@ -240,7 +240,7 @@ def copy_file(path1, path2):
         f.write(res)
 
 
-def random_code_list(code_list):
+def random_code_list(code_list, pick_weight):
     import json
     import datetime as dt
     from method.mainMethod import sift_codes
@@ -299,7 +299,7 @@ def random_code_list(code_list):
     list2 = generate_random_list(set_selected, weight_dict)
     list3 = generate_random_list(set_whitelist, weight_dict)
     total_list = [list1, list2, list3]
-    pick_weight = [75, 10, 15]
+    # pick_weight = [75, 10, 15]
 
     ret_list = []
     while True:
@@ -413,7 +413,7 @@ def get_random_list():
     #     market='main',
     # )
 
-    ret = random_code_list(code_list)
+    ret = random_code_list(code_list, pick_weight=[75, 10, 15])
     return ret
 
 

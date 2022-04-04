@@ -2,6 +2,7 @@ from method.dataMethod import sql2df
 from request.requestData import request_data2mysql
 from method.logMethod import log_it, MainLog
 from method.mainMethod import sift_codes
+from method.sortCode import random_code_list
 
 from gui.checkTree import CheckTree
 from gui.dataPix import DataPix
@@ -666,21 +667,17 @@ class MainWidget(QWidget):
         # with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     blacklist = json.loads(f.read())
 
-        path = "../basicData/dailyUpdate/latest/s005_code_random.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            random_list = json.loads(f.read())
-
-        with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
-            result = json.loads(f.read())
-            blacklist = list(result.keys())
-
-            tup_list = []
-            for key, value in result.items():
-                tup_list.append((key, value[1]))
-
-            tup_list = sorted(tup_list, key=lambda x: x[1])
-            whitelist = zip(*tup_list).__next__()
-            whitelist = whitelist[:50]
+        # with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
+        #     result = json.loads(f.read())
+        #     blacklist = list(result.keys())
+        #
+        #     tup_list = []
+        #     for key, value in result.items():
+        #         tup_list.append((key, value[1]))
+        #
+        #     tup_list = sorted(tup_list, key=lambda x: x[1])
+        #     whitelist = zip(*tup_list).__next__()
+        #     whitelist = whitelist[:50]
 
         # code_list = ['000002', '000004', '600004', '600006', '600007', '600008']
 
@@ -783,13 +780,16 @@ class MainWidget(QWidget):
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
-            blacklist=blacklist,
+            # blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
+            market='main',
         )
+        code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
+
         # code_list = hold_list + code_list
         # code_list = latest_update + hold_list + code_list
-        code_list = random_list
+
         return code_list
 
     def config_priority(self):
