@@ -309,6 +309,7 @@ def random_code_list(code_list):
             break
 
         picked = pick_number(src_number, pick_weight, 100)
+        print(picked)
         for index, value in enumerate(picked):
             for _ in range(value):
                 code = total_list[index].pop(0)
@@ -404,11 +405,11 @@ def get_random_list():
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
-    code_list = sift_codes(
-        source=code_list,
-        sort=code_list,
-        market='main',
-    )
+    # code_list = sift_codes(
+    #     source=code_list,
+    #     sort=code_list,
+    #     market='main',
+    # )
 
     random_code_list(code_list)
 
