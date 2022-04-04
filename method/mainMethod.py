@@ -138,12 +138,19 @@ def sift_codes(
 
     if market == 'all':
         pass
+
     elif market == 'main':
         for code in set_all:
             if code[:3] == '688':
-                set_black.update(code)
+                set_black.add(code)
             elif code[0] != '0' and code[0] != '6':
-                set_black.update(code)
+                set_black.add(code)
+
+    elif market == 'non_main':
+        for code in set_all:
+            if code[0] == '0' or code[0] == '6':
+                if code[:3] != '688':
+                    set_black.add(code)
 
     set_sift = set_all - set_black
     set_sift.update(set_white)

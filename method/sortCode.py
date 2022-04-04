@@ -249,10 +249,6 @@ def random_code_list(code_list):
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         sorted_list = json.loads(f.read())
 
-    path = "../basicData/dailyUpdate/latest/a001_code_list.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        code_list = json.loads(f.read())
-
     path = "../basicData/self_selected/gui_selected.txt"
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         gui_selected = json.loads(f.read())
@@ -269,7 +265,7 @@ def random_code_list(code_list):
     set_whitelist = set_all & tmp_whitelist - set_selected
     set_normal = set_all - set_selected - set_whitelist
 
-    weight_dict = dict.fromkeys(set_all, 10000000)
+    weight_dict = dict.fromkeys(set_all, 5000)
 
     date1 = dt.date.today()
     with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
@@ -281,23 +277,29 @@ def random_code_list(code_list):
         weight = margin ** 2
         weight_dict[key] = weight
 
-    tmp_dict = dict()
+    weight_counter = dict()
     for weight in weight_dict.values():
-        if weight in tmp_dict:
-            tmp_dict[weight] += 1
+        if weight in weight_counter:
+            weight_counter[weight] += 1
         else:
-            tmp_dict[weight] = 1
+            weight_counter[weight] = 1
 
-    date_list = list(tmp_dict.keys())
-    date_list.sort()
-    for date in date_list:
-        print(date, tmp_dict[date])
+    print('All:', len(set_all))
+    weight_list = list(weight_counter.keys())
+    weight_list.sort()
+    for weight in weight_list:
+        margin = weight ** 0.5
+        date2 = date1 - dt.timedelta(days=margin)
+        date_str = dt.date.strftime(date2, '%Y-%m-%d')
+
+        weight_str = '%s%6s%8s' % (date_str, weight, weight_counter[weight])
+        print(weight_str)
 
     list1 = generate_random_list(set_normal, weight_dict)
     list2 = generate_random_list(set_selected, weight_dict)
     list3 = generate_random_list(set_whitelist, weight_dict)
     total_list = [list1, list2, list3]
-    pick_weight = [30, 40, 30]
+    pick_weight = [75, 10, 15]
 
     ret_list = []
     while True:
@@ -394,6 +396,23 @@ def random_by_weight(src, weight_dict: dict):
             return code
 
 
+def get_random_list():
+    import json
+    from method.mainMethod import sift_codes
+
+    path = "../basicData/dailyUpdate/latest/a001_code_list.txt"
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        code_list = json.loads(f.read())
+
+    code_list = sift_codes(
+        source=code_list,
+        sort=code_list,
+        market='main',
+    )
+
+    random_code_list(code_list)
+
+
 if __name__ == '__main__':
     import pandas as pd
     pd.set_option('display.max_columns', None)
@@ -408,12 +427,4 @@ if __name__ == '__main__':
     # new_enter_code(date_dir)
     # generate_list()
     # get_codes_from_sel()
-    random_code_list(1)
-    # aa = [1, 0, 3]
-    # bb = [96, 50, 80]
-    # # for i in range(100):
-    # #     res = allot_weight(aa, 100)
-    # #     print(res)
-    #
-    # res = pick_number(bb, aa, 100)
-    # print(res)
+    get_random_list()
