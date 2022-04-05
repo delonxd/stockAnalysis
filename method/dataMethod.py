@@ -326,6 +326,7 @@ class DataAnalysis:
         self.fs_add(self.get_column(df, 's_038_pay_for_long_term_asset'))
         self.fs_add(self.get_column(df, 's_039_profit_adjust'))
         self.fs_add(self.get_column(df, 's_040_profit_adjust2'))
+        self.fs_add(self.get_column(df, 's_041_profit_adjust_ttm'))
 
     def config_widget_data(self):
         self.config_sub_fs(DataAnalysis)
@@ -810,6 +811,12 @@ class DataAnalysis:
             s3.name = column
             return s3.dropna()
 
+        elif column == 's_041_profit_adjust_ttm':
+            s1 = self.get_column(df, 's_039_profit_adjust')
+            s2 = s1.rolling(4, min_periods=1).mean()
+            s2.name = column
+            return s2.dropna()
+
     @staticmethod
     def get_return_year(pe, rate):
         a = 1 + rate
@@ -979,9 +986,9 @@ class DailyDataAnalysis(DataAnalysis):
 
         self.fs_add(self.get_column(df, 's_023_liabilities'))
         self.fs_add(self.get_column(df, 's_024_real_liabilities'))
-        self.fs_add(self.get_column(df, 's_038_pay_for_long_term_asset'))
-        self.fs_add(self.get_column(df, 's_039_profit_adjust'))
-        self.fs_add(self.get_column(df, 's_040_profit_adjust2'))
+        # self.fs_add(self.get_column(df, 's_038_pay_for_long_term_asset'))
+        # self.fs_add(self.get_column(df, 's_039_profit_adjust'))
+        # self.fs_add(self.get_column(df, 's_040_profit_adjust2'))
 
 
 def test_analysis():
