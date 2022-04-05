@@ -181,7 +181,14 @@ class DataPix:
             data.columns = [index_name]
             return data
 
-        if index_name == 's_022_profit_no_expenditure':
+        tmp_list = [
+            's_022_profit_no_expenditure',
+            's_038_pay_for_long_term_asset',
+            's_039_profit_adjust',
+            's_040_profit_adjust2',
+        ]
+
+        if index_name in tmp_list:
             data = self.df.loc[:, [index_name]].copy()
             data.dropna(inplace=True)
             data.columns = [index_name]
@@ -424,6 +431,10 @@ class DataPix:
             's_034_real_pe': 'real_pe',
             's_035_pe2rate': 's_035_pe2rate',
             's_036_real_pe2rate': 's_036_real_pe2rate',
+
+            's_038_pay_for_long_term_asset': 's_038_pay_for_long_term_asset',
+            's_039_profit_adjust': 's_039_profit_adjust',
+            's_040_profit_adjust2': 's_040_profit_adjust2',
         }
 
         tmp_list = list(tmp_dict.keys())
