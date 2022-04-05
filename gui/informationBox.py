@@ -25,10 +25,17 @@ class InformationBox:
 
             index_name = ds.index_name
 
+            box_df.loc[index_name, 'real_date'] = None
+
             if date in ds.df.index:
                 box_df.loc[index_name, 'value'] = ds.df.loc[date][0]
             else:
-                box_df.loc[index_name, 'value'] = None
+                s1 = ds.df.iloc[:, 0].copy().dropna()
+                if s1.size > 0:
+                    box_df.loc[index_name, 'value'] = s1[-1]
+                    box_df.loc[index_name, 'real_date'] = s1.index[-1]
+                else:
+                    box_df.loc[index_name, 'value'] = None
 
             box_df.loc[index_name, 'priority'] = ds.info_priority
             box_df.loc[index_name, 'data_source'] = ds
@@ -36,8 +43,6 @@ class InformationBox:
 
             if ds.frequency == 'DAILY':
                 box_df.loc[index_name, 'real_date'] = d1
-            else:
-                box_df.loc[index_name, 'real_date'] = None
 
         box_df.sort_values('priority', inplace=True)
 

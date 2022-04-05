@@ -243,6 +243,7 @@ def copy_file(path1, path2):
 def random_code_list(code_list, pick_weight):
     import json
     import datetime as dt
+    import numpy as np
     from method.mainMethod import sift_codes
 
     path = "../basicData/dailyUpdate/latest/s002_code_sorted_real_pe.txt"
@@ -305,7 +306,7 @@ def random_code_list(code_list, pick_weight):
     while True:
         picked_list = []
         src_number = [len(list1), len(list2), len(list3)]
-        if sum(src_number) == 0:
+        if sum(np.array(src_number) * np.array(pick_weight)) == 0:
             break
 
         picked = pick_number(src_number, pick_weight, 100)

@@ -788,7 +788,8 @@ class MainWidget(QWidget):
             sort=code_list,
             market='main',
         )
-        code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
+        # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
+        code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
         # path = "..\\basicData\\dailyUpdate\\latest\\s005_code_random.txt"
         # path = "..\\basicData\\dailyUpdate\\latest\\s003_code_sorted_roe_parent.txt"
