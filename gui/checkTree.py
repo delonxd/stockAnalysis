@@ -329,7 +329,8 @@ class CheckTree(QTreeWidget):
                     print(e)
 
             elif column_name in ["show_name"]:
-                text, _ = QInputDialog.getText(self, column_name, column_name + ': ')
+                ini = df.loc[index_name, column_name]
+                text, _ = QInputDialog.getText(self, column_name, column_name + ': ', text=ini)
                 df.loc[index_name, column_name] = text
                 item.setText(column, text)
                 self.update_style.emit()

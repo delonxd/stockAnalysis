@@ -159,7 +159,11 @@ if __name__ == '__main__':
     # df0 = add_new_style(df0, 'mir_y10', src='s_027_pe_return_rate')
     # df0 = add_new_style(df0, 's_034_real_pe', src='s_004_pe')
     # df0 = add_new_style(df0, 's_035_pe2rate', src='s_004_pe')
-    df0 = add_new_style(df0, 's_036_real_pe2rate', src='s_004_pe')
+    # df0 = add_new_style(df0, 's_036_real_pe2rate', src='s_004_pe')
+    df0 = add_new_style(df0, 's_037_real_pe_return_rate', src='s_027_pe_return_rate')
+    df0 = add_new_style(df0, 's_038_pay_for_long_term_asset')
+    df0 = add_new_style(df0, 's_039_profit_adjust')
+    df0 = add_new_style(df0, 's_040_profit_adjust2')
     # df0.drop('s_012_return_year', inplace=True)
 
     # df0.loc[

@@ -42,16 +42,19 @@ class InformationBox:
         box_df.sort_values('priority', inplace=True)
 
         res = list()
-        # res.append(('报告日期1: %s' % d1, QPen(Qt.white, 1, Qt.SolidLine)))
-        # res.append(('报告日期2: %s' % d2, QPen(Qt.white, 1, Qt.SolidLine)))
+        res.append((' : 报告日期1 %s' % d1, QPen(Qt.white, 1, Qt.SolidLine)))
+        res.append((' : 报告日期2 %s' % d2, QPen(Qt.white, 1, Qt.SolidLine)))
 
         for _, row in box_df.iterrows():
             name, value, ds = row['show_name'], row['value'], row['data_source']
             txt = ds.format(value)
             if row['real_date'] is not None:
-                txt = '%s (%s)' % (txt, row['real_date'])
+                # txt = '%s (%s)' % (txt, row['real_date'])
+                name = '%s (%s)' % (name, row['real_date'])
 
-            row_txt = '%s: %s' % (name, txt)
+            # num = self.chinese_num(txt)
+            # txt = '{0:>{width}}'.format(txt, width=7-num)
+            row_txt = '%s: %s' % (txt, name)
             pen = QPen(ds.color)
             res.append((row_txt, pen, ds))
 
@@ -65,21 +68,62 @@ class InformationBox:
         text_list3 = list()
 
         for row in text_list:
+            # if len(row) == 2:
+            #     text_list1.append((row[0], row[1]))
+            #     continue
+            #
+            # ds = row[2]
+            # if ds.data_type == 'assets':
+            #     text_list2.append((row[0], row[1]))
+            # else:
+            #     if len(text_list1) > 54:
+            #         text_list2.append((row[0], row[1]))
+            #     else:
+            #         text_list1.append((row[0], row[1]))
+            #
+            # if ds.data_type != 'assets' and ds.data_type != 'equity':
+            #     text_list3.append((row[0], row[1]))
+
             if len(row) == 2:
                 text_list1.append((row[0], row[1]))
+                text_list2.append((row[0], row[1]))
+                text_list3.append((row[0], row[1]))
                 continue
-
             ds = row[2]
-            if ds.data_type == 'assets':
+
+            if ds.data_type == 'equity':
+                text_list1.append((row[0], row[1]))
+            elif ds.data_type == 'assets':
                 text_list2.append((row[0], row[1]))
             else:
-                if len(text_list1) > 54:
-                    text_list2.append((row[0], row[1]))
-                else:
-                    text_list1.append((row[0], row[1]))
-
-            if ds.data_type != 'assets' and ds.data_type != 'equity':
                 text_list3.append((row[0], row[1]))
+
+            page1 = [
+                'id_001_bs_ta',
+                'id_062_bs_tl',
+                'id_063_bs_lwi',
+                'id_065_bs_tl_ta_r',
+                'id_066_bs_tcl',
+                'id_110_bs_toe',
+                'id_117_bs_is',
+                's_017_equity_parent',
+                's_021_cap_expenditure',
+            ]
+
+            page2 = [
+                'id_001_bs_ta',
+                'id_003_bs_tca',
+                'id_032_bs_tnca',
+                's_019_monetary_asset',
+                's_020_cap_asset',
+                's_021_cap_expenditure',
+            ]
+
+            if ds.index_name in page1:
+                text_list1.append((row[0], row[1]))
+
+            if ds.index_name in page2:
+                text_list2.append((row[0], row[1]))
 
         pix1 = self.draw_text(text_list1)
         pix2 = self.draw_text(text_list2)
@@ -98,19 +142,29 @@ class InformationBox:
 
         metrics = pix_painter.fontMetrics()
 
+        max_width1 = max_width2 = 0
+        for row_txt, _ in text_list:
+            txt1, txt2 = row_txt.split(":")
+            max_width1 = max(metrics.width(txt1), max_width1)
+            max_width2 = max(metrics.width(txt2), max_width2)
+
         x = y = blank = 1
-        max_width = 0
+        max_width = max_width1 + max_width2
         row_height = metrics.height() + blank * 2
 
         for row_txt, pen in text_list:
             pix_painter.setPen(pen)
 
-            width = metrics.width(row_txt)
-            rect = QRect(x, y, width, row_height)
-            pix_painter.drawText(rect, Qt.AlignCenter, row_txt)
+            txt1, txt2 = row_txt.split(":")
 
-            if width > max_width:
-                max_width = width
+            width1 = metrics.width(txt1)
+            rect = QRect(x + max_width1 - width1, y, width1, row_height)
+            pix_painter.drawText(rect, Qt.AlignCenter, txt1)
+
+            width2 = metrics.width(txt2)
+            rect = QRect(x + max_width1, y, width2, row_height)
+            pix_painter.drawText(rect, Qt.AlignCenter, txt2)
+
             y += row_height
         pix_painter.end()
 
@@ -125,3 +179,11 @@ class InformationBox:
         pix_painter = QPainter(pix)
         pix_painter.drawPixmap(10, 10, box)
         pix_painter.end()
+
+    @staticmethod
+    def chinese_num(data):
+        ret = 0
+        for s in data:
+            if ord(s) > 127:
+                ret += 1
+        return ret
