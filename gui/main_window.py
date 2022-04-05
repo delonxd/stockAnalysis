@@ -667,6 +667,8 @@ class MainWidget(QWidget):
         # with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     blacklist = json.loads(f.read())
 
+        ################################################################################################################
+
         # with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
         #     result = json.loads(f.read())
         #     blacklist = list(result.keys())
@@ -679,10 +681,7 @@ class MainWidget(QWidget):
         #     whitelist = zip(*tup_list).__next__()
         #     whitelist = whitelist[:50]
 
-        # code_list = ['000002', '000004', '600004', '600006', '600007', '600008']
-
-        # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
-        #     code_list = json.loads(f.read())
+        ################################################################################################################
 
         # dir0 = 'update_20220331153503'
         dir0 = 'latest'
@@ -785,11 +784,16 @@ class MainWidget(QWidget):
             sort=code_list,
             market='main',
         )
-        code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
+        # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
+
+        path = "..\\basicData\\dailyUpdate\\latest\\s005_code_random.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            code_list = json.loads(f.read())
 
         # code_list = hold_list + code_list
         # code_list = latest_update + hold_list + code_list
 
+        # code_list = hold_list
         return code_list
 
     def config_priority(self):
