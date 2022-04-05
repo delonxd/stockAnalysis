@@ -323,6 +323,10 @@ class DataAnalysis:
         self.fs_add(self.get_column(df, 's_023_liabilities'))
         self.fs_add(self.get_column(df, 's_024_real_liabilities'))
 
+        self.fs_add(self.get_column(df, 's_038_pay_for_long_term_asset'))
+        self.fs_add(self.get_column(df, 's_039_profit_adjust'))
+        self.fs_add(self.get_column(df, 's_040_profit_adjust2'))
+
     def config_widget_data(self):
         self.config_sub_fs(DataAnalysis)
         self.fs_add(self.get_column(self.df_fs, 'dt_fs'))
@@ -767,6 +771,45 @@ class DataAnalysis:
             s3.name = column
             return s3.dropna()
 
+        elif column == 's_038_pay_for_long_term_asset':
+            s1 = self.smooth_data('tmp', 'id_271_cfs_cpfpfiaolta', delta=True)
+            s2 = self.smooth_data('tmp', 'id_265_cfs_crfdofiaolta', delta=True)
+            s3 = s1 - s2
+            s3.name = column
+            return s3.dropna()
+
+        elif column == 's_039_profit_adjust':
+            adjust_dict = {
+                'id_298_cfs_np': '净利润',
+                'id_299_cfs_ioa': '加： 资产减值准备',
+                'id_300_cfs_cilor': '信用减值损失',
+                'id_301_cfs_dofx_dooaga_dopba': '固定资产折旧、油气资产折耗、生产性生物资产折旧',
+                'id_302_cfs_daaorei': '投资性房地产的折旧及摊销',
+                'id_303_cfs_aoia': '无形资产摊销',
+                'id_304_cfs_aoltde': '长期待摊费用摊销',
+                'id_305_cfs_lodofaiaaolta': '处置固定资产、无形资产和其他长期资产的损失',
+                'id_306_cfs_lfsfa': '固定资产报废损失',
+                # 'id_307_cfs_lfcifv': '公允价值变动损失',
+                'id_312_cfs_dii': '存货的减少',
+            }
+
+            index_list = list(adjust_dict.keys())
+            res_df = df.loc[:, index_list].copy().dropna(axis=0, how='all')
+            res_df = pd.DataFrame(res_df.apply(lambda x: x.sum(), axis=1))
+
+            new_df = get_month_delta(res_df, column)
+            s1 = new_df[column]
+            return s1.dropna()
+
+        elif column == 's_040_profit_adjust2':
+            s1 = self.get_column(df, 's_039_profit_adjust')
+            s2 = self.get_column(df, 's_038_pay_for_long_term_asset')
+            s3 = s1 - s2
+            s3 = s3.dropna()
+            s3 = s3.rolling(4, min_periods=1).mean()
+            s3.name = column
+            return s3.dropna()
+
     @staticmethod
     def get_return_year(pe, rate):
         a = 1 + rate
@@ -936,20 +979,35 @@ class DailyDataAnalysis(DataAnalysis):
 
         self.fs_add(self.get_column(df, 's_023_liabilities'))
         self.fs_add(self.get_column(df, 's_024_real_liabilities'))
+        self.fs_add(self.get_column(df, 's_038_pay_for_long_term_asset'))
+        self.fs_add(self.get_column(df, 's_039_profit_adjust'))
+        self.fs_add(self.get_column(df, 's_040_profit_adjust2'))
+
+
+def test_analysis():
+    code = '603889'
+    # code = '600519'
+
+    df1 = load_df_from_mysql(code, 'fs')
+    df2 = load_df_from_mysql(code, 'mvs')
+
+    data = DataAnalysis(df1, df2)
+    # data.config_widget_data()
+    data.config_daily_data()
+    # s1 = data.df['s_028_market_value'].copy()
+    # print(s1)
+
+    # s2 = data.df['s_018_profit_parent'].copy().dropna()
+    s2 = data.df['s_040_profit_adjust2'].copy().dropna()
+    # s2 = data.df['s_038_pay_for_long_term_asset'].copy().dropna()
+    # s2 = data.df['s_039_profit_adjust'].copy().dropna()
+    print(s2)
 
 
 if __name__ == '__main__':
-    # # sql2df('000002')
-    # str2 = "from __main__ import sql2df_mvs"
-    # t0 = timeit.Timer("sql2df_mvs('000004')", str2)
-    # print(t0.timeit(10))
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.width', 10000)
 
-    # combine_style_df()
-    #
-    # res = sql2df('600006')
-    # print(res)
-
-    # a = (dt.datetime.now() - dt.timedelta(hours=16)).date().strftime("%Y-%m-%d") + ' 16:00:00'
-    # a = a + ' 16:00:00'
-    # print(a)
+    test_analysis()
     pass
