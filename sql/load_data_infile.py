@@ -117,7 +117,7 @@ def input_databases():
     src_dir = "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads"
     # src_dir = "F:/MysqlUploads"
 
-    backups = 'backups_20220401'
+    backups = 'backups'
 
     root = '%s/%s/' % (src_dir, backups)
     dir_list = [x for x in os.listdir(root) if os.path.isdir(root + x)]

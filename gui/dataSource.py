@@ -91,7 +91,7 @@ class DataSource:
         self.metrics = None
 
         if self.ds_type == 'digit':
-            self.format_fun = lambda x: '--%s' % units if x == 0 else '%.2f%s' % (x / self.ratio, units)
+            self.format_fun = lambda x: '--' if x == 0 else '%.2f%s' % (x / self.ratio, units)
         else:
             self.format_fun = lambda x: '%s' % x
 
