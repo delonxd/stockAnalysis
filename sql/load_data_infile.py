@@ -124,7 +124,8 @@ def input_databases():
 
     for database in dir_list:
         dir_path = root + database + '/'
-        input_database(dir_path, 'testData')
+        # input_database(dir_path, 'testData')
+        input_database(dir_path, database)
 
 
 if __name__ == '__main__':
