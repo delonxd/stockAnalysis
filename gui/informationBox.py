@@ -12,7 +12,7 @@ class InformationBox:
         self.parent = parent
         self.background = None
 
-    def load_value(self, d1, d2):
+    def load_value(self, d1, d2, d_report):
         box_df = pd.DataFrame(columns=['priority', 'data_source', 'show_name', 'value', 'real_date'])
 
         for ds in self.parent.data_dict.values():
@@ -47,8 +47,9 @@ class InformationBox:
         box_df.sort_values('priority', inplace=True)
 
         res = list()
-        res.append((' : 报告日期1 %s' % d1, QPen(Qt.white, 1, Qt.SolidLine)))
-        res.append((' : 报告日期2 %s' % d2, QPen(Qt.white, 1, Qt.SolidLine)))
+        res.append(('公布日期: %s' % d_report, QPen(Qt.red, 1, Qt.SolidLine)))
+        res.append(('报告日期: %s' % d2, QPen(Qt.white, 1, Qt.SolidLine)))
+        res.append(('当前日期: %s' % d1, QPen(Qt.white, 1, Qt.SolidLine)))
 
         for _, row in box_df.iterrows():
             name, value, ds = row['show_name'], row['value'], row['data_source']

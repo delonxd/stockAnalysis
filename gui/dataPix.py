@@ -574,9 +574,9 @@ class DataPix:
         if self.df.shape[0] == 0:
             return
 
-        x, y, d0, d1, d2 = self.get_d1_d2(x, y)
+        x, y, d0, d1, d2, d_report = self.get_d1_d2(x, y)
         box = InformationBox(parent=self)
-        box = box.draw_pix(d1, d2)
+        box = box.draw_pix(d1, d2, d_report)
 
         show1 = self.draw_sub_cross(x, y, d0, d1, d2, state, box[0], self.pix)
         show2 = self.draw_sub_cross(x, y, d0, d1, d2, False, box[1], self.pix2)
@@ -607,7 +607,7 @@ class DataPix:
         d_report = self.get_last_date(d0, self.dt_fs.index.values)
         d2 = None if d_report is None else self.dt_fs[d_report]
 
-        return x, y, d0, d1, d2
+        return x, y, d0, d1, d2, d_report
 
     def draw_sub_cross(self, x, y, d0, d1, d2, state, box, pix):
 
