@@ -593,6 +593,13 @@ class MainWidget(QWidget):
         list0.append('%.2f%%%s' % (self.max_increase_30*100, self.get_sign(self.max_increase_30)))
         list0.append(txt_counter)
 
+        path = "../basicData/self_selected/gui_assessment.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            value_dict = json.loads(f.read())
+            ass = value_dict.get(code)
+            if ass is not None:
+                list0.append('%s亿' % ass)
+
         txt3 = '/'.join(list0)
 
         GuiLog.add_log('show stock --> ' + txt1)

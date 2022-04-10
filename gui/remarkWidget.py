@@ -68,6 +68,7 @@ class RemarkWidget(QWidget):
         res = json.dumps(value_dict, indent=4, ensure_ascii=False)
         with open(path, "w", encoding='utf-8') as f:
             f.write(res)
+        self.main_widget.show_stock_name()
 
     def download(self):
         self.code = code = self.main_widget.stock_code
