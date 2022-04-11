@@ -266,7 +266,7 @@ def random_code_list(code_list, pick_weight):
     set_whitelist = set_all & tmp_whitelist - set_selected
     set_normal = set_all - set_selected - set_whitelist
 
-    weight_dict = dict.fromkeys(set_all, 5000)
+    weight_dict = dict.fromkeys(set_all, 50000)
 
     date1 = dt.date.today()
     with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
