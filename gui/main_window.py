@@ -676,9 +676,9 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        # with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
-        #     result = json.loads(f.read())
-        #     blacklist = list(result.keys())
+        with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
+            result = json.loads(f.read())
+            blacklist = list(result.keys())
         #
         #     tup_list = []
         #     for key, value in result.items():
@@ -790,14 +790,14 @@ class MainWidget(QWidget):
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
-            # blacklist=blacklist,
+            blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
             # market='main',
             market='all',
         )
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
-        code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
+        # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
         # path = "..\\basicData\\dailyUpdate\\latest\\s005_code_random.txt"
         # path = "..\\basicData\\dailyUpdate\\latest\\s003_code_sorted_roe_parent.txt"

@@ -293,7 +293,7 @@ def random_code_list(code_list, pick_weight):
         date2 = date1 - dt.timedelta(days=margin)
         date_str = dt.date.strftime(date2, '%Y-%m-%d')
 
-        weight_str = '%s%6s%8s' % (date_str, weight, weight_counter[weight])
+        weight_str = '%s%12s%8s' % (date_str, weight, weight_counter[weight])
         print(weight_str)
 
     list1 = generate_random_list(set_normal, weight_dict)
