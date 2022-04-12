@@ -121,6 +121,8 @@ def daily_update():
     tmp_list = []
     counter = 1
 
+    report_date_dict = dict()
+
     while index < end:
         try:
             code = all_codes[index]
@@ -137,6 +139,9 @@ def daily_update():
             data.config_daily_data()
 
             df = data.df[columns].copy()
+            s1 = data.df['dt_fs'].copy().dropna()
+            report_date = s1.index[-1] if s1.size > 0 else ''
+            report_date_dict[code] = report_date
 
         except Exception as e:
             print(e)
@@ -158,6 +163,11 @@ def daily_update():
         file = '%s\\%s_%s.pkl' % (sub_dir, timestamp, counter)
         with open(file, "wb") as f:
             pickle.dump(tmp_list, f)
+
+    res = json.dumps(report_date_dict, indent=4, ensure_ascii=False)
+    file = '%s\\report_date_dict.txt' % res_dir
+    with open(file, "w", encoding='utf-8') as f:
+        f.write(res)
 
     MainLog.add_log('data analysis complete')
 
