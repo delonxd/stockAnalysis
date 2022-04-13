@@ -259,6 +259,10 @@ def random_code_list(code_list, pick_weight):
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         gui_whitelist = json.loads(f.read())
 
+    path = "../basicData/dailyUpdate/latest/a003_report_date_dict.txt"
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        report_date_dict = json.loads(f.read())
+
     set_all = set(code_list)
     tmp_selected = set(gui_selected)
     tmp_whitelist = set(gui_whitelist)
@@ -267,16 +271,29 @@ def random_code_list(code_list, pick_weight):
     set_whitelist = set_all & tmp_whitelist - set_selected
     set_normal = set_all - set_selected - set_whitelist
 
-    weight_dict = dict.fromkeys(set_all, 50000)
+    base_rate = 100000
+    weight_dict = dict.fromkeys(set_all, base_rate * 3000)
 
     date1 = dt.date.today()
     with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
-        result = json.loads(f.read())
+        gui_counter = json.loads(f.read())
 
-    for key, value in result.items():
+    for key, value in gui_counter.items():
+
+        report_date = report_date_dict.get(key)
+        if report_date is None or report_date == 'Invalid da':
+            report_date = ''
+        tmp_rate = base_rate if report_date > value[1] else 1
+
         date2 = dt.datetime.strptime(value[1], '%Y-%m-%d').date()
         margin = (date1 - date2).days
-        weight = margin ** 2
+
+        if margin == 1 and tmp_rate == base_rate:
+            print(key, report_date, value[1])
+
+        if margin >= 40:
+            print(key, date2)
+        weight = margin ** 2 * tmp_rate
         weight_dict[key] = weight
 
     weight_counter = dict()
@@ -290,11 +307,15 @@ def random_code_list(code_list, pick_weight):
     weight_list = list(weight_counter.keys())
     weight_list.sort()
     for weight in weight_list:
-        margin = weight ** 0.5
+        if weight % base_rate == 0:
+            margin = (weight / base_rate) ** 0.5
+        else:
+            margin = weight ** 0.5
+
         date2 = date1 - dt.timedelta(days=margin)
         date_str = dt.date.strftime(date2, '%Y-%m-%d')
 
-        weight_str = '%s%12s%8s' % (date_str, weight, weight_counter[weight])
+        weight_str = '%s%18s%8s' % (date_str, weight, weight_counter[weight])
         print(weight_str)
 
     list1 = generate_random_list(set_normal, weight_dict)
