@@ -218,6 +218,7 @@ def save_latest_list(dir_str):
     files = [
         'a001_code_list.txt',
         'a002_name_dict.txt',
+        'a003_report_date_dict.txt',
         's001_code_sorted_pe.txt',
         's002_code_sorted_real_pe.txt',
         's003_code_sorted_roe_parent.txt',
@@ -424,12 +425,12 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    date_dir = 'update_20220401153504'
+    date_dir = 'update_20220412153503'
 
-    # save_latest_list(date_dir)
+    save_latest_list(date_dir)
     # load_daily_res(date_dir)
     # sort_daily_code(date_dir)
     # new_enter_code(date_dir)
     # generate_list()
     # get_codes_from_sel()
-    get_random_list()
+    # get_random_list()
