@@ -25,6 +25,7 @@ import json
 import re
 import threading
 import time
+import datetime as dt
 
 import numpy as np
 import pandas as pd
@@ -492,8 +493,8 @@ class MainWidget(QWidget):
         last_real_pe = np.inf
         number = 0
 
-        date = ''
-        real_pe = None
+        date = (dt.date.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d')
+        real_pe = np.inf
         if 's_034_real_pe' in df.columns:
             s0 = self.data_pix.df['s_034_real_pe'].copy().dropna()
             if s0.size > 0:
