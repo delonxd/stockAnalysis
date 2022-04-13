@@ -92,8 +92,8 @@ class MainWidget(QWidget):
         self.codes_df = CodesDataFrame(code_list)
         # self.codes_df.init_current_index(index=1100)
         self.codes_df.init_current_index(index=0)
-        # self.codes_df.init_current_index(code='300646')
-        # self.codes_df.init_current_index(code='600420')
+        # self.codes_df.init_current_index(code='688261')
+        # self.codes_df.init_current_index(code='002260')
 
         self.style_df = load_default_style()
 
@@ -493,7 +493,11 @@ class MainWidget(QWidget):
         last_real_pe = np.inf
         number = 0
 
-        date = (dt.date.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d')
+        if df.columns.size > 0:
+            date = (dt.date.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d')
+        else:
+            date = ''
+
         real_pe = np.inf
         if 's_034_real_pe' in df.columns:
             s0 = self.data_pix.df['s_034_real_pe'].copy().dropna()
@@ -791,13 +795,13 @@ class MainWidget(QWidget):
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
-            blacklist=blacklist,
+            # blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
             # market='main',
             market='all',
         )
-        # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
+        code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
         # path = "..\\basicData\\dailyUpdate\\latest\\s005_code_random.txt"
