@@ -23,6 +23,7 @@ def daily_update():
     import time
     import pickle
     import datetime as dt
+    import numpy as np
 
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
 
@@ -109,7 +110,7 @@ def daily_update():
         's_022_profit_no_expenditure',
         # 's_023_liabilities',
         # 's_024_real_liabilities',
-        # 's_025_real_cost',
+        's_025_real_cost',
         's_026_holder_return_rate',
         's_027_pe_return_rate',
         's_028_market_value',
@@ -122,6 +123,7 @@ def daily_update():
     counter = 1
 
     report_date_dict = dict()
+    real_cost_dict = dict()
 
     while index < end:
         try:
@@ -139,9 +141,14 @@ def daily_update():
             data.config_daily_data()
 
             df = data.df[columns].copy()
+
             s1 = data.df['dt_fs'].copy().dropna()
             report_date = s1.index[-1] if s1.size > 0 else ''
             report_date_dict[code] = report_date
+
+            s2 = data.df['s_025_real_cost'].copy().dropna()
+            real_cost = s2[-1] if s2.size > 0 else np.inf
+            real_cost_dict[code] = real_cost
 
         except Exception as e:
             print(e)
@@ -166,6 +173,11 @@ def daily_update():
 
     res = json.dumps(report_date_dict, indent=4, ensure_ascii=False)
     file = '%s\\report_date_dict.txt' % res_dir
+    with open(file, "w", encoding='utf-8') as f:
+        f.write(res)
+
+    res = json.dumps(real_cost_dict, indent=4, ensure_ascii=False)
+    file = '%s\\real_cost_dict.txt' % res_dir
     with open(file, "w", encoding='utf-8') as f:
         f.write(res)
 
