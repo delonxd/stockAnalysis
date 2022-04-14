@@ -52,8 +52,8 @@ class DataPix:
         self.pix_list = [self.pix, self.pix2, self.pix3, self.pix4]
 
         # date metrics
-        self.date_max = dt.date(2022, 7, 20)
-        self.date_min = dt.date(1996, 7, 20)
+        self.date_max = dt.date(2023, 7, 20)
+        self.date_min = dt.date(1997, 7, 20)
         self.d_date = (self.date_max - self.date_min).days
 
         self.date_metrics1 = self.get_date_list('INTERIM')

@@ -674,24 +674,8 @@ class MainWidget(QWidget):
             new_index = (self.code_index - 1) % self.len_list
             self.change_stock(new_index)
 
-    @staticmethod
-    def get_code_list():
-        # with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
-        #     blacklist = json.loads(f.read())
-
-        ################################################################################################################
-
-        with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
-            result = json.loads(f.read())
-            blacklist = list(result.keys())
-        #
-        #     tup_list = []
-        #     for key, value in result.items():
-        #         tup_list.append((key, value[1]))
-        #
-        #     tup_list = sorted(tup_list, key=lambda x: x[1])
-        #     whitelist = zip(*tup_list).__next__()
-        #     whitelist = whitelist[:50]
+    def get_code_list(self):
+        blacklist = self.get_blacklist()
 
         ################################################################################################################
 
@@ -795,13 +779,13 @@ class MainWidget(QWidget):
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
-            # blacklist=blacklist,
+            blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
             # market='main',
             market='all',
         )
-        code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
+        # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
         # path = "..\\basicData\\dailyUpdate\\latest\\s005_code_random.txt"
@@ -814,6 +798,40 @@ class MainWidget(QWidget):
 
         # code_list = hold_list
         return code_list
+
+    @staticmethod
+    def get_blacklist():
+        blacklist = []
+
+        # with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
+        #     blacklist = json.loads(f.read())
+
+        ################################################################################################################
+
+        path = "../basicData/dailyUpdate/latest/a003_report_date_dict.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            report_date_dict = json.loads(f.read())
+
+        with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
+            gui_counter = json.loads(f.read())
+            # blacklist = list(gui_counter.keys())
+
+        for key, value in gui_counter.items():
+            report_date = report_date_dict.get(key)
+            if report_date is None or report_date == 'Invalid da':
+                report_date = ''
+            if report_date <= value[1]:
+                blacklist.append(key)
+
+        #     tup_list = []
+        #     for key, value in result.items():
+        #         tup_list.append((key, value[1]))
+        #
+        #     tup_list = sorted(tup_list, key=lambda x: x[1])
+        #     whitelist = zip(*tup_list).__next__()
+        #     whitelist = whitelist[:50]
+
+        return blacklist
 
     def config_priority(self):
         widget = PriorityTable(self.style_df)
