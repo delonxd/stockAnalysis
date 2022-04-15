@@ -441,6 +441,31 @@ def get_random_list():
     return ret
 
 
+def sort_discount():
+    import json
+    path = "../basicData/self_selected/gui_assessment.txt"
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        assessment_dict = json.loads(f.read())
+
+    path = "../basicData/dailyUpdate/latest/a004_real_cost_dict.txt"
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        real_cost_dict = json.loads(f.read())
+
+    tmp = []
+    for key, value in assessment_dict.items():
+        real_cost = real_cost_dict.get(key)
+
+        assessment = int(value)
+        if real_cost is not None:
+            discount = real_cost / assessment
+            tmp.append([key, discount])
+
+    tmp.sort(key=lambda x: x[1])
+
+    ret = list(list(zip(*tmp))[0])
+    return ret
+
+
 if __name__ == '__main__':
     import pandas as pd
     pd.set_option('display.max_columns', None)

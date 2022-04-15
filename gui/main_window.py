@@ -2,7 +2,7 @@ from method.dataMethod import sql2df
 from request.requestData import request_data2mysql
 from method.logMethod import log_it, MainLog
 from method.mainMethod import sift_codes
-from method.sortCode import random_code_list
+from method.sortCode import random_code_list, sort_discount
 
 from gui.checkTree import CheckTree
 from gui.dataPix import DataPix
@@ -776,14 +776,16 @@ class MainWidget(QWidget):
         # with open(path, "r", encoding="utf-8", errors="ignore") as f:
         #     code_list = json.loads(f.read())
 
+        code_list = sort_discount()
+
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
-            blacklist=blacklist,
+            # blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
-            # market='main',
-            market='all',
+            market='main',
+            # market='all',
         )
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
