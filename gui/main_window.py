@@ -776,7 +776,7 @@ class MainWidget(QWidget):
         # with open(path, "r", encoding="utf-8", errors="ignore") as f:
         #     code_list = json.loads(f.read())
 
-        code_list = sort_discount()
+        # code_list = sort_discount()
 
         code_list = sift_codes(
             source=code_list,
@@ -784,9 +784,10 @@ class MainWidget(QWidget):
             # blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
-            market='main',
-            # market='all',
+            # market='main',
+            market='all',
         )
+        code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
