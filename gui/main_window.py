@@ -91,7 +91,7 @@ class MainWidget(QWidget):
 
         self.codes_df = CodesDataFrame(code_list)
         # self.codes_df.init_current_index(index=1100)
-        self.codes_df.init_current_index(index=2)
+        self.codes_df.init_current_index(index=64)
         # self.codes_df.init_current_index(code='688261')
         # self.codes_df.init_current_index(code='002260')
 
@@ -624,10 +624,14 @@ class MainWidget(QWidget):
         real_cost = self.real_cost
 
         txt_bottom1 = 'None'
-        if ass is not None and real_cost is not None:
-            rate = real_cost / ass
-            txt_bottom1 = '%.2f亿/%s亿' % (real_cost, ass)
-            list0.append('%.2f' % rate)
+
+        if real_cost is not None:
+            if ass is not None:
+                rate = real_cost / ass
+                txt_bottom1 = '%.2f亿 / %s亿' % (real_cost, ass)
+                list0.append('%.2f' % rate)
+            else:
+                txt_bottom1 = '%s%.2f亿' % ('cost: ', real_cost)
 
         txt3 = '/'.join(list0)
         txt_bottom2 = '/'.join(list1)
@@ -819,15 +823,15 @@ class MainWidget(QWidget):
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
-        # path = "..\\basicData\\dailyUpdate\\latest\\s005_code_random.txt"
+        path = "..\\basicData\\dailyUpdate\\latest\\s005_code_random.txt"
         # path = "..\\basicData\\dailyUpdate\\latest\\s003_code_sorted_roe_parent.txt"
-        # with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        #     code_list = json.loads(f.read())
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            code_list = json.loads(f.read())
 
         # code_list = hold_list + code_list
         # code_list = latest_update + hold_list + code_list
 
-        code_list = hold_list
+        # code_list = hold_list
         return code_list
 
     @staticmethod
