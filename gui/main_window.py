@@ -91,7 +91,7 @@ class MainWidget(QWidget):
 
         self.codes_df = CodesDataFrame(code_list)
         # self.codes_df.init_current_index(index=1100)
-        self.codes_df.init_current_index(index=0)
+        self.codes_df.init_current_index(index=2)
         # self.codes_df.init_current_index(code='688261')
         # self.codes_df.init_current_index(code='002260')
 
@@ -144,6 +144,7 @@ class MainWidget(QWidget):
         self.web_widget = WebWidget()
         self.equity_change_widget = EquityChangeWidget()
         self.counter_info = None
+        self.real_cost = None
         self.max_increase_30 = 0
 
         self.window2 = ShowPix(main_window=self)
@@ -189,9 +190,12 @@ class MainWidget(QWidget):
         self.head_label3.setFont(QFont('Consolas', 16))
         self.head_label3.setPalette(p)
 
-        self.bottom_label1.setFont(QFont('Consolas', 16))
+        self.head_label3.setFont(QFont('Consolas', 16))
+        self.head_label3.setPalette(p)
+
+        self.bottom_label1.setFont(QFont('Consolas', 12))
         self.bottom_label1.setPalette(p)
-        self.bottom_label2.setFont(QFont('Consolas', 16))
+        self.bottom_label2.setFont(QFont('Consolas', 12))
         self.bottom_label2.setPalette(p)
 
         layout0 = QHBoxLayout()
@@ -207,7 +211,9 @@ class MainWidget(QWidget):
         layout1.addStretch(1)
 
         layout2 = QHBoxLayout()
-        layout2.addStretch(1)
+        # layout2.addStretch(1)
+        layout2.addWidget(self.bottom_label1, 1, Qt.AlignLeft | Qt.AlignTop)
+
         layout2.addWidget(self.button1, 0, Qt.AlignCenter)
         layout2.addWidget(self.button2, 0, Qt.AlignCenter)
         layout2.addWidget(self.button3, 0, Qt.AlignCenter)
@@ -221,7 +227,9 @@ class MainWidget(QWidget):
         layout2.addWidget(self.button11, 0, Qt.AlignCenter)
         layout2.addWidget(self.button12, 0, Qt.AlignCenter)
         layout2.addWidget(self.editor1, 0, Qt.AlignCenter)
-        layout2.addStretch(1)
+
+        layout2.addWidget(self.bottom_label2, 1, Qt.AlignRight | Qt.AlignTop)
+        # layout2.addStretch(1)
         # layout2.addWidget(button1, 0, Qt.AlignCenter)
 
         layout3 = QHBoxLayout()
@@ -514,6 +522,12 @@ class MainWidget(QWidget):
                 minimum = min(s0[-size0:])
                 self.max_increase_30 = recent / minimum - 1
 
+        self.real_cost = None
+        if 's_025_real_cost' in df.columns:
+            s0 = self.data_pix.df['s_025_real_cost'].copy().dropna()
+            if s0.size > 0:
+                self.real_cost = s0[-1] / 1e8
+
         path = "../basicData/self_selected/gui_counter.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             res_dict = json.loads(f.read())
@@ -564,6 +578,7 @@ class MainWidget(QWidget):
 
         code = row['code']
         list0 = []
+        list1 = []
 
         path = "../basicData/self_selected/gui_selected.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
@@ -596,21 +611,34 @@ class MainWidget(QWidget):
             txt_counter = '%s次/%.2f%%[%s]' % (data, np.inf, '')
 
         list0.append('%.2f%%%s' % (self.max_increase_30*100, self.get_sign(self.max_increase_30)))
-        list0.append(txt_counter)
+        list1.append(txt_counter)
 
+        ass = None
         path = "../basicData/self_selected/gui_assessment.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             value_dict = json.loads(f.read())
-            ass = value_dict.get(code)
-            if ass is not None:
-                list0.append('%s亿' % ass)
+            ass_str = value_dict.get(code)
+            if ass_str is not None:
+                ass = int(ass_str)
+
+        real_cost = self.real_cost
+
+        txt_bottom1 = 'None'
+        if ass is not None and real_cost is not None:
+            rate = real_cost / ass
+            txt_bottom1 = '%.2f亿/%s亿' % (real_cost, ass)
+            list0.append('%.2f' % rate)
 
         txt3 = '/'.join(list0)
+        txt_bottom2 = '/'.join(list1)
 
         GuiLog.add_log('show stock --> ' + txt1)
         self.head_label1.setText(txt1)
         self.head_label2.setText(txt2)
         self.head_label3.setText(txt3)
+
+        self.bottom_label1.setText(txt_bottom1)
+        self.bottom_label2.setText(txt_bottom2)
 
         if code in self.show_list:
             index = self.show_list.index(code)
@@ -787,7 +815,7 @@ class MainWidget(QWidget):
             # market='main',
             market='all',
         )
-        code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
+        # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
@@ -799,7 +827,7 @@ class MainWidget(QWidget):
         # code_list = hold_list + code_list
         # code_list = latest_update + hold_list + code_list
 
-        # code_list = hold_list
+        code_list = hold_list
         return code_list
 
     @staticmethod
