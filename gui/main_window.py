@@ -813,7 +813,7 @@ class MainWidget(QWidget):
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
-            # blacklist=blacklist,
+            blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
             # market='main',
@@ -823,10 +823,10 @@ class MainWidget(QWidget):
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
-        path = "..\\basicData\\dailyUpdate\\latest\\s005_code_random.txt"
-        # path = "..\\basicData\\dailyUpdate\\latest\\s003_code_sorted_roe_parent.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            code_list = json.loads(f.read())
+        # path = "..\\basicData\\dailyUpdate\\latest\\s005_code_random.txt"
+        # # path = "..\\basicData\\dailyUpdate\\latest\\s003_code_sorted_roe_parent.txt"
+        # with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        #     code_list = json.loads(f.read())
 
         # code_list = hold_list + code_list
         # code_list = latest_update + hold_list + code_list
