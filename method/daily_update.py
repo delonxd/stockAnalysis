@@ -79,6 +79,8 @@ def daily_update():
     with open(file, "w", encoding='utf-8') as f:
         f.write(res)
 
+    update_all_data(updated_code, start_date='1970-01-01')
+
     sub_dir = '%s\\res_daily' % res_dir
     os.makedirs(sub_dir)
 

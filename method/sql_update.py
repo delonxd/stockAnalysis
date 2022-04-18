@@ -209,6 +209,7 @@ def update_latest_data2():
 
 
 if __name__ == '__main__':
+    import json
     import pandas as pd
 
     # pd.set_option('display.max_columns', None)
@@ -217,4 +218,10 @@ if __name__ == '__main__':
 
     # mysql_update()
     # mysql_update_daily()
-    update_latest_data2()
+    # update_latest_data2()
+
+    path = "..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt"
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        code_list = json.loads(f.read())
+
+    update_all_data(code_list, start_date='1970-01-01')
