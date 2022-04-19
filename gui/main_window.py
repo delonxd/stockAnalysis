@@ -832,6 +832,12 @@ class MainWidget(QWidget):
         # code_list = latest_update + hold_list + code_list
 
         # code_list = hold_list
+
+        # res = json.dumps(code_list, indent=4, ensure_ascii=False)
+        # file = '..\\basicData\\analyzedData\\temp_codes.txt'
+        # with open(file, "w", encoding='utf-8') as f:
+        #     f.write(res)
+
         return code_list
 
     @staticmethod
