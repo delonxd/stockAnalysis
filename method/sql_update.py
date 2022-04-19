@@ -208,9 +208,25 @@ def update_latest_data2():
         index += 1
 
 
+def tmp_update():
+    # path = "..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt"
+    path = "..\\basicData\\analyzedData\\temp_codes.txt"
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        code_list = json.loads(f.read())
+
+    for code in code_list:
+        request_data2mysql(
+            stock_code=code,
+            data_type='fs',
+            start_date='2021-01-01',
+        )
+    # update_all_data(code_list, start_date='2021-01-01')
+
+
 if __name__ == '__main__':
     import json
     import pandas as pd
+    from request.requestData import request_data2mysql
 
     # pd.set_option('display.max_columns', None)
     # pd.set_option('display.max_rows', None)
@@ -220,8 +236,3 @@ if __name__ == '__main__':
     # mysql_update_daily()
     # update_latest_data2()
 
-    path = "..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        code_list = json.loads(f.read())
-
-    update_all_data(code_list, start_date='1970-01-01')

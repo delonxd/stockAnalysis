@@ -18,6 +18,7 @@ def daily_update():
     from method.sortCode import save_latest_list
     from sql.load_data_infile import output_databases
     from request.requestMirData import request_mir_y10
+    from request.requestData import request_data2mysql
 
     import json
     import time
@@ -71,7 +72,7 @@ def daily_update():
     ret1 = update_all_data(new_codes, start_date='1970-01-01')
     ret2 = update_latest_data(all_codes)
 
-    updated_code = list(set(ret1) or set(ret2))
+    updated_code = list(set(ret1 + ret2))
     updated_code.sort()
 
     res = json.dumps(updated_code, indent=4, ensure_ascii=False)
@@ -79,7 +80,12 @@ def daily_update():
     with open(file, "w", encoding='utf-8') as f:
         f.write(res)
 
-    update_all_data(updated_code, start_date='1970-01-01')
+    for code in updated_code:
+        request_data2mysql(
+            stock_code=code,
+            data_type='fs',
+            start_date='2021-01-01',
+        )
 
     sub_dir = '%s\\res_daily' % res_dir
     os.makedirs(sub_dir)
