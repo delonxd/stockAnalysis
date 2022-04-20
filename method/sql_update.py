@@ -210,7 +210,8 @@ def update_latest_data2():
 
 def tmp_update():
     # path = "..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt"
-    path = "..\\basicData\\analyzedData\\temp_codes.txt"
+    # path = "..\\basicData\\analyzedData\\temp_codes.txt"
+    path = "..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt"
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
@@ -235,4 +236,5 @@ if __name__ == '__main__':
     # mysql_update()
     # mysql_update_daily()
     # update_latest_data2()
+    tmp_update()
 
