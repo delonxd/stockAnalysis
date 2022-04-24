@@ -745,8 +745,8 @@ class MainWidget(QWidget):
 
         root = "..\\basicData\\dailyUpdate\\%s" % dir0
         # file = "code_sorted_real_pe.txt"
-        # file = "s002_code_sorted_real_pe.txt"
-        file = "s003_code_sorted_roe_parent.txt"
+        file = "s002_code_sorted_real_pe.txt"
+        # file = "s003_code_sorted_roe_parent.txt"
 
         with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
             code_list = json.loads(f.read())
@@ -802,7 +802,7 @@ class MainWidget(QWidget):
         #     txt = f.read()
         #     code_list = re.findall(r'([0-9]{6})', txt)
         #     code_list.reverse()
- 
+
         ################################################################################################################
 
         # path = "..\\basicData\\dailyUpdate\\latest\\s003_code_sorted_roe_parent.txt"
@@ -814,11 +814,11 @@ class MainWidget(QWidget):
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
-            # blacklist=blacklist,
+            blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
-            market='main',
-            # market='all',
+            # market='main',
+            market='all',
         )
         # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
