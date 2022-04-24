@@ -802,7 +802,7 @@ class MainWidget(QWidget):
         #     txt = f.read()
         #     code_list = re.findall(r'([0-9]{6})', txt)
         #     code_list.reverse()
-
+ 
         ################################################################################################################
 
         # path = "..\\basicData\\dailyUpdate\\latest\\s003_code_sorted_roe_parent.txt"
