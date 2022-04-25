@@ -507,11 +507,20 @@ class MainWidget(QWidget):
             date = ''
 
         real_pe = np.inf
+        tmp_date = ''
         if 's_034_real_pe' in df.columns:
             s0 = self.data_pix.df['s_034_real_pe'].copy().dropna()
             if s0.size > 0:
-                date = s0.index[-1]
+                tmp_date = max(s0.index[-1], tmp_date)
                 real_pe = s0[-1]
+
+        if 'dt_fs' in df.columns:
+            s0 = self.data_pix.df['dt_fs'].copy().dropna()
+            if s0.size > 0:
+                tmp_date = max(s0.index[-1], tmp_date)
+
+        if tmp_date != '':
+            date = tmp_date
 
         self.max_increase_30 = np.inf
         if 's_028_market_value' in df.columns:
