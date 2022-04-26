@@ -262,7 +262,8 @@ class MainWidget(QWidget):
         self.button2.clicked.connect(self.scale_up)
         self.button3.clicked.connect(self.scale_down)
         self.button4.clicked.connect(self.show_tree)
-        self.button5.clicked.connect(self.request_data)
+        # self.button5.clicked.connect(self.request_data)
+        self.button5.clicked.connect(self.request_data_quick)
         self.button6.clicked.connect(self.show_remark)
         self.button7.clicked.connect(self.show_code_list)
         self.button8.clicked.connect(self.config_priority)
@@ -388,6 +389,29 @@ class MainWidget(QWidget):
         self.run_buffer()
         # self.df_dict[code] = sql2df(code=code)
         # self.change_stock(self.code_index)
+
+    def request_data_quick(self):
+        code = self.stock_code
+
+        request_data2mysql(
+            stock_code=code,
+            data_type='fs',
+            start_date="2021-01-01",
+        )
+
+        # request_data2mysql(
+        #     stock_code=code,
+        #     data_type='mvs',
+        #     start_date="1970-01-01",
+        # )
+
+        if code in self.df_dict.keys():
+            self.df_dict.pop(code)
+
+        if code in self.pix_dict.keys():
+            self.pix_dict.pop(code)
+
+        self.run_buffer()
 
     def show_tree(self):
         self.tree.show()
