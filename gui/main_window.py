@@ -853,7 +853,7 @@ class MainWidget(QWidget):
             # market='main',
             market='all',
         )
-        # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
+        code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
