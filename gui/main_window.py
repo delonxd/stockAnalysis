@@ -121,6 +121,7 @@ class MainWidget(QWidget):
         self.button7 = QPushButton('code list')
         self.button8 = QPushButton('priority')
         self.button9 = QPushButton('new_window')
+        # todo checklist
         self.button10 = QPushButton('web')
         self.button11 = QPushButton('equity_change')
         self.button12 = QPushButton('relocate')
