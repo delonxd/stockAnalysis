@@ -92,7 +92,7 @@ class MainWidget(QWidget):
         self.codes_df = CodesDataFrame(code_list)
         # self.codes_df.init_current_index(index=1100)
         self.codes_df.init_current_index(index=0)
-        # self.codes_df.init_current_index(code='688261')
+        # self.codes_df.init_current_index(code='002082')
         # self.codes_df.init_current_index(code='002260')
 
         self.style_df = load_default_style()
@@ -585,6 +585,16 @@ class MainWidget(QWidget):
         else:
             self.counter_info = res_dict.get(code)
 
+        path = "../basicData/self_selected/gui_timestamp.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            timestamps = json.loads(f.read())
+
+        timestamps[code] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+
+        res = json.dumps(timestamps, indent=4, ensure_ascii=False)
+        with open(path, "w", encoding='utf-8') as f:
+            f.write(res)
+
     def update_style(self):
         self.pix_dict.clear()
         self.run_buffer()
@@ -845,16 +855,18 @@ class MainWidget(QWidget):
 
         # code_list = sort_discount()
 
+        # code_list = hold_list + code_list
+
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
-            blacklist=blacklist,
+            # blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
             # market='main',
             market='all',
         )
-        code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
+        # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
