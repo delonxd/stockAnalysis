@@ -93,7 +93,7 @@ class MainWidget(QWidget):
         # self.codes_df.init_current_index(index=1100)
         self.codes_df.init_current_index(index=0)
         # self.codes_df.init_current_index(code='002082')
-        # self.codes_df.init_current_index(code='002260')
+        # self.codes_df.init_current_index(code='600603')
 
         self.style_df = load_default_style()
 
@@ -663,7 +663,10 @@ class MainWidget(QWidget):
             value_dict = json.loads(f.read())
             ass_str = value_dict.get(code)
             if ass_str is not None:
-                ass = int(ass_str)
+                try:
+                    ass = int(ass_str)
+                except Exception as e:
+                    print(e)
 
         real_cost = self.real_cost
 
@@ -860,13 +863,13 @@ class MainWidget(QWidget):
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
-            # blacklist=blacklist,
+            blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
             # market='main',
             market='all',
         )
-        # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
+        code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
