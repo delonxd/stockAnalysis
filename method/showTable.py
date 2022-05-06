@@ -46,9 +46,15 @@ def generate_data_table():
 
     # print(ret)
 
-    filepath = "..\\basicData\\dailyUpdate\\latest\\show_table.xlsx"
-    with pd.ExcelWriter(filepath) as writer:
+    path = "..\\basicData\\dailyUpdate\\latest\\show_table.xlsx"
+    with pd.ExcelWriter(path) as writer:
         ret.to_excel(writer, sheet_name="数据输出", index=True)
+
+    dict0 = json.loads(ret.to_json(orient="index", force_ascii=False))
+    res = json.dumps(dict0, indent=4, ensure_ascii=False)
+    path = "..\\basicData\\dailyUpdate\\latest\\show_table.txt"
+    with open("../test/style_test.txt", "w", encoding="utf-8") as f:
+        f.write(res)
 
 
 def get_recent_val(df, column, default, shift=1):
