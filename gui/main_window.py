@@ -754,43 +754,12 @@ class MainWidget(QWidget):
             self.change_stock(new_index)
 
     def get_code_list(self):
+
         blacklist = self.get_blacklist()
 
         ################################################################################################################
 
-        # dir0 = 'update_20220331153503'
-        dir0 = 'latest'
-
-        # root = "..\\basicData\\analyzedData"
-        # root = "..\\basicData\\self_selected"
-        # root = "..\\basicData\\dailyUpdate\\%s" % dir0
-
-        # file = "new_enter_code.txt"
-        # file = "increase_code.txt"
-        # file = "code_sorted_real_pe.txt"
-
-        # file = "code_sorted_real_pe.txt"
-        # file = "code_sorted_roe_parent.txt"
-        # file = "sift_001_roe.txt"
-        # file = "sift_002_real_pe.txt"
-        # file = "sift_003_real_pe_current.txt"
-        # file = "hs300.txt"
-
-        # with open("%s\\jlr_codes.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
-        # with open("%s\\roe_codes2.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
-        # with open("%s\\return_year_codes.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
-        # with open("%s\\sift_code_006.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
-        # with open("%s\\sift_code_011.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
-        # with open("%s\\sift_003_real_pe_current.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
-        # with open("%s\\gui_selected.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
-        # with open("%s\\code_list.txt" % root, "r", encoding="utf-8", errors="ignore") as f:
-
-        # with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
-        #     code_list = json.loads(f.read())
-
-        ################################################################################################################
-
-        root = "..\\basicData\\dailyUpdate\\%s" % dir0
+        root = "..\\basicData\\dailyUpdate\\latest"
         # file = "code_sorted_real_pe.txt"
         file = "s002_code_sorted_real_pe.txt"
         # file = "s003_code_sorted_roe_parent.txt"
@@ -800,7 +769,6 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        root = "..\\basicData\\dailyUpdate\\%s" % dir0
         # file = "code_latest_update.txt"
         file = "s004_code_latest_update.txt"
 
@@ -812,24 +780,6 @@ class MainWidget(QWidget):
         with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
             tmp = json.loads(f.read())
             hold_list = list(zip(*tmp).__next__())
-
-        ################################################################################################################
-
-        # with open('../basicData/code_names_dict.txt', 'r', encoding='utf-8') as f:
-        #     code_name_dict = json.loads(f.read())
-        #
-        # name_code_dict = dict()
-        # for code, name in code_name_dict.items():
-        #     name_code_dict[name] = code
-        #
-        # with open("..\\basicData\\self_selected\\gui_daily_select.txt", "r", encoding="utf-8", errors="ignore") as f:
-        #     tmp = json.loads(f.read())
-        #     tmp0 = list(zip(*tmp))
-        # name_list = list(tmp0[1])
-        # code_list = []
-        #
-        # for name in name_list:
-        #     code_list.append(name_code_dict.get(name))
 
         ################################################################################################################
 
@@ -852,13 +802,10 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        # path = "..\\basicData\\dailyUpdate\\latest\\s003_code_sorted_roe_parent.txt"
-        # with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        #     code_list = json.loads(f.read())
-
         # code_list = sort_discount()
-
         # code_list = hold_list + code_list
+
+        ################################################################################################################
 
         code_list = sift_codes(
             source=code_list,
@@ -869,24 +816,22 @@ class MainWidget(QWidget):
             # market='main',
             market='all',
         )
+
+        ################################################################################################################
+
         code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
+        ################################################################################################################
+
         # path = "..\\basicData\\dailyUpdate\\latest\\s005_code_random.txt"
-        # # path = "..\\basicData\\dailyUpdate\\latest\\s003_code_sorted_roe_parent.txt"
         # with open(path, "r", encoding="utf-8", errors="ignore") as f:
         #     code_list = json.loads(f.read())
 
         # code_list = hold_list + code_list
         # code_list = latest_update + hold_list + code_list
-
         # code_list = hold_list
-
-        # res = json.dumps(code_list, indent=4, ensure_ascii=False)
-        # file = '..\\basicData\\analyzedData\\temp_codes.txt'
-        # with open(file, "w", encoding='utf-8') as f:
-        #     f.write(res)
 
         return code_list
 
