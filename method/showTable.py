@@ -8,6 +8,8 @@ import pandas as pd
 def generate_data_table():
     ret = pd.DataFrame()
 
+    ret = generate_basic_table(ret)
+
     sub_dir = '..\\basicData\\dailyUpdate\\latest\\res_daily\\'
     list0 = [x for x in os.listdir(sub_dir) if os.path.isfile(sub_dir + x)]
 
@@ -22,14 +24,37 @@ def generate_data_table():
         code = tmp[0]
         df = tmp[1]
 
-        s1 = df.loc[:, 's_037_real_pe_return_rate'].dropna()
-        ret.loc[code, 'real_pe_return_rate'] = s1[-1] if s1.size > 0 else -np.inf
+        val = get_recent_val(df, 's_037_real_pe_return_rate', -np.inf)
+        ret.loc[code, 'real_pe_return_rate'] = val
 
-        s2 = df.loc[:, 's_016_roe_parent'].dropna()
-        ret.loc[code, 'roe_parent'] = s2[-1] if s2.size > 0 else -np.inf
+        val = get_recent_val(df, 's_016_roe_parent', -np.inf)
+        ret.loc[code, 'roe_parent'] = val
 
-        s3 = df.loc[:, 's_027_pe_return_rate'].dropna()
-        ret.loc[code, 'pe_return_rate'] = s3[-1] if s3.size > 0 else -np.inf
+        val = get_recent_val(df, 's_027_pe_return_rate', -np.inf)
+        ret.loc[code, 'pe_return_rate'] = val
+
+        val = get_recent_val(df, 's_025_real_cost', np.inf)
+        ret.loc[code, 'real_cost'] = val
+
+        val = get_recent_val(df, 's_028_market_value', np.inf)
+        ret.loc[code, 'market_value_1'] = val
+
+        val = get_recent_val(df, 's_028_market_value', np.inf, 2)
+        ret.loc[code, 'market_value_2'] = val
+
+    ################################################################################################################
+
+    # print(ret)
+
+    filepath = "..\\basicData\\dailyUpdate\\latest\\show_table.xlsx"
+    with pd.ExcelWriter(filepath) as writer:
+        ret.to_excel(writer, sheet_name="数据输出", index=True)
+
+
+def get_recent_val(df, column, default, shift=1):
+    series = df.loc[:, column].copy().dropna()
+    val = series[-shift] if series.size >= shift else default
+    return val
 
 
 def generate_basic_table(df: pd.DataFrame):
@@ -107,14 +132,6 @@ def generate_basic_table(df: pd.DataFrame):
 
     for key, value in res.items():
         df.loc[key, 'gui_assessment'] = value
-
-    ################################################################################################################
-
-    print(df)
-
-    filepath = "..\\basicData\\dailyUpdate\\latest\\show_table.xlsx"
-    with pd.ExcelWriter(filepath) as writer:
-        df.to_excel(writer, sheet_name="数据输出", index=True)
 
     return df
 

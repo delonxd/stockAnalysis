@@ -1,3 +1,6 @@
+import os
+import pickle
+import shutil
 
 def load_daily_res(dir_str):
     import pickle
@@ -230,6 +233,29 @@ def save_latest_list(dir_str):
         path1 = '%s\\%s' % (src_dir, file[5:])
         path2 = '%s\\%s' % (target_dir, file)
         copy_file(path1, path2)
+
+    dir1 = '..\\basicData\\dailyUpdate\\%s\\res_daily' % dir_str
+    dir2 = '..\\basicData\\dailyUpdate\\latest\\res_daily'
+    clear_dir(dir2)
+    copy_dir(dir1, dir2)
+
+
+def clear_dir(dir_path):
+    for file in os.listdir(dir_path):
+        path = '%s\\%s' % (dir_path, file)
+        print('Delete %s' % path)
+        os.remove(path)
+
+
+def copy_dir(dir1, dir2):
+    for file in os.listdir(dir1):
+        path1 = '%s\\%s' % (dir1, file)
+        path2 = '%s\\%s' % (dir2, file)
+        # command = 'copy %s %s' % (path1, path2)
+        # shutil.copytree(path1, path2)
+        if os.path.isfile(path1):
+            shutil.copy(path1, path2)
+            print('Copy %s --> %s' % (path1, path2))
 
 
 def copy_file(path1, path2):
@@ -472,12 +498,14 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    date_dir = 'update_20220414153503'
+    date_dir = 'update_20220426114156'
 
-    save_latest_list(date_dir)
+    # save_latest_list(date_dir)
     # load_daily_res(date_dir)
     # sort_daily_code(date_dir)
     # new_enter_code(date_dir)
     # generate_list()
     # get_codes_from_sel()
     # get_random_list()
+
+    save_latest_list(date_dir)
