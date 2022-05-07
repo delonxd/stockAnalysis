@@ -1,3 +1,6 @@
+from method.logMethod import MainLog
+
+
 def mysql_update():
     # import sys
     # sys.path.append('D:\\PycharmProjects\\stockAnalysis')
@@ -89,8 +92,10 @@ def update_latest_data(code_list):
         counter -= 1
 
     length = len(list0)
-    print(length)
-    print(list0)
+    MainLog.add_split('#')
+    MainLog.add_log('total %s groups' % length)
+    # print(length)
+    # print(list0)
 
     start = 0
     end = length
@@ -100,10 +105,10 @@ def update_latest_data(code_list):
     index = start
     while index < end:
         stock_codes = list0[index]
-        print('\n')
-        print('############################################################################################')
-        print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
-        print('%s/%s --> %s' % (index, end, stock_codes))
+
+        MainLog.add_split('-')
+        MainLog.add_log('group %s/%s' % (index, end))
+        MainLog.add_split('-')
 
         new_data = request_daily_data2mysql(
             stock_codes=stock_codes,
@@ -113,6 +118,7 @@ def update_latest_data(code_list):
 
         ret.extend(new_data)
 
+        MainLog.add_split('-')
         request_daily_data2mysql(
             stock_codes=stock_codes,
             date='latest',
@@ -134,16 +140,17 @@ def update_all_data(code_list, start_date):
 
     while index < end:
         code = code_list[index]
-        print('\n')
-        print('############################################################################################')
-        print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
-        print('%s/%s --> %s' % (index, end, code))
+
+        MainLog.add_split('#')
+        MainLog.add_log('%s/%s --> %s' % (index, end, code))
 
         new_data = request_data2mysql(
             stock_code=code,
             data_type='fs',
             start_date=start_date,
         )
+
+        MainLog.add_split('-')
 
         request_data2mysql(
             stock_code=code,

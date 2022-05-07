@@ -246,7 +246,7 @@ def save_latest_list(dir_str):
 def clear_dir(dir_path):
     for file in os.listdir(dir_path):
         path = '%s\\%s' % (dir_path, file)
-        MainLog.add_log('Delete %s' % path)
+        MainLog.add_log('Delete --> %s' % path)
         os.remove(path)
 
 

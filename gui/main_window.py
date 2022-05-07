@@ -950,9 +950,9 @@ if __name__ == '__main__':
     from scipy.optimize import OptimizeWarning
     warnings.simplefilter("ignore", OptimizeWarning)
 
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', None)
-    pd.set_option('display.width', 100000)
+    # pd.set_option('display.max_columns', None)
+    # pd.set_option('display.max_rows', None)
+    # pd.set_option('display.width', 100000)
 
     app = QApplication(sys.argv)
     # main = MainWindow()

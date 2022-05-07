@@ -19,13 +19,20 @@ class MainLog:
         print(row)
 
     @classmethod
-    def add_split(cls):
-        row = '\n' + '#' * 100 + '\n'
+    def add_split(cls, txt):
+        row = txt * 100
+        cls.content = cls.content + row + '\n'
+        print(row)
+
+    @classmethod
+    def add_empty(cls):
+        row = '\n'
         cls.content = cls.content + row + '\n'
         print(row)
 
     @classmethod
     def write(cls, path):
+        cls.add_log('save log --> %s' % path)
         with open(path, "w", encoding='utf-8') as f:
             f.write(cls.content)
 
@@ -56,7 +63,7 @@ def log_it(logfile):
 
             res = func(*args, **kwargs)
 
-            log_str = func.__name__ + " was finished"
+            log_str = func.__name__ + " complete"
             MainLog.add_log(log_str)
 
             return res

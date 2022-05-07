@@ -44,6 +44,8 @@ def try_request(time0):
 @log_it(None)
 def request_data(stock_code, start_date, data_type):
     MainLog.add_log('    stock_code --> %s' % stock_code)
+    MainLog.add_log('    start_date --> %s' % start_date)
+    MainLog.add_log('    data_type --> %s' % data_type)
     token = "f819be3a-e030-4ff0-affe-764440759b5c"
 
     if data_type == 'fs':
@@ -89,6 +91,8 @@ def request_data(stock_code, start_date, data_type):
 @log_it(None)
 def request_daily_data(stock_codes, date, data_type):
     MainLog.add_log('    stock_codes --> %s' % stock_codes)
+    MainLog.add_log('    date --> %s' % date)
+    MainLog.add_log('    data_type --> %s' % data_type)
     token = "f819be3a-e030-4ff0-affe-764440759b5c"
 
     if data_type == 'fs':
@@ -304,9 +308,9 @@ def move_buffer_file(path, data_type):
 
     if not os.path.exists(new_dir):
         os.makedirs(new_dir)
-        MainLog.add_log('    make dir --> %s' % new_dir)
+        MainLog.add_log('make dir --> %s' % new_dir)
 
-    MainLog.add_log('    move file: %s --> %s' % (path, new_dir))
+    MainLog.add_log('move file: %s --> %s' % (path, new_dir))
     shutil.move(path, new_dir)
 
 
@@ -317,11 +321,15 @@ def request_data2mysql(stock_code, data_type, start_date):
         data_type=data_type,
     )
 
+    MainLog.add_split('-')
+
     path = dump_res2buffer(
         res=res,
         stock_code=stock_code,
         data_type=data_type,
     )
+
+    MainLog.add_split('-')
 
     db, cursor = get_cursor(data_type)
 
@@ -332,6 +340,8 @@ def request_data2mysql(stock_code, data_type, start_date):
         stock_code=stock_code,
         data_type=data_type,
     )
+
+    MainLog.add_split('-')
 
     db.close()
     move_buffer_file(path, data_type)
@@ -355,8 +365,9 @@ def request_daily_data2mysql(stock_codes, date, data_type):
 
     counter = 0
     for code, txt in dict0.items():
-        print('############################################################################################')
-        print(counter)
+
+        MainLog.add_split('-')
+        MainLog.add_log('counter --> %s' % counter)
         counter += 1
 
         # path = dump_res2buffer(
