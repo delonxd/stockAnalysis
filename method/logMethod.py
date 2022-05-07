@@ -19,6 +19,12 @@ class MainLog:
         print(row)
 
     @classmethod
+    def add_split(cls):
+        row = '\n' + '#' * 100 + '\n'
+        cls.content = cls.content + row + '\n'
+        print(row)
+
+    @classmethod
     def write(cls, path):
         with open(path, "w", encoding='utf-8') as f:
             f.write(cls.content)
