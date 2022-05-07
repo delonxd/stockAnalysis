@@ -3,6 +3,7 @@ import numpy as np
 import json
 import os
 import pandas as pd
+from method.fileMethod import *
 
 
 def get_recent_val(df, column, default, shift=1):
@@ -17,19 +18,13 @@ def generate_daily_table(dir_name):
     daily_dir = "..\\basicData\\dailyUpdate\\%s" % dir_name
     ################################################################################################################
 
-    path = "%s\\name_dict.txt" % daily_dir
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        res = json.loads(f.read())
-
+    res = load_json_txt("%s\\name_dict.txt" % daily_dir)
     for key, value in res.items():
         df.loc[key, 'cn_name'] = value
 
     ################################################################################################################
 
-    path = "%s\\report_date_dict.txt" % daily_dir
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        res = json.loads(f.read())
-
+    res = load_json_txt("%s\\report_date_dict.txt" % daily_dir)
     for key, value in res.items():
         df.loc[key, 'report_date'] = value
 
@@ -44,10 +39,7 @@ def generate_daily_table(dir_name):
 
     res = list()
     for file in os.listdir(sub_dir):
-        path = '%s\\%s' % (sub_dir, file)
-        print('Load %s' % path)
-        with open(path, "rb") as f:
-            res.extend(pickle.load(f))
+        res.extend(load_pkl('%s\\%s' % (sub_dir, file)))
 
     for tmp in res:
         code = tmp[0]
@@ -71,9 +63,7 @@ def generate_daily_table(dir_name):
         val = get_recent_val(src, 's_028_market_value', np.inf, 2)
         df.loc[code, 'market_value_2'] = val
 
-    path = '%s\\daily_table.pkl' % daily_dir
-    with open(path, "wb") as f:
-        pickle.dump(df, f)
+    dump_pkl('%s\\daily_table.pkl' % daily_dir, df)
 
     return df
 
@@ -98,30 +88,21 @@ def generate_gui_table():
 
     ################################################################################################################
 
-    path = "..\\basicData\\self_selected\\gui_hold.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        res = json.loads(f.read())
-
+    res = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
     for value in res:
         code = value[0]
         df.loc[code, 'gui_hold'] = True
 
     ################################################################################################################
 
-    path = "..\\basicData\\self_selected\\gui_remark.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        res = json.loads(f.read())
-
+    res = load_json_txt("..\\basicData\\self_selected\\gui_remark.txt")
     for key, value in res.items():
         df.loc[key, 'key_remark'] = value[1]
         df.loc[key, 'remark'] = value[2]
 
     ################################################################################################################
 
-    path = "..\\basicData\\self_selected\\gui_counter.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        res = json.loads(f.read())
-
+    res = load_json_txt("..\\basicData\\self_selected\\gui_counter.txt")
     for key, value in res.items():
         df.loc[key, 'counter_last_date'] = value[0]
         df.loc[key, 'counter_date'] = value[1]
@@ -131,65 +112,47 @@ def generate_gui_table():
 
     ################################################################################################################
 
-    path = "..\\basicData\\self_selected\\gui_assessment.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        res = json.loads(f.read())
-
+    res = load_json_txt("..\\basicData\\self_selected\\gui_assessment.txt")
     for key, value in res.items():
         df.loc[key, 'gui_assessment'] = value
 
-    path = "..\\basicData\\dailyUpdate\\latest\\z002_gui_table.pkl"
-    with open(path, "wb") as f:
-        pickle.dump(df, f)
+    dump_pkl("..\\basicData\\dailyUpdate\\latest\\z002_gui_table.pkl", df)
 
     return df
 
 
 def add_bool_column(df, path, name):
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        res = json.loads(f.read())
-
+    res = load_json_txt(path)
     for key in res:
         df.loc[key, name] = True
     return df
 
 
 def generate_show_table():
+    df1 = load_pkl("..\\basicData\\dailyUpdate\\latest\\z001_daily_table.pkl")
+    df2 = load_pkl("..\\basicData\\dailyUpdate\\latest\\z002_gui_table.pkl")
 
-    path = "..\\basicData\\dailyUpdate\\latest\\z001_daily_table.pkl"
-    with open(path, "rb") as f:
-        daily_df = pickle.load(f)
-
-    path = "..\\basicData\\dailyUpdate\\latest\\z002_gui_table.pkl"
-    with open(path, "rb") as f:
-        gui_df = pickle.load(f)
-
-    df = pd.concat([daily_df, gui_df], axis=1, sort=True)
+    df = pd.concat([df1, df2], axis=1, sort=True)
     ################################################################################################################
 
-    path = "..\\basicData\\dailyUpdate\\latest\\show_table.pkl"
-    with open(path, "wb") as f:
-        pickle.dump(df, f)
+    dump_pkl("..\\basicData\\dailyUpdate\\latest\\show_table.pkl", df)
 
     path = "..\\basicData\\dailyUpdate\\latest\\show_table.xlsx"
     with pd.ExcelWriter(path) as writer:
         df.to_excel(writer, sheet_name="数据输出", index=True)
 
     dict0 = json.loads(df.to_json(orient="index", force_ascii=False))
-    res = json.dumps(dict0, indent=4, ensure_ascii=False)
 
-    path = "..\\basicData\\dailyUpdate\\latest\\show_table.txt"
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(res)
+    write_json_txt("..\\basicData\\dailyUpdate\\latest\\show_table.txt", dict0)
 
     # print(df)
     return df
 
 
 if __name__ == '__main__':
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', None)
-    pd.set_option('display.width', 10000)
+    # pd.set_option('display.max_columns', None)
+    # pd.set_option('display.max_rows', None)
+    # pd.set_option('display.width', 10000)
 
     generate_daily_table('update_20220506153503')
     # generate_show_table()
