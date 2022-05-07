@@ -6,9 +6,7 @@ def daily_update():
     os.chdir("D:\\PycharmProjects\\stockAnalysis\\method")
 
     from request.requestBasicData import request_basic, request_industry_sample
-
     from method.mainMethod import sift_codes
-
     from method.dataMethod import load_df_from_mysql
     from method.dataMethod import DataAnalysis
     from method.sql_update import update_latest_data
@@ -17,6 +15,7 @@ def daily_update():
     from method.sortCode import sort_daily_code
     from method.sortCode import save_latest_list
     from method.showTable import generate_daily_table
+    from method.fileMethod import dump_pkl, write_json_txt
     from sql.load_data_infile import output_databases
     from request.requestMirData import request_mir_y10
     from request.requestData import request_data2mysql
@@ -28,9 +27,7 @@ def daily_update():
     import numpy as np
 
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-
     dir_name = 'update_%s' % timestamp
-
     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
 
     if not os.path.exists(res_dir):
@@ -38,19 +35,11 @@ def daily_update():
 
     all_codes, name_dict, ipo_dates = request_basic()
 
-    res = json.dumps(name_dict, indent=4, ensure_ascii=False)
-    file = '%s\\name_dict.txt' % res_dir
-    with open(file, "w", encoding='utf-8') as f:
-        f.write(res)
-
-    file = '../basicData/code_names_dict.txt'
-    with open(file, "w", encoding='utf-8') as f:
-        f.write(res)
-
-    res = json.dumps(all_codes, indent=4, ensure_ascii=False)
-    file = '%s\\code_list.txt' % res_dir
-    with open(file, "w", encoding='utf-8') as f:
-        f.write(res)
+    MainLog.add_split('#')
+    write_json_txt('%s\\name_dict.txt' % res_dir, name_dict)
+    write_json_txt('..\\basicData\\code_names_dict.txt', name_dict)
+    write_json_txt('%s\\code_list.txt' % res_dir, all_codes)
+    MainLog.add_split('#')
 
     # industry_dict = request_industry_sample()
     # res = json.dumps(industry_dict, indent=4, ensure_ascii=False)
@@ -60,6 +49,8 @@ def daily_update():
 
     # code_list = get_part_codes(code_list)
 
+    ################################################################################################################
+
     new_codes = []
     for code, date in ipo_dates.items():
         if not date:
@@ -67,8 +58,8 @@ def daily_update():
         elif date > '2021-11-01':
             new_codes.append(code)
 
-    print('Length of all codes: ', len(all_codes))
-    print('Length of new codes: ', len(new_codes))
+    MainLog.add_log('Length of all codes: %s' % len(all_codes))
+    MainLog.add_log('Length of new codes: %s' % len(new_codes))
 
     ret1 = update_all_data(new_codes, start_date='1970-01-01')
     ret2 = update_latest_data(all_codes)
@@ -76,12 +67,21 @@ def daily_update():
     updated_code = list(set(ret1 + ret2))
     updated_code.sort()
 
+    ################################################################################################################
+
+    MainLog.add_split('#')
+    MainLog.add_log('new updated: %s' % len(updated_code))
+    MainLog.add_log('generate code_latest_update.txt')
+
     res = json.dumps(updated_code, indent=4, ensure_ascii=False)
     file = '%s\\code_latest_update.txt' % res_dir
     with open(file, "w", encoding='utf-8') as f:
         f.write(res)
 
+    ################################################################################################################
+
     for code in updated_code:
+        MainLog.add_split('#')
         request_data2mysql(
             stock_code=code,
             data_type='fs',
@@ -93,6 +93,8 @@ def daily_update():
 
     MainLog.write('%s\\logs1.txt' % res_dir)
     MainLog.init_log()
+    
+    ################################################################################################################
 
     columns = [
         # 's_001_roe',
@@ -134,13 +136,13 @@ def daily_update():
     report_date_dict = dict()
     real_cost_dict = dict()
 
+    MainLog.add_split('#')
+    MainLog.add_log('columns: %s' % columns)
+
     while index < end:
         try:
             code = all_codes[index]
-            print('\n')
-            print('############################################################################################')
-            print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())))
-            print('Analysis: %s/%s --> %s' % (index, end, code))
+            MainLog.add_log('Analysis: %s/%s --> %s' % (index, end, code))
 
             df1 = load_df_from_mysql(code, 'fs')
             df2 = load_df_from_mysql(code, 'mvs')
@@ -160,11 +162,11 @@ def daily_update():
             real_cost_dict[code] = real_cost
 
         except Exception as e:
-            print(e)
+            MainLog.add_log(e)
             continue
 
         tmp_list.append((code, df))
-        print(df.columns)
+        # print(df.columns)
         if len(tmp_list) == 1000:
             file = '%s\\%s_%s.pkl' % (sub_dir, timestamp, counter)
             with open(file, "wb") as f:
@@ -214,9 +216,9 @@ def daily_update():
 
 
 if __name__ == '__main__':
-    import pandas as pd
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', None)
-    pd.set_option('display.width', 10000)
+    # import pandas as pd
+    # pd.set_option('display.max_columns', None)
+    # pd.set_option('display.max_rows', None)
+    # pd.set_option('display.width', 10000)
 
     daily_update()
