@@ -227,6 +227,7 @@ def save_latest_list(dir_str):
         's002_code_sorted_real_pe.txt',
         's003_code_sorted_roe_parent.txt',
         's004_code_latest_update.txt',
+        'z001_daily_table.pkl',
     ]
 
     for file in files:
@@ -260,12 +261,30 @@ def copy_dir(dir1, dir2):
 
 def copy_file(path1, path2):
     import json
-    with open(path1, "r", encoding='utf-8') as f:
-        data = json.loads(f.read())
 
-    res = json.dumps(data, indent=4, ensure_ascii=False)
-    with open(path2, "w", encoding='utf-8') as f:
-        f.write(res)
+    type1 = path1[-3:]
+    type2 = path2[-3:]
+
+    if type1 == type2 == 'txt':
+        with open(path1, "r", encoding='utf-8') as f:
+            data = json.loads(f.read())
+
+        res = json.dumps(data, indent=4, ensure_ascii=False)
+        with open(path2, "w", encoding='utf-8') as f:
+            f.write(res)
+
+        print('Copy %s --> %s' % (path1, path2))
+
+    elif type1 == type2 == 'pkl':
+        with open(path1, "rb") as f:
+            data = pickle.load(f)
+
+        with open(path2, "wb") as f:
+            pickle.dump(data, f)
+        print('Copy %s --> %s' % (path1, path2))
+
+    else:
+        print("CopyError: invalid type for copy_file(): '%s' --> '%s'")
 
 
 def random_code_list(code_list, pick_weight):
@@ -498,7 +517,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    date_dir = 'update_20220426114156'
+    date_dir = 'update_20220506153503'
 
     # save_latest_list(date_dir)
     # load_daily_res(date_dir)
