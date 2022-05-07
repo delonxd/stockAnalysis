@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+from method.fileMethod import *
 
 
 def res2df_fs(res, header_df, prefix='q', postfix='t'):
@@ -178,5 +179,18 @@ def list_to_set(src, ind_dict):
         return ret
 
 
+def sift_show_table(sort_by, ascending):
+    src = load_pkl("..\\basicData\\dailyUpdate\\latest\\show_table.pkl")
+
+    src['aaa'] = src['market_value_1'] / pd.to_numeric(src['gui_assessment'])
+
+    print(src['aaa'])
+    df = src.sort_values(by=sort_by, ascending=ascending)
+
+    ret = df.index.values.tolist()
+    print(ret)
+
+
 if __name__ == '__main__':
+    sift_show_table('real_pe_return_rate', False)
     pass
