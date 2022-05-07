@@ -3,6 +3,7 @@ from request.requestData import request_data2mysql
 from method.logMethod import log_it, MainLog
 from method.mainMethod import sift_codes
 from method.sortCode import random_code_list, sort_discount
+from method.fileMethod import *
 
 from gui.checkTree import CheckTree
 from gui.dataPix import DataPix
@@ -764,22 +765,14 @@ class MainWidget(QWidget):
         file = "s002_code_sorted_real_pe.txt"
         # file = "s003_code_sorted_roe_parent.txt"
 
-        with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
-            code_list = json.loads(f.read())
+        code_list = load_json_txt("{}\\{}".format(root, file))
+
+        # latest_update = load_json_txt("{}\\s004_code_latest_update.txt".format(root))
 
         ################################################################################################################
 
-        # file = "code_latest_update.txt"
-        file = "s004_code_latest_update.txt"
-
-        with open("%s\\%s" % (root, file), "r", encoding="utf-8", errors="ignore") as f:
-            latest_update = json.loads(f.read())
-
-        ################################################################################################################
-
-        with open("..\\basicData\\self_selected\\gui_hold.txt", "r", encoding="utf-8", errors="ignore") as f:
-            tmp = json.loads(f.read())
-            hold_list = list(zip(*tmp).__next__())
+        # tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
+        # hold_list = list(zip(*tmp).__next__())
 
         ################################################################################################################
 
@@ -803,7 +796,6 @@ class MainWidget(QWidget):
         ################################################################################################################
 
         # code_list = sort_discount()
-        # code_list = hold_list + code_list
 
         ################################################################################################################
 
@@ -824,10 +816,6 @@ class MainWidget(QWidget):
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
         ################################################################################################################
-
-        # path = "..\\basicData\\dailyUpdate\\latest\\s005_code_random.txt"
-        # with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        #     code_list = json.loads(f.read())
 
         # code_list = hold_list + code_list
         # code_list = latest_update + hold_list + code_list
