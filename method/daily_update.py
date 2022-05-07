@@ -93,7 +93,7 @@ def daily_update():
 
     MainLog.write('%s\\logs1.txt' % res_dir)
     MainLog.init_log()
-    
+
     ################################################################################################################
 
     columns = [
@@ -167,10 +167,9 @@ def daily_update():
 
         tmp_list.append((code, df))
         # print(df.columns)
-        if len(tmp_list) == 1000:
-            file = '%s\\%s_%s.pkl' % (sub_dir, timestamp, counter)
-            with open(file, "wb") as f:
-                pickle.dump(tmp_list, f)
+        if len(tmp_list) == 5:
+            dump_pkl('%s\\%s_%s.pkl' % (sub_dir, timestamp, counter), tmp_list)
+            MainLog.add_split('-')
 
             tmp_list = []
             counter += 1
@@ -178,37 +177,38 @@ def daily_update():
         index += 1
 
     if len(tmp_list) > 0:
-        file = '%s\\%s_%s.pkl' % (sub_dir, timestamp, counter)
-        with open(file, "wb") as f:
-            pickle.dump(tmp_list, f)
+        dump_pkl('%s\\%s_%s.pkl' % (sub_dir, timestamp, counter), tmp_list)
 
-    res = json.dumps(report_date_dict, indent=4, ensure_ascii=False)
-    file = '%s\\report_date_dict.txt' % res_dir
-    with open(file, "w", encoding='utf-8') as f:
-        f.write(res)
-
-    res = json.dumps(real_cost_dict, indent=4, ensure_ascii=False)
-    file = '%s\\real_cost_dict.txt' % res_dir
-    with open(file, "w", encoding='utf-8') as f:
-        f.write(res)
-
+    MainLog.add_split('-')
     MainLog.add_log('data analysis complete')
 
+    ################################################################################################################
+
+    MainLog.add_split('#')
+    write_json_txt('%s\\report_date_dict.txt' % res_dir, report_date_dict)
+    write_json_txt('%s\\real_cost_dict.txt' % res_dir, real_cost_dict)
+
+    MainLog.add_split('#')
     sort_daily_code(dir_name)
     MainLog.add_log('sort_daily_code complete')
 
+    MainLog.add_split('#')
     generate_daily_table(dir_name)
     MainLog.add_log('generate_daily_table complete')
 
+    MainLog.add_split('#')
     save_latest_list(dir_name)
     MainLog.add_log('save_latest_list complete')
 
+    MainLog.add_split('#')
     output_databases()
     MainLog.add_log('output_databases complete')
 
+    MainLog.add_split('#')
     request_mir_y10()
     MainLog.add_log('request_mir_y10 complete')
 
+    MainLog.add_split('#')
     request_industry_sample()
     MainLog.add_log('request_industry_sample complete')
 

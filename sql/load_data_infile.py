@@ -1,10 +1,15 @@
+import mysql.connector
+import time
+import os
+import shutil
+from request.requestData import get_header_df
+from method.sqlMethod import sql_format_create_table
+from method.sqlMethod import sql_format_drop_table
+from method.sqlMethod import sql_format_header_df
+from method.logMethod import MainLog
+
 
 def output_database(database, target_dir):
-    import mysql.connector
-    import time
-    import os
-    import shutil
-
     dir_path = '%s/%s' % (target_dir, database)
 
     if os.path.exists(dir_path):
@@ -31,26 +36,18 @@ def output_database(database, target_dir):
     cursor.execute(sql_str)
     tmp_res = cursor.fetchall()
 
-    print('All table: ', tmp_res)
+    MainLog.add_log('All table: %s' % tmp_res)
 
     for index in tmp_res:
         table = index[0]
         file = "%s/%s_backups.sql" % (dir_path, table)
         sql_str = 'SELECT * FROM %s INTO OUTFILE "%s";' % (table, file)
-        print(time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time())), sql_str)
+        MainLog.add_log(sql_str)
         cursor.execute(sql_str)
         db.commit()
 
 
 def input_database(dir_path, database=None):
-    import mysql.connector
-    import time
-    import os
-    from request.requestData import get_header_df
-    from method.sqlMethod import sql_format_create_table
-    from method.sqlMethod import sql_format_drop_table
-    from method.sqlMethod import sql_format_header_df
-
     host = 'localhost'
     port = '3306'
 
@@ -94,9 +91,6 @@ def input_database(dir_path, database=None):
 
 
 def output_databases():
-    import time
-    import os
-
     # target_dir = "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads"
     target_dir = "F:/MysqlUploads"
 
@@ -109,11 +103,11 @@ def output_databases():
         os.makedirs(dir_path)
 
     output_database('fsData', dir_path)
+    MainLog.add_split('-')
     output_database('marketData', dir_path)
 
 
 def input_databases():
-    import os
     src_dir = "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads"
     # src_dir = "F:/MysqlUploads"
 
