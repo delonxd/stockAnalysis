@@ -11,12 +11,13 @@ def get_recent_val(df, column, default, shift=1):
     return val
 
 
-def generate_daily_table():
+def generate_daily_table(dir_name):
     df = pd.DataFrame()
 
+    daily_dir = "..\\basicData\\dailyUpdate\\%s" % dir_name
     ################################################################################################################
 
-    path = "..\\basicData\\dailyUpdate\\latest\\a002_name_dict.txt"
+    path = "%s\\a002_name_dict.txt" % daily_dir
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         res = json.loads(f.read())
 
@@ -25,7 +26,7 @@ def generate_daily_table():
 
     ################################################################################################################
 
-    path = "..\\basicData\\dailyUpdate\\latest\\a003_report_date_dict.txt"
+    path = "%s\\a003_report_date_dict.txt" % daily_dir
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         res = json.loads(f.read())
 
@@ -34,12 +35,12 @@ def generate_daily_table():
 
     ################################################################################################################
 
-    path = "..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt"
+    path = "%s\\s004_code_latest_update.txt" % daily_dir
     df = add_bool_column(df, path, 'update_recently')
 
     ################################################################################################################
 
-    sub_dir = '..\\basicData\\dailyUpdate\\latest\\res_daily\\'
+    sub_dir = '%s\\res_daily\\' % daily_dir
 
     res = list()
     for file in os.listdir(sub_dir):

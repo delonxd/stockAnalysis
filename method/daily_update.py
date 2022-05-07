@@ -16,6 +16,7 @@ def daily_update():
     from method.logMethod import MainLog
     from method.sortCode import sort_daily_code
     from method.sortCode import save_latest_list
+    from method.showTable import generate_daily_table
     from sql.load_data_infile import output_databases
     from request.requestMirData import request_mir_y10
     from request.requestData import request_data2mysql
@@ -193,6 +194,9 @@ def daily_update():
 
     sort_daily_code(dir_name)
     MainLog.add_log('sort_daily_code complete')
+
+    generate_daily_table(dir_name)
+    MainLog.add_log('generate_daily_table complete')
 
     save_latest_list(dir_name)
     MainLog.add_log('save_latest_list complete')
