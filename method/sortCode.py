@@ -1,6 +1,8 @@
 import os
 import pickle
 import shutil
+from method.logMethod import MainLog
+
 
 def load_daily_res(dir_str):
     import pickle
@@ -244,7 +246,7 @@ def save_latest_list(dir_str):
 def clear_dir(dir_path):
     for file in os.listdir(dir_path):
         path = '%s\\%s' % (dir_path, file)
-        print('Delete %s' % path)
+        MainLog.add_log('Delete %s' % path)
         os.remove(path)
 
 
@@ -256,7 +258,7 @@ def copy_dir(dir1, dir2):
         # shutil.copytree(path1, path2)
         if os.path.isfile(path1):
             shutil.copy(path1, path2)
-            print('Copy %s --> %s' % (path1, path2))
+            MainLog.add_log('Copy %s --> %s' % (path1, path2))
 
 
 def copy_file(path1, path2):
@@ -273,7 +275,7 @@ def copy_file(path1, path2):
         with open(path2, "w", encoding='utf-8') as f:
             f.write(res)
 
-        print('Copy %s --> %s' % (path1, path2))
+        MainLog.add_log('Copy %s --> %s' % (path1, path2))
 
     elif type1 == type2 == 'pkl':
         with open(path1, "rb") as f:
@@ -281,10 +283,10 @@ def copy_file(path1, path2):
 
         with open(path2, "wb") as f:
             pickle.dump(data, f)
-        print('Copy %s --> %s' % (path1, path2))
+        MainLog.add_log('Copy %s --> %s' % (path1, path2))
 
     else:
-        print("CopyError: invalid type for copy_file(): '%s' --> '%s'")
+        MainLog.add_log("CopyError: invalid type for copy_file(): '%s' --> '%s'" % (path1, path2))
 
 
 def random_code_list(code_list, pick_weight):
