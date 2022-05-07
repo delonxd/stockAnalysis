@@ -167,7 +167,7 @@ def daily_update():
 
         tmp_list.append((code, df))
         # print(df.columns)
-        if len(tmp_list) == 5:
+        if len(tmp_list) == 1000:
             dump_pkl('%s\\%s_%s.pkl' % (sub_dir, timestamp, counter), tmp_list)
             MainLog.add_split('-')
 
