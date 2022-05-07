@@ -17,7 +17,7 @@ def generate_daily_table(dir_name):
     daily_dir = "..\\basicData\\dailyUpdate\\%s" % dir_name
     ################################################################################################################
 
-    path = "%s\\a002_name_dict.txt" % daily_dir
+    path = "%s\\name_dict.txt" % daily_dir
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         res = json.loads(f.read())
 
@@ -26,7 +26,7 @@ def generate_daily_table(dir_name):
 
     ################################################################################################################
 
-    path = "%s\\a003_report_date_dict.txt" % daily_dir
+    path = "%s\\report_date_dict.txt" % daily_dir
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         res = json.loads(f.read())
 
@@ -35,7 +35,7 @@ def generate_daily_table(dir_name):
 
     ################################################################################################################
 
-    path = "%s\\s004_code_latest_update.txt" % daily_dir
+    path = "%s\\code_latest_update.txt" % daily_dir
     df = add_bool_column(df, path, 'update_recently')
 
     ################################################################################################################
@@ -71,7 +71,7 @@ def generate_daily_table(dir_name):
         val = get_recent_val(src, 's_028_market_value', np.inf, 2)
         df.loc[code, 'market_value_2'] = val
 
-    path = "..\\basicData\\dailyUpdate\\latest\\z001_daily_table.pkl"
+    path = '%s\\daily_table.pkl' % daily_dir
     with open(path, "wb") as f:
         pickle.dump(df, f)
 
@@ -191,7 +191,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    # generate_daily_table()
+    generate_daily_table('update_20220506153503')
     # generate_show_table()
-    generate_show_table()
+    # generate_show_table()
 
