@@ -2,6 +2,8 @@ import os
 import pickle
 import shutil
 from method.logMethod import MainLog
+from method.fileMethod import *
+from method.dataMethod import load_df_from_mysql
 
 
 def load_daily_res(dir_str):
@@ -513,14 +515,41 @@ def sort_discount():
     return ret
 
 
+def sort_hold():
+    path = '..\\basicData\\self_selected\\gui_hold.txt'
+    hold_dict = load_json_txt(path)
+
+    ret = []
+    for val in hold_dict:
+        code = val[0]
+        df = load_df_from_mysql(code, 'mvs')
+        number = val[2]
+        price = df['id_035_mvs_sp'].iloc[-1]
+
+        value = int(round(100 * price * number))
+
+        tmp = [code, val[1], number, value, price]
+        print(tmp)
+        ret.append(tmp)
+    ret.sort(key=lambda x: x[3], reverse=True)
+
+    list0 = []
+    for row in ret:
+        tmp_txt = json.dumps(row, ensure_ascii=False)
+        list0.append(tmp_txt)
+    res = '[\n\t' + ',\n\t'.join(list0) + '\n]'
+
+    with open(path, "w", encoding='utf-8') as f:
+        f.write(res)
+
+
 if __name__ == '__main__':
     import pandas as pd
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    date_dir = 'update_20220506153503'
-
+    date_dir = 'update_20220507153503'
     # save_latest_list(date_dir)
     # load_daily_res(date_dir)
     # sort_daily_code(date_dir)
@@ -528,5 +557,6 @@ if __name__ == '__main__':
     # generate_list()
     # get_codes_from_sel()
     # get_random_list()
+    # save_latest_list(date_dir)
 
-    save_latest_list(date_dir)
+    sort_hold()
