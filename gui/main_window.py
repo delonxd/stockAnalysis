@@ -764,6 +764,7 @@ class MainWidget(QWidget):
         # file = "code_sorted_real_pe.txt"
         file = "s002_code_sorted_real_pe.txt"
         # file = "s003_code_sorted_roe_parent.txt"
+        # file = "s004_code_latest_update.txt"
 
         code_list = load_json_txt("{}\\{}".format(root, file))
 
@@ -771,8 +772,8 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        # tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
-        # hold_list = list(zip(*tmp).__next__())
+        tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
+        hold_list = list(zip(*tmp).__next__())
 
         ################################################################################################################
 
@@ -802,7 +803,7 @@ class MainWidget(QWidget):
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
-            # blacklist=blacklist,
+            blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
             # market='main',
@@ -811,7 +812,7 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
+        code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
