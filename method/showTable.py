@@ -151,20 +151,44 @@ def generate_show_table():
     return df
 
 
-def show_distribution(daily_dir):
-    sub_dir = '%s\\res_daily\\' % daily_dir
+def show_distribution():
+    path = "..\\basicData\\self_selected\\gui_selected.txt"
+    gui_selected = load_json_txt(path)
 
+    path = "..\\basicData\\dailyUpdate\\latest\\z001_daily_table.pkl"
+    df = load_pkl(path)
+
+    root = '..\\basicData\\dailyUpdate\\latest\\res_daily\\'
     res = list()
-    for file in os.listdir(sub_dir):
-        res.extend(load_pkl('%s\\%s' % (sub_dir, file)))
+    for file in os.listdir(root):
+        res.extend(load_pkl('%s\\%s' % (root, file)))
 
-    ret = [0] * 21
+    # df = pd.DataFrame()
+    ret1 = np.zeros(41)
+    ret2 = np.zeros(41)
+    ret3 = np.zeros(41)
+
+    total1 = 0
+    total2 = 0
+    total3 = 0
+
+    # for tmp in df.iterrows():
     for tmp in res:
         code = tmp[0]
         src = tmp[1]
 
-        val1 = get_recent_val(src, 's_028_market_value', np.inf)
-        val2 = get_recent_val(src, 's_028_market_value', np.inf, 2)
+        # val1 = tmp[1]['market_value_1']
+        # val2 = tmp[1]['market_value_2']
+
+        try:
+            val1 = src.loc['2022-05-10', 'market_value']
+        except:
+            val1 = np.inf
+
+        try:
+            val2 = src.loc['2022-04-25', 'market_value']
+        except:
+            val2 = np.inf
 
         r = val1 / val2 - 1
 
@@ -172,18 +196,37 @@ def show_distribution(daily_dir):
             r = -0.1
         if r > 0.1:
             r = 0.1
+        if val1 == np.inf or val2 == np.inf:
+            r = np.nan
 
-        index = round((r + 0.1) * 10)
-        ret[index] = ret[index] + 1
+        if not np.isnan(r):
+            index = round((r + 0.1) * 200)
 
-    test_figure(ret)
+            ret1[index] = ret1[index] + 1
+            total1 += 1
+
+            if code[0] == '0' or code[0] == '6':
+                if code[:3] != '688':
+                    # print(code)
+                    ret2[index] = ret2[index] + 1
+                    total2 += 1
+            if code in gui_selected:
+                ret3[index] = ret3[index] + 1
+                total3 += 1
+
+    ret1 = ret1 / total1
+    ret2 = ret2 / total2
+    ret3 = ret3 / total3
+
+    test_figure(ret1, ret2, ret3)
 
 
-def test_figure(yy):
+def test_figure(yy, yy2, yy3):
     plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
     plt.rcParams['axes.unicode_minus'] = False
 
-    xx = np.arange(-10, 11, 1)
+    length = len(yy)
+    xx = range(length)
     fig = plt.figure(figsize=(16, 9), dpi=90)
 
     fig_tittle = 'Distribution'
@@ -199,18 +242,23 @@ def test_figure(yy):
     # ax1.set_xlabel('断开电容')
     # ax1.set_ylabel('label-voltage')
 
-    ax1.yaxis.grid(True, which='major')
-    ax1.set_ylim([0, 2])
+    ax1.yaxis.grid(True, which='both')
+    ax1.xaxis.grid(True, which='both')
+    # ax1.set_ylim([0, 0.5])
 
     # tmp = np.min(yy) * 1000
     # ax1.text(0.05, 0.95, '最小分路电流%.2fmA' % tmp, fontsize=10, color='blue', va='top', ha='left', transform=ax1.transAxes)
 
     ax1.plot(xx, yy, linestyle='-', alpha=0.8, color='blue', label='all')
-    # ax1.plot(xx, yy2, linestyle='--', alpha=0.8, color='r', label='门限值')
-    # ax1.plot(xx, yy3, linestyle='--', alpha=0.8, color='g', label='正常情况')
+    ax1.plot(xx, yy2, linestyle='--', alpha=0.8, color='r', label='main')
+    ax1.plot(xx, yy3, linestyle='--', alpha=0.8, color='g', label='selected')
 
-    ax1.set_xticks(xx)
-    # ax1.set_xticklabels(xx2)
+    interval = round((length - 1) / 20)
+    major_xx = range(0, length, interval)
+    label_xx = range(-10, 11, 1)
+
+    ax1.set_xticks(major_xx)
+    ax1.set_xticklabels(label_xx)
 
     ax1.legend()
     for label in ax1.xaxis.get_ticklabels():
@@ -227,7 +275,8 @@ if __name__ == '__main__':
     # pd.set_option('display.width', 10000)
 
     # generate_daily_table('update_20220506153503')
-    test_figure([1] * 21)
+    # test_figure([1] * 21)
+    show_distribution()
     # generate_show_table()
     # generate_show_table()
 
