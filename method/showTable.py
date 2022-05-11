@@ -4,6 +4,8 @@ import json
 import os
 import pandas as pd
 from method.fileMethod import *
+import time
+import matplotlib.pyplot as plt
 
 
 def get_recent_val(df, column, default, shift=1):
@@ -149,12 +151,83 @@ def generate_show_table():
     return df
 
 
+def show_distribution(daily_dir):
+    sub_dir = '%s\\res_daily\\' % daily_dir
+
+    res = list()
+    for file in os.listdir(sub_dir):
+        res.extend(load_pkl('%s\\%s' % (sub_dir, file)))
+
+    ret = [0] * 21
+    for tmp in res:
+        code = tmp[0]
+        src = tmp[1]
+
+        val1 = get_recent_val(src, 's_028_market_value', np.inf)
+        val2 = get_recent_val(src, 's_028_market_value', np.inf, 2)
+
+        r = val1 / val2 - 1
+
+        if r < -0.1:
+            r = -0.1
+        if r > 0.1:
+            r = 0.1
+
+        index = round((r + 0.1) * 10)
+        ret[index] = ret[index] + 1
+
+    test_figure(ret)
+
+
+def test_figure(yy):
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus'] = False
+
+    xx = np.arange(-10, 11, 1)
+    fig = plt.figure(figsize=(16, 9), dpi=90)
+
+    fig_tittle = 'Distribution'
+
+    fig.suptitle(fig_tittle)
+    fig.subplots_adjust(hspace=0.3)
+
+    ax1 = fig.add_subplot(1, 1, 1)
+
+    # title = '分路电流-频率%sHz'
+    # ax1.set_title(title)
+
+    # ax1.set_xlabel('断开电容')
+    # ax1.set_ylabel('label-voltage')
+
+    ax1.yaxis.grid(True, which='major')
+    ax1.set_ylim([0, 2])
+
+    # tmp = np.min(yy) * 1000
+    # ax1.text(0.05, 0.95, '最小分路电流%.2fmA' % tmp, fontsize=10, color='blue', va='top', ha='left', transform=ax1.transAxes)
+
+    ax1.plot(xx, yy, linestyle='-', alpha=0.8, color='blue', label='all')
+    # ax1.plot(xx, yy2, linestyle='--', alpha=0.8, color='r', label='门限值')
+    # ax1.plot(xx, yy3, linestyle='--', alpha=0.8, color='g', label='正常情况')
+
+    ax1.set_xticks(xx)
+    # ax1.set_xticklabels(xx2)
+
+    ax1.legend()
+    for label in ax1.xaxis.get_ticklabels():
+        # label is a Text instance
+        label.set_color('blue')
+        # label.set_rotation(50)
+
+    plt.show()
+
+
 if __name__ == '__main__':
     # pd.set_option('display.max_columns', None)
     # pd.set_option('display.max_rows', None)
     # pd.set_option('display.width', 10000)
 
-    generate_daily_table('update_20220506153503')
+    # generate_daily_table('update_20220506153503')
+    test_figure([1] * 21)
     # generate_show_table()
     # generate_show_table()
 
