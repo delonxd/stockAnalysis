@@ -155,22 +155,17 @@ def show_distribution():
     path = "..\\basicData\\self_selected\\gui_selected.txt"
     gui_selected = load_json_txt(path)
 
-    path = "..\\basicData\\dailyUpdate\\latest\\z001_daily_table.pkl"
-    df = load_pkl(path)
-
     root = '..\\basicData\\dailyUpdate\\latest\\res_daily\\'
     res = list()
     for file in os.listdir(root):
         res.extend(load_pkl('%s\\%s' % (root, file)))
 
-    # df = pd.DataFrame()
-    ret1 = np.zeros(41)
-    ret2 = np.zeros(41)
-    ret3 = np.zeros(41)
+    path = "..\\basicData\\dailyUpdate\\latest\\z001_daily_table.pkl"
+    df = load_pkl(path)
 
-    total1 = 0
-    total2 = 0
-    total3 = 0
+    precision = 0.005
+
+    ret = pd.DataFrame(dtype='int64')
 
     # for tmp in df.iterrows():
     for tmp in res:
@@ -182,51 +177,54 @@ def show_distribution():
 
         try:
             val1 = src.loc['2022-05-10', 'market_value']
-        except:
-            val1 = np.inf
-
-        try:
             val2 = src.loc['2022-04-25', 'market_value']
         except:
+            val1 = np.inf
             val2 = np.inf
 
         r = val1 / val2 - 1
 
-        if r < -0.1:
-            r = -0.1
-        if r > 0.1:
-            r = 0.1
         if val1 == np.inf or val2 == np.inf:
             r = np.nan
 
         if not np.isnan(r):
-            index = round((r + 0.1) * 200)
+            index = round(r / precision) * precision
 
-            ret1[index] = ret1[index] + 1
-            total1 += 1
+            ret = add_counter(ret, index, 'all')
 
             if code[0] == '0' or code[0] == '6':
                 if code[:3] != '688':
-                    # print(code)
-                    ret2[index] = ret2[index] + 1
-                    total2 += 1
+                    ret = add_counter(ret, index, 'main')
+
             if code in gui_selected:
-                ret3[index] = ret3[index] + 1
-                total3 += 1
+                ret = add_counter(ret, index, 'selected')
 
-    ret1 = ret1 / total1
-    ret2 = ret2 / total2
-    ret3 = ret3 / total3
+    start = min(ret.index)
+    end = max(ret.index) + 1e-10
 
-    test_figure(ret1, ret2, ret3)
+    new_index = np.arange(start, end, precision)
+    new_index = map(lambda x: round(x / precision) * precision, new_index)
+    ret = ret.reindex(new_index).fillna(0)
+
+    print(ret.sum())
+
+    test_figure(ret)
 
 
-def test_figure(yy, yy2, yy3):
+def add_counter(df: pd.DataFrame, row, column):
+    if row in df.index and column in df.columns:
+        df.loc[row, column] = df.loc[row, column] + 1
+    else:
+        df.loc[row, column] = 1
+    ret = df.fillna(0)
+    return ret
+
+
+def test_figure(df: pd.DataFrame):
     plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
     plt.rcParams['axes.unicode_minus'] = False
 
-    length = len(yy)
-    xx = range(length)
+    xx = df.index
     fig = plt.figure(figsize=(16, 9), dpi=90)
 
     fig_tittle = 'Distribution'
@@ -249,16 +247,19 @@ def test_figure(yy, yy2, yy3):
     # tmp = np.min(yy) * 1000
     # ax1.text(0.05, 0.95, '最小分路电流%.2fmA' % tmp, fontsize=10, color='blue', va='top', ha='left', transform=ax1.transAxes)
 
-    ax1.plot(xx, yy, linestyle='-', alpha=0.8, color='blue', label='all')
-    ax1.plot(xx, yy2, linestyle='--', alpha=0.8, color='r', label='main')
-    ax1.plot(xx, yy3, linestyle='--', alpha=0.8, color='g', label='selected')
+    colors = ['b', 'r', 'g']
+    for index, column in enumerate(df.columns):
+        yy = df.loc[:, column]
+        yy = yy / yy.sum()
+        color = colors[index % 3]
+        ax1.plot(xx, yy, linestyle='-', alpha=0.8, color=color, label=column)
 
-    interval = round((length - 1) / 20)
-    major_xx = range(0, length, interval)
-    label_xx = range(-10, 11, 1)
-
-    ax1.set_xticks(major_xx)
-    ax1.set_xticklabels(label_xx)
+    # interval = round((length - 1) / 20)
+    # major_xx = range(0, length, interval)
+    # label_xx = range(-10, 11, 1)
+    #
+    # ax1.set_xticks(major_xx)
+    # ax1.set_xticklabels(label_xx)
 
     ax1.legend()
     for label in ax1.xaxis.get_ticklabels():
@@ -270,9 +271,9 @@ def test_figure(yy, yy2, yy3):
 
 
 if __name__ == '__main__':
-    # pd.set_option('display.max_columns', None)
-    # pd.set_option('display.max_rows', None)
-    # pd.set_option('display.width', 10000)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.width', 10000)
 
     # generate_daily_table('update_20220506153503')
     # test_figure([1] * 21)
