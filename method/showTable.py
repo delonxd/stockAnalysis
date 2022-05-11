@@ -163,7 +163,7 @@ def show_distribution():
     path = "..\\basicData\\dailyUpdate\\latest\\z001_daily_table.pkl"
     df = load_pkl(path)
 
-    precision = 0.005
+    precision = 0.05
 
     ret = pd.DataFrame(dtype='int64')
 
@@ -176,8 +176,8 @@ def show_distribution():
         # val2 = tmp[1]['market_value_2']
 
         try:
-            val1 = src.loc['2022-05-10', 'market_value']
-            val2 = src.loc['2022-04-25', 'market_value']
+            val1 = src.loc['2022-05-11', 's_028_market_value']
+            val2 = src.loc['2021-01-25', 's_028_market_value']
         except:
             val1 = np.inf
             val2 = np.inf
