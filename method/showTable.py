@@ -163,24 +163,24 @@ def show_distribution():
     path = "..\\basicData\\dailyUpdate\\latest\\z001_daily_table.pkl"
     df = load_pkl(path)
 
-    precision = 0.05
+    precision = 0.005
 
     ret = pd.DataFrame(dtype='int64')
 
-    # for tmp in df.iterrows():
-    for tmp in res:
+    for tmp in df.iterrows():
+    # for tmp in res:
         code = tmp[0]
         src = tmp[1]
 
-        # val1 = tmp[1]['market_value_1']
-        # val2 = tmp[1]['market_value_2']
+        val1 = tmp[1]['market_value_1']
+        val2 = tmp[1]['market_value_2']
 
-        try:
-            val1 = src.loc['2022-05-11', 's_028_market_value']
-            val2 = src.loc['2021-01-25', 's_028_market_value']
-        except:
-            val1 = np.inf
-            val2 = np.inf
+        # try:
+        #     val1 = src.loc['2022-05-11', 's_028_market_value']
+        #     val2 = src.loc['2021-01-25', 's_028_market_value']
+        # except:
+        #     val1 = np.inf
+        #     val2 = np.inf
 
         r = val1 / val2 - 1
 
@@ -270,6 +270,65 @@ def test_figure(df: pd.DataFrame):
     plt.show()
 
 
+def test_strategy():
+    from method.dataMethod import load_df_from_mysql
+    import datetime as dt
+
+    df = load_df_from_mysql('600438', 'mvs')
+
+    # s0 = df.loc[:, 'id_041_mvs_mc'].dropna()
+    s0 = df.loc[:, 'id_035_mvs_sp'].dropna()
+    s1 = s0[s0.index > '2021-01-04']
+
+    profit = 0
+    s2 = s1.copy()
+
+    status = True
+    value = s1[0]
+    date = s1.index[0]
+    print(status, value, profit)
+    for index, val in s1.iteritems():
+        if status is True:
+            if val > value:
+                profit += val - value
+                value = val
+                status = False
+                d1 = dt.datetime.strptime(date, "%Y-%m-%d")
+                d2 = dt.datetime.strptime(index, "%Y-%m-%d")
+                delta = (d2 - d1).days
+                print(date, index, delta)
+                print(val, profit)
+                # print('out')
+        else:
+            if val < value:
+                value = val
+                status = True
+                date = index
+        s2[index] = profit
+
+    print(status, s1[-1], profit)
+
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus'] = False
+
+    xx = range(s1.size)
+    yy = s1.values
+    fig = plt.figure(figsize=(16, 9), dpi=50)
+
+    fig_tittle = 'Distribution'
+
+    fig.suptitle(fig_tittle)
+    fig.subplots_adjust(hspace=0.3)
+
+    ax1 = fig.add_subplot(1, 1, 1)
+
+    # ax1.yaxis.grid(True, which='both')
+    # ax1.xaxis.grid(True, which='both')
+
+    ax1.plot(xx, yy, linestyle='-', alpha=0.8, color='r', label='test')
+    # plt.show()
+
+
 if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
@@ -277,7 +336,8 @@ if __name__ == '__main__':
 
     # generate_daily_table('update_20220506153503')
     # test_figure([1] * 21)
-    show_distribution()
+    # show_distribution()
+    test_strategy()
     # generate_show_table()
     # generate_show_table()
 
