@@ -51,17 +51,18 @@ class CodesDataFrame:
     def sort_values(self, columns, ascending=True):
         self.df.sort_values(columns, ascending=ascending, inplace=True)
 
-    def init_current_index(self, index=None, code=None):
-
-        if index is not None:
-            self.current_index = index
-            return
-
-        if code is not None:
+    def init_current_index(self, index=0):
+        if isinstance(index, str):
+            code = index
             code_list = self.df['code'].tolist()
             if code in code_list:
                 self.current_index = code_list.index(code)
-            return
+        else:
+            try:
+                tmp = int(index)
+                self.current_index = tmp
+            except Exception as e:
+                print(e)
 
 
 class QDataFrameTable(QTableWidget):

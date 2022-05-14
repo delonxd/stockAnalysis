@@ -88,13 +88,10 @@ class MainWidget(QWidget):
     def __init__(self):
         super().__init__()
 
-        code_list = self.get_code_list()
+        code_list, code_index = self.get_code_list()
 
         self.codes_df = CodesDataFrame(code_list)
-        # self.codes_df.init_current_index(index=1100)
-        self.codes_df.init_current_index(index=0)
-        # self.codes_df.init_current_index(code='002082')
-        # self.codes_df.init_current_index(code='600603')
+        self.codes_df.init_current_index(index=code_index)
 
         self.style_df = load_default_style()
 
@@ -147,6 +144,7 @@ class MainWidget(QWidget):
         self.equity_change_widget = EquityChangeWidget()
         self.counter_info = None
         self.real_cost = None
+        self.listing_date = None
         self.max_increase_30 = 0
 
         self.window2 = ShowPix(main_window=self)
@@ -549,6 +547,7 @@ class MainWidget(QWidget):
             date = tmp_date
 
         self.max_increase_30 = np.inf
+        self.listing_date = None
         if 's_028_market_value' in df.columns:
             s0 = self.data_pix.df['s_028_market_value'].copy().dropna()
             if s0.size > 0:
@@ -556,6 +555,7 @@ class MainWidget(QWidget):
                 size0 = min(s0.size, 30)
                 minimum = min(s0[-size0:])
                 self.max_increase_30 = recent / minimum - 1
+                self.listing_date = s0.index[0]
 
         self.real_cost = None
         if 's_025_real_cost' in df.columns:
@@ -656,6 +656,10 @@ class MainWidget(QWidget):
             txt_counter = '%s次/%.2f%%[%s]' % (data, np.inf, '')
 
         list0.append('%.2f%%%s' % (self.max_increase_30*100, self.get_sign(self.max_increase_30)))
+
+        if self.listing_date is not None:
+            list0.insert(0, self.listing_date)
+
         list1.append(txt_counter)
 
         ass = None
@@ -762,8 +766,8 @@ class MainWidget(QWidget):
 
         root = "..\\basicData\\dailyUpdate\\latest"
         # file = "code_sorted_real_pe.txt"
-        file = "s002_code_sorted_real_pe.txt"
-        # file = "s003_code_sorted_roe_parent.txt"
+        # file = "s002_code_sorted_real_pe.txt"
+        file = "s003_code_sorted_roe_parent.txt"
         # file = "s004_code_latest_update.txt"
 
         code_list = load_json_txt("{}\\{}".format(root, file))
@@ -803,16 +807,19 @@ class MainWidget(QWidget):
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
-            blacklist=blacklist,
+            # blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
-            # market='main',
-            market='all',
+            market='main',
+            # market='all',
         )
+
+        code_index = 0
+        code_index = '605399'
 
         ################################################################################################################
 
-        code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
+        # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
 
@@ -822,7 +829,7 @@ class MainWidget(QWidget):
         # code_list = latest_update + hold_list + code_list
         # code_list = hold_list
 
-        return code_list
+        return code_list,  code_index
 
     @staticmethod
     def get_blacklist():
