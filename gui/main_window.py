@@ -732,7 +732,7 @@ class MainWidget(QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.cross = not self.cross
+            # self.cross = not self.cross
 
             pos = event.pos() - self.label.pos()
             self.draw_cross(pos.x(), pos.y())
@@ -814,8 +814,8 @@ class MainWidget(QWidget):
             # market='all',
         )
 
-        code_index = 0
-        code_index = '605399'
+        # code_index = 0
+        code_index = '000708'
 
         ################################################################################################################
 
@@ -829,7 +829,7 @@ class MainWidget(QWidget):
         # code_list = latest_update + hold_list + code_list
         # code_list = hold_list
 
-        return code_list,  code_index
+        return code_list, code_index
 
     @staticmethod
     def get_blacklist():

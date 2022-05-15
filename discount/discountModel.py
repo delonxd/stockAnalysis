@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class ValueModel:
@@ -22,7 +23,7 @@ class ValueModel:
 
         return x
 
-    def remain_value(self, nr):
+    def remain_value(self, nr, rr):
         x = cal_remain_value(
             rate0=self.rate0,
             rate1=self.rate[0],
@@ -30,6 +31,7 @@ class ValueModel:
             rate2=self.rate[1],
             n2=self.year[1],
             nr=nr,
+            rr=rr,
         )
 
         return x
@@ -91,7 +93,7 @@ def cal_value2(rate0, rate1=0, rate2=0, n1=0, n2=0):
     return res, d_percent
 
 
-def cal_remain_value(rate0, rate1=0, rate2=0, n1=0, n2=0, nr=30):
+def cal_remain_value(rate0, rate1=0, rate2=0, n1=0, n2=0, nr=30, rr=0.4):
     n3 = 1e7 - n1 - n2
 
     if nr <= n1:
@@ -125,9 +127,9 @@ def cal_remain_value(rate0, rate1=0, rate2=0, n1=0, n2=0, nr=30):
     res1_book = sum_value2(1, a1t, a2t, n1b, n2b, n3b)
     res1_remain = res1_book * (a0**nr)
 
-    res_plus = res1_remain + res2_real
+    # res_plus = res1_remain + res2_real
 
-    remain_rate = 0.4
+    remain_rate = rr
     res_plus = res1_real * (1 - remain_rate) + res1_remain * remain_rate + res2_real
 
     # print("Value: {:.2f}".format(res0))
@@ -136,9 +138,10 @@ def cal_remain_value(rate0, rate1=0, rate2=0, n1=0, n2=0, nr=30):
     # print("Value2: {:.2f}".format(res_plus))
     p = res_plus / res0 * 100
     print("nr: {:.0f}, Value2: {:.2f}, percent: {:.2f}%".format(nr, res_plus, p))
+    print("Value: {:.2f}".format(res0))
 
-
-    return res0, res1_remain, res2_real
+    # return res0, res1_remain, res2_real
+    return p
 
 
 def cal_kelly(p1, p2, k):
@@ -166,8 +169,7 @@ def get_index(list0, val):
     return res
 
 
-if __name__ == '__main__':
-
+def test_value():
     v_list = []
     for r1 in np.arange(-10, 50.01, 0.01):
         if r1 <= 5:
@@ -184,32 +186,45 @@ if __name__ == '__main__':
         v_list.append(m.value/2)
         m.show_value()
 
-    import random
-    for i in range(1000):
-        a = random.random() * 300 + 3
 
-        ii = get_index(v_list, a)
-        rr = round(ii * 0.01 - 10, 2)
-        # print(rr)
+def test_remain_rate():
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus'] = False
 
-    # m = ValueModel(
-    #     pe=10,
-    #     rate=[25, 5],
-    #     year=[10, 10],
-    #     rate0=-10,
-    # )
-    # r = 1/3
-    #
-    # m.value_k(
-    #     p1=1-r,
-    #     p2=r,
-    # )
-    #
-    # # cal_kelly(
-    # #     p1=1-r,
-    # #     p2=r,
-    # #     k=1.6,
-    # # )
-    #
-    # for i in range(0, 31, 5):
-    #     m.remain_value(i)
+    fig = plt.figure(figsize=(16, 9), dpi=90)
+
+    fig_tittle = 'Distribution'
+
+    fig.suptitle(fig_tittle)
+    fig.subplots_adjust(hspace=0.3)
+
+    ax1 = fig.add_subplot(1, 1, 1)
+
+    m1 = ValueModel(
+        pe=10,
+        rate=[20, 10],
+        year=[10, 10],
+        rate0=-10,
+    )
+
+    ax1.yaxis.grid(True, which='both')
+    ax1.xaxis.grid(True, which='both')
+
+    for i in range(11):
+        rr = i / 10
+        yy = []
+        for nr in range(100):
+            tmp = m1.remain_value(nr, rr)
+            yy.append(tmp)
+
+        xx = range(100)
+        ax1.plot(xx, yy, linestyle='-', alpha=0.8, color='r', label=str(i))
+
+    ax1.legend()
+    ax1.set_ylim([0, 105])
+
+    plt.show()
+
+
+if __name__ == '__main__':
+    test_remain_rate()
