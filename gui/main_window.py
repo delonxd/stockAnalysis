@@ -766,8 +766,8 @@ class MainWidget(QWidget):
 
         root = "..\\basicData\\dailyUpdate\\latest"
         # file = "code_sorted_real_pe.txt"
-        # file = "s002_code_sorted_real_pe.txt"
-        file = "s003_code_sorted_roe_parent.txt"
+        file = "s002_code_sorted_real_pe.txt"
+        # file = "s003_code_sorted_roe_parent.txt"
         # file = "s004_code_latest_update.txt"
 
         code_list = load_json_txt("{}\\{}".format(root, file))
@@ -807,15 +807,15 @@ class MainWidget(QWidget):
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
-            # blacklist=blacklist,
+            blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
-            market='main',
-            # market='all',
+            # market='main',
+            market='all',
         )
 
-        # code_index = 0
-        code_index = '000708'
+        code_index = 0
+        # code_index = '000708'
 
         ################################################################################################################
 
