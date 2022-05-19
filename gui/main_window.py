@@ -767,7 +767,7 @@ class MainWidget(QWidget):
         root = "..\\basicData\\dailyUpdate\\latest"
         # file = "code_sorted_real_pe.txt"
         file = "s002_code_sorted_real_pe.txt"
-        # file = "s003_code_sorted_roe_parent.txt"
+        file = "s003_code_sorted_roe_parent.txt"
         # file = "s004_code_latest_update.txt"
 
         code_list = load_json_txt("{}\\{}".format(root, file))
