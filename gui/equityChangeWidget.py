@@ -80,20 +80,32 @@ class EquityChangeWidget(QWidget):
 
 def request_equity_change(code):
     token = "f819be3a-e030-4ff0-affe-764440759b5c"
-    today = dt.date.today().strftime("%Y-%m-%d")
     url = 'https://open.lixinger.com/api/cn/company/equity-change'
-    api = {
-        "token": token,
-        "startDate": "1970-01-01",
-        "endDate": today,
-        "stockCode": code,
-    }
 
-    res = data_request(url=url, api_dict=api)
-    data = json.loads(res.decode())['data']
+    ret = []
+
+    start = dt.date(dt.date.today().year - 9, 1, 1)
+    end = dt.date.today()
+
+    while True:
+        api = {
+            "token": token,
+            "startDate": start.strftime("%Y-%m-%d"),
+            "endDate": end.strftime("%Y-%m-%d"),
+            "stockCode": code,
+        }
+
+        res = data_request(url=url, api_dict=api)
+        data = json.loads(res.decode())['data']
+        if len(data) == 0:
+            break
+        else:
+            start = dt.date(start.year - 10, 1, 1)
+            end = dt.date(start.year + 9, 12, 31)
+        ret.extend(data)
 
     # print(config_equity_change_data(data))
-    return data
+    return ret
 
 
 def config_equity_change_data(data):
