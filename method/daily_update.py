@@ -61,7 +61,7 @@ def daily_update():
     MainLog.add_log('Length of all codes: %s' % len(all_codes))
     MainLog.add_log('Length of new codes: %s' % len(new_codes))
 
-    ret1 = update_all_data(new_codes, start_date='1970-01-01')
+    ret1 = update_all_data(new_codes, start_date='2013-01-01')
     ret2 = update_latest_data(all_codes)
 
     updated_code = list(set(ret1 + ret2))
@@ -85,7 +85,7 @@ def daily_update():
         request_data2mysql(
             stock_code=code,
             data_type='fs',
-            start_date='2021-01-01',
+            start_date='2013-01-01',
         )
 
     sub_dir = '%s\\res_daily' % res_dir
