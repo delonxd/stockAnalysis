@@ -13,6 +13,7 @@ from gui.styleDataFrame import load_default_style
 from gui.styleDataFrame import save_default_style
 from gui.priorityTable import PriorityTable
 from gui.showPix import ShowPix
+from gui.showPlot import ShowPlot
 from gui.remarkWidget import RemarkWidget
 from gui.webWidget import WebWidget
 from gui.equityChangeWidget import EquityChangeWidget
@@ -30,7 +31,7 @@ import datetime as dt
 
 import numpy as np
 import pandas as pd
-
+import matplotlib.pyplot as plt
 
 class GuiLog(MainLog):
     content = ''
@@ -118,7 +119,7 @@ class MainWidget(QWidget):
         self.button6 = QPushButton('remark')
         self.button7 = QPushButton('code list')
         self.button8 = QPushButton('priority')
-        self.button9 = QPushButton('new_window')
+        self.button9 = QPushButton('plot')
         # todo checklist
         self.button10 = QPushButton('web')
         self.button11 = QPushButton('equity_change')
@@ -147,7 +148,8 @@ class MainWidget(QWidget):
         self.listing_date = None
         self.max_increase_30 = 0
 
-        self.window2 = ShowPix(main_window=self)
+        # self.window2 = ShowPix(main_window=self)
+        self.window2 = ShowPlot()
 
         self.tree.update_style.connect(self.update_style)
         self.code_widget.table_view.change_signal.connect(self.change_stock)
@@ -267,7 +269,8 @@ class MainWidget(QWidget):
         self.button6.clicked.connect(self.show_remark)
         self.button7.clicked.connect(self.show_code_list)
         self.button8.clicked.connect(self.config_priority)
-        self.button9.clicked.connect(self.show_new_window)
+        # self.button9.clicked.connect(self.show_new_window)
+        self.button9.clicked.connect(self.show_plot)
         self.button10.clicked.connect(self.show_web)
         self.button11.clicked.connect(self.show_equity_change)
         self.button12.clicked.connect(self.relocate)
@@ -517,6 +520,11 @@ class MainWidget(QWidget):
 
         self.web_widget.load_code(code)
         self.equity_change_widget.load_code(code)
+
+        if self.window2.isHidden():
+            return
+        else:
+            self.show_plot()
 
     def update_counter(self, code):
         df = self.data_pix.df
@@ -815,7 +823,7 @@ class MainWidget(QWidget):
         )
 
         code_index = 0
-        # code_index = '000708'
+        # code_index = '002810'
 
         ################################################################################################################
 
@@ -827,7 +835,7 @@ class MainWidget(QWidget):
 
         # code_list = hold_list + code_list
         # code_list = latest_update + hold_list + code_list
-        # code_list = hold_list
+        code_list = hold_list
 
         if len(code_list) == 0:
             raise KeyboardInterrupt('len(code_list) == 0')
@@ -880,6 +888,15 @@ class MainWidget(QWidget):
     def show_new_window(self):
         self.window2.show()
 
+    def show_plot(self):
+        df = self.data_pix.df
+        s0 = pd.Series()
+        if 's_028_market_value' in df.columns:
+            s0 = self.data_pix.df['s_028_market_value'].copy().dropna()
+            s0 = s0[-1250:]
+
+        self.window2.show_plot(title=self.stock_code, series=s0)
+
     def show_web(self):
         self.web_widget.show()
         self.web_widget.load_code(self.stock_code)
@@ -898,15 +915,20 @@ class MainWidget(QWidget):
             self.equity_change_widget.resize(940, 1008)
             self.equity_change_widget.move(-1916, -10)
 
+            self.window2.move(-1906, 10)
+
             self.showMaximized()
             self.location_state = True
 
         else:
             self.web_widget.resize(960, 500)
-            self.web_widget.move(0, 0)
+            self.web_widget.move(10, 10)
 
             self.equity_change_widget.resize(940, 800)
             self.equity_change_widget.move(0, 0)
+
+            self.window2.move(0, 100)
+
             self.location_state = False
 
     def keyPressEvent(self, e):
@@ -956,6 +978,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     # main = MainWindow()
     main = MainWidget()
-    # main.showMaximized()
-    main.showMinimized()
+    main.showMaximized()
+    # main.showMinimized()
     sys.exit(app.exec_())
