@@ -6,18 +6,30 @@ from method.urlMethod import data_request
 
 def request_mir_y10():
     token = "f819be3a-e030-4ff0-affe-764440759b5c"
-    today = dt.date.today().strftime("%Y-%m-%d")
     url = 'https://open.lixinger.com/api/macro/national-debt'
-    api = {
-        "token": token,
-        "areaCode": "cn",
-        "startDate": "1970-01-01",
-        "endDate": today,
-        "metricsList": ["mir_y10"],
-    }
 
-    res = data_request(url=url, api_dict=api)
-    data = json.loads(res.decode())['data']
+    start = dt.date(dt.date.today().year - 9, 1, 1)
+    end = dt.date.today()
+
+    data = []
+
+    while True:
+        api = {
+            "token": token,
+            "areaCode": "cn",
+            "startDate": start.strftime("%Y-%m-%d"),
+            "endDate": end.strftime("%Y-%m-%d"),
+            "metricsList": ["mir_y10"],
+        }
+
+        res = data_request(url=url, api_dict=api)
+        tmp = json.loads(res.decode())['data']
+        if len(tmp) == 0:
+            break
+        else:
+            start = dt.date(start.year - 10, 1, 1)
+            end = dt.date(start.year + 9, 12, 31)
+        data.extend(tmp)
 
     dict0 = dict()
     for row in data:
