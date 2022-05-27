@@ -329,6 +329,8 @@ def random_code_list(code_list, pick_weight):
         gui_counter = json.loads(f.read())
 
     for key, value in gui_counter.items():
+        if key not in set_all:
+            continue
 
         report_date = report_date_dict.get(key)
         if report_date is None or report_date == 'Invalid da':

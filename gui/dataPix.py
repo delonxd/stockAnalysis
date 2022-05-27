@@ -579,10 +579,10 @@ class DataPix:
         box = box.draw_pix(d1, d2, d_report)
 
         thick = 3 if state is True else 1
-        show1 = self.draw_sub_cross(x, y, d0, d1, d2, state, thick, box[0], self.pix)
+        show1 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, box[0], self.pix)
         show2 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, box[1], self.pix2)
         show3 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, box[2], self.pix3)
-        show4 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, box[2], self.pix4)
+        show4 = self.draw_sub_cross(x, y, d0, d1, d2, state, thick, box[2], self.pix4)
 
         self.pix_list = [show1, show2, show3, show4]
 

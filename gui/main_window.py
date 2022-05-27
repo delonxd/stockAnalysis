@@ -551,7 +551,7 @@ class MainWidget(QWidget):
             if s0.size > 0:
                 tmp_date = max(s0.index[-1], tmp_date)
 
-        if tmp_date != '':
+        if tmp_date != '' and tmp_date != 'Invalid da':
             date = tmp_date
 
         self.max_increase_30 = np.inf
@@ -827,15 +827,15 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
+        code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
-        # code_list = random_code_list(code_list, pick_weight=[1, 0, 0])
+        # code_list = random_code_list(code_list, pick_weight=[0, 1, 1])
 
         ################################################################################################################
 
         # code_list = hold_list + code_list
         # code_list = latest_update + hold_list + code_list
-        code_list = hold_list
+        # code_list = hold_list
 
         if len(code_list) == 0:
             raise KeyboardInterrupt('len(code_list) == 0')
@@ -922,12 +922,12 @@ class MainWidget(QWidget):
 
         else:
             self.web_widget.resize(960, 500)
-            self.web_widget.move(10, 10)
+            self.web_widget.move(0, 0)
 
             self.equity_change_widget.resize(940, 800)
             self.equity_change_widget.move(0, 0)
 
-            self.window2.move(0, 100)
+            self.window2.move(10, 10)
 
             self.location_state = False
 
@@ -940,6 +940,9 @@ class MainWidget(QWidget):
             self.window_flag = 2
         elif e.key() == Qt.Key_4:
             self.window_flag = 3
+        elif e.key() == Qt.Key_S:
+            self.cross = not self.cross
+
         # self.update_window()
         self.show_pix()
 
