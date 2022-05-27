@@ -120,12 +120,16 @@ class MainWidget(QWidget):
         self.button7 = QPushButton('code list')
         self.button8 = QPushButton('priority')
         self.button9 = QPushButton('plot')
-        # todo checklist
         self.button10 = QPushButton('web')
         self.button11 = QPushButton('equity_change')
         self.button12 = QPushButton('relocate')
 
-        self.location_state = False
+        self.button9.setCheckable(True)
+        self.button10.setCheckable(True)
+        self.button11.setCheckable(True)
+        self.button12.setCheckable(True)
+
+        # todo checklist
 
         self.editor1 = QLineEdit()
         self.editor1.setValidator(QIntValidator())
@@ -889,26 +893,34 @@ class MainWidget(QWidget):
         self.window2.show()
 
     def show_plot(self):
-        df = self.data_pix.df
-        s0 = pd.Series()
-        if 's_028_market_value' in df.columns:
-            s0 = self.data_pix.df['s_028_market_value'].copy().dropna()
-            s0 = s0[-1250:]
+        if self.button9.isChecked():
 
-        self.window2.show_plot(title=self.stock_code, series=s0)
+            df = self.data_pix.df
+            s0 = pd.Series()
+            if 's_028_market_value' in df.columns:
+                s0 = self.data_pix.df['s_028_market_value'].copy().dropna()
+                s0 = s0[-1250:]
+
+            self.window2.show_plot(title=self.stock_code, series=s0)
+        else:
+            self.window2.close()
 
     def show_web(self):
-        self.web_widget.show()
-        self.web_widget.load_code(self.stock_code)
+        if self.button10.isChecked():
+            self.web_widget.show()
+            self.web_widget.load_code(self.stock_code)
+        else:
+            self.web_widget.close()
 
     def show_equity_change(self):
-        self.equity_change_widget.show()
-        self.equity_change_widget.load_code(self.stock_code)
+        if self.button11.isChecked():
+            self.equity_change_widget.show()
+            self.equity_change_widget.load_code(self.stock_code)
+        else:
+            self.equity_change_widget.close()
 
     def relocate(self):
-
-        if self.location_state is False:
-
+        if self.button12.isChecked():
             self.web_widget.resize(960, 1008)
             self.web_widget.move(-971, -10)
 
@@ -916,10 +928,7 @@ class MainWidget(QWidget):
             self.equity_change_widget.move(-1916, -10)
 
             self.window2.move(-1906, 10)
-
             self.showMaximized()
-            self.location_state = True
-
         else:
             self.web_widget.resize(960, 500)
             self.web_widget.move(0, 0)
@@ -928,8 +937,7 @@ class MainWidget(QWidget):
             self.equity_change_widget.move(0, 0)
 
             self.window2.move(10, 10)
-
-            self.location_state = False
+            self.showMaximized()
 
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_1:
