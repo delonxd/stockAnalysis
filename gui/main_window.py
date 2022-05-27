@@ -821,8 +821,8 @@ class MainWidget(QWidget):
             # blacklist=blacklist,
             # whitelist=whitelist,
             sort=code_list,
-            # market='main',
-            market='all',
+            market='main',
+            # market='all',
         )
 
         code_index = 0
@@ -830,7 +830,7 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
+        # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
         # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
         # code_list = random_code_list(code_list, pick_weight=[0, 1, 1])
 
