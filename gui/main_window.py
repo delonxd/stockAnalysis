@@ -748,8 +748,7 @@ class MainWidget(QWidget):
 
             pos = event.pos() - self.label.pos()
             self.draw_cross(pos.x(), pos.y())
-            GuiLog.write(self.log_path)
-
+            # GuiLog.write(self.log_path)
             self.label.setFocus()
 
         # elif event.button() == Qt.RightButton:
@@ -948,8 +947,10 @@ class MainWidget(QWidget):
             self.window_flag = 2
         elif e.key() == Qt.Key_4:
             self.window_flag = 3
-        elif e.key() == Qt.Key_S:
+        elif e.key() == Qt.Key_Space:
             self.cross = not self.cross
+        elif e.key() == Qt.Key_S:
+            GuiLog.write(self.log_path)
 
         # self.update_window()
         self.show_pix()
