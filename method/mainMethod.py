@@ -128,7 +128,9 @@ def sift_codes(
         whitelist=None,
         blacklist=None,
         sort=None,
-        market='all'):
+        market='all',
+        timestamp=None,
+):
 
     with open("..\\basicData\\industry\\industry_code_dict.txt", "r", encoding="utf-8", errors="ignore") as f:
         ind_dict = json.loads(f.read())
@@ -136,6 +138,17 @@ def sift_codes(
     set_all = list_to_set(source, ind_dict)
     set_white = list_to_set(whitelist, ind_dict)
     set_black = list_to_set(blacklist, ind_dict)
+
+    set_time_sift = set()
+
+    if timestamp is not None:
+        with open("..\\basicData\\self_selected\\gui_timestamp.txt", "r", encoding="utf-8", errors="ignore") as f:
+            gui_timestamp = json.loads(f.read())
+
+        for key, value in gui_timestamp.items():
+            if value > timestamp:
+                set_time_sift.add(key)
+                print('sift:', key, value)
 
     if market == 'all':
         pass
@@ -154,6 +167,7 @@ def sift_codes(
                     set_black.add(code)
 
     set_sift = set_all - set_black
+    set_sift = set_sift - set_time_sift
     set_sift.update(set_white)
 
     res_list = []

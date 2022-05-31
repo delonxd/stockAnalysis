@@ -823,6 +823,7 @@ class MainWidget(QWidget):
             sort=code_list,
             market='main',
             # market='all',
+            timestamp='2022-05-28 00:00:00',
         )
 
         code_index = 0
