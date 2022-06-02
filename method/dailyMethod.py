@@ -11,14 +11,19 @@ import os
 import pandas as pd
 
 
-def mysql_daily_update(dir_name):
+def basic_daily_update(dir_name):
     all_codes, name_dict, ipo_dates = request_basic()
+    res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
 
     MainLog.add_split('#')
-    write_json_txt('%s\\name_dict.txt' % dir_name, name_dict)
+    write_json_txt('%s\\name_dict.txt' % res_dir, name_dict)
     write_json_txt('..\\basicData\\code_names_dict.txt', name_dict)
-    write_json_txt('%s\\code_list.txt' % dir_name, all_codes)
-    MainLog.add_split('#')
+    write_json_txt('%s\\code_list.txt' % res_dir, all_codes)
+    return all_codes, name_dict, ipo_dates
+
+
+def mysql_daily_update(dir_name, all_codes, ipo_dates):
+    res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
 
     # industry_dict = request_industry_sample()
     # res = json.dumps(industry_dict, indent=4, ensure_ascii=False)
@@ -53,7 +58,7 @@ def mysql_daily_update(dir_name):
     MainLog.add_log('generate code_latest_update.txt')
 
     res = json.dumps(updated_code, indent=4, ensure_ascii=False)
-    file = '%s\\code_latest_update.txt' % dir_name
+    file = '%s\\code_latest_update.txt' % res_dir
     with open(file, "w", encoding='utf-8') as f:
         f.write(res)
 
@@ -66,8 +71,6 @@ def mysql_daily_update(dir_name):
             data_type='fs',
             start_date='2013-01-01',
         )
-
-    return all_codes
 
 
 def daily_analysis(dir_name, all_codes):

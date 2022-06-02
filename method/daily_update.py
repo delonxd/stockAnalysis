@@ -8,6 +8,7 @@ def daily_update():
     from request.requestBasicData import request_basic, request_industry_sample
     from method.logMethod import MainLog
     from method.sortCode import sort_daily_code
+    from method.dailyMethod import basic_daily_update
     from method.dailyMethod import mysql_daily_update
     from method.dailyMethod import daily_analysis
     from method.dailyMethod import generate_daily_table
@@ -26,7 +27,10 @@ def daily_update():
 
     ################################################################################################################
 
-    all_codes = mysql_daily_update(dir_name)
+    all_codes, name_dict, ipo_dates = basic_daily_update(dir_name)
+
+    MainLog.add_split('#')
+    mysql_daily_update(dir_name, all_codes, ipo_dates)
     MainLog.add_log('mysql_daily_update complete')
 
     MainLog.write('%s\\logs1.txt' % res_dir)
@@ -34,13 +38,12 @@ def daily_update():
 
     ################################################################################################################
 
-    # all_codes, _, _ = request_basic()
-    daily_analysis(all_codes, dir_name)
+    daily_analysis(dir_name, all_codes)
     MainLog.add_log('data analysis complete')
 
-    MainLog.add_split('#')
-    sort_daily_code(dir_name)
-    MainLog.add_log('sort_daily_code complete')
+    # MainLog.add_split('#')
+    # sort_daily_code(dir_name)
+    # MainLog.add_log('sort_daily_code complete')
 
     MainLog.add_split('#')
     generate_daily_table(dir_name)
@@ -52,9 +55,9 @@ def daily_update():
 
     ################################################################################################################
 
-    MainLog.add_split('#')
-    output_databases()
-    MainLog.add_log('output_databases complete')
+    # MainLog.add_split('#')
+    # output_databases()
+    # MainLog.add_log('output_databases complete')
 
     MainLog.add_split('#')
     request_mir_y10()
