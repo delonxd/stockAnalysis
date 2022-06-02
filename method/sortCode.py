@@ -1,7 +1,3 @@
-import os
-import pickle
-import shutil
-from method.logMethod import MainLog
 from method.fileMethod import *
 from method.dataMethod import load_df_from_mysql
 
@@ -53,15 +49,13 @@ def load_daily_res(dir_str):
         f.write(res)
 
 
-def sort_daily_code(dir_str):
+def sort_daily_code(dir_name):
     import pickle
     import numpy as np
     import json
     import os
 
-    datetime = dir_str[-14:]
-    res_dir = '..\\basicData\\dailyUpdate\\update_%s' % datetime
-
+    res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
     sub_dir = '%s\\res_daily\\' % res_dir
     list0 = [x for x in os.listdir(sub_dir) if os.path.isfile(sub_dir + x)]
 
@@ -112,75 +106,6 @@ def sort_daily_code(dir_str):
         f.write(res)
 
 
-def new_enter_code(dir_str):
-    import pickle
-    import numpy as np
-    import json
-    import os
-
-    datetime = dir_str[-14:]
-    res_dir = '..\\basicData\\dailyUpdate\\update_%s' % datetime
-
-    sub_dir = '%s\\res_daily\\' % res_dir
-    list0 = [x for x in os.listdir(sub_dir) if os.path.isfile(sub_dir + x)]
-
-    res = list()
-    for file in list0:
-        path = '%s\\%s' % (sub_dir, file)
-        print(path)
-        with open(path, "rb") as f:
-            res.extend(pickle.load(f))
-
-    base_line = 1 / 22
-    offset = 30
-
-    val_list1 = list()
-    val_list2 = list()
-    val_list3 = list()
-    for tmp in res:
-        code = tmp[0]
-        df = tmp[1]
-
-        s1 = df.loc[:, 's_037_real_pe_return_rate'].dropna()
-
-        # print(s1)
-
-        val1 = s1[-1] if s1.size > 0 else -np.inf
-        val2 = s1[-1-offset] if s1.size > offset else -np.inf
-
-        if val1 >= base_line:
-            val_list1.append((code, val1))
-            val3 = (val1 - val2) / val1
-            val_list3.append((code, val3))
-
-        if val2 >= base_line:
-            val_list2.append((code, val2))
-
-    res1 = sorted(val_list1, key=lambda x: x[1], reverse=True)
-    res2 = sorted(val_list2, key=lambda x: x[1], reverse=True)
-
-    sorted1 = zip(*res1).__next__()
-    sorted2 = zip(*res2).__next__()
-
-    sorted3 = list()
-    for code in sorted1:
-        if code not in sorted2:
-            sorted3.append(code)
-
-    # res = json.dumps(sorted3, indent=4, ensure_ascii=False)
-    # file = '%s\\new_enter_code.txt' % res_dir
-    # with open(file, "w", encoding='utf-8') as f:
-    #     f.write(res)
-
-    res4 = sorted(val_list3, key=lambda x: x[1], reverse=True)
-    sorted4 = zip(*res4).__next__()
-
-    res = json.dumps(sorted4, indent=4, ensure_ascii=False)
-    file = '%s\\increase_code.txt' % res_dir
-    with open(file, "w", encoding='utf-8') as f:
-        f.write(res)
-
-
 def generate_list():
     import json
 
@@ -216,79 +141,6 @@ def get_codes_from_sel():
     file = '..\\basicData\\self_selected\\hs300.txt'
     with open(file, "w", encoding='utf-8') as f:
         f.write(res)
-
-
-def save_latest_list(dir_str):
-    src_dir = '..\\basicData\\dailyUpdate\\%s' % dir_str
-    target_dir = '..\\basicData\\dailyUpdate\\latest'
-
-    files = [
-        'a001_code_list.txt',
-        'a002_name_dict.txt',
-        'a003_report_date_dict.txt',
-        'a004_real_cost_dict.txt',
-        's001_code_sorted_pe.txt',
-        's002_code_sorted_real_pe.txt',
-        's003_code_sorted_roe_parent.txt',
-        's004_code_latest_update.txt',
-        'z001_daily_table.pkl',
-    ]
-
-    for file in files:
-        path1 = '%s\\%s' % (src_dir, file[5:])
-        path2 = '%s\\%s' % (target_dir, file)
-        copy_file(path1, path2)
-
-    dir1 = '..\\basicData\\dailyUpdate\\%s\\res_daily' % dir_str
-    dir2 = '..\\basicData\\dailyUpdate\\latest\\res_daily'
-    clear_dir(dir2)
-    copy_dir(dir1, dir2)
-
-
-def clear_dir(dir_path):
-    for file in os.listdir(dir_path):
-        path = '%s\\%s' % (dir_path, file)
-        MainLog.add_log('Delete --> %s' % path)
-        os.remove(path)
-
-
-def copy_dir(dir1, dir2):
-    for file in os.listdir(dir1):
-        path1 = '%s\\%s' % (dir1, file)
-        path2 = '%s\\%s' % (dir2, file)
-        # command = 'copy %s %s' % (path1, path2)
-        # shutil.copytree(path1, path2)
-        if os.path.isfile(path1):
-            shutil.copy(path1, path2)
-            MainLog.add_log('Copy %s --> %s' % (path1, path2))
-
-
-def copy_file(path1, path2):
-    import json
-
-    type1 = path1[-3:]
-    type2 = path2[-3:]
-
-    if type1 == type2 == 'txt':
-        with open(path1, "r", encoding='utf-8') as f:
-            data = json.loads(f.read())
-
-        res = json.dumps(data, indent=4, ensure_ascii=False)
-        with open(path2, "w", encoding='utf-8') as f:
-            f.write(res)
-
-        MainLog.add_log('Copy %s --> %s' % (path1, path2))
-
-    elif type1 == type2 == 'pkl':
-        with open(path1, "rb") as f:
-            data = pickle.load(f)
-
-        with open(path2, "wb") as f:
-            pickle.dump(data, f)
-        MainLog.add_log('Copy %s --> %s' % (path1, path2))
-
-    else:
-        MainLog.add_log("CopyError: invalid type for copy_file(): '%s' --> '%s'" % (path1, path2))
 
 
 def random_code_list(code_list, pick_weight):
@@ -498,7 +350,8 @@ def sort_discount():
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         assessment_dict = json.loads(f.read())
 
-    path = "../basicData/dailyUpdate/latest/a004_real_cost_dict.txt"
+    # path = "../basicData/dailyUpdate/latest/a004_real_cost_dict.txt"
+    path = "../basicData/dailyUpdate/latest/a005_equity_parent_dict.txt"
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         real_cost_dict = json.loads(f.read())
 
@@ -551,8 +404,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    date_dir = 'update_20220507153503'
-    # save_latest_list(date_dir)
+    date_dir = 'update_20220601153504'
     # load_daily_res(date_dir)
     # sort_daily_code(date_dir)
     # new_enter_code(date_dir)
@@ -561,4 +413,4 @@ if __name__ == '__main__':
     # get_random_list()
     # save_latest_list(date_dir)
 
-    sort_hold()
+    # sort_hold()

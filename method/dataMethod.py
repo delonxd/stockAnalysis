@@ -817,6 +817,11 @@ class DataAnalysis:
             s2.name = column
             return s2.dropna()
 
+        elif column == 's_042_roe_adjust':
+            s1 = pd.Series()
+            s1.name = column
+            return s1.dropna()
+
     @staticmethod
     def get_return_year(pe, rate):
         a = 1 + rate
@@ -966,7 +971,7 @@ class DailyDataAnalysis(DataAnalysis):
         self.fs_add(self.get_column(df, 's_016_roe_parent'))
 
         self.fs_add(self.get_column(df, 's_007_asset'))
-        # self.fs_add(self.get_column(df, 's_002_equity'))
+        self.fs_add(self.get_column(df, 's_002_equity'))
         # self.fs_add(self.get_column(df, 's_005_stocks'))
 
         # self.fs_add(self.get_column(df, 's_003_profit'))
