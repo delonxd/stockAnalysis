@@ -149,6 +149,7 @@ class MainWidget(QWidget):
         self.equity_change_widget = EquityChangeWidget()
         self.counter_info = None
         self.real_cost = None
+        self.equity = np.nan
         self.listing_date = None
         self.max_increase_30 = 0
 
@@ -575,6 +576,12 @@ class MainWidget(QWidget):
             if s0.size > 0:
                 self.real_cost = s0[-1] / 1e8
 
+        self.equity = np.nan
+        if 's_002_equity' in df.columns:
+            s0 = self.data_pix.df['s_002_equity'].copy().dropna()
+            if s0.size > 0:
+                self.equity = s0[-1] / 1e8
+
         path = "../basicData/self_selected/gui_counter.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             res_dict = json.loads(f.read())
@@ -686,6 +693,7 @@ class MainWidget(QWidget):
                     print(e)
 
         real_cost = self.real_cost
+        equity = self.equity
 
         txt_bottom1 = 'None'
 
@@ -693,6 +701,8 @@ class MainWidget(QWidget):
             if ass is not None:
                 rate = real_cost / ass
                 txt_bottom1 = '%.2f亿 / %s亿' % (real_cost, ass)
+                list0.append('%.2f' % rate)
+                rate = ass / equity
                 list0.append('%.2f' % rate)
             else:
                 txt_bottom1 = '%s%.2f亿' % ('cost: ', real_cost)
@@ -811,7 +821,7 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        # code_list = sort_discount()
+        code_list = sort_discount()
 
         ################################################################################################################
 
@@ -823,7 +833,7 @@ class MainWidget(QWidget):
             sort=code_list,
             market='main',
             # market='all',
-            timestamp='2022-05-28 00:00:00',
+            # timestamp='2022-05-28 00:00:00',
         )
 
         code_index = 0

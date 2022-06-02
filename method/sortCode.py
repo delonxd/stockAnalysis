@@ -351,7 +351,7 @@ def sort_discount():
         assessment_dict = json.loads(f.read())
 
     # path = "../basicData/dailyUpdate/latest/a004_real_cost_dict.txt"
-    path = "../basicData/dailyUpdate/latest/a005_equity_parent_dict.txt"
+    path = "../basicData/dailyUpdate/latest/a005_equity_dict.txt"
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         real_cost_dict = json.loads(f.read())
 

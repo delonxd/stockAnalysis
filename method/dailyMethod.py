@@ -222,6 +222,15 @@ def generate_daily_table(dir_name):
     dict2 = df.loc[:, 'real_cost'].copy().dropna().to_dict()
     write_json_txt('%s\\real_cost_dict.txt' % daily_dir, dict2)
 
+    list1 = df.sort_values('real_pe_return_rate', ascending=False).index.to_list()
+    write_json_txt('%s\\code_sorted_real_pe.txt' % daily_dir, list1)
+
+    list2 = df.sort_values('roe_parent', ascending=False).index.to_list()
+    write_json_txt('%s\\code_sorted_roe_parent.txt' % daily_dir, list2)
+
+    list3 = df.sort_values('pe_return_rate', ascending=False).index.to_list()
+    write_json_txt('%s\\code_sorted_pe.txt' % daily_dir, list3)
+
     dump_pkl('%s\\daily_table.pkl' % daily_dir, df)
 
     return df
@@ -261,5 +270,5 @@ if __name__ == '__main__':
     pd.set_option('display.width', 10000)
 
     dir_daily = 'update_20220602153503'
-    # generate_daily_table(dir_daily)
+    generate_daily_table(dir_daily)
     save_latest_list(dir_daily)
