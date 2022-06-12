@@ -17,6 +17,7 @@ from gui.showPlot import ShowPlot
 from gui.remarkWidget import RemarkWidget
 from gui.webWidget import WebWidget
 from gui.equityChangeWidget import EquityChangeWidget
+from gui.comparisonWidget import ComparisonWidget
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -112,8 +113,11 @@ class MainWidget(QWidget):
         self.label = QLabel(self)
 
         self.button1 = QPushButton('export')
-        self.button2 = QPushButton('x2')
-        self.button3 = QPushButton('/2')
+        self.button2 = QPushButton('save_codes')
+        self.button3 = QPushButton('comparison')
+
+        # self.button2 = QPushButton('x2')
+        # self.button3 = QPushButton('/2')
         self.button4 = QPushButton('style')
         self.button5 = QPushButton('request')
         self.button6 = QPushButton('remark')
@@ -266,8 +270,11 @@ class MainWidget(QWidget):
         self.center()
 
         self.button1.clicked.connect(self.export_style)
-        self.button2.clicked.connect(self.scale_up)
-        self.button3.clicked.connect(self.scale_down)
+        self.button2.clicked.connect(self.save_codes)
+        self.button3.clicked.connect(self.compare_codes)
+        # self.button2.clicked.connect(self.scale_up)
+        # self.button3.clicked.connect(self.scale_down)
+
         self.button4.clicked.connect(self.show_tree)
         # self.button5.clicked.connect(self.request_data)
         self.button5.clicked.connect(self.request_data_quick)
@@ -334,6 +341,17 @@ class MainWidget(QWidget):
         action10.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_non_cyclical.txt"))
         action11.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_non_cyclical.txt"))
         menu.exec_(QCursor.pos())
+
+    def save_codes(self):
+        code_list = self.codes_df.df['code'].tolist()
+        file = 'code_list_%s' % time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
+        write_json_txt('..\\basicData\\tmp_code_list\\%s' % file, code_list)
+
+    @staticmethod
+    def compare_codes():
+        pass
+        # widget = ComparisonWidget()
+        # widget.show()
 
     def add_code(self, path):
         row = self.codes_df.df.iloc[self.code_index]
