@@ -55,9 +55,9 @@ def daily_update():
 
     ################################################################################################################
 
-    # MainLog.add_split('#')
-    # output_databases()
-    # MainLog.add_log('output_databases complete')
+    MainLog.add_split('#')
+    output_databases()
+    MainLog.add_log('output_databases complete')
 
     MainLog.add_split('#')
     request_mir_y10()
