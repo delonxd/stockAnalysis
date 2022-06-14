@@ -59,7 +59,8 @@ def request_industry_sample():
         sub_data = data["constituents"]
         industry = data["stockCode"]
         for val in sub_data:
-            dict0[val["stockCode"]] = industry
+            if not val == {}:
+                dict0[val["stockCode"]] = industry
 
     dict1 = dict()
     for data in data_list:
@@ -67,7 +68,9 @@ def request_industry_sample():
         industry = data["stockCode"]
         tmp = []
         for val in sub_data:
-            tmp.append(val["stockCode"])
+            if not val == {}:
+                tmp.append(val["stockCode"])
+
         dict1[industry] = tmp
 
     res = json.dumps(dict0, indent=4, ensure_ascii=False)
