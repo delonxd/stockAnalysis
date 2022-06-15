@@ -143,15 +143,18 @@ def get_codes_from_sel():
         f.write(res)
 
 
-def random_code_list(code_list, pick_weight):
+def random_code_list(code_list, pick_weight, sorted_list=None, interval=100):
     import json
     import datetime as dt
     import numpy as np
     from method.mainMethod import sift_codes
 
-    path = "../basicData/dailyUpdate/latest/s002_code_sorted_real_pe.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        sorted_list = json.loads(f.read())
+    # path = "../basicData/dailyUpdate/latest/s002_code_sorted_real_pe.txt"
+    # with open(path, "r", encoding="utf-8", errors="ignore") as f:
+    #     sorted_list = json.loads(f.read())
+
+    if sorted_list is None:
+        sorted_list = code_list
 
     path = "../basicData/self_selected/gui_selected.txt"
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
@@ -235,7 +238,7 @@ def random_code_list(code_list, pick_weight):
         if sum(np.array(src_number) * np.array(pick_weight)) == 0:
             break
 
-        picked = pick_number(src_number, pick_weight, 100)
+        picked = pick_number(src_number, pick_weight, interval)
         print(picked)
         for index, value in enumerate(picked):
             for _ in range(value):
@@ -353,15 +356,15 @@ def sort_discount():
     # path = "../basicData/dailyUpdate/latest/a004_real_cost_dict.txt"
     path = "../basicData/dailyUpdate/latest/a005_equity_dict.txt"
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        real_cost_dict = json.loads(f.read())
+        res_dict = json.loads(f.read())
 
     tmp = []
     for key, value in assessment_dict.items():
-        real_cost = real_cost_dict.get(key)
+        data = res_dict.get(key)
 
         assessment = int(value)
-        if real_cost is not None:
-            discount = real_cost / assessment
+        if data is not None:
+            discount = data / assessment
             tmp.append([key, discount])
 
     tmp.sort(key=lambda x: x[1])

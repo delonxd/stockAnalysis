@@ -34,6 +34,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
 class GuiLog(MainLog):
     content = ''
 
@@ -799,6 +800,58 @@ class MainWidget(QWidget):
 
     def get_code_list(self):
 
+        # code_list = self.get_codes_old(self)
+        code_list = []
+
+        mission = 3
+
+        if mission == 1:
+
+            src = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s002_code_sorted_real_pe.txt")
+            src = sift_codes(
+                source=src,
+                sort=src,
+                market='all',
+            )
+            code_list = random_code_list(src, pick_weight=[30, 40, 30], interval=100)
+
+        elif mission == 2:
+
+            src = sort_discount()
+            src = sift_codes(
+                source=src,
+                sort=src,
+                market='main',
+            )
+            code_list = random_code_list(src, pick_weight=[0, 1, 1], interval=40)
+
+        elif mission == 3:
+
+            src = sort_discount()
+            src = sift_codes(
+                source=src,
+                sort=src,
+                market='main',
+            )
+            code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=10)
+
+        elif mission == 4:
+
+            tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
+            code_list = list(zip(*tmp).__next__())
+
+        ################################################################################################################
+
+        code_index = 0
+        # code_index = '002810'
+
+        if len(code_list) == 0:
+            raise KeyboardInterrupt('len(code_list) == 0')
+
+        return code_list, code_index
+
+    def get_codes_old(self):
+
         blacklist = self.get_blacklist()
 
         ################################################################################################################
@@ -806,29 +859,13 @@ class MainWidget(QWidget):
         root = "..\\basicData\\dailyUpdate\\latest"
         # file = "code_sorted_real_pe.txt"
         file = "s002_code_sorted_real_pe.txt"
-        file = "s003_code_sorted_roe_parent.txt"
+        # file = "s003_code_sorted_roe_parent.txt"
         # file = "s004_code_latest_update.txt"
 
         code_list = load_json_txt("{}\\{}".format(root, file))
 
-        # latest_update = load_json_txt("{}\\s004_code_latest_update.txt".format(root))
-
-        ################################################################################################################
-
-        tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
-        hold_list = list(zip(*tmp).__next__())
-
-        ################################################################################################################
-
-        # industry_list = [
-        #     "C110101",
-        #     "C110102",
-        #     "C110103",
-        #     "C030201",
-        #     "C020203",
-        #     "C070101",
-        # ]
-        # code_list = get_part_codes(code_list, exclude_industry=industry_list)
+        ass_list = load_json_txt("..\\basicData\\self_selected\\gui_assessment.txt")
+        ass_list = list(ass_list.keys())
 
         ################################################################################################################
 
@@ -839,40 +876,20 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        code_list = sort_discount()
-
-        ################################################################################################################
-
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
             # blacklist=blacklist,
+            # blacklist=ass_list,
             # whitelist=whitelist,
             sort=code_list,
             market='main',
             # market='all',
             # timestamp='2022-05-28 00:00:00',
         )
+        code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
 
-        code_index = 0
-        # code_index = '002810'
-
-        ################################################################################################################
-
-        # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
-        # code_list = random_code_list(code_list, pick_weight=[75, 10, 15])
-        # code_list = random_code_list(code_list, pick_weight=[0, 1, 1])
-
-        ################################################################################################################
-
-        # code_list = hold_list + code_list
-        # code_list = latest_update + hold_list + code_list
-        # code_list = hold_list
-
-        if len(code_list) == 0:
-            raise KeyboardInterrupt('len(code_list) == 0')
-
-        return code_list, code_index
+        return code_list
 
     @staticmethod
     def get_blacklist():
