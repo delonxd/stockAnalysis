@@ -1,11 +1,15 @@
 from method.fileMethod import *
 from method.dataMethod import load_df_from_mysql
+from method.mainMethod import sift_codes
+import json
+import datetime as dt
+import numpy as np
+import pickle
+import os
+import re
 
 
 def load_daily_res(dir_str):
-    import pickle
-    import numpy as np
-    import json
 
     dir_str = 'update_20220117153503'
 
@@ -50,10 +54,6 @@ def load_daily_res(dir_str):
 
 
 def sort_daily_code(dir_name):
-    import pickle
-    import numpy as np
-    import json
-    import os
 
     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
     sub_dir = '%s\\res_daily\\' % res_dir
@@ -107,8 +107,6 @@ def sort_daily_code(dir_name):
 
 
 def generate_list():
-    import json
-
     with open("..\\basicData\\analyzedData\\sift_002_real_pe.txt", "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
@@ -129,9 +127,6 @@ def generate_list():
 
 
 def get_codes_from_sel():
-    import re
-    import json
-
     with open("..\\basicData\\self_selected\\hs300_src.txt", "r", encoding="utf-8", errors="ignore") as f:
         txt = f.read()
         code_list = re.findall(r'([0-9]{6})', txt)
@@ -143,15 +138,7 @@ def get_codes_from_sel():
         f.write(res)
 
 
-def random_code_list(code_list, pick_weight, sorted_list=None, interval=100):
-    import json
-    import datetime as dt
-    import numpy as np
-    from method.mainMethod import sift_codes
-
-    # path = "../basicData/dailyUpdate/latest/s002_code_sorted_real_pe.txt"
-    # with open(path, "r", encoding="utf-8", errors="ignore") as f:
-    #     sorted_list = json.loads(f.read())
+def random_code_list(code_list, pick_weight, sorted_list=None, interval=100, mode='normal'):
 
     if sorted_list is None:
         sorted_list = code_list
@@ -164,10 +151,6 @@ def random_code_list(code_list, pick_weight, sorted_list=None, interval=100):
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         gui_whitelist = json.loads(f.read())
 
-    path = "../basicData/dailyUpdate/latest/a003_report_date_dict.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        report_date_dict = json.loads(f.read())
-
     set_all = set(code_list)
     tmp_selected = set(gui_selected)
     tmp_whitelist = set(gui_whitelist)
@@ -175,6 +158,46 @@ def random_code_list(code_list, pick_weight, sorted_list=None, interval=100):
     set_selected = set_all & tmp_selected
     set_whitelist = set_all & tmp_whitelist - set_selected
     set_normal = set_all - set_selected - set_whitelist
+
+    weight_dict = get_weight_dict(set_all)
+
+    src_list = [set()]
+    if mode == 'normal':
+        src_list = [set_normal, set_selected, set_whitelist]
+    elif mode == 'mission2':
+        src_list = [set_selected | set_whitelist]
+
+    total_list = list(map(lambda x: generate_random_list(x, weight_dict), src_list))
+
+    ret_list = []
+    while True:
+        picked_list = []
+        src_number = list(map(lambda x: len(x), total_list))
+        if sum(np.array(src_number) * np.array(pick_weight)) == 0:
+            break
+
+        picked = pick_number(src_number, pick_weight, interval)
+        print(picked)
+        for index, value in enumerate(picked):
+            for _ in range(value):
+                code = total_list[index].pop(0)
+                picked_list.append(code)
+
+        sub_list = sift_codes(source=picked_list, sort=sorted_list)
+        ret_list.extend(sub_list)
+
+    path = "../basicData/dailyUpdate/latest/s005_code_random.txt"
+    tmp = json.dumps(ret_list, indent=4, ensure_ascii=False)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(tmp)
+
+    return ret_list
+
+
+def get_weight_dict(set_all):
+    path = "../basicData/dailyUpdate/latest/a003_report_date_dict.txt"
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        report_date_dict = json.loads(f.read())
 
     base_rate = 100000
     weight_dict = dict.fromkeys(set_all, base_rate * 3000)
@@ -225,35 +248,7 @@ def random_code_list(code_list, pick_weight, sorted_list=None, interval=100):
         weight_str = '%s%18s%8s' % (date_str, weight, weight_counter[weight])
         print(weight_str)
 
-    list1 = generate_random_list(set_normal, weight_dict)
-    list2 = generate_random_list(set_selected, weight_dict)
-    list3 = generate_random_list(set_whitelist, weight_dict)
-    total_list = [list1, list2, list3]
-    # pick_weight = [75, 10, 15]
-
-    ret_list = []
-    while True:
-        picked_list = []
-        src_number = [len(list1), len(list2), len(list3)]
-        if sum(np.array(src_number) * np.array(pick_weight)) == 0:
-            break
-
-        picked = pick_number(src_number, pick_weight, interval)
-        print(picked)
-        for index, value in enumerate(picked):
-            for _ in range(value):
-                code = total_list[index].pop(0)
-                picked_list.append(code)
-
-        sub_list = sift_codes(source=picked_list, sort=sorted_list)
-        ret_list.extend(sub_list)
-
-    path = "../basicData/dailyUpdate/latest/s005_code_random.txt"
-    tmp = json.dumps(ret_list, indent=4, ensure_ascii=False)
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(tmp)
-
-    return ret_list
+    return weight_dict
 
 
 def pick_number(src, weight, total):
@@ -366,6 +361,8 @@ def sort_discount():
         if data is not None:
             discount = data / assessment
             tmp.append([key, discount])
+        elif key in set0:
+            tmp.append([key, 0])
 
     tmp.sort(key=lambda x: x[1])
 

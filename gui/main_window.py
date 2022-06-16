@@ -152,6 +152,8 @@ class MainWidget(QWidget):
         self.remark_widget = RemarkWidget(self)
         self.web_widget = WebWidget()
         self.equity_change_widget = EquityChangeWidget()
+        self.window2 = ShowPlot()
+
         self.counter_info = None
         self.real_cost = None
         self.equity = np.nan
@@ -159,7 +161,6 @@ class MainWidget(QWidget):
         self.max_increase_30 = 0
 
         # self.window2 = ShowPix(main_window=self)
-        self.window2 = ShowPlot()
 
         self.tree.update_style.connect(self.update_style)
         self.code_widget.table_view.change_signal.connect(self.change_stock)
@@ -800,10 +801,13 @@ class MainWidget(QWidget):
 
     def get_code_list(self):
 
-        # code_list = self.get_codes_old(self)
+        mission = 0
+
         code_list = []
 
-        mission = 3
+        if mission == 0:
+
+            code_list = self.get_codes_old()
 
         if mission == 1:
 
@@ -813,7 +817,7 @@ class MainWidget(QWidget):
                 sort=src,
                 market='all',
             )
-            code_list = random_code_list(src, pick_weight=[30, 40, 30], interval=100)
+            code_list = random_code_list(src, pick_weight=[1, 0, 0], interval=100)
 
         elif mission == 2:
 
@@ -823,7 +827,7 @@ class MainWidget(QWidget):
                 sort=src,
                 market='main',
             )
-            code_list = random_code_list(src, pick_weight=[0, 1, 1], interval=40)
+            code_list = random_code_list(src, pick_weight=[1], interval=40, mode='mission2')
 
         elif mission == 3:
 
@@ -833,7 +837,7 @@ class MainWidget(QWidget):
                 sort=src,
                 market='main',
             )
-            code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=10)
+            code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=5)
 
         elif mission == 4:
 
@@ -876,18 +880,30 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
+        path = "..\\basicData\\self_selected\\gui_selected.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            gui_selected = json.loads(f.read())
+
+        path = "..\\basicData\\self_selected\\gui_whitelist.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            gui_whitelist = json.loads(f.read())
+
+        code_list = list(set(gui_selected) | set(gui_whitelist))
+
+        ################################################################################################################
+
         code_list = sift_codes(
             source=code_list,
             # source=['C01'],
             # blacklist=blacklist,
-            # blacklist=ass_list,
+            blacklist=ass_list,
             # whitelist=whitelist,
             sort=code_list,
             market='main',
             # market='all',
             # timestamp='2022-05-28 00:00:00',
         )
-        code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
+        # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
 
         return code_list
 
@@ -1000,6 +1016,14 @@ class MainWidget(QWidget):
 
         # self.update_window()
         self.show_pix()
+
+    def closeEvent(self, event):
+        self.tree.close()
+        self.code_widget.close()
+        self.remark_widget.close()
+        self.web_widget.close()
+        self.equity_change_widget.close()
+        self.window2.close()
 
 
 class MainWindow(QMainWindow):
