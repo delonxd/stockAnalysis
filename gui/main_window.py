@@ -801,7 +801,7 @@ class MainWidget(QWidget):
 
     def get_code_list(self):
 
-        mission = 2
+        mission = 4
 
         code_list = []
 
@@ -845,11 +845,11 @@ class MainWidget(QWidget):
                 market='main',
             )
             # code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=5)
-            code_index = '002109'
+            code_index = '002439'
 
         ################################################################################################################
 
-        code_index = 0
+        # code_index = 0
         # code_index = '002109'
 
         if len(code_list) == 0:

@@ -361,8 +361,8 @@ def sort_discount():
         if data is not None:
             discount = data / assessment
             tmp.append([key, discount])
-        elif key in set0:
-            tmp.append([key, 0])
+        # elif key in set0:
+        #     tmp.append([key, 0])
 
     tmp.sort(key=lambda x: x[1])
 
@@ -404,7 +404,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    date_dir = 'update_20220601153504'
+    # date_dir = 'update_20220601153504'
     # load_daily_res(date_dir)
     # sort_daily_code(date_dir)
     # new_enter_code(date_dir)
@@ -413,4 +413,4 @@ if __name__ == '__main__':
     # get_random_list()
     # save_latest_list(date_dir)
 
-    # sort_hold()
+    sort_hold()
