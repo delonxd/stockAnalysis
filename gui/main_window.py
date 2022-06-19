@@ -585,7 +585,7 @@ class MainWidget(QWidget):
             s0 = self.data_pix.df['s_028_market_value'].copy().dropna()
             if s0.size > 0:
                 recent = s0[-1]
-                size0 = min(s0.size, 30)
+                size0 = min(s0.size, 90)
                 minimum = min(s0[-size0:])
                 self.max_increase_30 = recent / minimum - 1
                 self.listing_date = s0.index[0]
@@ -801,7 +801,7 @@ class MainWidget(QWidget):
 
     def get_code_list(self):
 
-        mission = 1
+        mission = 2
 
         code_list = []
 
@@ -821,13 +821,8 @@ class MainWidget(QWidget):
 
         elif mission == 2:
 
-            src = sort_discount()
-            src = sift_codes(
-                source=src,
-                sort=src,
-                market='main',
-            )
-            code_list = random_code_list(src, pick_weight=[1], interval=40, mode='mission2')
+            tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
+            code_list = list(zip(*tmp).__next__())
 
         elif mission == 3:
 
@@ -837,17 +832,25 @@ class MainWidget(QWidget):
                 sort=src,
                 market='main',
             )
-            code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=5)
+            code_list = random_code_list(src, pick_weight=[1], interval=40, mode='mission2')
 
         elif mission == 4:
 
-            tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
-            code_list = list(zip(*tmp).__next__())
+            src = sort_discount()
+            src.reverse()
+            code_list = sift_codes(
+                # source=load_json_txt("..\\basicData\\self_selected\\gui_selected.txt"),
+                source=load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt"),
+                sort=src,
+                market='main',
+            )
+            # code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=5)
+            code_index = '002109'
 
         ################################################################################################################
 
         code_index = 0
-        # code_index = '002810'
+        # code_index = '002109'
 
         if len(code_list) == 0:
             raise KeyboardInterrupt('len(code_list) == 0')
@@ -888,7 +891,7 @@ class MainWidget(QWidget):
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             gui_whitelist = json.loads(f.read())
 
-        code_list = list(set(gui_selected) | set(gui_whitelist))
+        # code_list = list(set(gui_selected) | set(gui_whitelist))
 
         ################################################################################################################
 
@@ -896,11 +899,11 @@ class MainWidget(QWidget):
             source=code_list,
             # source=['C01'],
             # blacklist=blacklist,
-            blacklist=ass_list,
+            # blacklist=ass_list,
             # whitelist=whitelist,
             sort=code_list,
-            market='main',
-            # market='all',
+            # market='main',
+            market='all',
             # timestamp='2022-05-28 00:00:00',
         )
         # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])

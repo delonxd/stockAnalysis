@@ -138,6 +138,7 @@ class DataPix:
                 self.default_ds = ds
 
         self.draw_pix()
+        self.init_cross()
 
     def config_data(self, data, row):
         index_name = row['index_name']
@@ -564,6 +565,23 @@ class DataPix:
             pix_painter.end()
 
     ###############################################################################################
+
+    def init_cross(self):
+        x = self.data_rect.right()
+        y = self.data_rect.bottom() / 2
+        key = 's_041_profit_adjust_ttm'
+        if key in self.data_dict.keys():
+            try:
+                ds = self.data_dict[key]
+                data_y = ds.df.iloc[:, 0].values.max()
+                y = self.y_data2px(data_y, ds)
+                self.draw_cross(x, y, False)
+                return
+            except Exception as e:
+                print(e)
+                print(self.code)
+        self.draw_cross(x, y, False)
+
     def draw_cross(self, x, y, state):
         if x is None and y is None:
             return
