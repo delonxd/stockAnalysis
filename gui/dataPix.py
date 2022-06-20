@@ -571,15 +571,11 @@ class DataPix:
         y = self.data_rect.bottom() / 2
         key = 's_041_profit_adjust_ttm'
         if key in self.data_dict.keys():
-            try:
-                ds = self.data_dict[key]
-                data_y = ds.df.iloc[:, 0].values.max()
-                y = self.y_data2px(data_y, ds)
-                self.draw_cross(x, y, False)
+            ds = self.data_dict[key]
+            data_y = ds.df.iloc[:, 0].values.max()
+            y = self.y_data2px(data_y, ds)
+            if np.isnan(y):
                 return
-            except Exception as e:
-                print(e)
-                print(self.code)
         self.draw_cross(x, y, False)
 
     def draw_cross(self, x, y, state):

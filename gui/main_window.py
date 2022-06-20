@@ -801,13 +801,16 @@ class MainWidget(QWidget):
 
     def get_code_list(self):
 
-        mission = 4
+        mission = 2
 
         code_list = []
+        code_index = 0
 
         if mission == 0:
 
             code_list = self.get_codes_old()
+            # code_index = '688072'
+            code_index = 60
 
         if mission == 1:
 
@@ -865,9 +868,10 @@ class MainWidget(QWidget):
 
         root = "..\\basicData\\dailyUpdate\\latest"
         # file = "code_sorted_real_pe.txt"
-        file = "s002_code_sorted_real_pe.txt"
+        # file = "s002_code_sorted_real_pe.txt"
         # file = "s003_code_sorted_roe_parent.txt"
         # file = "s004_code_latest_update.txt"
+        file = "s005_code_random.txt"
 
         code_list = load_json_txt("{}\\{}".format(root, file))
 
@@ -895,17 +899,17 @@ class MainWidget(QWidget):
 
         ################################################################################################################
 
-        code_list = sift_codes(
-            source=code_list,
-            # source=['C01'],
-            # blacklist=blacklist,
-            # blacklist=ass_list,
-            # whitelist=whitelist,
-            sort=code_list,
-            # market='main',
-            market='all',
-            # timestamp='2022-05-28 00:00:00',
-        )
+        # code_list = sift_codes(
+        #     source=code_list,
+        #     # source=['C01'],
+        #     # blacklist=blacklist,
+        #     # blacklist=ass_list,
+        #     # whitelist=whitelist,
+        #     sort=code_list,
+        #     # market='main',
+        #     market='all',
+        #     # timestamp='2022-05-28 00:00:00',
+        # )
         # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
 
         return code_list
