@@ -848,7 +848,7 @@ class MainWidget(QWidget):
                 market='main',
             )
             # code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=5)
-            code_index = '603150'
+            code_index = '002967'
 
         ################################################################################################################
 
