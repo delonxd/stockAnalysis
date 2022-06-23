@@ -801,7 +801,7 @@ class MainWidget(QWidget):
 
     def get_code_list(self):
 
-        mission = 4
+        mission = 1
 
         code_list = []
         code_index = 0
@@ -810,7 +810,7 @@ class MainWidget(QWidget):
 
             code_list = self.get_codes_old()
             # code_index = '688072'
-            code_index = 60
+            code_index = 30
 
         if mission == 1:
 
@@ -840,7 +840,7 @@ class MainWidget(QWidget):
         elif mission == 4:
 
             src = sort_discount()
-            src.reverse()
+            # src.reverse()
             code_list = sift_codes(
                 # source=load_json_txt("..\\basicData\\self_selected\\gui_selected.txt"),
                 source=load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt"),
@@ -848,7 +848,7 @@ class MainWidget(QWidget):
                 market='main',
             )
             # code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=5)
-            code_index = '002967'
+            # code_index = '603666'
 
         ################################################################################################################
 
