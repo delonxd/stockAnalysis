@@ -347,7 +347,7 @@ class MainWidget(QWidget):
     def save_codes(self):
         code_list = self.codes_df.df['code'].tolist()
         file = 'code_list_%s' % time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
-        write_json_txt('..\\basicData\\tmp_code_list\\%s' % file, code_list)
+        write_json_txt('..\\basicData\\tmp\\%s' % file, code_list)
 
     @staticmethod
     def compare_codes():
@@ -801,7 +801,7 @@ class MainWidget(QWidget):
 
     def get_code_list(self):
 
-        mission = 1
+        mission = 4
 
         code_list = []
         code_index = 0
@@ -820,7 +820,7 @@ class MainWidget(QWidget):
                 sort=src,
                 market='all',
             )
-            code_list = random_code_list(src, pick_weight=[1, 0, 0], interval=100)
+            code_list = random_code_list(src, pick_weight=[1, 0, 0], interval=80)
 
         elif mission == 2:
 
@@ -835,7 +835,7 @@ class MainWidget(QWidget):
                 sort=src,
                 market='main',
             )
-            code_list = random_code_list(src, pick_weight=[1], interval=40, mode='mission2')
+            code_list = random_code_list(src, pick_weight=[1], interval=40, mode='selected+whitelist')
 
         elif mission == 4:
 
@@ -850,6 +850,19 @@ class MainWidget(QWidget):
             # code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=5)
             # code_index = '603666'
 
+        elif mission == 5:
+
+            codes = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s002_code_sorted_real_pe.txt")
+            src = random_code_list(codes, pick_weight=[1], interval=40, mode='selected+whitelist')
+
+            # src.reverse()
+            code_list = sift_codes(
+                source=src,
+                sort=src,
+                blacklist=sort_discount(),
+                market='main',
+            )
+
         ################################################################################################################
 
         # code_index = 0
@@ -857,6 +870,9 @@ class MainWidget(QWidget):
 
         if len(code_list) == 0:
             raise KeyboardInterrupt('len(code_list) == 0')
+
+        path = '..\\basicData\\tmp\\code_list_latest.txt'
+        write_json_txt(path, code_list)
 
         return code_list, code_index
 
