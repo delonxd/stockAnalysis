@@ -18,17 +18,19 @@ def load_pkl(path):
     return ret
 
 
-def write_json_txt(path, data):
+def write_json_txt(path, data, log=True):
     res = json.dumps(data, indent=4, ensure_ascii=False)
     with open(path, "w", encoding='utf-8') as f:
         f.write(res)
-    MainLog.add_log('write json txt --> %s' % path)
+    if log:
+        MainLog.add_log('write json txt --> %s' % path)
 
 
-def load_json_txt(path):
+def load_json_txt(path, log=True):
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         ret = json.loads(f.read())
-    MainLog.add_log('loads json txt --> %s' % path)
+    if log:
+        MainLog.add_log('loads json txt --> %s' % path)
     return ret
 
 

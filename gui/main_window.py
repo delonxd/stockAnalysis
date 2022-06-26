@@ -313,6 +313,11 @@ class MainWidget(QWidget):
         action10 = QAction('添加非周期', menu)
         action11 = QAction('删除非周期', menu)
 
+        action_mark0 = QAction('取消标记', menu)
+        action_mark1 = QAction('标记1', menu)
+        action_mark2 = QAction('标记2', menu)
+        action_mark3 = QAction('标记3', menu)
+
         menu.addAction(action1)
         menu.addSeparator()
         menu.addAction(action2)
@@ -330,6 +335,12 @@ class MainWidget(QWidget):
         menu.addAction(action6)
         menu.addAction(action7)
 
+        menu.addSeparator()
+        menu.addAction(action_mark1)
+        menu.addAction(action_mark2)
+        menu.addAction(action_mark3)
+        menu.addAction(action_mark0)
+
         action1.triggered.connect(self.request_data)
         action6.triggered.connect(self.scale_down)
         action7.triggered.connect(self.scale_up)
@@ -342,12 +353,34 @@ class MainWidget(QWidget):
         action9.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_whitelist.txt"))
         action10.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_non_cyclical.txt"))
         action11.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_non_cyclical.txt"))
+
+        action_mark0.triggered.connect(lambda x: self.add_mark(0))
+        action_mark1.triggered.connect(lambda x: self.add_mark(1))
+        action_mark2.triggered.connect(lambda x: self.add_mark(2))
+        action_mark3.triggered.connect(lambda x: self.add_mark(3))
+
         menu.exec_(QCursor.pos())
 
     def save_codes(self):
         code_list = self.codes_df.df['code'].tolist()
         file = 'code_list_%s' % time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
         write_json_txt('..\\basicData\\tmp\\%s' % file, code_list)
+
+    def add_mark(self, mark):
+        path = "../basicData/self_selected/gui_mark.txt"
+        mark_dict = load_json_txt(path, log=False)
+
+        row = self.codes_df.df.iloc[self.code_index]
+        code = row['code']
+
+        if mark == 0:
+            if code in mark_dict:
+                mark_dict.pop(code)
+        else:
+            mark_dict[code] = mark
+
+        write_json_txt(path, mark_dict, log=False)
+        self.show_stock_name()
 
     @staticmethod
     def compare_codes():
@@ -664,29 +697,18 @@ class MainWidget(QWidget):
         list0 = []
         list1 = []
 
-        path = "../basicData/self_selected/gui_selected.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            code_list = json.loads(f.read())
-        if code in code_list:
+        if code in load_json_txt("../basicData/self_selected/gui_selected.txt", log=False):
             list0.append('自选')
-
-        path = "../basicData/self_selected/gui_whitelist.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            code_list = json.loads(f.read())
-        if code in code_list:
+        if code in load_json_txt("../basicData/self_selected/gui_whitelist.txt", log=False):
             list0.append('白')
-
-        path = "../basicData/self_selected/gui_blacklist.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            code_list = json.loads(f.read())
-        if code in code_list:
+        if code in load_json_txt("../basicData/self_selected/gui_blacklist.txt", log=False):
             list0.append('黑')
-
-        path = "../basicData/self_selected/gui_non_cyclical.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            code_list = json.loads(f.read())
-        if code in code_list:
+        if code in load_json_txt("../basicData/self_selected/gui_non_cyclical.txt", log=False):
             list0.append('非周期')
+
+        mark = load_json_txt("../basicData/self_selected/gui_mark.txt", log=False).get(code)
+        if mark is not None:
+            txt2 = txt2 + '(%s)' % mark
 
         data = self.counter_info
         if isinstance(data, list):
@@ -849,6 +871,7 @@ class MainWidget(QWidget):
             )
             # code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=5)
             # code_index = '603666'
+            code_index = 59
 
         elif mission == 5:
 
