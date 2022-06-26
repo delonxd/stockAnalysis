@@ -871,20 +871,34 @@ class MainWidget(QWidget):
             )
             # code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=5)
             # code_index = '603666'
-            code_index = 59
+            code_index = 127
 
         elif mission == 5:
 
-            codes = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s002_code_sorted_real_pe.txt")
-            src = random_code_list(codes, pick_weight=[1], interval=40, mode='selected+whitelist')
+            src = []
+            mark = 1
 
-            # src.reverse()
+            mark_dict = load_json_txt("..\\basicData\\self_selected\\gui_mark.txt")
+            for code, value in mark_dict.items():
+                if value == mark:
+                    src.append(code)
+
             code_list = sift_codes(
                 source=src,
-                sort=src,
-                blacklist=sort_discount(),
+                sort=sort_discount(),
                 market='main',
             )
+
+            # codes = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s002_code_sorted_real_pe.txt")
+            # src = random_code_list(codes, pick_weight=[1], interval=40, mode='selected+whitelist')
+            #
+            # # src.reverse()
+            # code_list = sift_codes(
+            #     source=src,
+            #     sort=src,
+            #     blacklist=sort_discount(),
+            #     market='main',
+            # )
 
         ################################################################################################################
 
