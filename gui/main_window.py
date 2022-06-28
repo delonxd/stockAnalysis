@@ -57,6 +57,7 @@ class ReadSQLThread(QThread):
                 code, style_df, df, ratio = self.buffer_list.pop(0)
             else:
                 break
+            # print(zip(*self.buffer_list).__next__())
             self.lock.release()
             res0 = DataPix(code=code, style_df=style_df, df=df, ratio=ratio)
             GuiLog.add_log('    add buffer %s' % code)
@@ -823,7 +824,7 @@ class MainWidget(QWidget):
 
     def get_code_list(self):
 
-        mission = 4
+        mission = 2
 
         code_list = []
         code_index = 0
@@ -832,7 +833,7 @@ class MainWidget(QWidget):
 
             code_list = self.get_codes_old()
             # code_index = '688072'
-            code_index = 30
+            code_index = 24
 
         if mission == 1:
 
@@ -914,6 +915,7 @@ class MainWidget(QWidget):
         return code_list, code_index
 
     def get_codes_old(self):
+        code_list = load_json_txt("..\\basicData\\tmp\\code_list_latest.txt")
 
         blacklist = self.get_blacklist()
 
@@ -926,7 +928,7 @@ class MainWidget(QWidget):
         # file = "s004_code_latest_update.txt"
         file = "s005_code_random.txt"
 
-        code_list = load_json_txt("{}\\{}".format(root, file))
+        # code_list = load_json_txt("{}\\{}".format(root, file))
 
         ass_list = load_json_txt("..\\basicData\\self_selected\\gui_assessment.txt")
         ass_list = list(ass_list.keys())
