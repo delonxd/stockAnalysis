@@ -219,10 +219,10 @@ def get_weight_dict(set_all):
         margin = (date1 - date2).days
 
         if margin == 1 and tmp_rate == base_rate:
-            print(key, report_date, value[1])
+            print(key, report_date, value[1], 'margin == 1')
 
         if margin >= 40:
-            print(key, date2)
+            print(key, date2, 'margin >= 40')
         weight = margin ** 2 * tmp_rate
         weight_dict[key] = weight
 

@@ -824,7 +824,7 @@ class MainWidget(QWidget):
 
     def get_code_list(self):
 
-        mission = 4
+        mission = 5
 
         code_list = []
         code_index = 0
