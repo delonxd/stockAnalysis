@@ -890,16 +890,20 @@ class MainWidget(QWidget):
                 market='main',
             )
 
-            # codes = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s002_code_sorted_real_pe.txt")
+        elif mission == 6:
+
+            src = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
+            sort_list = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s002_code_sorted_real_pe.txt")
             # src = random_code_list(codes, pick_weight=[1], interval=40, mode='selected+whitelist')
-            #
-            # # src.reverse()
-            # code_list = sift_codes(
-            #     source=src,
-            #     sort=src,
-            #     blacklist=sort_discount(),
-            #     market='main',
-            # )
+            # src.reverse()
+
+            code_list = sift_codes(
+                source=src,
+                sort=sort_list,
+                blacklist=sort_discount(),
+                # market='main',
+                market='non_main',
+            )
 
         ################################################################################################################
 
