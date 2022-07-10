@@ -408,6 +408,26 @@ class DataPix:
 
         pix_painter.end()
 
+    def draw_split(self, pix):
+        if 'split_date' not in self.df.columns:
+            return
+
+        s0 = self.df['split_date'].copy().dropna()
+        pix_painter = QPainter(pix)
+        pen1 = QPen(Qt.yellow, 1, Qt.DotLine)
+
+        d_top = self.data_rect.top()
+        d_bottom = self.data_rect.bottom() + 1
+
+        for date_str in s0:
+
+            x = self.x_data2px(dt.datetime.strptime(date_str, "%Y-%m-%d").date())
+
+            pix_painter.setPen(pen1)
+            pix_painter.drawLine(QPoint(x, d_top), QPoint(x, d_bottom))
+
+        pix_painter.end()
+
     def draw_data_dict(self):
         tmp_dict = {
             's_022_profit_no_expenditure': '股东盈余',
@@ -444,6 +464,11 @@ class DataPix:
 
         self.draw_percentage(self.pix2, 'assets')
         self.draw_percentage(self.pix, 'equity')
+
+        self.draw_split(self.pix)
+        self.draw_split(self.pix2)
+        self.draw_split(self.pix3)
+        self.draw_split(self.pix4)
 
         for ds in self.data_dict.values():
             if ds.ds_type == 'digit' and ds.data_type is None:

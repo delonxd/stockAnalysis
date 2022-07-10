@@ -274,10 +274,15 @@ class DataAnalysis:
 
     def config_sub_fs(self, class_sub):
         df = self.df_fs.copy()
+        s0 = pd.Series(name='split_date')
+
         sub_list = self.get_sub_date()
+
         last_date = ''
         df_list = list()
         for sub in sub_list:
+            s0[sub[-1]] = sub[-1]
+
             sub_df = df.loc[sub, :].copy()
             sub_data = class_sub(sub_df, None)
             sub_data.config_fs_data()
@@ -294,6 +299,7 @@ class DataAnalysis:
         else:
             self.df_fs = pd.concat(df_list)
 
+        self.fs_add(s0)
         return self.df_fs
 
     def config_fs_data(self):

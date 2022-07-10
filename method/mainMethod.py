@@ -166,6 +166,18 @@ def sift_codes(
                 if code[:3] != '688':
                     set_black.add(code)
 
+    elif market == 'growth':
+        for code in set_all:
+            if code[0] != '3':
+                set_black.add(code)
+
+    elif market == 'main+growth':
+        for code in set_all:
+            if code[:3] == '688':
+                set_black.add(code)
+            elif code[0] != '0' and code[0] != '6' and code[0] != '3':
+                set_black.add(code)
+
     set_sift = set_all - set_black
     set_sift = set_sift - set_time_sift
     set_sift.update(set_white)
