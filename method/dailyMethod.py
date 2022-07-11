@@ -267,11 +267,26 @@ def save_latest_list(dir_name):
     copy_dir(dir1, dir2)
 
 
+def test_daily_analysis():
+    import time
+    timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
+    dir_name = 'test_%s' % timestamp
+    res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
+
+    if not os.path.exists(res_dir):
+        os.makedirs(res_dir)
+
+    codes = load_json_txt('..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt')
+    daily_analysis(dir_name, codes)
+
+
 if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    dir_daily = 'update_20220602153503'
-    generate_daily_table(dir_daily)
-    save_latest_list(dir_daily)
+    # dir_daily = 'update_20220602153503'
+    # generate_daily_table(dir_daily)
+    # save_latest_list(dir_daily)
+
+    test_daily_analysis()
