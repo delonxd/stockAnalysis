@@ -222,10 +222,13 @@ def tmp_update():
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
+    # code_list = code_list[:1]
     for code in code_list:
+        print(code)
+        # break
         request_data2mysql(
             stock_code=code,
-            data_type='fs',
+            data_type='mvs',
             start_date='2021-01-01',
         )
     # update_all_data(code_list, start_date='2021-01-01')

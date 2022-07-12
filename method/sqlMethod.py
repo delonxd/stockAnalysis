@@ -12,8 +12,16 @@ def update_df2sql(cursor, table, df_data, check_field, ini=False):
         df_data.insert(0, "first_update", np.NAN)
     else:
         df_sql = get_data_frame(cursor, table)
-        df_first = df_sql.set_index(check_field, drop=False).loc[:, ['first_update']]
-        df_data = pd.concat([df_first, df_data], axis=1, sort=True).reindex(df_data.index)
+        df_sql = df_sql.set_index(check_field, drop=False)
+        col_sql = df_sql.columns
+        df_sql = df_sql.drop(df_data.columns, axis=1)
+
+        df_data = pd.concat([df_sql, df_data], axis=1, sort=True).reindex(df_data.index)
+        df_data = df_data.reindex(col_sql, axis=1)
+
+        # df_sql = get_data_frame(cursor, table)
+        # df_first = df_sql.set_index(check_field, drop=False).loc[:, ['first_update']]
+        # df_data = pd.concat([df_first, df_data], axis=1, sort=True).reindex(df_data.index)
 
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
 

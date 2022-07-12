@@ -164,8 +164,10 @@ def random_code_list(code_list, pick_weight, sorted_list=None, interval=100, mod
     src_list = [set()]
     if mode == 'normal':
         src_list = [set_normal, set_selected, set_whitelist]
-    elif mode == 'selected+whitelist':
+    elif mode == 'whitelist+selected':
         src_list = [set_selected | set_whitelist]
+    elif mode == 'whitelist-selected':
+        src_list = [set_whitelist - set_selected]
 
     total_list = list(map(lambda x: generate_random_list(x, weight_dict), src_list))
 
