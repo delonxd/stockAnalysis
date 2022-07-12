@@ -156,6 +156,20 @@ def sql_format_drop_table(table, if_exists=True):
     return result
 
 
+def sql_add_field(table, field, sql_type):
+    result = """
+        ALTER TABLE %s ADD %s %s;
+    """ % (table, field, sql_type)
+    return result
+
+
+def sql_drop_field(table, field):
+    result = """
+        ALTER TABLE %s DROP %s;
+    """ % (table, field)
+    return result
+
+
 # def sql_format_header(header: list):
 #     if not isinstance(header, list):
 #         raise KeyboardInterrupt('header格式需为列表')
