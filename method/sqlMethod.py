@@ -4,6 +4,7 @@ import datetime as dt
 import pandas as pd
 import numpy as np
 from method.mainMethod import transpose_df, show_df
+from method.logMethod import MainLog
 
 
 def update_df2sql(cursor, table, df_data, check_field, ini=False):
@@ -29,12 +30,15 @@ def update_df2sql(cursor, table, df_data, check_field, ini=False):
     # print(dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
 
     new_index = []
+
+    changed = set()
     for index in df_data.index:
         if index not in df_sql.index:
             # print(index)
             new_index.append(index)
             continue
 
+        flag = False
         for column in df_data.columns:
             if column in ['first_update', 'last_update']:
                 continue
@@ -46,9 +50,17 @@ def update_df2sql(cursor, table, df_data, check_field, ini=False):
             elif pd.isna(val1) and pd.isna(val2):
                 pass
             else:
+                changed.add(column)
                 # print(index, column)
-                new_index.append(index)
-                break
+                flag = True
+                # break
+        if flag is True:
+            new_index.append(index)
+
+    changed = list(changed)
+    changed.sort()
+
+    MainLog.add_log('    changed columns --> %s' % changed)
 
     # print(dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
 
