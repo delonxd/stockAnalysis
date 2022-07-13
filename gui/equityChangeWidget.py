@@ -65,15 +65,29 @@ class EquityChangeWidget(QWidget):
                     row[6],  row[7], row[8], row[9],
                 ]
                 for j, value in enumerate(show):
-                    item = QTableWidgetItem(str(value))
-                    # item.setBackground(brush)
+                    if j > 3:
+                        try:
+                            txt = format(value, ',')
+                        except:
+                            txt = str(value)
+                    else:
+                        txt = str(value)
+                    item = QTableWidgetItem(txt)
                     item.setForeground(brush)
+
+                    if j > 3 or j == 0:
+                        font = item.font()
+                        font.setPointSize(8)
+                        item.setFont(font)
+
+                    if j > 3:
+                        item.setTextAlignment(Qt.AlignRight | Qt.AlignCenter)
                     self.table_widget.setItem(i, j, item)
 
             self.table_widget.resizeColumnsToContents()
-            self.table_widget.setColumnWidth(0, 100)
-            self.table_widget.setColumnWidth(2, 55)
-            self.table_widget.setColumnWidth(3, 55)
+            self.table_widget.setColumnWidth(0, 80)
+            self.table_widget.setColumnWidth(2, 50)
+            self.table_widget.setColumnWidth(3, 50)
         except Exception as e:
             print(e)
 
@@ -200,8 +214,8 @@ def config_equity_change_data(data):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main = EquityChangeWidget()
-    main.load_code('000820')
     main.show()
+    main.load_code('000001')
     sys.exit(app.exec_())
 
     # a = request_equity_change('600004')

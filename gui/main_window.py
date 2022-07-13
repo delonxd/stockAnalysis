@@ -877,7 +877,7 @@ class MainWidget(QWidget):
             )
             # code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=5)
             # code_index = '603666'
-            code_index = '300832'
+            code_index = '002043'
             # code_index = 0
 
         elif mission == 5:
