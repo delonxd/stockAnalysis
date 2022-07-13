@@ -61,33 +61,54 @@ class EquityChangeWidget(QWidget):
 
                 show = [
                     row[0], row[5], row[10], row[11],
-                    row[1], row[2], row[3], row[4],
+                    row[1], row[2]/row[1], row[3]/row[1], row[4]/row[1],
                     row[6],  row[7], row[8], row[9],
                 ]
+
                 for j, value in enumerate(show):
-                    if j > 3:
-                        try:
+                    if j in [4, 8, 9, 10, 11]:
+                        if value == 0:
+                            txt = '-'
+                        else:
                             txt = format(value, ',')
-                        except:
-                            txt = str(value)
+                    elif j in [5, 6, 7]:
+                        if value == 0:
+                            txt = '-'
+                        else:
+                            txt = format(value*100, '.2f') + '%'
+                    elif j == 2:
+                        txt = '  ' + str(value)
+                    elif j == 3:
+                        if value == 1:
+                            txt = '-'
+                        else:
+                            txt = format(value*100-100, '.2f') + '%'
                     else:
                         txt = str(value)
                     item = QTableWidgetItem(txt)
                     item.setForeground(brush)
 
-                    if j > 3 or j == 0:
+                    # if j == 2:
+                    #     item.setBackground(Qt.gray)
+
+                    if j > 7:
                         font = item.font()
                         font.setPointSize(8)
                         item.setFont(font)
 
-                    if j > 3:
+                    if j > 2:
                         item.setTextAlignment(Qt.AlignRight | Qt.AlignCenter)
                     self.table_widget.setItem(i, j, item)
 
             self.table_widget.resizeColumnsToContents()
-            self.table_widget.setColumnWidth(0, 80)
-            self.table_widget.setColumnWidth(2, 50)
-            self.table_widget.setColumnWidth(3, 50)
+            self.table_widget.setColumnWidth(0, 90)
+
+            width = 60
+            self.table_widget.setColumnWidth(2, width)
+            self.table_widget.setColumnWidth(3, width)
+            self.table_widget.setColumnWidth(5, width)
+            self.table_widget.setColumnWidth(6, width)
+            self.table_widget.setColumnWidth(7, width)
         except Exception as e:
             print(e)
 
@@ -170,7 +191,7 @@ def config_equity_change_data(data):
     last = None
     res2 = []
 
-    func = lambda x: '-' if x == 0 else x
+    # func = lambda x: '-' if x == 0 else x
 
     ipo_rate = 1
     for row in res:
@@ -193,7 +214,8 @@ def config_equity_change_data(data):
                 tmp = last[10]*rate
                 if row[5] == 'IPO':
                     ipo_rate = tmp
-                new = [*row, func(d1), func(d2), func(d3), func(d4), tmp, round(rate, 4)]
+                # new = [*row, func(d1), func(d2), func(d3), func(d4), tmp, round(rate, 4)]
+                new = [*row, d1, d2, d3, d4, tmp, round(rate, 4)]
                 res2.append(new)
         else:
             d1 = row[1]
@@ -201,7 +223,8 @@ def config_equity_change_data(data):
             d3 = row[3]
             d4 = row[4]
 
-            new = [*row, func(d1), func(d2), func(d3), func(d4), 1, 1]
+            # new = [*row, func(d1), func(d2), func(d3), func(d4), 1, 1]
+            new = [*row, d1, d2, d3, d4, 1, 1]
             res2.append(new)
         last = res2[-1]
 
