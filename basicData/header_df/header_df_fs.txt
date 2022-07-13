@@ -1155,7 +1155,7 @@
         "txt_CN": "三项费用率",
         "sql_type": "DOUBLE",
         "sheet_name": "ps",
-        "api": "te_r"
+        "api": null
     },
     "id_186_ps_oic": {
         "txt_CN": "加： 其他收益",

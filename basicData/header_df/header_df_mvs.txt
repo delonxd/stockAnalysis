@@ -243,19 +243,19 @@
         "txt_CN": "前复权",
         "sql_type": "DOUBLE",
         "sheet_name": "mvs",
-        "api": "fc_rights"
+        "api": null
     },
     "id_038_mvs_bc_rights": {
         "txt_CN": "后复权",
         "sql_type": "DOUBLE",
         "sheet_name": "mvs",
-        "api": "bc_rights"
+        "api": null
     },
     "id_039_mvs_lxr_fc_rights": {
         "txt_CN": "理杏仁前复权",
         "sql_type": "DOUBLE",
         "sheet_name": "mvs",
-        "api": "lxr_fc_rights"
+        "api": null
     },
     "id_040_mvs_shn": {
         "txt_CN": "股东人数",

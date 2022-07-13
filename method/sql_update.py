@@ -81,6 +81,7 @@ def mysql_update_daily():
 def update_latest_data(code_list):
     import time
     from request.requestData import request_daily_data2mysql
+    from request.requestData import request2mysql_daily
 
     list0 = []
     counter = 0
@@ -110,7 +111,7 @@ def update_latest_data(code_list):
         MainLog.add_log('group %s/%s' % (index, end))
         MainLog.add_split('-')
 
-        new_data = request_daily_data2mysql(
+        new_data = request2mysql_daily(
             stock_codes=stock_codes,
             date='latest',
             data_type='fs',
@@ -119,7 +120,7 @@ def update_latest_data(code_list):
         ret.extend(new_data)
 
         MainLog.add_split('-')
-        request_daily_data2mysql(
+        request2mysql_daily(
             stock_codes=stock_codes,
             date='latest',
             data_type='mvs',
@@ -132,6 +133,7 @@ def update_latest_data(code_list):
 def update_all_data(code_list, start_date):
     import time
     from request.requestData import request_data2mysql
+    from request.requestData import request2mysql
 
     index = 0
     end = len(code_list)
@@ -144,7 +146,7 @@ def update_all_data(code_list, start_date):
         MainLog.add_split('#')
         MainLog.add_log('%s/%s --> %s' % (index, end, code))
 
-        new_data = request_data2mysql(
+        new_data = request2mysql(
             stock_code=code,
             data_type='fs',
             start_date=start_date,
@@ -152,7 +154,7 @@ def update_all_data(code_list, start_date):
 
         MainLog.add_split('-')
 
-        request_data2mysql(
+        request2mysql(
             stock_code=code,
             data_type='mvs',
             start_date=start_date,
@@ -216,22 +218,89 @@ def update_latest_data2():
 
 
 def tmp_update():
+    from request.requestData import request2mysql
+    from request.requestData import request2mysql_daily
+
     # path = "..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt"
     # path = "..\\basicData\\analyzedData\\temp_codes.txt"
     path = "..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt"
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
-    # code_list = code_list[:1]
-    for code in code_list:
-        print(code)
-        # break
-        request_data2mysql(
-            stock_code=code,
-            data_type='mvs',
-            start_date='2021-01-01',
-        )
+    code_list = list(filter(lambda x: x < '100000', code_list))
+    code_list = code_list[:1]
+    code_list = ['000002']
+
+    # for code in code_list:
+    #     #     print(code)
+    #     #     # break
+    #     #     request2mysql(
+    #     #     # request_data2mysql(
+    #     #         stock_code=code,
+    #     #         data_type='mvs',
+    #     #         # start_date='2015-01-01',
+    #     #         start_date='1970-01-01',
+    #     #         # end_date='2022-01-01',
+    #     #         # metrics=['q.ps.foe_r.t'],
+    #     #     )
+
+    request2mysql_daily(
+        stock_codes=code_list,
+        data_type='mvs',
+        date='latest',
+        # metrics=['q.ps.foe_r.t'],
+        # metrics=['q.bs.ta.t'],
+    )
+
     # update_all_data(code_list, start_date='2021-01-01')
+
+
+def update_header():
+    from method.sqlMethod import sql_drop_field
+    from request.requestData import get_cursor
+
+    data_type = 'mvs'
+    stock_code = '000001'
+    field = 'id_048_xxx'
+    sql_type = 'DOUBLE'
+
+    table = '%s_%s' % (data_type, stock_code)
+    db, cursor = get_cursor(data_type)
+
+    # cursor.execute(sql_add_field(table, field, sql_type))
+    cursor.execute(sql_drop_field(table, field))
+    db.commit()
+
+
+def test_compare():
+    from method.dataMethod import load_df_from_mysql
+    import numpy as np
+
+    data_type = 'mvs'
+    code = '000002'
+
+    df1 = load_df_from_mysql(code, data_type)
+    df2 = load_df_from_mysql(code+'_copy1', data_type)
+
+    df1 = df1.drop(['first_update', 'last_update'], axis=1)
+    df2 = df2.drop(['first_update', 'last_update'], axis=1)
+
+    for column in df1.columns:
+        for index in df1.index:
+            try:
+                val1 = df1.loc[index, column]
+                val2 = df2.loc[index, column]
+
+                if val1 == val2:
+                    pass
+                elif np.isnan(val1) and np.isnan(val2):
+                    pass
+                else:
+                    print(index, column, val1, val2)
+
+            except:
+                continue
+    # print(df1.columns)
 
 
 if __name__ == '__main__':
@@ -247,4 +316,5 @@ if __name__ == '__main__':
     # mysql_update_daily()
     # update_latest_data2()
     tmp_update()
+    # test_compare()
 

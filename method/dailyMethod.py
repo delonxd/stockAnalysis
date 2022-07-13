@@ -2,7 +2,7 @@ from request.requestBasicData import request_basic
 from method.fileMethod import *
 from method.sql_update import update_latest_data
 from method.sql_update import update_all_data
-from request.requestData import request_data2mysql
+from request.requestData import request_data2mysql, request2mysql
 from method.dataMethod import load_df_from_mysql
 from method.dataMethod import DataAnalysis
 from method.showTable import add_bool_column, get_recent_val
@@ -66,7 +66,7 @@ def mysql_daily_update(dir_name, all_codes, ipo_dates):
 
     for code in updated_code:
         MainLog.add_split('#')
-        request_data2mysql(
+        request2mysql(
             stock_code=code,
             data_type='fs',
             start_date='2013-01-01',

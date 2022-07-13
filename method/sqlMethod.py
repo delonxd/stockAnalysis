@@ -1,5 +1,6 @@
 import json
 import time
+import datetime as dt
 import pandas as pd
 import numpy as np
 from method.mainMethod import transpose_df, show_df
@@ -10,14 +11,14 @@ def update_df2sql(cursor, table, df_data, check_field, ini=False):
 
     if ini:
         df_data.insert(0, "first_update", np.NAN)
+        df_sql = pd.DataFrame()
     else:
         df_sql = get_data_frame(cursor, table)
         df_sql = df_sql.set_index(check_field, drop=False)
-        col_sql = df_sql.columns
-        df_sql = df_sql.drop(df_data.columns, axis=1)
+        df_org = df_sql.drop(df_data.columns, axis=1)
 
-        df_data = pd.concat([df_sql, df_data], axis=1, sort=True).reindex(df_data.index)
-        df_data = df_data.reindex(col_sql, axis=1)
+        df_data = pd.concat([df_org, df_data], axis=1, sort=True).reindex(df_data.index)
+        df_data = df_data.reindex(df_sql.columns, axis=1)
 
         # df_sql = get_data_frame(cursor, table)
         # df_first = df_sql.set_index(check_field, drop=False).loc[:, ['first_update']]
@@ -25,7 +26,34 @@ def update_df2sql(cursor, table, df_data, check_field, ini=False):
 
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
 
-    new_data = df_data.loc[df_data['first_update'].isnull()]
+    # print(dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
+
+    new_index = []
+    for index in df_data.index:
+        if index not in df_sql.index:
+            # print(index)
+            new_index.append(index)
+            continue
+
+        for column in df_data.columns:
+            if column in ['first_update', 'last_update']:
+                continue
+            val1 = df_data.loc[index, column]
+            val2 = df_sql.loc[index, column]
+
+            if val1 == val2:
+                pass
+            elif pd.isna(val1) and pd.isna(val2):
+                pass
+            else:
+                # print(index, column)
+                new_index.append(index)
+                break
+
+    # print(dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
+
+    new_data = df_data.loc[new_index, :]
+    df_data = new_data.copy()
 
     df_data.loc[:, 'first_update'].fillna(value=timestamp, inplace=True)
     df_data.loc[:, 'last_update'].fillna(value=timestamp, inplace=True)
