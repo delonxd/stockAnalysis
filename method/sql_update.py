@@ -227,49 +227,55 @@ def tmp_update():
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
-    code_list = list(filter(lambda x: x < '100000', code_list))
+    # code_list = list(filter(lambda x: x < '100000', code_list))
     code_list = code_list[:1]
-    code_list = ['000002']
+    # code_list = ['000002']
+    # code_list.reverse()
+    for code in code_list:
+        print(code)
+        # break
+        request2mysql(
+            stock_code=code,
+            data_type='mvs',
+            # start_date='2015-01-01',
+            start_date='1970-01-01',
+            # end_date='2022-01-01',
+            metrics=['ta'],
+        )
 
-    # for code in code_list:
-    #     #     print(code)
-    #     #     # break
-    #     #     request2mysql(
-    #     #     # request_data2mysql(
-    #     #         stock_code=code,
-    #     #         data_type='mvs',
-    #     #         # start_date='2015-01-01',
-    #     #         start_date='1970-01-01',
-    #     #         # end_date='2022-01-01',
-    #     #         # metrics=['q.ps.foe_r.t'],
-    #     #     )
-
-    request2mysql_daily(
-        stock_codes=code_list,
-        data_type='mvs',
-        date='latest',
-        # metrics=['q.ps.foe_r.t'],
-        # metrics=['q.bs.ta.t'],
-    )
+    # request2mysql_daily(
+    #     stock_codes=code_list,
+    #     data_type='mvs',
+    #     date='latest',
+    #     # metrics=['q.ps.foe_r.t'],
+    #     # metrics=['q.bs.ta.t'],
+    # )
 
     # update_all_data(code_list, start_date='2021-01-01')
 
 
 def update_header():
-    from method.sqlMethod import sql_drop_field
+    from method.sqlMethod import sql_drop_field, sql_add_field
     from request.requestData import get_cursor
 
     data_type = 'mvs'
-    stock_code = '000001'
-    field = 'id_048_xxx'
-    sql_type = 'DOUBLE'
-
-    table = '%s_%s' % (data_type, stock_code)
+    database = 'marketData'
     db, cursor = get_cursor(data_type)
 
-    # cursor.execute(sql_add_field(table, field, sql_type))
-    cursor.execute(sql_drop_field(table, field))
-    db.commit()
+    sql_str = 'SELECT table_name FROM information_schema.TABLES WHERE table_schema = "%s";' % database
+    cursor.execute(sql_str)
+    tmp_res = cursor.fetchall()
+
+    MainLog.add_log('All table: %s' % tmp_res)
+
+    for index in tmp_res:
+        table = index[0]
+        field = 'id_048_mvs_ta'
+        command = sql_add_field(table, field, 'DOUBLE')
+        # print(command)
+        cursor.execute(command)
+        db.commit()
+        MainLog.add_log('Table %s add field %s' % (table, field))
 
 
 def test_compare():

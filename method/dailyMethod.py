@@ -219,6 +219,9 @@ def generate_daily_table(dir_name):
         val = get_recent_val(src, 's_002_equity', np.nan)
         df.loc[code, 'equity'] = val
 
+        s0 = src.loc[:, 's_028_market_value'].copy().dropna()
+        df.loc[code, 'ipo_date'] = s0.index[0] if s0.size > 0 else np.nan
+
     dict1 = df.loc[:, 'equity'].copy().dropna().to_dict()
     write_json_txt('%s\\equity_dict.txt' % daily_dir, dict1)
 
@@ -285,8 +288,8 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    # dir_daily = 'update_20220602153503'
+    # dir_daily = 'update_20220713153503'
     # generate_daily_table(dir_daily)
     # save_latest_list(dir_daily)
 
-    test_daily_analysis()
+    # test_daily_analysis()

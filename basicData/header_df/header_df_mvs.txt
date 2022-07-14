@@ -304,5 +304,11 @@
         "sql_type": "DOUBLE",
         "sheet_name": "mvs",
         "api": "ha_shm"
+    },
+    "id_048_mvs_ta": {
+        "txt_CN": "成交金额",
+        "sql_type": "DOUBLE",
+        "sheet_name": "mvs",
+        "api": "ta"
     }
 }
