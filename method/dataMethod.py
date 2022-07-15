@@ -25,6 +25,9 @@ def load_df_from_mysql(stock_code, data_type):
     elif data_type == 'mvs':
         table = 'mvs_%s' % stock_code
         check_field = 'date'
+    elif data_type == 'eq':
+        table = 'eq_%s' % stock_code
+        check_field = 'date'
     else:
         return
 

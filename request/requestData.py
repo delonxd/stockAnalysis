@@ -162,6 +162,8 @@ def get_cursor(data_type):
         database = 'fsData'
     elif data_type == 'mvs':
         database = 'marketData'
+    elif data_type == 'eq':
+        database = 'eqData'
     else:
         return
 
@@ -233,13 +235,9 @@ def get_cursor(data_type):
 
 
 def get_header_df(data_type):
-    if data_type == 'fs':
-        with open("../basicData/header_df/header_df_fs.txt", "r", encoding='utf-8') as f:
-            return pd.read_json(f.read(), orient="columns")
-
-    elif data_type == 'mvs':
-        with open("../basicData/header_df/header_df_mvs.txt", "r", encoding='utf-8') as f:
-            return pd.read_json(f.read(), orient="columns")
+    path = "../basicData/header_df/header_df_%s.txt" % data_type
+    with open(path, "r", encoding='utf-8') as f:
+        return pd.read_json(f.read(), orient="columns")
 
 
 @log_it(None)

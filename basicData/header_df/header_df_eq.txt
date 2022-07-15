@@ -1,0 +1,58 @@
+{
+    "first_update": {
+        "txt_CN": "首次上传日期",
+        "sql_type": "VARCHAR(30)"
+    },
+    "last_update": {
+        "txt_CN": "最近上传日期",
+        "sql_type": "VARCHAR(30)"
+    },
+    "date": {
+        "txt_CN": "日期",
+        "sql_type": "VARCHAR(30)"
+    },
+    "id_001_reason": {
+        "txt_CN": "原因",
+        "sql_type": "VARCHAR(30)"
+    },
+    "id_002_rate": {
+        "txt_CN": "稀释",
+        "sql_type": "DOUBLE"
+    },
+    "id_003_changeRate": {
+        "txt_CN": "变动",
+        "sql_type": "DOUBLE"
+    },
+    "id_004_capitalization": {
+        "txt_CN": "总股本",
+        "sql_type": "DOUBLE"
+    },
+    "id_005_outstandingSharesA": {
+        "txt_CN": "流通",
+        "sql_type": "DOUBLE"
+    },
+    "id_006_limitedSharesA": {
+        "txt_CN": "限售",
+        "sql_type": "DOUBLE"
+    },
+    "id_007_otherShares": {
+        "txt_CN": "其他",
+        "sql_type": "DOUBLE"
+    },
+    "id_008_deltaCapitalization": {
+        "txt_CN": "Δ总股本",
+        "sql_type": "DOUBLE"
+    },
+    "id_009_deltaOutstandingSharesA": {
+        "txt_CN": "Δ流通",
+        "sql_type": "DOUBLE"
+    },
+    "id_010_deltaLimitedSharesA": {
+        "txt_CN": "Δ限售",
+        "sql_type": "DOUBLE"
+    },
+    "id_011_deltaOtherShares": {
+        "txt_CN": "Δ其他",
+        "sql_type": "DOUBLE"
+    }
+}
