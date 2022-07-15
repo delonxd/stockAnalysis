@@ -220,6 +220,7 @@ def update_latest_data2():
 def tmp_update():
     from request.requestData import request2mysql
     from request.requestData import request2mysql_daily
+    from request.requestEquityData import request_eq2mysql
 
     # path = "..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt"
     # path = "..\\basicData\\analyzedData\\temp_codes.txt"
@@ -227,21 +228,23 @@ def tmp_update():
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         code_list = json.loads(f.read())
 
+    request_eq2mysql(code_list)
     # code_list = list(filter(lambda x: x < '100000', code_list))
-    code_list = code_list[:1]
+    # code_list = code_list[:1]
     # code_list = ['000002']
     # code_list.reverse()
-    for code in code_list:
-        print(code)
-        # break
-        request2mysql(
-            stock_code=code,
-            data_type='mvs',
-            # start_date='2015-01-01',
-            start_date='1970-01-01',
-            # end_date='2022-01-01',
-            metrics=['ta'],
-        )
+    # for code in code_list:
+    #     print(code)
+    #     # break
+    #     request2mysql(
+    #         stock_code=code,
+    #         data_type='mvs',
+    #         # start_date='2015-01-01',
+    #         start_date='1970-01-01',
+    #         # end_date='2022-01-01',
+    #         metrics=['ta'],
+    #     )
+    #     request2mysql()
 
     # request2mysql_daily(
     #     stock_codes=code_list,
@@ -314,9 +317,9 @@ if __name__ == '__main__':
     import pandas as pd
     from request.requestData import request_data2mysql
 
-    # pd.set_option('display.max_columns', None)
-    # pd.set_option('display.max_rows', None)
-    # pd.set_option('display.width', 10000)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', 3)
+    pd.set_option('display.width', 10000)
 
     # mysql_update()
     # mysql_update_daily()
