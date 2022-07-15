@@ -110,6 +110,7 @@ def daily_analysis(dir_name, all_codes):
         's_027_pe_return_rate',
         's_028_market_value',
         's_037_real_pe_return_rate',
+        'id_048_mvs_ta',
     ]
 
     index = 0
@@ -292,4 +293,4 @@ if __name__ == '__main__':
     # generate_daily_table(dir_daily)
     # save_latest_list(dir_daily)
 
-    # test_daily_analysis()
+    test_daily_analysis()
