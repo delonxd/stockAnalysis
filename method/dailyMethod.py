@@ -16,9 +16,9 @@ def basic_daily_update(dir_name):
     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
 
     MainLog.add_split('#')
-    write_json_txt('%s\\name_dict.txt' % res_dir, name_dict)
+    write_json_txt('%s\\a002_name_dict.txt' % res_dir, name_dict)
     write_json_txt('..\\basicData\\code_names_dict.txt', name_dict)
-    write_json_txt('%s\\code_list.txt' % res_dir, all_codes)
+    write_json_txt('%s\\a001_code_list.txt' % res_dir, all_codes)
     return all_codes, name_dict, ipo_dates
 
 
@@ -47,7 +47,6 @@ def mysql_daily_update(dir_name, all_codes, ipo_dates):
 
     ret1 = update_all_data(new_codes, start_date='2013-01-01')
     ret2 = update_latest_data(all_codes)
-
     updated_code = list(set(ret1 + ret2))
     updated_code.sort()
 
@@ -57,10 +56,12 @@ def mysql_daily_update(dir_name, all_codes, ipo_dates):
     MainLog.add_log('new updated: %s' % len(updated_code))
     MainLog.add_log('generate code_latest_update.txt')
 
-    res = json.dumps(updated_code, indent=4, ensure_ascii=False)
-    file = '%s\\code_latest_update.txt' % res_dir
-    with open(file, "w", encoding='utf-8') as f:
-        f.write(res)
+    # res = json.dumps(updated_code, indent=4, ensure_ascii=False)
+    # file = '%s\\code_latest_update.txt' % res_dir
+    # with open(file, "w", encoding='utf-8') as f:
+    #     f.write(res)
+
+    write_json_txt('%s\\s004_code_latest_update.txt' % res_dir, updated_code)
 
     ################################################################################################################
 
@@ -110,7 +111,8 @@ def daily_analysis(dir_name, all_codes):
         's_027_pe_return_rate',
         's_028_market_value',
         's_037_real_pe_return_rate',
-        'id_048_mvs_ta',
+        # 'id_048_mvs_ta',
+        's_044_turnover_volume',
     ]
 
     index = 0
@@ -161,7 +163,7 @@ def daily_analysis(dir_name, all_codes):
 
     MainLog.add_split('-')
 
-    write_json_txt('%s\\report_date_dict.txt' % res_dir, report_date_dict)
+    write_json_txt('%s\\a003_report_date_dict.txt' % res_dir, report_date_dict)
 
     MainLog.add_split('#')
 
@@ -172,19 +174,19 @@ def generate_daily_table(dir_name):
     daily_dir = "..\\basicData\\dailyUpdate\\%s" % dir_name
     ################################################################################################################
 
-    res = load_json_txt("%s\\name_dict.txt" % daily_dir)
+    res = load_json_txt("%s\\a002_name_dict.txt" % daily_dir)
     for key, value in res.items():
         df.loc[key, 'cn_name'] = value
 
     ################################################################################################################
 
-    res = load_json_txt("%s\\report_date_dict.txt" % daily_dir)
+    res = load_json_txt("%s\\a003_report_date_dict.txt" % daily_dir)
     for key, value in res.items():
         df.loc[key, 'report_date'] = value
 
     ################################################################################################################
 
-    path = "%s\\code_latest_update.txt" % daily_dir
+    path = "%s\\s004_code_latest_update.txt" % daily_dir
     df = add_bool_column(df, path, 'update_recently')
 
     ################################################################################################################
@@ -223,22 +225,22 @@ def generate_daily_table(dir_name):
         s0 = src.loc[:, 's_028_market_value'].copy().dropna()
         df.loc[code, 'ipo_date'] = s0.index[0] if s0.size > 0 else np.nan
 
-    dict1 = df.loc[:, 'equity'].copy().dropna().to_dict()
-    write_json_txt('%s\\equity_dict.txt' % daily_dir, dict1)
-
     dict2 = df.loc[:, 'real_cost'].copy().dropna().to_dict()
-    write_json_txt('%s\\real_cost_dict.txt' % daily_dir, dict2)
+    write_json_txt('%s\\a004_real_cost_dict.txt' % daily_dir, dict2)
 
-    list1 = df.sort_values('real_pe_return_rate', ascending=False).index.to_list()
-    write_json_txt('%s\\code_sorted_real_pe.txt' % daily_dir, list1)
-
-    list2 = df.sort_values('roe_parent', ascending=False).index.to_list()
-    write_json_txt('%s\\code_sorted_roe_parent.txt' % daily_dir, list2)
+    dict1 = df.loc[:, 'equity'].copy().dropna().to_dict()
+    write_json_txt('%s\\a005_equity_dict.txt' % daily_dir, dict1)
 
     list3 = df.sort_values('pe_return_rate', ascending=False).index.to_list()
-    write_json_txt('%s\\code_sorted_pe.txt' % daily_dir, list3)
+    write_json_txt('%s\\s001_code_sorted_pe.txt' % daily_dir, list3)
 
-    dump_pkl('%s\\daily_table.pkl' % daily_dir, df)
+    list1 = df.sort_values('real_pe_return_rate', ascending=False).index.to_list()
+    write_json_txt('%s\\s002_code_sorted_real_pe.txt' % daily_dir, list1)
+
+    list2 = df.sort_values('roe_parent', ascending=False).index.to_list()
+    write_json_txt('%s\\s003_code_sorted_roe_parent.txt' % daily_dir, list2)
+
+    dump_pkl('%s\\z001_daily_table.pkl' % daily_dir, df)
 
     return df
 
@@ -261,7 +263,8 @@ def save_latest_list(dir_name):
     ]
 
     for file in files:
-        path1 = '%s\\%s' % (src_dir, file[5:])
+        # path1 = '%s\\%s' % (src_dir, file[5:])
+        path1 = '%s\\%s' % (src_dir, file)
         path2 = '%s\\%s' % (target_dir, file)
         copy_file(path1, path2)
 
