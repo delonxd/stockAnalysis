@@ -359,6 +359,7 @@ class DataAnalysis:
         self.mvs_add(self.get_column(self.df_mvs, 's_034_real_pe'))
         self.mvs_add(self.get_column(self.df_mvs, 's_035_pe2rate'))
         self.mvs_add(self.get_column(self.df_mvs, 's_036_real_pe2rate'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_043_turnover_volume_ttm'))
 
         self.config_balance_sheet()
         self.set_df()
@@ -373,6 +374,7 @@ class DataAnalysis:
         self.mvs_add(self.get_column(self.df_mvs, 's_027_pe_return_rate'))
         self.mvs_add(self.get_column(self.df_mvs, 's_028_market_value'))
         self.mvs_add(self.get_column(self.df_mvs, 's_037_real_pe_return_rate'))
+        self.mvs_add(self.get_column(self.df_mvs, 's_044_turnover_volume'))
         self.set_df()
 
     def config_balance_sheet(self):
@@ -830,6 +832,23 @@ class DataAnalysis:
             s1 = pd.Series()
             s1.name = column
             return s1.dropna()
+
+        elif column == 's_043_turnover_volume_ttm':
+            s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            s2 = self.df_mvs['id_042_mvs_cmc'].copy().dropna()
+            s3 = self.df_mvs['id_048_mvs_ta'].copy().dropna()
+            s4 = s1 / s2 * s3
+            s4 = s4.rolling(20, min_periods=1).mean()
+            s4.name = column
+            return s4.dropna()
+
+        elif column == 's_044_turnover_volume':
+            s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            s2 = self.df_mvs['id_042_mvs_cmc'].copy().dropna()
+            s3 = self.df_mvs['id_048_mvs_ta'].copy().dropna()
+            s4 = s1 / s2 * s3
+            s4.name = column
+            return s4.dropna()
 
     @staticmethod
     def get_return_year(pe, rate):

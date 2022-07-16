@@ -458,6 +458,7 @@ class DataPix:
             's_039_profit_adjust': 's_039_profit_adjust',
             's_040_profit_adjust2': 's_040_profit_adjust2',
             's_041_profit_adjust_ttm': 's_041_profit_adjust_ttm',
+            's_043_turnover_volume_ttm': 's_043_turnover_volume_ttm',
         }
 
         tmp_list = list(tmp_dict.keys())
