@@ -188,7 +188,7 @@ def random_code_list(code_list, pick_weight, sorted_list=None, interval=100, mod
         sub_list = sift_codes(source=picked_list, sort=sorted_list)
         ret_list.extend(sub_list)
 
-    path = "../basicData/dailyUpdate/latest/s005_code_random.txt"
+    path = "../basicData/tmp/code_list_random.txt"
     tmp = json.dumps(ret_list, indent=4, ensure_ascii=False)
     with open(path, "w", encoding="utf-8") as f:
         f.write(tmp)
