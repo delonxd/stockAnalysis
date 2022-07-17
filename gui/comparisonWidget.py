@@ -31,6 +31,7 @@ class ComparisonWidget(QWidget):
 
         self.cache = dict()
         self.data = pd.DataFrame()
+        self.show_table = pd.DataFrame()
 
         self.init_gui()
         self.init_data()
@@ -89,12 +90,19 @@ class ComparisonWidget(QWidget):
         self.compare_button.clicked.connect(self.show_distribution)
 
     def init_data(self):
-        root = '..\\basicData\\dailyUpdate\\latest\\res_daily\\'
-        res = list()
-        for file in os.listdir(root):
-            res.extend(load_pkl('%s\\%s' % (root, file)))
+        # root = '..\\basicData\\dailyUpdate\\latest\\res_daily\\'
+        # res = list()
+        # for file in os.listdir(root):
+        #     res.extend(load_pkl('%s\\%s' % (root, file)))
+        #
+        # self.data = res
 
-        self.data = res
+        tmp = load_json_txt('..\\basicData\\dailyUpdate\\latest\\show_table.txt')
+        # load_pkl('..\\basicData\\dailyUpdate\\latest\\show_table.pkl')
+
+        df = pd.DataFrame.from_dict(tmp, orient='index')
+        df[df.isnull()] = np.nan
+        self.show_table = df
 
         cache = load_json_txt('tmp\\comparison_cache.txt')
         self.editor1.setText(cache['path1'])
@@ -111,6 +119,8 @@ class ComparisonWidget(QWidget):
             self.pix_label.setPixmap(QPixmap('tmp\\comparison_plot.png'))
         except:
             pass
+
+        print('initial complete')
 
     def save_cfg(self):
         self.cache['date1'] = self.dateTimeEdit1.date().toString('yyyy-MM-dd')
@@ -153,25 +163,33 @@ class ComparisonWidget(QWidget):
         if range2 != 0:
             list2 = list2[:range2]
 
-        df = self.data
+        # df = self.data
+        df = self.show_table
+
+        print(list1)
+        print(list2)
 
         ret = pd.DataFrame(dtype='int64')
 
-        for tmp in df:
+        for tmp in df.iterrows():
+
             code = tmp[0]
             src = tmp[1]
 
-            try:
-                val1 = src.loc[date1, 's_028_market_value']
-                val2 = src.loc[date2, 's_028_market_value']
-            except Exception as e:
-                val1 = np.inf
-                val2 = np.inf
+            # try:
+            #     val1 = src.loc[date1, 's_028_market_value']
+            #     val2 = src.loc[date2, 's_028_market_value']
+            # except Exception as e:
+            #     val1 = np.inf
+            #     val2 = np.inf
+            #
+            # r = val1 / val2 - 1
+            #
+            # if val1 == np.inf or val2 == np.inf:
+            #     r = np.nan
 
-            r = val1 / val2 - 1
-
-            if val1 == np.inf or val2 == np.inf:
-                r = np.nan
+            # r = src['turnover_ttm20'] / src['gui_assessment'] * 1000
+            r = src['turnover_ttm20'] / src['market_value_1'] * 1000
 
             if not np.isnan(r):
                 index = round(r / precision) * precision
@@ -241,7 +259,6 @@ def g_figure(df: pd.DataFrame, path):
 
     ax1.yaxis.grid(True, which='both')
     ax1.xaxis.grid(True, which='both')
-    # ax1.set_ylim([0, 0.5])
 
     colors = ['b', 'r', 'g']
     for index, column in enumerate(df.columns):
