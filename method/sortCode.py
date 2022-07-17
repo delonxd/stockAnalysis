@@ -344,14 +344,15 @@ def get_random_list():
     return ret
 
 
-def sort_discount():
+def sort_discount(path="../basicData/dailyUpdate/latest/a005_equity_dict.txt"):
     import json
-    path = "../basicData/self_selected/gui_assessment.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+    path_ass = "../basicData/self_selected/gui_assessment.txt"
+    with open(path_ass, "r", encoding="utf-8", errors="ignore") as f:
         assessment_dict = json.loads(f.read())
 
     # path = "../basicData/dailyUpdate/latest/a004_real_cost_dict.txt"
-    path = "../basicData/dailyUpdate/latest/a005_equity_dict.txt"
+    # path = "../basicData/dailyUpdate/latest/a005_equity_dict.txt"
+    # path = "../basicData/dailyUpdate/latest/a006_turnover_dict.txt"
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         res_dict = json.loads(f.read())
 
