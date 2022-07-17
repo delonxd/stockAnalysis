@@ -360,6 +360,7 @@ class DataAnalysis:
         self.mvs_add(self.get_column(self.df_mvs, 's_035_pe2rate'))
         self.mvs_add(self.get_column(self.df_mvs, 's_036_real_pe2rate'))
         self.mvs_add(self.get_column(self.df_mvs, 's_043_turnover_volume_ttm'))
+        self.mvs_add(self.get_column(self.df_mvs, 'market_change_rate'))
 
         self.config_balance_sheet()
         self.set_df()
@@ -534,6 +535,13 @@ class DataAnalysis:
                 tmp = json.loads(f.read())
             s1 = pd.Series(tmp)
             s1.name = 'mir_y10'
+            return s1
+
+        elif column == 'market_change_rate':
+            with open("..\\basicData\\dailyUpdate\\latest\\a007_change_rate.txt", "r", encoding="utf-8", errors="ignore") as f:
+                tmp = json.loads(f.read())
+            s1 = pd.Series(tmp)
+            s1.name = 'market_change_rate'
             return s1
 
         elif column == 's_001_roe':

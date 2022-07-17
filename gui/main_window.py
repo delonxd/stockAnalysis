@@ -160,6 +160,7 @@ class MainWidget(QWidget):
         self.equity = np.nan
         self.listing_date = None
         self.max_increase_30 = 0
+        self.turnover = 0
 
         # self.window2 = ShowPix(main_window=self)
 
@@ -630,6 +631,12 @@ class MainWidget(QWidget):
             if s0.size > 0:
                 self.real_cost = s0[-1] / 1e8
 
+        self.turnover = 0
+        if 's_043_turnover_volume_ttm' in df.columns:
+            s0 = self.data_pix.df['s_043_turnover_volume_ttm'].copy().dropna()
+            if s0.size > 0:
+                self.turnover = s0[-1]
+
         self.equity = np.nan
         if 's_002_equity' in df.columns:
             s0 = self.data_pix.df['s_002_equity'].copy().dropna()
@@ -750,6 +757,10 @@ class MainWidget(QWidget):
             else:
                 txt_bottom1 = '%s%.2f亿' % ('cost: ', real_cost)
 
+        if ass is not None:
+            rate = self.turnover / 1e6 / ass
+            txt2 = txt2 + '-%.2f%%' % rate
+
         txt3 = '/'.join(list0)
         txt_bottom2 = '/'.join(list1)
 
@@ -865,7 +876,9 @@ class MainWidget(QWidget):
 
         elif mission == 4:
 
-            src = sort_discount()
+            path = "../basicData/dailyUpdate/latest/a006_turnover_dict.txt"
+
+            src = sort_discount(path)
             # src.reverse()
             code_list = sift_codes(
                 source=load_json_txt("..\\basicData\\self_selected\\gui_selected.txt"),
@@ -877,8 +890,8 @@ class MainWidget(QWidget):
             )
             # code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=5)
             # code_index = '603666'
-            code_index = '002043'
-            # code_index = 0
+            # code_index = '002043'
+            code_index = 250
 
         elif mission == 5:
 

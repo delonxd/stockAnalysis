@@ -74,6 +74,23 @@ def add_bool_column(df, path, name):
     return df
 
 
+def sum_value(res, column):
+    ret = pd.Series()
+
+    for tmp in res:
+        code = tmp[0]
+        src = tmp[1]
+        s1 = src.loc[:, column].copy().dropna()
+
+        df = pd.concat([s1, ret], axis=1, sort=False)
+        df = df.fillna(0)
+        ret = df.sum(axis=1)
+    ret = ret.sort_index()
+    print(ret)
+
+    return ret
+
+
 def generate_show_table():
     from method.dailyMethod import generate_daily_table
     df1 = generate_daily_table('latest')

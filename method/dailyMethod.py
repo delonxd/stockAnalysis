@@ -197,6 +197,14 @@ def generate_daily_table(dir_name):
     for file in os.listdir(sub_dir):
         res.extend(load_pkl('%s\\%s' % (sub_dir, file)))
 
+    from showTable import sum_value
+    s1 = sum_value(res, ['s_028_market_value'])
+    s2 = sum_value(res, ['s_044_turnover_volume'])
+    s2 = s2.rolling(20, min_periods=1).mean()
+
+    s3 = (s2 / s1).dropna().to_dict()
+    write_json_txt('%s\\a007_change_rate.txt' % daily_dir, s3)
+
     for tmp in res:
         code = tmp[0]
         src = tmp[1]
@@ -263,6 +271,7 @@ def save_latest_list(dir_name):
         'a004_real_cost_dict.txt',
         'a005_equity_dict.txt',
         'a006_turnover_dict.txt',
+        'a007_change_rate.txt',
         's001_code_sorted_pe.txt',
         's002_code_sorted_real_pe.txt',
         's003_code_sorted_roe_parent.txt',

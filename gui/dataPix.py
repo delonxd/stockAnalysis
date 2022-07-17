@@ -459,6 +459,7 @@ class DataPix:
             's_040_profit_adjust2': 's_040_profit_adjust2',
             's_041_profit_adjust_ttm': 's_041_profit_adjust_ttm',
             's_043_turnover_volume_ttm': 's_043_turnover_volume_ttm',
+            'market_change_rate': 'market_change_rate',
         }
 
         tmp_list = list(tmp_dict.keys())
