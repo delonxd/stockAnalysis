@@ -225,20 +225,27 @@ def generate_daily_table(dir_name):
         s0 = src.loc[:, 's_028_market_value'].copy().dropna()
         df.loc[code, 'ipo_date'] = s0.index[0] if s0.size > 0 else np.nan
 
-    dict2 = df.loc[:, 'real_cost'].copy().dropna().to_dict()
-    write_json_txt('%s\\a004_real_cost_dict.txt' % daily_dir, dict2)
+        s1 = src.loc[:, 's_044_turnover_volume'].copy().dropna()
+        s1 = s1.rolling(20, min_periods=1).mean().dropna()
+        df.loc[code, 'turnover_ttm20'] = s1[-1] if s1.size >= 1 else np.nan
 
-    dict1 = df.loc[:, 'equity'].copy().dropna().to_dict()
-    write_json_txt('%s\\a005_equity_dict.txt' % daily_dir, dict1)
+    tmp = df.loc[:, 'real_cost'].copy().dropna().to_dict()
+    write_json_txt('%s\\a004_real_cost_dict.txt' % daily_dir, tmp)
 
-    list3 = df.sort_values('pe_return_rate', ascending=False).index.to_list()
-    write_json_txt('%s\\s001_code_sorted_pe.txt' % daily_dir, list3)
+    tmp = df.loc[:, 'equity'].copy().dropna().to_dict()
+    write_json_txt('%s\\a005_equity_dict.txt' % daily_dir, tmp)
 
-    list1 = df.sort_values('real_pe_return_rate', ascending=False).index.to_list()
-    write_json_txt('%s\\s002_code_sorted_real_pe.txt' % daily_dir, list1)
+    tmp = df.loc[:, 'turnover_ttm20'].copy().dropna().to_dict()
+    write_json_txt('%s\\a006_turnover_dict.txt' % daily_dir, tmp)
 
-    list2 = df.sort_values('roe_parent', ascending=False).index.to_list()
-    write_json_txt('%s\\s003_code_sorted_roe_parent.txt' % daily_dir, list2)
+    tmp = df.sort_values('pe_return_rate', ascending=False).index.to_list()
+    write_json_txt('%s\\s001_code_sorted_pe.txt' % daily_dir, tmp)
+
+    tmp = df.sort_values('real_pe_return_rate', ascending=False).index.to_list()
+    write_json_txt('%s\\s002_code_sorted_real_pe.txt' % daily_dir, tmp)
+
+    tmp = df.sort_values('roe_parent', ascending=False).index.to_list()
+    write_json_txt('%s\\s003_code_sorted_roe_parent.txt' % daily_dir, tmp)
 
     dump_pkl('%s\\z001_daily_table.pkl' % daily_dir, df)
 
@@ -255,6 +262,7 @@ def save_latest_list(dir_name):
         'a003_report_date_dict.txt',
         'a004_real_cost_dict.txt',
         'a005_equity_dict.txt',
+        'a006_turnover_dict.txt',
         's001_code_sorted_pe.txt',
         's002_code_sorted_real_pe.txt',
         's003_code_sorted_roe_parent.txt',

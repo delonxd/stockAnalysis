@@ -60,7 +60,7 @@ def generate_gui_table():
 
     res = load_json_txt("..\\basicData\\self_selected\\gui_assessment.txt")
     for key, value in res.items():
-        df.loc[key, 'gui_assessment'] = value
+        df.loc[key, 'gui_assessment'] = int(value) * 1e8
 
     dump_pkl("..\\basicData\\dailyUpdate\\latest\\z002_gui_table.pkl", df)
 
@@ -75,8 +75,12 @@ def add_bool_column(df, path, name):
 
 
 def generate_show_table():
-    df1 = load_pkl("..\\basicData\\dailyUpdate\\latest\\z001_daily_table.pkl")
-    df2 = load_pkl("..\\basicData\\dailyUpdate\\latest\\z002_gui_table.pkl")
+    from method.dailyMethod import generate_daily_table
+    df1 = generate_daily_table('latest')
+    df2 = generate_gui_table()
+
+    # df1 = load_pkl("..\\basicData\\dailyUpdate\\latest\\z001_daily_table.pkl")
+    # df2 = load_pkl("..\\basicData\\dailyUpdate\\latest\\z002_gui_table.pkl")
 
     df = pd.concat([df1, df2], axis=1, sort=True)
     ################################################################################################################
@@ -162,6 +166,5 @@ if __name__ == '__main__':
     # test_figure([1] * 21)
     # show_distribution()
     # test_strategy()
-    # generate_show_table()
-    # generate_show_table()
+    generate_show_table()
 

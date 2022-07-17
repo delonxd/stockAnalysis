@@ -837,7 +837,7 @@ class DataAnalysis:
             s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
             s2 = self.df_mvs['id_042_mvs_cmc'].copy().dropna()
             s3 = self.df_mvs['id_048_mvs_ta'].copy().dropna()
-            s4 = s1 / s2 * s3
+            s4 = s1 / s2 * s3 * 10
             s4 = s4.rolling(20, min_periods=1).mean()
             s4.name = column
             return s4.dropna()
