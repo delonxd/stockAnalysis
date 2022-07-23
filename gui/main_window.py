@@ -1,8 +1,7 @@
 from method.dataMethod import sql2df
 from request.requestData import request_data2mysql
 from method.logMethod import log_it, MainLog
-from method.mainMethod import sift_codes
-from method.sortCode import random_code_list, sort_discount
+from method.sortCode import sort_discount, sift_codes
 from method.fileMethod import *
 
 from gui.checkTree import CheckTree
@@ -102,6 +101,9 @@ class MainWidget(QWidget):
         time0 = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
         self.log_path = '../bufferData/logs/gui_log/gui_log_%s.txt' % time0
 
+        path = "..\\basicData\\dailyUpdate\\latest\\a000_log_data.txt"
+        self.date_ini = load_json_txt(path)['update_date']
+
         self.df_dict = dict()
         self.pix_dict = dict()
 
@@ -134,8 +136,6 @@ class MainWidget(QWidget):
         self.button10.setCheckable(True)
         self.button11.setCheckable(True)
         self.button12.setCheckable(True)
-
-        # todo checklist
 
         self.editor1 = QLineEdit()
         self.editor1.setValidator(QIntValidator())
@@ -594,25 +594,26 @@ class MainWidget(QWidget):
         number = 0
 
         if df.columns.size > 0:
-            date = (dt.date.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d')
+            # date = (dt.date.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d')
+            date = self.date_ini
         else:
             date = ''
 
         real_pe = np.inf
-        tmp_date = ''
+        # tmp_date = ''
         if 's_034_real_pe' in df.columns:
             s0 = self.data_pix.df['s_034_real_pe'].copy().dropna()
             if s0.size > 0:
-                tmp_date = max(s0.index[-1], tmp_date)
+                # tmp_date = max(s0.index[-1], tmp_date)
                 real_pe = s0[-1]
 
-        if 'dt_fs' in df.columns:
-            s0 = self.data_pix.df['dt_fs'].copy().dropna()
-            if s0.size > 0:
-                tmp_date = max(s0.index[-1], tmp_date)
-
-        if tmp_date != '' and tmp_date != 'Invalid da':
-            date = tmp_date
+        # if 'dt_fs' in df.columns:
+        #     s0 = self.data_pix.df['dt_fs'].copy().dropna()
+        #     if s0.size > 0:
+        #         tmp_date = max(s0.index[-1], tmp_date)
+        #
+        # if tmp_date != '' and tmp_date != 'Invalid da':
+        #     date = tmp_date
 
         self.max_increase_30 = np.inf
         self.listing_date = None
@@ -833,104 +834,99 @@ class MainWidget(QWidget):
             new_index = (self.code_index - 1) % self.len_list
             self.change_stock(new_index)
 
-    def get_code_list(self):
+    @staticmethod
+    def get_code_list():
 
-        mission = 1
+        mission = 2
 
         code_list = []
         code_index = 0
 
         if mission == 0:
 
-            code_list = self.get_codes_old()
+            code_list = sift_codes(
+                source='old',
+            )
+
             # code_index = '688072'
-            code_index = 69
+            code_index = 65
 
         if mission == 1:
 
-            src = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s002_code_sorted_real_pe.txt")
-            src = sift_codes(
-                source=src,
-                sort=src,
+            code_list = sift_codes(
+                source='real_pe',
+                # sort='real_pe',
                 market='all',
+                # random=False,
+                random=True,
+                interval=80,
+                mode='all-whitelist',
             )
-            code_list = random_code_list(src, pick_weight=[1, 0, 0], interval=80)
 
         elif mission == 2:
 
-            tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
-            code_list = list(zip(*tmp).__next__())
+            code_list = sift_codes(
+                # source='hold',
+                # source='latest_update',
+                # source='sort-equity',
+                source='sort-ass',
+            )
 
         elif mission == 3:
 
-            src = sort_discount()
-            src = sift_codes(
-                source=src,
-                sort=src,
+            code_list = sift_codes(
+                source='all',
+                sort='sort-ass/equity',
                 # market='main',
                 market='main+growth',
+                # insert=0,
+                random=True,
+                interval=40,
+                # mode='whitelist+selected',
+                mode='whitelist-selected',
             )
-            code_list = random_code_list(src, pick_weight=[1], interval=40, mode='whitelist+selected')
-            # code_list = random_code_list(src, pick_weight=[1], interval=40, mode='whitelist-selected')
-            # code_list = random_code_list(src, pick_weight=[0, 1, 0], interval=30)
 
         elif mission == 4:
 
-            # path = "../basicData/dailyUpdate/latest/a006_turnover_dict.txt"
-            path = "../basicData/dailyUpdate/latest/a005_equity_dict.txt"
-
-            src = sort_discount(path)
-            # src.reverse()
             code_list = sift_codes(
-                source=load_json_txt("..\\basicData\\self_selected\\gui_selected.txt"),
-                # source=load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt"),
-                sort=src,
+                # source='selected',
+                source='mark-1',
+                sort='sort-ass/equity',
+                # sort='sort-ass/turnover',
+                # reverse=True,
                 # market='main',
                 # market='growth',
                 market='main+growth',
+
+                random=True,
+                interval=100,
+                mode='selected',
+                # mode='whitelist+selected',
             )
-            code_list = random_code_list(src, pick_weight=[0, 0, 1], interval=100)
+
             # code_index = '603666'
             # code_index = '002043'
             code_index = 0
 
-        elif mission == 5:
-
-            src = []
-            mark = 1
-
-            mark_dict = load_json_txt("..\\basicData\\self_selected\\gui_mark.txt")
-            for code, value in mark_dict.items():
-                if value == mark:
-                    src.append(code)
-
-            code_list = sift_codes(
-                source=src,
-                sort=sort_discount(),
-                # market='main',
-                market='main+growth',
-            )
-
         elif mission == 6:
 
-            src = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
-            sort_list = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s002_code_sorted_real_pe.txt")
-            # src = random_code_list(codes, pick_weight=[1], interval=40, mode='selected+whitelist')
-            # src.reverse()
-
             code_list = sift_codes(
-                source=src,
-                sort=sort_list,
-                blacklist=sort_discount(),
+                source='whitelist',
+                blacklist='sort-ass/equity',
                 # market='main',
                 # market='non_main',
                 market='growth',
             )
 
-        ################################################################################################################
+        elif mission == 7:
 
-        # code_index = 0
-        # code_index = '002109'
+            code_list = sift_codes(
+                ids_names=['2-光伏设备'],
+                sort='real_pe',
+                market='all',
+            )
+
+        ################################################################################################################
 
         if len(code_list) == 0:
             raise KeyboardInterrupt('len(code_list) == 0')
@@ -939,95 +935,6 @@ class MainWidget(QWidget):
         write_json_txt(path, code_list)
 
         return code_list, code_index
-
-    def get_codes_old(self):
-        code_list = load_json_txt("..\\basicData\\tmp\\code_list_latest.txt")
-
-        blacklist = self.get_blacklist()
-
-        ################################################################################################################
-
-        root = "..\\basicData\\dailyUpdate\\latest"
-        # file = "code_sorted_real_pe.txt"
-        # file = "s002_code_sorted_real_pe.txt"
-        # file = "s003_code_sorted_roe_parent.txt"
-        # file = "s004_code_latest_update.txt"
-        file = "s005_code_random.txt"
-
-        # code_list = load_json_txt("{}\\{}".format(root, file))
-
-        ass_list = load_json_txt("..\\basicData\\self_selected\\gui_assessment.txt")
-        ass_list = list(ass_list.keys())
-
-        ################################################################################################################
-
-        # with open("..\\basicData\\self_selected\\板块50.txt", "r", encoding="utf-8", errors="ignore") as f:
-        #     txt = f.read()
-        #     code_list = re.findall(r'([0-9]{6})', txt)
-        #     code_list.reverse()
-
-        ################################################################################################################
-
-        path = "..\\basicData\\self_selected\\gui_selected.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            gui_selected = json.loads(f.read())
-
-        path = "..\\basicData\\self_selected\\gui_whitelist.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            gui_whitelist = json.loads(f.read())
-
-        # code_list = list(set(gui_selected) | set(gui_whitelist))
-
-        ################################################################################################################
-
-        # code_list = sift_codes(
-        #     source=code_list,
-        #     # source=['C01'],
-        #     # blacklist=blacklist,
-        #     # blacklist=ass_list,
-        #     # whitelist=whitelist,
-        #     sort=code_list,
-        #     # market='main',
-        #     market='all',
-        #     # timestamp='2022-05-28 00:00:00',
-        # )
-        # code_list = random_code_list(code_list, pick_weight=[30, 40, 30])
-
-        return code_list
-
-    @staticmethod
-    def get_blacklist():
-        blacklist = []
-
-        # with open("..\\bufferData\\codes\\blacklist.txt", "r", encoding="utf-8", errors="ignore") as f:
-        #     blacklist = json.loads(f.read())
-
-        ################################################################################################################
-
-        path = "../basicData/dailyUpdate/latest/a003_report_date_dict.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            report_date_dict = json.loads(f.read())
-
-        with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
-            gui_counter = json.loads(f.read())
-            # blacklist = list(gui_counter.keys())
-
-        for key, value in gui_counter.items():
-            report_date = report_date_dict.get(key)
-            if report_date is None or report_date == 'Invalid da':
-                report_date = ''
-            if report_date <= value[1]:
-                blacklist.append(key)
-
-        #     tup_list = []
-        #     for key, value in result.items():
-        #         tup_list.append((key, value[1]))
-        #
-        #     tup_list = sorted(tup_list, key=lambda x: x[1])
-        #     whitelist = zip(*tup_list).__next__()
-        #     whitelist = whitelist[:50]
-
-        return blacklist
 
     def config_priority(self):
         widget = PriorityTable(self.style_df)
