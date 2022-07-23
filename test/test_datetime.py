@@ -73,6 +73,10 @@ if __name__ == '__main__':
     datetime2 = dt.datetime.strptime(time_str, "%a %b %d %H:%M:%S %Y")
     show_var('datetime2', datetime2)
 
+    # str类型 转换 datetime类型
+    time_str = '2022-07-23'
+    date2 = dt.datetime.strptime('2022-07-23', "%Y-%m-%d").date()
+
     # 得到今天
     today = dt.date.today()
     show_var('today', today)

@@ -304,6 +304,23 @@ def test_daily_analysis():
     daily_analysis(dir_name, codes)
 
 
+def generate_log_data(dir_name):
+    daily_dir = "..\\basicData\\dailyUpdate\\%s" % dir_name
+
+    path = "%s\\logs1.txt" % daily_dir
+
+    with open(path, 'r') as f:
+        for num, line in enumerate(f):
+            if num == 1:
+                date = line[:10]
+                break
+    ret = dict()
+    ret['update_date'] = date
+
+    path = "%s\\a000_log_data.txt" % daily_dir
+    write_json_txt(path, ret)
+
+
 if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
@@ -313,4 +330,5 @@ if __name__ == '__main__':
     # generate_daily_table(dir_daily)
     # save_latest_list(dir_daily)
 
-    test_daily_analysis()
+    # test_daily_analysis()
+    generate_log_data('update_20220723153503')
