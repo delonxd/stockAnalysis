@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from method.fileMethod import *
 
 import pandas as pd
 import sys
@@ -15,14 +15,16 @@ class CodesDataFrame:
         columns = ['code', 'name', 'level1', 'level2', 'level3', 'i_code']
         self.df = pd.DataFrame(columns=columns)
 
-        with open('../basicData/code_names_dict.txt', 'r', encoding='utf-8') as f:
-            self.code_names_dict = json.loads(f.read())
+        path = '../basicData/code_names_dict.txt'
+        self.code_names_dict = load_json_txt(path)
 
-        with open('../basicData/industry/code_industry_dict.txt', 'r', encoding='utf-8') as f:
-            self.code_industry_dict = json.loads(f.read())
+        path = '../basicData/industry/sw_2021_dict.txt'
+        # path = '../basicData/industry/code_industry_dict.txt'
+        self.code_industry_dict = load_json_txt(path)
 
-        with open('../basicData/industry/industry_dict.txt', 'r', encoding='utf-8') as f:
-            self.industry_name_dict = json.loads(f.read())
+        path = '../basicData/industry/sw_2021_name_dict.txt'
+        # path = '../basicData/industry/industry_dict.txt'
+        self.industry_name_dict = load_json_txt(path)
 
         for index, code in enumerate(code_list):
             self.add_code(index, code)
@@ -37,9 +39,13 @@ class CodesDataFrame:
 
         i_code = self.code_industry_dict.get(code)
         if i_code:
-            i1 = i_code[:3]
-            i2 = i_code[:5]
-            i3 = i_code[:7]
+            # i1 = i_code[:3]
+            # i2 = i_code[:5]
+            # i3 = i_code[:7]
+
+            i1 = i_code[:2] + '0000'
+            i2 = i_code[:4] + '00'
+            i3 = i_code[:6]
 
             row['level1'] = self.industry_name_dict.get(i1)
             row['level2'] = self.industry_name_dict.get(i2)

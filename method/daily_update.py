@@ -15,6 +15,7 @@ def daily_update():
     from method.dailyMethod import save_latest_list
     from sql.load_data_infile import output_databases
     from request.requestMirData import request_mir_y10
+    from request.requestSwData import update_sw_2021
 
     import time
 
@@ -55,17 +56,21 @@ def daily_update():
 
     ################################################################################################################
 
-    MainLog.add_split('#')
-    output_databases()
-    MainLog.add_log('output_databases complete')
+    # MainLog.add_split('#')
+    # output_databases()
+    # MainLog.add_log('output_databases complete')
 
     MainLog.add_split('#')
     request_mir_y10()
     MainLog.add_log('request_mir_y10 complete')
 
+    # MainLog.add_split('#')
+    # request_industry_sample()
+    # MainLog.add_log('request_industry_sample complete')
+
     MainLog.add_split('#')
-    request_industry_sample()
-    MainLog.add_log('request_industry_sample complete')
+    update_sw_2021()
+    MainLog.add_log('update_sw_2021 complete')
 
     MainLog.write('%s\\logs2.txt' % res_dir)
 
