@@ -129,15 +129,16 @@ def sift_codes(
         blacklist=None,
         sort=None,
         market='all',
+        ids_names=None,
         timestamp=None,
 ):
 
-    with open("..\\basicData\\industry\\industry_code_dict.txt", "r", encoding="utf-8", errors="ignore") as f:
-        ind_dict = json.loads(f.read())
+    if ids_names is not None:
+        source = industry_name2code(ids_names)
 
-    set_all = list_to_set(source, ind_dict)
-    set_white = list_to_set(whitelist, ind_dict)
-    set_black = list_to_set(blacklist, ind_dict)
+    set_all = list_to_set(source)
+    set_white = list_to_set(whitelist)
+    set_black = list_to_set(blacklist)
 
     set_time_sift = set()
 
@@ -189,19 +190,56 @@ def sift_codes(
     return res_list
 
 
-def list_to_set(src, ind_dict):
+def industry_name2code(ids_names):
+
+    name_dict = load_json_txt('..\\basicData\\industry\\sw_2021_name_dict.txt')
+
+    ids_codes = []
+
+    for ids_code, name in name_dict.items():
+        if ids_code[-4:] == '0000':
+            ids_name = '1-' + name
+        elif ids_code[-2:] == '00':
+            ids_name = '2-' + name
+        else:
+            ids_name = '3-' + name
+
+        if ids_name in ids_names:
+            ids_codes.append(ids_code)
+
+    sw_2021_dict = load_json_txt('..\\basicData\\industry\\sw_2021_dict.txt')
+
+    ret = []
+    for code, ids_code1 in sw_2021_dict.items():
+        if ids_code1 is None:
+            continue
+
+        for ids_code2 in ids_codes:
+            if ids_code2[-4:] == '0000':
+                index = 2
+            elif ids_code2[-2:] == '00':
+                index = 4
+            else:
+                index = 6
+
+            if ids_code1[:index] == ids_code2[:index]:
+                ret.append(code)
+    return ret
+
+
+def list_to_set(src):
     ret = set()
     if src is None:
         return ret
     else:
         for code in src:
-            if code[0] == 'C':
-                length = len(code)
-                for key, value in ind_dict.items():
-                    if code == key[:length]:
-                        ret.update(set(value))
-            else:
-                ret.add(code)
+            # if code[0] == 'C':
+            #     length = len(code)
+            #     for key, value in ind_dict.items():
+            #         if code == key[:length]:
+            #             ret.update(set(value))
+            # else:
+            ret.add(code)
         return ret
 
 

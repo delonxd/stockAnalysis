@@ -15,14 +15,14 @@ class CodesDataFrame:
         columns = ['code', 'name', 'level1', 'level2', 'level3', 'i_code']
         self.df = pd.DataFrame(columns=columns)
 
-        path = '../basicData/code_names_dict.txt'
+        path = '..\\basicData\\code_names_dict.txt'
         self.code_names_dict = load_json_txt(path)
 
-        path = '../basicData/industry/sw_2021_dict.txt'
+        path = '..\\basicData\\industry\\sw_2021_dict.txt'
         # path = '../basicData/industry/code_industry_dict.txt'
         self.code_industry_dict = load_json_txt(path)
 
-        path = '../basicData/industry/sw_2021_name_dict.txt'
+        path = '..\\basicData\\industry\\sw_2021_name_dict.txt'
         # path = '../basicData/industry/industry_dict.txt'
         self.industry_name_dict = load_json_txt(path)
 
