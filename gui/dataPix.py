@@ -803,7 +803,12 @@ class DataPix:
         val_y = None
         if value is not None:
             if data.logarithmic is True:
-                val_y = np.log2(value / data.scale_min) / np.log2(data.scale_max / data.scale_min)
+                t1 = value / data.scale_min
+                t2 = data.scale_max / data.scale_min
+                if t1 <= 0 or t2 <= 0:
+                    val_y = np.nan
+                else:
+                    val_y = np.log2(t1) / np.log2(t2)
             else:
                 val_y = value
         return val_y

@@ -209,6 +209,7 @@ def get_weight_dict(set_all):
     with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
         gui_counter = json.loads(f.read())
 
+    counter = 0
     for key, value in gui_counter.items():
         if key not in set_all:
             continue
@@ -224,14 +225,17 @@ def get_weight_dict(set_all):
 
         if flag is True:
             weight = margin ** 2 * base_rate
-            print(key, report_date, value[1], 'margin == 1')
+            MainLog.add_log('%s %s %s margin == 1' % (key, report_date, value[1]))
         elif margin > 60:
             weight = margin ** 2 * 100
-            print(key, date2, 'margin > 60')
+            # MainLog.add_log('%s %s margin > 60' % (key, value[1]))
+            counter += 1
         else:
             weight = margin ** 2
 
         weight_dict[key] = weight
+
+    MainLog.add_log('margin > 60 --> %s' % counter)
 
     weight_counter = dict()
     for weight in weight_dict.values():
@@ -240,6 +244,7 @@ def get_weight_dict(set_all):
         else:
             weight_counter[weight] = 1
 
+    MainLog.add_split('-')
     MainLog.add_log('All --> %s' % len(set_all))
 
     weight_list = list(weight_counter.keys())
