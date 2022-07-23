@@ -13,6 +13,7 @@ def daily_update():
     from method.dailyMethod import daily_analysis
     from method.dailyMethod import generate_daily_table
     from method.dailyMethod import save_latest_list
+    from method.dailyMethod import generate_log_data
     from sql.load_data_infile import output_databases
     from request.requestMirData import request_mir_y10
     from request.requestSwData import update_sw_2021
@@ -33,6 +34,10 @@ def daily_update():
     MainLog.add_split('#')
     mysql_daily_update(dir_name, all_codes, ipo_dates)
     MainLog.add_log('mysql_daily_update complete')
+
+    MainLog.add_split('#')
+    generate_log_data(dir_name)
+    MainLog.add_log('generate_log_data complete')
 
     MainLog.write('%s\\logs1.txt' % res_dir)
     MainLog.init_log()

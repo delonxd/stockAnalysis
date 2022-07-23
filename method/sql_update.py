@@ -1,4 +1,5 @@
 from method.logMethod import MainLog
+from method.sortCode import sift_codes
 
 
 def mysql_update():
@@ -9,7 +10,6 @@ def mysql_update():
     # os.chdir("D:\\PycharmProjects\\stockAnalysis\\method")
 
     from request.requestData import request_data2mysql
-    from method.mainMethod import sift_codes
     from method.dataMethod import load_df_from_mysql
 
     import json
@@ -67,7 +67,6 @@ def mysql_update():
 
 
 def mysql_update_daily():
-    from method.mainMethod import sift_codes
     import json
 
     # with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:

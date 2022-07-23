@@ -265,6 +265,7 @@ def save_latest_list(dir_name):
     target_dir = '..\\basicData\\dailyUpdate\\latest'
 
     files = [
+        'a000_log_data.txt',
         'a001_code_list.txt',
         'a002_name_dict.txt',
         'a003_report_date_dict.txt',
