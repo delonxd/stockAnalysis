@@ -144,23 +144,13 @@ def random_code_list(code_list, pick_weight, interval, mode):
 
     sorted_list = code_list
 
-    path = "../basicData/self_selected/gui_selected.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        gui_selected = json.loads(f.read())
-
-    path = "../basicData/self_selected/gui_whitelist.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        gui_whitelist = json.loads(f.read())
-
     set_all = set(code_list)
-    tmp_selected = set(gui_selected)
-    tmp_whitelist = set(gui_whitelist)
+    tmp_selected = set(str_recognition('selected'))
+    tmp_whitelist = set(str_recognition('whitelist'))
 
     set_selected = set_all & tmp_selected
     set_whitelist = set_all & tmp_whitelist - set_selected
     set_normal = set_all - set_selected - set_whitelist
-
-    weight_dict = get_weight_dict(set_all)
 
     src_list = [set()]
     if mode == 'normal':
@@ -174,9 +164,15 @@ def random_code_list(code_list, pick_weight, interval, mode):
     elif mode == 'all-whitelist':
         src_list = [set_normal]
 
+    set_total = set()
+    for tmp in src_list:
+        set_total = set_total | set(tmp)
+
+    weight_dict = get_weight_dict(set_total)
+
     total_list = list(map(lambda x: generate_random_list(x, weight_dict), src_list))
 
-    ret_list = []
+    ret = []
     while True:
         picked_list = []
         src_number = list(map(lambda x: len(x), total_list))
@@ -184,25 +180,25 @@ def random_code_list(code_list, pick_weight, interval, mode):
             break
 
         picked = pick_number(src_number, pick_weight, interval)
-        print(picked)
+
+        MainLog.add_log('pick --> %s' % picked)
+
         for index, value in enumerate(picked):
             for _ in range(value):
                 code = total_list[index].pop(0)
                 picked_list.append(code)
 
         sub_list = sift_codes(source=picked_list, sort=sorted_list)
-        ret_list.extend(sub_list)
+        ret.extend(sub_list)
 
-    path = "../basicData/tmp/code_list_random.txt"
-    tmp = json.dumps(ret_list, indent=4, ensure_ascii=False)
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(tmp)
+    write_json_txt("..\\basicData\\tmp\\code_list_random.txt", ret)
+    MainLog.add_split('#')
 
-    return ret_list
+    return ret
 
 
 def get_weight_dict(set_all):
-    path = "../basicData/dailyUpdate/latest/a003_report_date_dict.txt"
+    path = "..\\basicData\\dailyUpdate\\latest\\a003_report_date_dict.txt"
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         report_date_dict = json.loads(f.read())
 
@@ -244,7 +240,8 @@ def get_weight_dict(set_all):
         else:
             weight_counter[weight] = 1
 
-    print('All:', len(set_all))
+    MainLog.add_log('All --> %s' % len(set_all))
+
     weight_list = list(weight_counter.keys())
     weight_list.sort()
     for weight in weight_list:
@@ -260,7 +257,9 @@ def get_weight_dict(set_all):
         date_str = dt.date.strftime(date2, '%Y-%m-%d')
 
         weight_str = '%s%18s%8s' % (date_str, weight, weight_counter[weight])
-        print(weight_str)
+        MainLog.add_log(weight_str)
+
+    MainLog.add_split('-')
 
     return weight_dict
 
