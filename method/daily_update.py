@@ -35,14 +35,14 @@ def daily_update():
     mysql_daily_update(dir_name, all_codes, ipo_dates)
     MainLog.add_log('mysql_daily_update complete')
 
-    MainLog.add_split('#')
-    generate_log_data(dir_name)
-    MainLog.add_log('generate_log_data complete')
-
     MainLog.write('%s\\logs1.txt' % res_dir)
     MainLog.init_log()
 
     ################################################################################################################
+
+    MainLog.add_split('#')
+    generate_log_data(dir_name)
+    MainLog.add_log('generate_log_data complete')
 
     daily_analysis(dir_name, all_codes)
     MainLog.add_log('data analysis complete')

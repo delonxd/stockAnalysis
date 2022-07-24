@@ -401,15 +401,16 @@ def sort_hold():
 
 def sift_codes(
         source=None,
+        ids_names=None,
         whitelist=None,
         blacklist=None,
+
         sort=None,
         reverse=False,
+        insert=None,
 
         market='all',
-        ids_names=None,
         timestamp=None,
-        insert=None,
 
         random=False,
         pick_weight=None,
