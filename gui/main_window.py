@@ -837,7 +837,7 @@ class MainWidget(QWidget):
     @staticmethod
     def get_code_list():
 
-        mission = 2
+        mission = 4
 
         code_list = []
         code_index = 0
@@ -849,9 +849,9 @@ class MainWidget(QWidget):
             )
 
             # code_index = '688072'
-            code_index = 65
+            # code_index = 65
 
-        if mission == 1:
+        elif mission == 1:
 
             code_list = sift_codes(
                 source='real_pe',
@@ -866,10 +866,11 @@ class MainWidget(QWidget):
         elif mission == 2:
 
             code_list = sift_codes(
-                # source='hold',
+                source='hold',
+                # source='all',
                 # source='latest_update',
                 # source='sort-equity',
-                source='sort-ass',
+                # source='sort-ass',
             )
 
         elif mission == 3:
@@ -889,8 +890,8 @@ class MainWidget(QWidget):
         elif mission == 4:
 
             code_list = sift_codes(
-                # source='selected',
-                source='mark-1',
+                source='selected',
+                # source='mark-1',
                 sort='sort-ass/equity',
                 # sort='sort-ass/turnover',
                 # reverse=True,
