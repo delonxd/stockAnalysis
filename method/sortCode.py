@@ -624,6 +624,17 @@ def str_recognition(src):
                 txt = f.read()
                 ret = re.findall(r'([0-9]{6})', txt)
                 ret.reverse()
+
+        elif src == 'industry':
+            ids_dict = load_json_txt("..\\basicData\\industry\\sw_2021_dict.txt")
+
+            tup_list = []
+            for key, value in ids_dict.items():
+                ids = '' if value is None else value
+                tup_list.append((key, ids))
+
+            tup_list.sort(key=lambda x: x[1])
+            ret = list(zip(*tup_list).__next__())
         else:
             raise KeyboardInterrupt('error str_recognition')
         return ret
@@ -646,4 +657,6 @@ if __name__ == '__main__':
     # get_random_list()
     # save_latest_list(date_dir)
 
-    sort_hold()
+    # sort_hold()
+    rr = str_recognition('industry')
+    print(rr)
