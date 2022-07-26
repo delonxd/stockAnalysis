@@ -656,12 +656,32 @@ class MainWidget(QWidget):
         elif data is not None:
             number = data
 
+        path = "..\\basicData\\dailyUpdate\\latest\\a003_report_date_dict.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            report_date = json.loads(f.read()).get(code)
+
+        color = Qt.red
+
+        if report_date is not None:
+            if data is None:
+                color = Qt.white
+            elif data[1] < report_date:
+                color = Qt.white
+            elif self.date_ini == data[1]:
+                if data[0] < report_date:
+                    color = Qt.white
+
+        p = QPalette()
+        p.setColor(QPalette.WindowText, color)
+        self.head_label1.setPalette(p)
+
         if date > last_date:
             number += 1
             delta = (1/real_pe - 1/last_real_pe) * abs(last_real_pe)
             self.counter_info = [last_date, date, number, real_pe, delta]
             res_dict[code] = self.counter_info
             res = json.dumps(res_dict, indent=4, ensure_ascii=False)
+            path = "../basicData/self_selected/gui_counter.txt"
             with open(path, "w", encoding='utf-8') as f:
                 f.write(res)
         else:
@@ -837,7 +857,7 @@ class MainWidget(QWidget):
     @staticmethod
     def get_code_list():
 
-        mission = 5
+        mission = 1
 
         code_list = []
         code_index = 0
@@ -848,7 +868,7 @@ class MainWidget(QWidget):
                 source='old',
             )
 
-            # code_index = '688072'
+            code_index = '000408'
             # code_index = 65
 
         elif mission == 1:
