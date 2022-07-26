@@ -837,7 +837,7 @@ class MainWidget(QWidget):
     @staticmethod
     def get_code_list():
 
-        mission = 4
+        mission = 5
 
         code_list = []
         code_index = 0
@@ -908,6 +908,16 @@ class MainWidget(QWidget):
             # code_index = '603666'
             # code_index = '002043'
             code_index = 0
+
+        elif mission == 5:
+
+            code_list = sift_codes(
+                source='whitelist',
+                sort='industry',
+                # reverse=True,
+                # market='main+growth',
+            )
+            # code_index = '002043'
 
         elif mission == 6:
 
