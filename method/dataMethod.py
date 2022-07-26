@@ -1,7 +1,6 @@
 from method.sqlMethod import get_data_frame, sql_if_table_exists
 from request.requestData import get_cursor
 from request.requestData import get_header_df
-from request.requestData import request_data2mysql
 from discount.discountModel import ValueModel
 
 import pandas as pd

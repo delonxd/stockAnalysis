@@ -1,5 +1,5 @@
 from method.dataMethod import sql2df
-from request.requestData import request_data2mysql
+from request.requestData import request2mysql
 from method.logMethod import log_it, MainLog
 from method.sortCode import sort_discount, sift_codes
 from method.fileMethod import *
@@ -431,13 +431,13 @@ class MainWidget(QWidget):
     def request_data(self):
         code = self.stock_code
 
-        request_data2mysql(
+        request2mysql(
             stock_code=code,
             data_type='fs',
             start_date="1970-01-01",
         )
 
-        request_data2mysql(
+        request2mysql(
             stock_code=code,
             data_type='mvs',
             start_date="1970-01-01",
@@ -456,7 +456,7 @@ class MainWidget(QWidget):
     def request_data_quick(self):
         code = self.stock_code
 
-        request_data2mysql(
+        request2mysql(
             stock_code=code,
             data_type='fs',
             start_date="2021-01-01",

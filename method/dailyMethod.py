@@ -2,10 +2,10 @@ from request.requestBasicData import request_basic
 from method.fileMethod import *
 from method.sql_update import update_latest_data
 from method.sql_update import update_all_data
-from request.requestData import request_data2mysql, request2mysql
+from request.requestData import request2mysql
 from method.dataMethod import load_df_from_mysql
 from method.dataMethod import DataAnalysis
-from method.showTable import add_bool_column, get_recent_val
+from method.showTable import add_bool_column, get_recent_val, sum_value
 import numpy as np
 import os
 import pandas as pd
@@ -197,7 +197,6 @@ def generate_daily_table(dir_name):
     for file in os.listdir(sub_dir):
         res.extend(load_pkl('%s\\%s' % (sub_dir, file)))
 
-    from showTable import sum_value
     s1 = sum_value(res, ['s_028_market_value'])
     s2 = sum_value(res, ['s_044_turnover_volume'])
     s2 = s2.rolling(20, min_periods=1).mean()
