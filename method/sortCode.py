@@ -635,11 +635,67 @@ def str_recognition(src):
 
             tup_list.sort(key=lambda x: x[1])
             ret = list(zip(*tup_list).__next__())
+
+        elif src == 'industry-ass/equity':
+            list1 = sift_codes(source='all', sort='sort-ass/equity', insert=-1)
+            ids_dict = load_json_txt("..\\basicData\\industry\\sw_2021_dict.txt")
+            ids_sort = load_json_txt("..\\basicData\\industry\\industry_sorted.txt")
+
+            tup_list = []
+            for code in list1:
+                ids = ids_dict[code]
+                if ids is None:
+                    index = 100000
+                else:
+                    index = ids_sort[ids]
+
+                tup_list.append((code, index))
+
+            tup_list.sort(key=lambda x: x[1])
+            ret = list(zip(*tup_list).__next__())
+
         else:
             raise KeyboardInterrupt('error str_recognition')
         return ret
     else:
         return src
+
+
+def sort_industry(by='ass/equity'):
+    ids_name = load_json_txt("..\\basicData\\industry\\sw_2021_name_dict.txt")
+    ids_dict = load_json_txt("..\\basicData\\industry\\sw_2021_dict.txt")
+
+    ids_list = []
+    for ids in ids_name.keys():
+        if ids[-2:] != '00':
+            ids_list.append(ids)
+
+    if by == 'ass/equity':
+        code_list = sift_codes(source='whitelist', sort='sort-ass/equity')
+    else:
+        code_list = []
+
+    counter = 1
+    counter_dict = dict()
+    for code in code_list:
+        ids = ids_dict.get(code)
+        if ids is None:
+            continue
+        if ids not in counter_dict:
+            counter_dict[ids] = counter
+            counter += 1
+
+    counter = 100001
+    for ids in ids_list:
+        if ids not in counter_dict:
+            counter_dict[ids] = counter
+            counter += 1
+
+    # ids_list.sort(key=lambda x: counter_dict.get(x))
+
+    write_json_txt("..\\basicData\\industry\\industry_sorted.txt", counter_dict)
+    # print(ids_list)
+    # return ids_list
 
 
 if __name__ == '__main__':
@@ -658,5 +714,4 @@ if __name__ == '__main__':
     # save_latest_list(date_dir)
 
     # sort_hold()
-    rr = str_recognition('industry')
-    print(rr)
+    sort_industry()
