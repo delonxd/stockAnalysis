@@ -104,10 +104,8 @@ class MainWidget(QWidget):
         self.codes_df = CodesDataFrame(code_list)
         self.codes_df.init_current_index(index=code_index)
 
-        self.style_df = load_default_style()
-
         time0 = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
-        self.log_path = '../bufferData/logs/gui_log/gui_log_%s.txt' % time0
+        self.log_path = '..\\bufferData\\logs\\gui_log\\gui_log_%s.txt' % time0
 
         path = "..\\basicData\\dailyUpdate\\latest\\a000_log_data.txt"
         self.date_ini = load_json_txt(path)['update_date']
@@ -119,7 +117,7 @@ class MainWidget(QWidget):
         self.buffer.signal1.connect(self.update_data_pix)
 
         code = self.stock_code
-        self.style_df = load_default_style()
+        self.style_df = load_pkl('..\\gui\\styles\\style_default.pkl')
         self.data_pix = DataPix(code=code, style_df=pd.DataFrame(), df=pd.DataFrame())
 
         self.label = QLabel(self)
@@ -178,7 +176,7 @@ class MainWidget(QWidget):
         self.code_widget.table_view.change_signal.connect(self.change_stock)
 
         self.cross = False
-        self.ratio = 16
+        self.ratio_dict = dict()
         self.init_ui()
 
         self.window_flag = 3
@@ -200,6 +198,10 @@ class MainWidget(QWidget):
     @property
     def len_list(self):
         return int(self.codes_df.df.shape[0])
+
+    def df_dict_copy(self, code):
+        df = self.df_dict.get(code)
+        return None if df is None else df.copy()
 
     def init_ui(self):
 
@@ -354,8 +356,8 @@ class MainWidget(QWidget):
         menu.addAction(action_mark0)
 
         action1.triggered.connect(self.request_data)
-        action6.triggered.connect(self.scale_down)
-        action7.triggered.connect(self.scale_up)
+        action6.triggered.connect(lambda x: self.scale_change(0.5))
+        action7.triggered.connect(lambda x: self.scale_change(2))
 
         action2.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_selected.txt"))
         action3.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_selected.txt"))
@@ -500,22 +502,20 @@ class MainWidget(QWidget):
             self.editor1.setText('')
             self.label.setFocus()
 
-    def scale_up(self):
-        self.ratio = self.ratio * 2
-        self.refresh_ratio()
-
-    def scale_down(self):
-        self.ratio = self.ratio / 2
-        self.refresh_ratio()
-
-    def refresh_ratio(self):
+    def scale_change(self, val):
         code = self.stock_code
-        if code in self.df_dict.keys():
-            df = self.df_dict[code].copy()
-        else:
-            return
-        style_df = self.style_df.copy()
-        message = [code, style_df, df, self.ratio, True]
+
+        ratio = self.ratio_dict.get(code)
+        ratio = 16 if ratio is None else ratio
+        ratio = ratio * val
+        self.ratio_dict[code] = ratio
+
+        if ratio == 16:
+            self.ratio_dict.pop(code)
+
+        style = self.style_df.copy()
+        df = self.df_dict_copy(code)
+        message = [code, style, df, ratio, True]
         self.send_message(message)
 
     def export_style(self):
@@ -528,11 +528,10 @@ class MainWidget(QWidget):
         codes = self.codes_df.generate_buffer_list(20, 2)
         for code in codes:
             if code not in self.pix_dict.keys():
-                df = None
-                if code in self.df_dict.keys():
-                    df = self.df_dict[code].copy()
-                style_df = self.style_df.copy()
-                message = [code, style_df, df, None, False]
+                style = self.style_df.copy()
+                df = self.df_dict_copy(code)
+                ratio = self.ratio_dict.get(code)
+                message = [code, style, df, ratio, False]
                 message_list.append(message)
 
         self.buffer.extend(message_list)
