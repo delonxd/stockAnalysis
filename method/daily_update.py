@@ -17,6 +17,7 @@ def daily_update():
     from sql.load_data_infile import output_databases
     from request.requestMirData import request_mir_y10
     from request.requestSwData import update_sw_2021
+    from request.requestEquityData import request_eq2mysql
 
     import time
 
@@ -78,6 +79,10 @@ def daily_update():
     MainLog.add_log('update_sw_2021 complete')
 
     MainLog.write('%s\\logs2.txt' % res_dir)
+    MainLog.init_log()
+
+    request_eq2mysql(all_codes)
+    MainLog.write('%s\\logs3.txt' % res_dir)
 
 
 if __name__ == '__main__':

@@ -26,8 +26,10 @@ class CodesDataFrame:
         # path = '../basicData/industry/industry_dict.txt'
         self.industry_name_dict = load_json_txt(path)
 
+        self.index_dict = dict()
         for index, code in enumerate(code_list):
             self.add_code(index, code)
+            self.index_dict[code] = index
 
         self.current_index = current_index
 
@@ -69,6 +71,25 @@ class CodesDataFrame:
                 self.current_index = tmp
             except Exception as e:
                 print(e)
+
+    def generate_buffer_list(self, forward, backward):
+        # forward = 20
+        # backward = 2
+
+        buffer = list(range(forward+1))
+
+        for i in range(1, backward+1):
+            buffer.insert(i*2, -i)
+
+        arr = np.array(buffer, dtype='int32')
+        arr = (arr + self.current_index) % self.df.shape[0]
+
+        ret = []
+        for index in arr:
+            code = self.df.iloc[index]['code']
+            if code not in ret:
+                ret.append(code)
+        return ret
 
 
 class QDataFrameTable(QTableWidget):

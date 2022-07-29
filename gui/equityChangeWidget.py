@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from method.dataMethod import load_df_from_mysql
 from request.requestData import get_header_df
-
+from request.requestEquityData import request_eq2mysql
 import sys
 
 
@@ -31,6 +31,7 @@ class EquityChangeWidget(QWidget):
 
         self.code = code
 
+        # request_eq2mysql([code])
         df = load_df_from_mysql(code, 'eq')
 
         header_df = get_header_df('eq')

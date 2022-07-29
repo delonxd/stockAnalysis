@@ -13,6 +13,8 @@ from gui.styleDataFrame import save_default_style
 from gui.priorityTable import PriorityTable
 from gui.showPix import ShowPix
 from gui.showPlot import ShowPlot
+from gui.showPlot import show1
+
 from gui.remarkWidget import RemarkWidget
 from gui.webWidget import WebWidget
 from gui.equityChangeWidget import EquityChangeWidget
@@ -45,6 +47,7 @@ class ReadSQLThread(QThread):
         super().__init__()
 
         self.buffer_list = list()
+        self.current = ''
         self.lock = threading.Lock()
 
     def run(self):
@@ -53,7 +56,8 @@ class ReadSQLThread(QThread):
         while True:
             self.lock.acquire()
             if len(self.buffer_list) > 0:
-                code, style_df, df, ratio = self.buffer_list.pop(0)
+                code, style_df, df, ratio, _ = self.buffer_list.pop(0)
+                self.current = code
             else:
                 break
             # print(zip(*self.buffer_list).__next__())
@@ -62,6 +66,7 @@ class ReadSQLThread(QThread):
             GuiLog.add_log('    add buffer %s' % code)
             self.signal1.emit(res0)
 
+        self.current = ''
         GuiLog.add_log('thread end')
         self.lock.release()
 
@@ -70,6 +75,9 @@ class ReadSQLThread(QThread):
         message_list.reverse()
         for message in message_list:
             code = message[0]
+
+            if code == self.current and message[-1] is False:
+                continue
 
             if len(self.buffer_list) > 0:
                 x = list(zip(*self.buffer_list))[0]
@@ -161,6 +169,8 @@ class MainWidget(QWidget):
         self.listing_date = None
         self.max_increase_30 = 0
         self.turnover = 0
+
+        self.plt_x0_y0 = [10, 32]
 
         # self.window2 = ShowPix(main_window=self)
 
@@ -505,10 +515,8 @@ class MainWidget(QWidget):
         else:
             return
         style_df = self.style_df.copy()
-        message_list = [[code, style_df, df, self.ratio]]
-        self.buffer.extend(message_list)
-        self.buffer.start()
-        print('buffer start')
+        message = [code, style_df, df, self.ratio, True]
+        self.send_message(message)
 
     def export_style(self):
         df = self.tree.df.copy()
@@ -516,54 +524,55 @@ class MainWidget(QWidget):
         save_default_style(df)
 
     def run_buffer(self):
-        index1 = self.code_index
-        index2 = self.code_index
-        arr = np.array([], dtype='int32')
-
-        codes_df = self.codes_df.df
-
-        l0 = codes_df.shape[0]
-        l1 = (l0 - 1) / 2
-        l2 = 20
-
-        offset = int(min(l1, l2))
-
-        arr = np.append(arr, index1)
-        for i in range(offset):
-            if i < 20:
-                index1 += 1
-                arr = np.append(arr, index1)
-
-            if i < 2:
-                index2 -= 1
-                arr = np.append(arr, index2)
-        arr = arr % l0
-
         message_list = list()
-        for index in arr:
-            code = codes_df.iloc[index]['code']
-            message = self.emit_code_message(code)
-            if message is not None:
+        codes = self.codes_df.generate_buffer_list(20, 2)
+        for code in codes:
+            if code not in self.pix_dict.keys():
+                df = None
+                if code in self.df_dict.keys():
+                    df = self.df_dict[code].copy()
+                style_df = self.style_df.copy()
+                message = [code, style_df, df, None, False]
                 message_list.append(message)
 
         self.buffer.extend(message_list)
         self.buffer.start()
 
-    def emit_code_message(self, code):
-        if code in self.pix_dict.keys():
-            return
-        else:
-            df = None
-            if code in self.df_dict.keys():
-                df = self.df_dict[code].copy()
-            style_df = self.style_df.copy()
-            return code, style_df, df, None
+    def send_message(self, message):
+        self.buffer.extend([message])
+        self.buffer.start()
 
     def update_data_pix(self, data_pix):
-        self.pix_dict[data_pix.code] = data_pix
-        self.df_dict[data_pix.code] = data_pix.df
+        df_dict = self.df_dict
+        pix_dict = self.pix_dict
 
-        if data_pix.code == self.stock_code:
+        flag1 = len(df_dict) > 35
+        flag2 = len(pix_dict) > 35
+
+        if flag1 or flag2:
+            buffer = self.codes_df.generate_buffer_list(23, 5)
+            show = self.show_list
+            codes = buffer + show
+
+            if flag1:
+                for key in df_dict.keys():
+                    if key not in codes:
+                        df_dict.pop(key)
+                        GuiLog.add_log('release df_dict --> ' + key)
+                        break
+
+            if flag2:
+                for key in pix_dict.keys():
+                    if key not in codes:
+                        pix_dict.pop(key)
+                        GuiLog.add_log('release px_dict --> ' + key)
+                        break
+
+        code = data_pix.code
+        pix_dict[code] = data_pix
+        df_dict[code] = data_pix.df
+
+        if code == self.stock_code:
             self.data_pix = data_pix
             self.update_window()
             # self.show_pix()
@@ -581,10 +590,13 @@ class MainWidget(QWidget):
         self.web_widget.load_code(code)
         self.equity_change_widget.load_code(code)
 
-        if self.window2.isHidden():
-            return
-        else:
+        if len(plt.get_fignums()) == 1:
             self.show_plot()
+
+        # if self.window2.isHidden():
+        #     return
+        # else:
+        #     self.show_plot()
 
     def update_counter(self, code):
         df = self.data_pix.df
@@ -793,15 +805,9 @@ class MainWidget(QWidget):
         self.bottom_label1.setText(txt_bottom1)
         self.bottom_label2.setText(txt_bottom2)
 
-        if code in self.show_list:
-            index = self.show_list.index(code)
-            self.show_list.pop(index)
-        self.show_list.append(code)
-        if len(self.show_list) > 30:
-            code = self.show_list.pop(0)
-            self.df_dict.pop(code)
-            self.pix_dict.pop(code)
-            GuiLog.add_log('release stock --> ' + code)
+        if code not in self.show_list:
+            self.show_list.insert(0, code)
+            self.show_list = self.show_list[:5]
 
     @staticmethod
     def get_sign(data):
@@ -857,7 +863,7 @@ class MainWidget(QWidget):
     @staticmethod
     def get_code_list():
 
-        mission = 1
+        mission = 0
 
         code_list = []
         code_index = 0
@@ -868,8 +874,8 @@ class MainWidget(QWidget):
                 source='old',
             )
 
-            code_index = '000408'
-            # code_index = 65
+            # code_index = '000408'
+            code_index = 4
 
         elif mission == 1:
 
@@ -887,6 +893,7 @@ class MainWidget(QWidget):
 
             code_list = sift_codes(
                 source='hold',
+                # source='industry-ass/equity',
                 # source='all',
                 # source='latest_update',
                 # source='sort-equity',
@@ -902,7 +909,7 @@ class MainWidget(QWidget):
                 market='main+growth',
                 # insert=0,
                 random=True,
-                interval=40,
+                interval=30,
                 # mode='whitelist+selected',
                 mode='whitelist-selected',
             )
@@ -932,8 +939,10 @@ class MainWidget(QWidget):
         elif mission == 5:
 
             code_list = sift_codes(
+                # source='all',
                 source='whitelist',
-                sort='industry',
+                # sort='industry',
+                sort='industry-ass/equity',
                 # reverse=True,
                 # market='main+growth',
             )
@@ -980,17 +989,30 @@ class MainWidget(QWidget):
         self.window2.show()
 
     def show_plot(self):
-        if self.button9.isChecked():
 
-            df = self.data_pix.df
-            s0 = pd.Series()
-            if 's_028_market_value' in df.columns:
-                s0 = self.data_pix.df['s_028_market_value'].copy().dropna()
-                s0 = s0[-1250:]
+        df = self.data_pix.df
 
-            self.window2.show_plot(title=self.stock_code, series=s0)
-        else:
-            self.window2.close()
+        if df.columns.size == 0:
+            return
+
+        columns = ['id_041_mvs_mc', 's_043_turnover_volume_ttm']
+        df = df[columns].copy()
+        df = df.dropna(axis=0, how='all')
+
+        show1(self.stock_code, df, *self.plt_x0_y0)
+
+        # if self.button9.isChecked():
+        #
+        #     df = self.data_pix.df
+        #     s0 = pd.Series()
+        #     column = 's_028_market_value'
+        #     if column in df.columns:
+        #         s0 = self.data_pix.df[column].copy().dropna()
+        #         s0 = s0[-1250:]
+        #
+        #     self.window2.show_plot(title=self.stock_code, series=s0)
+        # else:
+        #     self.window2.close()
 
     def show_web(self):
         if self.button10.isChecked():
@@ -1008,6 +1030,8 @@ class MainWidget(QWidget):
 
     def relocate(self):
         if self.button12.isChecked():
+            self.showMaximized()
+
             self.web_widget.resize(960, 1008)
             self.web_widget.move(-971, -10)
 
@@ -1015,8 +1039,13 @@ class MainWidget(QWidget):
             self.equity_change_widget.move(-1916, -10)
 
             self.window2.move(-1906, 10)
-            self.showMaximized()
+
+            self.plt_x0_y0 = [-1916, 32]
+            plt.get_current_fig_manager().window.setGeometry(*self.plt_x0_y0, 1600, 900)
+
         else:
+            self.showMaximized()
+
             self.web_widget.resize(960, 500)
             self.web_widget.move(0, 0)
 
@@ -1024,7 +1053,9 @@ class MainWidget(QWidget):
             self.equity_change_widget.move(0, 0)
 
             self.window2.move(10, 10)
-            self.showMaximized()
+
+            self.plt_x0_y0 = [10, 32]
+            plt.get_current_fig_manager().window.setGeometry(*self.plt_x0_y0, 1600, 900)
 
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_1:
@@ -1050,6 +1081,7 @@ class MainWidget(QWidget):
         self.web_widget.close()
         self.equity_change_widget.close()
         self.window2.close()
+        plt.close()
 
 
 class MainWindow(QMainWindow):
