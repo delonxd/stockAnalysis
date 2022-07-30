@@ -7,13 +7,12 @@ from method.fileMethod import *
 from gui.checkTree import CheckTree
 from gui.dataPix import DataPix
 from gui.stockListView import QStockListView, CodesDataFrame
+from gui.fsView import FsView
 
-from gui.styleDataFrame import load_default_style
 from gui.styleDataFrame import save_default_style
 from gui.priorityTable import PriorityTable
 from gui.showPix import ShowPix
-from gui.showPlot import ShowPlot
-from gui.showPlot import show1
+from gui.showPlot import show_plt
 
 from gui.remarkWidget import RemarkWidget
 from gui.webWidget import WebWidget
@@ -26,10 +25,8 @@ from PyQt5.QtGui import *
 
 import sys
 import json
-import re
 import threading
 import time
-import datetime as dt
 
 import numpy as np
 import pandas as pd
@@ -124,7 +121,8 @@ class MainWidget(QWidget):
 
         self.button1 = QPushButton('export')
         self.button2 = QPushButton('save_codes')
-        self.button3 = QPushButton('comparison')
+        # self.button3 = QPushButton('comparison')
+        self.button3 = QPushButton('fs_data')
 
         # self.button2 = QPushButton('x2')
         # self.button3 = QPushButton('/2')
@@ -159,7 +157,8 @@ class MainWidget(QWidget):
         self.remark_widget = RemarkWidget(self)
         self.web_widget = WebWidget()
         self.equity_change_widget = EquityChangeWidget()
-        self.window2 = ShowPlot()
+        self.fs_view = FsView()
+        # self.window2 = ShowPlot()
 
         self.counter_info = None
         self.real_cost = None
@@ -168,7 +167,7 @@ class MainWidget(QWidget):
         self.max_increase_30 = 0
         self.turnover = 0
 
-        self.plt_x0_y0 = [10, 32]
+        self.plt_rect = [10, 32, 1600, 900]
 
         # self.window2 = ShowPix(main_window=self)
 
@@ -287,7 +286,8 @@ class MainWidget(QWidget):
 
         self.button1.clicked.connect(self.export_style)
         self.button2.clicked.connect(self.save_codes)
-        self.button3.clicked.connect(self.compare_codes)
+        # self.button3.clicked.connect(self.compare_codes)
+        self.button3.clicked.connect(self.show_fs_data)
         # self.button2.clicked.connect(self.scale_up)
         # self.button3.clicked.connect(self.scale_down)
 
@@ -401,6 +401,10 @@ class MainWidget(QWidget):
         pass
         # widget = ComparisonWidget()
         # widget.show()
+
+    def show_fs_data(self):
+        self.fs_view.show()
+        self.fs_view.load_df(self.stock_code)
 
     def add_code(self, path):
         row = self.codes_df.df.iloc[self.code_index]
@@ -588,6 +592,7 @@ class MainWidget(QWidget):
 
         self.web_widget.load_code(code)
         self.equity_change_widget.load_code(code)
+        self.fs_view.load_df(code)
 
         if len(plt.get_fignums()) == 1:
             self.show_plot()
@@ -862,7 +867,7 @@ class MainWidget(QWidget):
     @staticmethod
     def get_code_list():
 
-        mission = 0
+        mission = 5
 
         code_list = []
         code_index = 0
@@ -946,6 +951,7 @@ class MainWidget(QWidget):
                 # market='main+growth',
             )
             # code_index = '002043'
+            code_index = 203
 
         elif mission == 6:
 
@@ -990,7 +996,6 @@ class MainWidget(QWidget):
     def show_plot(self):
 
         df = self.data_pix.df
-
         if df.columns.size == 0:
             return
 
@@ -998,20 +1003,7 @@ class MainWidget(QWidget):
         df = df[columns].copy()
         df = df.dropna(axis=0, how='all')
 
-        show1(self.stock_code, df, *self.plt_x0_y0)
-
-        # if self.button9.isChecked():
-        #
-        #     df = self.data_pix.df
-        #     s0 = pd.Series()
-        #     column = 's_028_market_value'
-        #     if column in df.columns:
-        #         s0 = self.data_pix.df[column].copy().dropna()
-        #         s0 = s0[-1250:]
-        #
-        #     self.window2.show_plot(title=self.stock_code, series=s0)
-        # else:
-        #     self.window2.close()
+        show_plt(self.stock_code, df, *self.plt_rect)
 
     def show_web(self):
         if self.button10.isChecked():
@@ -1028,6 +1020,13 @@ class MainWidget(QWidget):
             self.equity_change_widget.close()
 
     def relocate(self):
+        if len(plt.get_fignums()) == 1:
+            plt_flag = True
+            rect = plt.get_current_fig_manager().window.geometry()
+        else:
+            plt_flag = False
+            rect = QRect(*self.plt_rect)
+
         if self.button12.isChecked():
             self.showMaximized()
 
@@ -1037,10 +1036,10 @@ class MainWidget(QWidget):
             self.equity_change_widget.resize(940, 1008)
             self.equity_change_widget.move(-1916, -10)
 
-            self.window2.move(-1906, 10)
+            # self.window2.move(-1906, 10)
+            self.plt_rect = [-1916, 32, rect.width(), rect.height()]
 
-            self.plt_x0_y0 = [-1916, 32]
-            plt.get_current_fig_manager().window.setGeometry(*self.plt_x0_y0, 1600, 900)
+            self.fs_view.move(152-1920, 100)
 
         else:
             self.showMaximized()
@@ -1051,10 +1050,15 @@ class MainWidget(QWidget):
             self.equity_change_widget.resize(940, 800)
             self.equity_change_widget.move(0, 0)
 
-            self.window2.move(10, 10)
+            # self.window2.move(10, 10)
+            self.fs_view.move(152, 100)
 
-            self.plt_x0_y0 = [10, 32]
-            plt.get_current_fig_manager().window.setGeometry(*self.plt_x0_y0, 1600, 900)
+            self.plt_rect = [10, 32, rect.width(), rect.height()]
+
+        if plt_flag is True:
+            plt.get_current_fig_manager().window.setGeometry(*self.plt_rect)
+        else:
+            plt.close("all")
 
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_1:
@@ -1079,7 +1083,8 @@ class MainWidget(QWidget):
         self.remark_widget.close()
         self.web_widget.close()
         self.equity_change_widget.close()
-        self.window2.close()
+        self.fs_view.close()
+        # self.window2.close()
         plt.close()
 
 

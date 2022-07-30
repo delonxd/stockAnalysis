@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from method.fileMethod import *
+from method.logMethod import MainLog
 
 import pandas as pd
 import sys
@@ -126,7 +127,8 @@ class QDataFrameTable(QTableWidget):
         # QMessageBox.information(self, 'QListWidget', '您选择了: %s' % item.text())
 
     def on_doubleClicked(self, item):
-        print(item.row())
+        # print(item.row())
+        MainLog.add_log('move to row --> %s' % item.row())
         self.change_signal.emit(item.row())
 
 
