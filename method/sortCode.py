@@ -558,6 +558,9 @@ def str_recognition(src):
         if src == 'all':
             ret = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
 
+        elif src == 'salary':
+            ret = load_json_txt("..\\test\\salary_code.txt")
+
         elif src == 'pe':
             ret = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s001_code_sorted_pe.txt")
 

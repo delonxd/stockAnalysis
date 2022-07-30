@@ -405,6 +405,7 @@ class MainWidget(QWidget):
     def show_fs_data(self):
         self.fs_view.show()
         self.fs_view.load_df(self.stock_code)
+        self.fs_view.activateWindow()
 
     def add_code(self, path):
         row = self.codes_df.df.iloc[self.code_index]
@@ -443,6 +444,7 @@ class MainWidget(QWidget):
 
     def show_remark(self):
         self.remark_widget.show()
+        self.remark_widget.activateWindow()
 
     def request_data(self):
         code = self.stock_code
@@ -494,9 +496,11 @@ class MainWidget(QWidget):
 
     def show_tree(self):
         self.tree.show()
+        self.tree.activateWindow()
 
     def show_code_list(self):
         self.code_widget.show()
+        self.code_widget.activateWindow()
 
     def editor1_changed(self, txt):
         code_list = self.codes_df.df['code'].tolist()
@@ -867,7 +871,7 @@ class MainWidget(QWidget):
     @staticmethod
     def get_code_list():
 
-        mission = 5
+        mission = 2
 
         code_list = []
         code_index = 0
@@ -897,11 +901,13 @@ class MainWidget(QWidget):
 
             code_list = sift_codes(
                 source='hold',
+                # source='salary',
                 # source='industry-ass/equity',
                 # source='all',
                 # source='latest_update',
                 # source='sort-equity',
                 # source='sort-ass',
+                # sort='industry',
             )
 
         elif mission == 3:
@@ -1008,6 +1014,7 @@ class MainWidget(QWidget):
     def show_web(self):
         if self.button10.isChecked():
             self.web_widget.show()
+            self.web_widget.activateWindow()
             self.web_widget.load_code(self.stock_code)
         else:
             self.web_widget.close()
@@ -1016,6 +1023,7 @@ class MainWidget(QWidget):
         if self.button11.isChecked():
             self.equity_change_widget.show()
             self.equity_change_widget.load_code(self.stock_code)
+            self.equity_change_widget.activateWindow()
         else:
             self.equity_change_widget.close()
 

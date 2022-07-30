@@ -86,7 +86,7 @@ def sum_value(res, column):
         df = df.fillna(0)
         ret = df.sum(axis=1)
     ret = ret.sort_index()
-    print(ret)
+    # print(ret)
 
     return ret
 

@@ -13,7 +13,7 @@ class CodesDataFrame:
 
     def __init__(self, code_list, current_index=0):
 
-        columns = ['code', 'name', 'level1', 'level2', 'level3', 'i_code']
+        columns = ['code', 'name', 'level1', 'level2', 'level3', 'i_code', 'salary']
         self.df = pd.DataFrame(columns=columns)
 
         path = '..\\basicData\\code_names_dict.txt'
@@ -26,6 +26,9 @@ class CodesDataFrame:
         path = '..\\basicData\\industry\\sw_2021_name_dict.txt'
         # path = '../basicData/industry/industry_dict.txt'
         self.industry_name_dict = load_json_txt(path)
+
+        path = '..\\test\\test_analysis_dict.txt'
+        self.salary_dict = load_json_txt(path)
 
         self.index_dict = dict()
         for index, code in enumerate(code_list):
@@ -54,6 +57,10 @@ class CodesDataFrame:
             row['level2'] = self.industry_name_dict.get(i2)
             row['level3'] = self.industry_name_dict.get(i3)
             row['i_code'] = i_code
+
+        tmp = self.salary_dict.get(code)
+        value = '' if pd.isna(tmp) else '%.2f' % (tmp/10000)
+        row['salary'] = value
 
         self.df.loc[index] = row
 
@@ -137,7 +144,7 @@ class QStockListView(QWidget):
         super().__init__()
 
         self.setWindowTitle('QTestWidget')
-        self.resize(600, 900)
+        self.resize(800, 900)
 
         self.table_view = QDataFrameTable(code_df)
 
