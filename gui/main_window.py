@@ -98,8 +98,7 @@ class MainWidget(QWidget):
 
         code_list, code_index = self.get_code_list()
 
-        self.codes_df = CodesDataFrame(code_list)
-        self.codes_df.init_current_index(index=code_index)
+        self.codes_df = CodesDataFrame(code_list, code_index)
 
         time0 = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
         self.log_path = '..\\bufferData\\logs\\gui_log\\gui_log_%s.txt' % time0
@@ -154,6 +153,7 @@ class MainWidget(QWidget):
 
         self.tree = CheckTree(self.style_df)
         self.code_widget = QStockListView(self.codes_df)
+
         self.remark_widget = RemarkWidget(self)
         self.web_widget = WebWidget()
         self.equity_change_widget = EquityChangeWidget()
@@ -800,7 +800,7 @@ class MainWidget(QWidget):
 
         if ass is not None:
             rate = self.turnover / 1e6 / ass
-            txt2 = txt2 + '-%.2f%%' % rate
+            txt2 = txt2 + '-%.2f‰' % rate
 
         txt3 = '/'.join(list0)
         txt_bottom2 = '/'.join(list1)
@@ -883,7 +883,7 @@ class MainWidget(QWidget):
             )
 
             # code_index = '000408'
-            code_index = 4
+            code_index = 0
 
         elif mission == 1:
 
@@ -900,6 +900,7 @@ class MainWidget(QWidget):
         elif mission == 2:
 
             code_list = sift_codes(
+                # ids_names=['2-出版'],
                 source='hold',
                 # source='salary',
                 # source='industry-ass/equity',

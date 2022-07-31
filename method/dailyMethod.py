@@ -9,6 +9,7 @@ from method.showTable import add_bool_column, get_recent_val, sum_value
 import numpy as np
 import os
 import pandas as pd
+import datetime as dt
 
 
 def basic_daily_update(dir_name):
@@ -34,7 +35,6 @@ def mysql_daily_update(dir_name, all_codes, ipo_dates):
     # code_list = get_part_codes(code_list)
 
     ################################################################################################################
-
     new_codes = []
     for code, date in ipo_dates.items():
         if not date:
@@ -45,8 +45,13 @@ def mysql_daily_update(dir_name, all_codes, ipo_dates):
     MainLog.add_log('Length of all codes: %s' % len(all_codes))
     MainLog.add_log('Length of new codes: %s' % len(new_codes))
 
-    ret1 = update_all_data(new_codes, start_date='2013-01-01')
-    ret2 = update_latest_data(all_codes)
+    weekday = dt.date.today().weekday()
+    mvs_flag = True
+    if weekday in [6, 7]:
+        mvs_flag = False
+
+    ret1 = update_all_data(new_codes, start_date='2013-01-01', mvs_flag=mvs_flag)
+    ret2 = update_latest_data(all_codes, mvs_flag=mvs_flag)
     updated_code = list(set(ret1 + ret2))
     updated_code.sort()
 

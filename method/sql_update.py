@@ -1,7 +1,7 @@
 from method.logMethod import MainLog
 
 
-def update_latest_data(code_list):
+def update_latest_data(code_list, mvs_flag=True):
     from request.requestData import request2mysql_daily
 
     list0 = []
@@ -40,18 +40,20 @@ def update_latest_data(code_list):
 
         ret.extend(new_data)
 
-        MainLog.add_split('-')
-        request2mysql_daily(
-            stock_codes=stock_codes,
-            date='latest',
-            data_type='mvs',
-        )
+        if mvs_flag is True:
+            MainLog.add_split('-')
+            request2mysql_daily(
+                stock_codes=stock_codes,
+                date='latest',
+                data_type='mvs',
+            )
+
         index += 1
 
     return ret
 
 
-def update_all_data(code_list, start_date):
+def update_all_data(code_list, start_date, mvs_flag=True):
     from request.requestData import request2mysql
 
     index = 0
@@ -73,11 +75,13 @@ def update_all_data(code_list, start_date):
 
         MainLog.add_split('-')
 
-        request2mysql(
-            stock_code=code,
-            data_type='mvs',
-            start_date=start_date,
-        )
+        if mvs_flag is True:
+            request2mysql(
+                stock_code=code,
+                data_type='mvs',
+                start_date=start_date,
+            )
+
         index += 1
 
         if new_data is not None:

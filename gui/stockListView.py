@@ -2,70 +2,98 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from method.fileMethod import *
 from method.logMethod import MainLog
+from method.sortCode import sift_codes
 
 import pandas as pd
-import sys
 import numpy as np
-import json
 
 
 class CodesDataFrame:
 
-    def __init__(self, code_list, current_index=0):
+    def __init__(self, code_list, current_index):
+        # self.df_all = load_pkl("..\\basicData\\code_df_src.pkl")
+        self.df_all = load_pkl("..\\basicData\\dailyUpdate\\latest\\show_table.pkl")
+        self.df_mask = load_pkl("..\\basicData\\dailyUpdate\\latest\\show_table_mask.pkl")
 
-        columns = ['code', 'name', 'level1', 'level2', 'level3', 'i_code', 'salary']
-        self.df = pd.DataFrame(columns=columns)
+        # drop_columns = ['cn_name', 'key_remark', 'remark']
+        # self.df_all = self.df_all.drop(drop_columns, axis=1)
+        # self.df_mask = self.df_mask.drop(drop_columns, axis=1)
 
-        path = '..\\basicData\\code_names_dict.txt'
-        self.code_names_dict = load_json_txt(path)
+        self.df = pd.DataFrame()
 
-        path = '..\\basicData\\industry\\sw_2021_dict.txt'
-        # path = '../basicData/industry/code_industry_dict.txt'
-        self.code_industry_dict = load_json_txt(path)
+        self.group_list = [self.df_all.index.tolist()]
+        self.index_list = [0]
+        self.group_flag = 0
+        self.current_index = 0
 
-        path = '..\\basicData\\industry\\sw_2021_name_dict.txt'
-        # path = '../basicData/industry/industry_dict.txt'
-        self.industry_name_dict = load_json_txt(path)
+        self.load_code_list(code_list, current_index)
 
-        path = '..\\test\\test_analysis_dict.txt'
-        self.salary_dict = load_json_txt(path)
+    def load_code_list(self, code_list, code_index):
+        if self.df.size != 0:
+            code = self.df.iloc[self.current_index, 0]
+            self.index_list[self.group_flag] = code
 
-        self.index_dict = dict()
-        for index, code in enumerate(code_list):
-            self.add_code(index, code)
-            self.index_dict[code] = index
+        self.df = self.df_all.loc[code_list, :].copy()
+        self.df.index = range(self.df.shape[0])
 
-        self.current_index = current_index
+        self.group_flag += 1
+        if self.group_flag < len(self.group_list):
+            self.group_list = self.group_list[:self.group_flag]
+            self.index_list = self.index_list[:self.group_flag]
 
-    def add_code(self, index, code):
-        row = pd.Series(index=self.df.columns, dtype=str)
+        # if len(self.index_list) > 0:
+        #     code = self.df.iloc[self.current_index, 0]
+        #     self.index_list[-1] = code
 
-        row['code'] = code
-        row['name'] = self.code_names_dict.get(code)
+        self.group_list.append(code_list)
+        self.index_list.append(0)
 
-        i_code = self.code_industry_dict.get(code)
-        if i_code:
-            # i1 = i_code[:3]
-            # i2 = i_code[:5]
-            # i3 = i_code[:7]
+        self.init_current_index(code_index)
 
-            i1 = i_code[:2] + '0000'
-            i2 = i_code[:4] + '00'
-            i3 = i_code[:6]
+    def sort_df(self, column_num, condition):
 
-            row['level1'] = self.industry_name_dict.get(i1)
-            row['level2'] = self.industry_name_dict.get(i2)
-            row['level3'] = self.industry_name_dict.get(i3)
-            row['i_code'] = i_code
+        code = self.df.iloc[self.current_index, 0]
+        if condition == 0:
 
-        tmp = self.salary_dict.get(code)
-        value = '' if pd.isna(tmp) else '%.2f' % (tmp/10000)
-        row['salary'] = value
+            code_list = self.group_list[self.group_flag]
+            self.df = self.df_all.loc[code_list, :].copy()
+            self.df.index = range(self.df.shape[0])
+        else:
+            column = self.df.columns[column_num]
 
-        self.df.loc[index] = row
+            if condition == 1:
+                ascending = False
+            else:
+                ascending = True
+            self.df = self.df.sort_values(by=column, ascending=ascending)
+            self.df.index = range(self.df.shape[0])
 
-    def sort_values(self, columns, ascending=True):
-        self.df.sort_values(columns, ascending=ascending, inplace=True)
+        self.init_current_index(code)
+
+    def backward(self):
+        if self.group_flag < 1:
+            return
+        self.index_list[self.group_flag] = self.current_index
+
+        self.group_flag -= 1
+        self.load_flag()
+
+    def forward(self):
+        if self.group_flag >= len(self.group_list)-1:
+            return
+        self.index_list[self.group_flag] = self.current_index
+
+        self.group_flag += 1
+        self.load_flag()
+
+    def load_flag(self):
+        code_list = self.group_list[self.group_flag]
+        code_index = self.index_list[self.group_flag]
+
+        self.df = self.df_all.loc[code_list, :].copy()
+        self.df.index = range(self.df.shape[0])
+
+        self.init_current_index(code_index)
 
     def init_current_index(self, index=0):
         if isinstance(index, str):
@@ -104,39 +132,108 @@ class QDataFrameTable(QTableWidget):
     change_signal = pyqtSignal(int)
 
     def __init__(self, code_df: CodesDataFrame):
-        df = code_df.df
-        super().__init__(*df.shape)
-
+        super().__init__()
         self.code_df = code_df
-        h_header = np.vectorize(lambda x: str(x))(df.columns.values)
-        v_header = np.vectorize(lambda x: str(x))(df.index.values)
-        self.setHorizontalHeaderLabels(h_header)
-        self.setVerticalHeaderLabels(v_header)
+        self.sort_flags = []
 
-        arr = df.values
-        for i in range(df.shape[0]):
-            for j in range(df.shape[1]):
-                self.setItem(i, j, QTableWidgetItem(str(arr[i, j])))
+        self.load_code_df()
+
+        self.loaded_row = set()
 
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+        # self.setSortingEnabled(True)
+        self.horizontalHeader().setSectionsClickable(True)
+        self.horizontalHeader().sectionClicked.connect(self.sort_df)
+
         # self.verticalHeader().setVisible(False)
-        #
         # self.clicked.connect(self.on_clicked)
-        self.doubleClicked.connect(self.on_doubleClicked)
+        self.doubleClicked.connect(self.on_double_clicked)
 
-    @property
-    def df(self):
-        return self.code_df.df
+        # self.verticalScrollBar().valueChanged.connect(self.load_item)
 
-    def on_clicked(self, item):
-        print(item.row())
-        # QMessageBox.information(self, 'QListWidget', '您选择了: %s' % item.text())
+    def load_code_df(self):
+        df = self.code_df.df
+        code_list = self.code_df.df['code'].tolist()
+        mask = self.code_df.df_mask.reindex(code_list)
+        # mask = self.code_df.df_mask.loc[code_list, :].copy()
+        # mask.index = range(mask.shape[0])
+        arr = mask.values
 
-    def on_doubleClicked(self, item):
-        # print(item.row())
+        row_size = df.shape[0]
+        column_size = df.shape[1]
+        self.setRowCount(row_size)
+        self.setColumnCount(column_size)
+
+        self.sort_flags = [0] * column_size
+
+        h_header = np.vectorize(lambda x: str(x))(df.columns.values)
+        v_header = np.vectorize(lambda x: str(x))(df.index.values)
+
+        self.setHorizontalHeaderLabels(h_header)
+        self.setVerticalHeaderLabels(v_header)
+
+        # arr = df.values
+        for i in range(row_size):
+            for j in range(column_size):
+                item = QTableWidgetItem(str(arr[i, j]))
+                self.setItem(i, j, item)
+                item.setTextAlignment(Qt.AlignRight | Qt.AlignCenter)
+
+        row = self.code_df.current_index
+        self.resizeColumnsToContents()
+
+        width = 100
+        for i in range(10):
+            self.setColumnWidth(i, width)
+
+        self.verticalScrollBar().setSliderPosition(row)
+        self.selectRow(row)
+
+    def on_double_clicked(self, item):
+        row = item.row()
+        column = item.column()
+
+        level = column - 1
+        if level in [1, 2, 3]:
+            name = self.code_df.df.iloc[row, column]
+            code = self.code_df.df.iloc[row, 0]
+
+            ids_name = '%s-%s' % (level, name)
+            code_list = sift_codes(ids_names=[ids_name])
+
+            if len(code_list) > 0:
+                MainLog.add_log('show industry --> %s' % ids_name)
+
+                self.code_df.load_code_list(code_list, code)
+                self.load_code_df()
+                self.change_signal.emit(self.code_df.current_index)
+                return
+
         MainLog.add_log('move to row --> %s' % item.row())
         self.change_signal.emit(item.row())
+
+    def backward(self):
+        self.code_df.backward()
+        self.load_code_df()
+        self.change_signal.emit(self.code_df.current_index)
+
+    def forward(self):
+        self.code_df.forward()
+        self.load_code_df()
+        self.change_signal.emit(self.code_df.current_index)
+
+    def sort_df(self, column):
+        pos = self.horizontalScrollBar().sliderPosition()
+        flag = self.sort_flags[column]
+        flag = (flag + 1) % 3
+        self.code_df.sort_df(column, flag)
+        self.load_code_df()
+        self.verticalScrollBar().setSliderPosition(0)
+        self.horizontalScrollBar().setSliderPosition(pos)
+        self.sort_flags[column] = flag
+        self.change_signal.emit(self.code_df.current_index)
 
 
 class QStockListView(QWidget):
@@ -144,37 +241,32 @@ class QStockListView(QWidget):
         super().__init__()
 
         self.setWindowTitle('QTestWidget')
-        self.resize(800, 900)
+        # self.resize(800, 900)
+        self.resize(1600, 900)
 
         self.table_view = QDataFrameTable(code_df)
 
         layout0 = QHBoxLayout()
         layout0.addStretch(1)
+
+        self.button1 = QPushButton('<<')
+        self.button2 = QPushButton('>>')
+
+        layout0.addWidget(self.button1, 0)
         layout0.addWidget(QPushButton('select'), 0)
         layout0.addWidget(QPushButton('load'), 0)
+        layout0.addWidget(self.button2, 0)
+
         layout0.addStretch(1)
 
         layout = QVBoxLayout()
         layout.addLayout(layout0)
         layout.addWidget(self.table_view)
 
+        self.button1.clicked.connect(self.table_view.backward)
+        self.button2.clicked.connect(self.table_view.forward)
+
         self.setLayout(layout)
-
-
-def test_codes_data_frame():
-    # import re
-    # with open("..\\basicData\\selected_0514.txt", "r", encoding="utf-8", errors="ignore") as f:
-    #     txt = f.read()
-    #     code_list = re.findall(r'([0-9]{6})', txt)
-    #     code_list.reverse()
-
-    with open("..\\basicData\\code_list.txt", "r", encoding="utf-8", errors="ignore") as f:
-        code_list = json.loads(f.read())
-
-    tmp = CodesDataFrame(code_list)
-    print(tmp.df)
-
-    tmp.init_current_index(code='600000')
 
 
 if __name__ == '__main__':
@@ -186,4 +278,6 @@ if __name__ == '__main__':
     # main.show()
     # sys.exit(app.exec_())
 
-    test_codes_data_frame()
+    # df = load_pkl("..\\basicData\\code_df_src.pkl")
+    # print(df)
+    pass
