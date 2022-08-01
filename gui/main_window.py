@@ -565,14 +565,14 @@ class MainWidget(QWidget):
                 for key in df_dict.keys():
                     if key not in codes:
                         df_dict.pop(key)
-                        GuiLog.add_log('release df_dict --> ' + key)
+                        # GuiLog.add_log('release df_dict --> ' + key)
                         break
 
             if flag2:
                 for key in pix_dict.keys():
                     if key not in codes:
                         pix_dict.pop(key)
-                        GuiLog.add_log('release px_dict --> ' + key)
+                        # GuiLog.add_log('release px_dict --> ' + key)
                         break
 
         code = data_pix.code
@@ -1048,7 +1048,7 @@ class MainWidget(QWidget):
             # self.window2.move(-1906, 10)
             self.plt_rect = [-1916, 32, rect.width(), rect.height()]
 
-            self.fs_view.move(152-1920, 100)
+            self.fs_view.move(152-1920, 60)
 
         else:
             self.showMaximized()
@@ -1060,7 +1060,7 @@ class MainWidget(QWidget):
             self.equity_change_widget.move(0, 0)
 
             # self.window2.move(10, 10)
-            self.fs_view.move(152, 100)
+            self.fs_view.move(152, 60)
 
             self.plt_rect = [10, 32, rect.width(), rect.height()]
 

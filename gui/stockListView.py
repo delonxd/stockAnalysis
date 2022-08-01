@@ -4,6 +4,7 @@ from PyQt5.QtGui import *
 from method.fileMethod import *
 from method.logMethod import MainLog
 from method.sortCode import sift_codes
+from method.showTable import generate_show_table
 
 import pandas as pd
 import numpy as np
@@ -13,6 +14,9 @@ class CodesDataFrame:
 
     def __init__(self, code_list, current_index):
         # self.df_all = load_pkl("..\\basicData\\code_df_src.pkl")
+
+        generate_show_table()
+
         self.df_all = load_pkl("..\\basicData\\dailyUpdate\\latest\\show_table.pkl")
         self.df_mask = load_pkl("..\\basicData\\dailyUpdate\\latest\\show_table_mask.pkl")
 
@@ -304,7 +308,9 @@ class GenerateCodeListWidget(QWidget):
             'old',
             'all',
             'hold',
-            'mark',
+            'mark-1',
+            'mark-2',
+            'mark-3',
             'selected',
             'whitelist',
             'blacklist',
@@ -312,6 +318,7 @@ class GenerateCodeListWidget(QWidget):
 
             'sort-ass',
             'sort-equity',
+            'sort-ass/equity',
             'sort-ass/real_cost',
             'sort-ass/turnover',
             'industry-ass/equity',
@@ -323,7 +330,18 @@ class GenerateCodeListWidget(QWidget):
         ]
 
         obj = QComboBox()
-        flags = list(map(lambda x: str(x), range(10)))
+        # flags = list(map(lambda x: str(x), range(10)))
+        flags = [
+            '0_old',
+            '1_selected',
+            '2_hold',
+            '3_random_s',
+            '4_random_w-s',
+            '5_random_a-w',
+            '6',
+            '7',
+            '8',
+        ]
         obj.addItems(flags)
         self.labels.append(QLabel('mission: '))
         self.editor.append(obj)
@@ -504,7 +522,12 @@ class GenerateCodeListWidget(QWidget):
         try:
             ret = sift_codes(*args)
             # print(ret, code_index)
+
             self.generate_signal.emit(ret, code_index)
+
+            path = '..\\basicData\\tmp\\code_list_latest.txt'
+            write_json_txt(path, ret)
+
             MainLog.add_log('generate code_list')
 
         except Exception as e:
@@ -513,23 +536,32 @@ class GenerateCodeListWidget(QWidget):
     def mission_change(self, txt):
         self.init_editor_dict()
         editor_dict = self.editor_dict
-        mission = str(txt)
+        mission = self.editor[0].currentText()
+        # mission = str(txt)
 
         editor_dict['mission'] = mission
+        print(mission)
 
         if mission == '0':
             editor_dict['source'] = 'old'
 
-        elif mission == '1':
-            editor_dict['source'] = 'real_pe'
-            editor_dict['random'] = 'True'
-            editor_dict['interval'] = '80'
-            editor_dict['mode'] = 'all-whitelist'
+        elif mission == '1_selected':
+            editor_dict['source'] = 'selected'
+            editor_dict['sort'] = 'sort-ass/equity'
 
-        elif mission == '2':
+        elif mission == '2_hold':
             editor_dict['source'] = 'hold'
 
-        elif mission == '3':
+        elif mission == '3_random_s':
+            editor_dict['source'] = 'selected'
+            editor_dict['sort'] = 'sort-ass/equity'
+            editor_dict['market'] = 'main+growth'
+
+            editor_dict['random'] = 'True'
+            editor_dict['interval'] = '20'
+            editor_dict['mode'] = 'selected'
+
+        elif mission == '4_random_w-s':
             editor_dict['source'] = 'all'
             editor_dict['sort'] = 'sort-ass/equity'
             editor_dict['market'] = 'main+growth'
@@ -538,26 +570,23 @@ class GenerateCodeListWidget(QWidget):
             editor_dict['interval'] = '30'
             editor_dict['mode'] = 'whitelist-selected'
 
-        elif mission == '4':
-            editor_dict['source'] = 'selected'
-            editor_dict['sort'] = 'sort-ass/equity'
-            editor_dict['market'] = 'main+growth'
-
+        elif mission == '5_random_a-w':
+            editor_dict['source'] = 'real_pe'
             editor_dict['random'] = 'True'
-            editor_dict['interval'] = '100'
-            editor_dict['mode'] = 'selected'
+            editor_dict['interval'] = '80'
+            editor_dict['mode'] = 'all-whitelist'
 
-        elif mission == '5':
+        elif mission == '6':
             editor_dict['source'] = 'whitelist'
             editor_dict['sort'] = 'industry-ass/equity'
             editor_dict['code_index'] = '203'
 
-        elif mission == '6':
+        elif mission == '7':
             editor_dict['source'] = 'whitelist'
             editor_dict['blacklist'] = 'sort-ass/equity'
             editor_dict['market'] = 'growth'
 
-        elif mission == '7':
+        elif mission == '8':
             editor_dict['ids_names'] = '2-光伏设备'
             editor_dict['sort'] = 'real_pe'
             editor_dict['market'] = 'growth'

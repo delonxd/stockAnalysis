@@ -12,8 +12,8 @@ class FsView(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('FsView')
-        self.resize(1600, 800)
-        self.move(152, 100)
+        self.resize(1600, 930)
+        self.move(152, 60)
 
         self.table_widget = QTableWidget()
         self.table_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -62,6 +62,7 @@ class FsView(QWidget):
         self.table_widget.resizeColumnsToContents()
 
         self.table_widget.verticalHeader().setDefaultAlignment(Qt.AlignRight)
+        self.table_widget.verticalScrollBar().setSliderPosition(303)
 
         self.code = code
 

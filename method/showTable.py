@@ -1,6 +1,7 @@
 
 import pandas as pd
 from method.fileMethod import *
+from method.logMethod import log_it
 import matplotlib.pyplot as plt
 
 
@@ -159,6 +160,7 @@ def get_level_name(ids_name_dict, i_code, level):
         return
 
 
+@log_it(None)
 def generate_show_table():
     # from method.dailyMethod import generate_daily_table
     # df1 = generate_daily_table('latest')
