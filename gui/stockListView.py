@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from method.fileMethod import *
 from method.logMethod import MainLog
 from method.sortCode import sift_codes
@@ -205,14 +206,16 @@ class QDataFrameTable(QTableWidget):
 
             if len(code_list) > 0:
                 MainLog.add_log('show industry --> %s' % ids_name)
-
-                self.code_df.load_code_list(code_list, code)
-                self.load_code_df()
-                self.change_signal.emit(self.code_df.current_index)
+                self.load_code_list(code_list, code)
                 return
 
         MainLog.add_log('move to row --> %s' % item.row())
         self.change_signal.emit(item.row())
+
+    def load_code_list(self, code_list, code_index):
+        self.code_df.load_code_list(code_list, code_index)
+        self.load_code_df()
+        self.change_signal.emit(self.code_df.current_index)
 
     def backward(self):
         self.code_df.backward()
@@ -245,16 +248,18 @@ class QStockListView(QWidget):
         self.resize(1600, 900)
 
         self.table_view = QDataFrameTable(code_df)
+        self.generate_widget = GenerateCodeListWidget()
 
         layout0 = QHBoxLayout()
         layout0.addStretch(1)
 
         self.button1 = QPushButton('<<')
         self.button2 = QPushButton('>>')
+        self.button3 = QPushButton('load')
 
         layout0.addWidget(self.button1, 0)
         layout0.addWidget(QPushButton('select'), 0)
-        layout0.addWidget(QPushButton('load'), 0)
+        layout0.addWidget(self.button3, 0)
         layout0.addWidget(self.button2, 0)
 
         layout0.addStretch(1)
@@ -265,19 +270,315 @@ class QStockListView(QWidget):
 
         self.button1.clicked.connect(self.table_view.backward)
         self.button2.clicked.connect(self.table_view.forward)
+        self.button3.clicked.connect(self.generate_widget.show)
+
+        self.generate_widget.generate_signal.connect(self.table_view.load_code_list)
 
         self.setLayout(layout)
 
 
-if __name__ == '__main__':
-    # arr0 = np.random.rand(40, 4)
-    # df0 = pd.DataFrame(arr0)
-    #
-    # app = QApplication(sys.argv)
-    # main = QStockListView(df0)
-    # main.show()
-    # sys.exit(app.exec_())
+class GenerateCodeListWidget(QWidget):
+    generate_signal = pyqtSignal(object, object)
 
-    # df = load_pkl("..\\basicData\\code_df_src.pkl")
-    # print(df)
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('GenerateCodeList')
+        self.resize(400, 600)
+
+        h_layout = QHBoxLayout()
+        v_layout = QVBoxLayout()
+
+        h_layout.addStretch(1)
+        h_layout.addLayout(v_layout, 0)
+        h_layout.addStretch(1)
+
+        self.labels = []
+        self.editor = []
+        self.values = []
+
+        layout = QGridLayout()
+
+        str_flg = [
+            '',
+            'old',
+            'all',
+            'hold',
+            'mark',
+            'selected',
+            'whitelist',
+            'blacklist',
+            'industry',
+
+            'sort-ass',
+            'sort-equity',
+            'sort-ass/real_cost',
+            'sort-ass/turnover',
+            'industry-ass/equity',
+
+            'salary',
+            'pe',
+            'real_pe',
+            'plate-50',
+        ]
+
+        obj = QComboBox()
+        flags = list(map(lambda x: str(x), range(10)))
+        obj.addItems(flags)
+        self.labels.append(QLabel('mission: '))
+        self.editor.append(obj)
+
+        obj = QComboBox()
+        obj.addItems(str_flg)
+        self.labels.append(QLabel('source: '))
+        self.editor.append(obj)
+
+        obj = QLineEdit()
+        self.labels.append(QLabel('ids_names: '))
+        self.editor.append(obj)
+
+        obj = QComboBox()
+        obj.addItems(str_flg)
+        self.labels.append(QLabel('whitelist: '))
+        self.editor.append(obj)
+
+        obj = QComboBox()
+        obj.addItems(str_flg)
+        self.labels.append(QLabel('blacklist: '))
+        self.editor.append(obj)
+
+        obj = QComboBox()
+        obj.addItems(str_flg)
+        self.labels.append(QLabel('sort: '))
+        self.editor.append(obj)
+
+        obj = QComboBox()
+        obj.addItems(['', 'True', 'False'])
+        self.labels.append(QLabel('reverse: '))
+        self.editor.append(obj)
+
+        obj = QComboBox()
+        obj.addItems(['', '0', '-1'])
+        self.labels.append(QLabel('insert: '))
+        self.editor.append(obj)
+
+        obj = QComboBox()
+        market_flag = [
+            'all',
+            'main',
+            'non_main',
+            'growth',
+            'main+growth',
+        ]
+        obj.addItems(market_flag)
+        self.labels.append(QLabel('market: '))
+        self.editor.append(obj)
+
+        obj = QLineEdit()
+        self.labels.append(QLabel('timestamp: '))
+        self.editor.append(obj)
+
+        obj = QComboBox()
+        obj.addItems(['True', 'False'])
+        self.labels.append(QLabel('random: '))
+        self.editor.append(obj)
+
+        obj = QLineEdit()
+        self.labels.append(QLabel('pick_weight: '))
+        self.editor.append(obj)
+
+        obj = QLineEdit()
+        self.labels.append(QLabel('interval: '))
+        self.editor.append(obj)
+
+        obj = QComboBox()
+        mode_flag = [
+            'normal',
+            'selected',
+            'whitelist+selected',
+            'whitelist-selected',
+            'all-whitelist',
+        ]
+        obj.addItems(mode_flag)
+        self.labels.append(QLabel('mode: '))
+        self.editor.append(obj)
+
+        obj = QLineEdit()
+        self.labels.append(QLabel('code_index: '))
+        self.editor.append(obj)
+
+        for row, label in enumerate(self.labels):
+            editor = self.editor[row]
+
+            label.setFont(QFont('Consolas', 14))
+            editor.setFont(QFont('Consolas', 14))
+
+            layout.addWidget(label, row, 0, alignment=Qt.AlignRight)
+            layout.addWidget(editor, row, 1)
+
+        self.button = QPushButton('Generate')
+        self.button.setFont(QFont('Consolas', 14))
+
+        layout1 = QHBoxLayout()
+        layout1.addStretch(1)
+        layout1.addWidget(self.button)
+        layout1.addStretch(1)
+
+        v_layout.addStretch(1)
+        v_layout.addLayout(layout, 0)
+        v_layout.addLayout(layout1, 0)
+        v_layout.addStretch(1)
+
+        self.setLayout(h_layout)
+        self.editor_dict = dict()
+        self.init_editor_dict()
+        self.load_editor_dict()
+
+        self.button.clicked.connect(self.read_value)
+        self.editor[0].currentIndexChanged.connect(self.mission_change)
+
+    def init_editor_dict(self):
+        self.editor_dict = {
+            'mission': '0',
+            'source': '',
+            'ids_names': '',
+            'whitelist': '',
+            'blacklist': '',
+
+            'sort': '',
+            'reverse': 'False',
+            'insert': '',
+
+            'market': 'all',
+            'timestamp': '',
+
+            'random': 'False',
+            'pick_weight': '',
+            'interval': '100',
+            'mode': 'normal',
+
+            'code_index': '0',
+        }
+
+    def load_editor_dict(self):
+        tmp_list = list(self.editor_dict.values())
+        for row, editor in enumerate(self.editor):
+            if isinstance(editor, QComboBox):
+                editor.setCurrentText(tmp_list[row])
+
+            else:
+                editor.setText(tmp_list[row])
+
+    def read_value(self):
+        self.values = []
+        for editor in self.editor:
+            if isinstance(editor, QComboBox):
+                val = editor.currentText()
+            else:
+                val = editor.text()
+
+            if val == '':
+                val = None
+            elif val == 'True':
+                val = True
+            elif val == 'False':
+                val = False
+            elif val.isdecimal():
+                try:
+                    val = int(val)
+                except BaseException as e:
+                    print(e)
+
+            self.values.append(val)
+
+        val = self.values[2]
+        if val is not None:
+            val = val.split(',')
+            self.values[2] = val
+        # print(self.values)
+
+        args = self.values[1: -1]
+        code_index = self.values[-1]
+        # print(args)
+
+        try:
+            ret = sift_codes(*args)
+            # print(ret, code_index)
+            self.generate_signal.emit(ret, code_index)
+            MainLog.add_log('generate code_list')
+
+        except Exception as e:
+            MainLog.add_log(e)
+
+    def mission_change(self, txt):
+        self.init_editor_dict()
+        editor_dict = self.editor_dict
+        mission = str(txt)
+
+        editor_dict['mission'] = mission
+
+        if mission == '0':
+            editor_dict['source'] = 'old'
+
+        elif mission == '1':
+            editor_dict['source'] = 'real_pe'
+            editor_dict['random'] = 'True'
+            editor_dict['interval'] = '80'
+            editor_dict['mode'] = 'all-whitelist'
+
+        elif mission == '2':
+            editor_dict['source'] = 'hold'
+
+        elif mission == '3':
+            editor_dict['source'] = 'all'
+            editor_dict['sort'] = 'sort-ass/equity'
+            editor_dict['market'] = 'main+growth'
+
+            editor_dict['random'] = 'True'
+            editor_dict['interval'] = '30'
+            editor_dict['mode'] = 'whitelist-selected'
+
+        elif mission == '4':
+            editor_dict['source'] = 'selected'
+            editor_dict['sort'] = 'sort-ass/equity'
+            editor_dict['market'] = 'main+growth'
+
+            editor_dict['random'] = 'True'
+            editor_dict['interval'] = '100'
+            editor_dict['mode'] = 'selected'
+
+        elif mission == '5':
+            editor_dict['source'] = 'whitelist'
+            editor_dict['sort'] = 'industry-ass/equity'
+            editor_dict['code_index'] = '203'
+
+        elif mission == '6':
+            editor_dict['source'] = 'whitelist'
+            editor_dict['blacklist'] = 'sort-ass/equity'
+            editor_dict['market'] = 'growth'
+
+        elif mission == '7':
+            editor_dict['ids_names'] = '2-光伏设备'
+            editor_dict['sort'] = 'real_pe'
+            editor_dict['market'] = 'growth'
+
+        self.load_editor_dict()
+
+
+def test_code_list_view():
+    import sys
+
+    app = QApplication(sys.argv)
+
+    code_list = sift_codes(source='all')
+    codes_df = CodesDataFrame(code_list, 0)
+
+    main = QStockListView(codes_df)
+    # main = GenerateCodeListWidget()
+    main.show()
+    sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    test_code_list_view()
     pass
