@@ -106,26 +106,6 @@ def sort_daily_code(dir_name):
         f.write(res)
 
 
-def generate_list():
-    with open("..\\basicData\\analyzedData\\sift_002_real_pe.txt", "r", encoding="utf-8", errors="ignore") as f:
-        code_list = json.loads(f.read())
-
-    # with open("..\\basicData\\self_selected\\gui_selected.txt", "r", encoding="utf-8", errors="ignore") as f:
-    with open("..\\basicData\\self_selected\\gui_whitelist.txt", "r", encoding="utf-8", errors="ignore") as f:
-        select_list = json.loads(f.read())
-
-    new_list = []
-    for code in code_list:
-        if code in select_list:
-            new_list.append(code)
-
-    res = json.dumps(new_list, indent=4, ensure_ascii=False)
-    # file = '..\\basicData\\self_selected\\gui_selected2.txt'
-    file = '..\\basicData\\self_selected\\gui_whitelist2.txt'
-    with open(file, "w", encoding='utf-8') as f:
-        f.write(res)
-
-
 def get_codes_from_sel():
     with open("..\\basicData\\self_selected\\hs300_src.txt", "r", encoding="utf-8", errors="ignore") as f:
         txt = f.read()
