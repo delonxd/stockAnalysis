@@ -14,6 +14,7 @@ def daily_update():
     from method.dailyMethod import generate_daily_table
     from method.dailyMethod import save_latest_list
     from method.dailyMethod import generate_log_data
+    from method.fileMethod import load_json_txt
     from sql.load_data_infile import output_databases
     from request.requestMirData import request_mir_y10
     from request.requestSwData import update_sw_2021
@@ -81,7 +82,8 @@ def daily_update():
     MainLog.write('%s\\logs2.txt' % res_dir)
     MainLog.init_log()
 
-    request_eq2mysql(all_codes)
+    whitelist = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
+    request_eq2mysql(whitelist)
     MainLog.write('%s\\logs3.txt' % res_dir)
 
 
