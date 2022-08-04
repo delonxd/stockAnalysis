@@ -569,6 +569,9 @@ def str_recognition(src):
         elif src == 'old':
             ret = load_json_txt("..\\basicData\\tmp\\code_list_latest.txt")
 
+        elif src == 'old_random':
+            ret = load_json_txt("..\\basicData\\tmp\\code_list_random.txt")
+
         elif src == 'sort-ass':
             dict0 = load_json_txt("..\\basicData\\self_selected\\gui_assessment.txt")
             df = pd.DataFrame.from_dict(dict0, orient='index', dtype='int64')
@@ -696,5 +699,5 @@ if __name__ == '__main__':
     # get_random_list()
     # save_latest_list(date_dir)
 
-    # sort_hold()
-    sort_industry()
+    sort_hold()
+    # sort_industry()

@@ -306,6 +306,7 @@ class GenerateCodeListWidget(QWidget):
         str_flg = [
             '',
             'old',
+            'old_random',
             'all',
             'hold',
             'mark-1',
@@ -332,6 +333,7 @@ class GenerateCodeListWidget(QWidget):
         obj = QComboBox()
         # flags = list(map(lambda x: str(x), range(10)))
         flags = [
+            '',
             '0_old',
             '1_selected',
             '2_hold',
@@ -457,7 +459,7 @@ class GenerateCodeListWidget(QWidget):
 
     def init_editor_dict(self):
         self.editor_dict = {
-            'mission': '0',
+            'mission': '',
             'source': '',
             'ids_names': '',
             'whitelist': '',
@@ -542,7 +544,7 @@ class GenerateCodeListWidget(QWidget):
         editor_dict['mission'] = mission
         print(mission)
 
-        if mission == '0':
+        if mission == '0_old':
             editor_dict['source'] = 'old'
 
         elif mission == '1_selected':
