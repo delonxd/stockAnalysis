@@ -47,7 +47,7 @@ def mysql_daily_update(dir_name, all_codes, ipo_dates):
 
     weekday = dt.date.today().weekday()
     mvs_flag = True
-    if weekday in [6, 7]:
+    if weekday in [5, 6]:
         mvs_flag = False
 
     ret1 = update_all_data(new_codes, start_date='2013-01-01', mvs_flag=mvs_flag)
