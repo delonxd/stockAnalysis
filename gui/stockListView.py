@@ -309,6 +309,7 @@ class GenerateCodeListWidget(QWidget):
             'old_random',
             'all',
             'hold',
+            'mark-0',
             'mark-1',
             'mark-2',
             'mark-3',
@@ -317,6 +318,7 @@ class GenerateCodeListWidget(QWidget):
             'blacklist',
             'industry',
 
+            'sort-report',
             'sort-ass',
             'sort-equity',
             'sort-ass/equity',

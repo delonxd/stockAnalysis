@@ -572,8 +572,16 @@ def str_recognition(src):
         elif src == 'old_random':
             ret = load_json_txt("..\\basicData\\tmp\\code_list_random.txt")
 
+        elif src == 'sort-report':
+            path = "..\\basicData\\dailyUpdate\\latest\\a003_report_date_dict.txt"
+            dict0 = load_json_txt(path)
+            df = pd.DataFrame.from_dict(dict0, orient='index')
+            df = df.sort_values(0, ascending=False)
+            ret = df.index.to_list()
+
         elif src == 'sort-ass':
-            dict0 = load_json_txt("..\\basicData\\self_selected\\gui_assessment.txt")
+            path = "..\\basicData\\self_selected\\gui_assessment.txt"
+            dict0 = load_json_txt(path)
             df = pd.DataFrame.from_dict(dict0, orient='index', dtype='int64')
             df = df.sort_values(0, ascending=False)
             ret = df.index.to_list()
@@ -587,11 +595,15 @@ def str_recognition(src):
 
         elif src[:4] == 'mark':
             mark = int(src.split('-')[1])
-            ret = []
             mark_dict = load_json_txt("..\\basicData\\self_selected\\gui_mark.txt")
-            for code, value in mark_dict.items():
-                if value == mark:
-                    ret.append(code)
+
+            if mark == 0:
+                ret = list(mark_dict.keys())
+            else:
+                ret = []
+                for code, value in mark_dict.items():
+                    if value == mark:
+                        ret.append(code)
 
         elif src == 'sort-ass/equity':
             ret = sort_discount()
