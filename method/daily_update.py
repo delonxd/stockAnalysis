@@ -82,8 +82,10 @@ def daily_update():
     MainLog.write('%s\\logs2.txt' % res_dir)
     MainLog.init_log()
 
-    whitelist = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
-    request_eq2mysql(whitelist)
+    list1 = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
+    list2 = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt")
+    list3 = list(set(list1 + list2))
+    request_eq2mysql(list3)
     MainLog.write('%s\\logs3.txt' % res_dir)
 
 

@@ -318,6 +318,7 @@ class GenerateCodeListWidget(QWidget):
             'blacklist',
             'industry',
 
+            'latest_update',
             'sort-report',
             'sort-ass',
             'sort-equity',
@@ -329,6 +330,7 @@ class GenerateCodeListWidget(QWidget):
             'salary',
             'pe',
             'real_pe',
+            'roe_parent',
             'plate-50',
         ]
 

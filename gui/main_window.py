@@ -1,5 +1,6 @@
 from method.dataMethod import sql2df
 from request.requestData import request2mysql
+from request.requestEquityData import request_eq2mysql
 from method.logMethod import log_it, MainLog
 from method.sortCode import sort_discount, sift_codes
 from method.fileMethod import *
@@ -479,6 +480,8 @@ class MainWidget(QWidget):
             data_type='fs',
             start_date="2021-01-01",
         )
+
+        request_eq2mysql([code])
 
         # request_data2mysql(
         #     stock_code=code,

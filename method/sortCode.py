@@ -355,6 +355,8 @@ def sort_hold():
     path = '..\\basicData\\self_selected\\gui_hold.txt'
     hold_dict = load_json_txt(path)
 
+    name_dict = load_json_txt('..\\basicData\\code_names_dict.txt')
+
     ret = []
     for val in hold_dict:
         code = val[0]
@@ -362,9 +364,10 @@ def sort_hold():
         number = val[2]
         price = df['id_035_mvs_sp'].iloc[-1]
 
-        value = int(round(100 * price * number))
+        value = int(round(price * number))
+        name = name_dict[code]
 
-        tmp = [code, val[1], number, value, price]
+        tmp = [code, name, number, value, price]
         print(tmp)
         ret.append(tmp)
     ret.sort(key=lambda x: x[3], reverse=True)
