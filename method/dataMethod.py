@@ -795,6 +795,7 @@ class DataAnalysis:
             s2 = self.smooth_data('tmp', 'id_265_cfs_crfdofiaolta', delta=True)
             s3 = s1 - s2
             s3.name = column
+            s3 = s3.astype('float64')
             return s3.dropna()
 
         elif column == 's_039_profit_adjust':
@@ -818,6 +819,7 @@ class DataAnalysis:
 
             new_df = get_month_delta(res_df, column)
             s1 = new_df[column]
+            s1 = s1.astype('float64')
             return s1.dropna()
 
         elif column == 's_040_profit_adjust2':
@@ -827,6 +829,7 @@ class DataAnalysis:
             s3 = s3.dropna()
             s3 = s3.rolling(4, min_periods=1).mean()
             s3.name = column
+            s3 = s3.astype('float64')
             return s3.dropna()
 
         elif column == 's_041_profit_adjust_ttm':

@@ -260,9 +260,10 @@ class QStockListView(QWidget):
         self.button1 = QPushButton('<<')
         self.button2 = QPushButton('>>')
         self.button3 = QPushButton('load')
+        self.button4 = QPushButton('select')
 
         layout0.addWidget(self.button1, 0)
-        layout0.addWidget(QPushButton('select'), 0)
+        layout0.addWidget(self.button4, 0)
         layout0.addWidget(self.button3, 0)
         layout0.addWidget(self.button2, 0)
 
@@ -275,10 +276,25 @@ class QStockListView(QWidget):
         self.button1.clicked.connect(self.table_view.backward)
         self.button2.clicked.connect(self.table_view.forward)
         self.button3.clicked.connect(self.generate_widget.show)
+        self.button4.clicked.connect(self.select_code)
 
         self.generate_widget.generate_signal.connect(self.table_view.load_code_list)
 
         self.setLayout(layout)
+
+    def select_code(self):
+        txt, _ = QInputDialog.getText(self, '选择', '请输入:')
+
+        name_dict = load_json_txt('..\\basicData\\code_names_dict.txt')
+
+        if txt in name_dict.keys():
+            self.table_view.load_code_list([txt], 0)
+            return
+        if txt in name_dict.values():
+            for key, value in name_dict.items():
+                if value == txt:
+                    self.table_view.load_code_list([key], 0)
+                    return
 
 
 class GenerateCodeListWidget(QWidget):

@@ -23,10 +23,21 @@ class WebWidget(QMainWindow):
         url = 'http://basic.10jqka.com.cn/%s/operate.html###' % code
         self.browser.load(QUrl(url))
 
+    # def load_url(self, url):
+    #     # self.browser.load(QUrl(url))
+    #
+    #     # import os
+    #     # path = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+    #     # os.system(path, url)
+    #     import webbrowser
+    #     webbrowser.open(url)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main = WebWidget()
-    main.load_code('600004')
+    # main.load_code('600004')
+    main.load_url('http://stockpage.10jqka.com.cn/600000/')
     main.show()
+
     sys.exit(app.exec_())
