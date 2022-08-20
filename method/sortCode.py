@@ -6,51 +6,6 @@ import numpy as np
 import pickle
 import os
 import re
-import pandas as pd
-
-
-def load_daily_res(dir_str):
-
-    dir_str = 'update_20220117153503'
-
-    datetime = dir_str[-14:]
-    res_dir = '..\\basicData\\dailyUpdate\\update_%s' % datetime
-
-    file = '%s\\res_daily_%s.pkl' % (res_dir, datetime)
-    with open(file, "rb") as f:
-        res = pickle.load(f)
-
-    val_list = list()
-    for tup in res:
-        code = tup[0]
-        df = tup[1]
-
-        # s1 = df.loc[:, 's_016_roe_parent'].dropna()
-        # s1 = df.loc[:, 's_027_pe_return_rate'].dropna()
-        # s1 = df.loc[:, 's_037_real_pe_return_rate'].dropna()
-        s1 = df.loc[:, 's_028_market_value'].dropna()
-        # val = s1[-1] if s1.size > 0 else -np.inf
-
-        if s1.size > 1:
-            if s1[-1] < 0:
-                val = np.inf
-            else:
-                size = min(s1.size, 5)
-                val = s1[-1] / s1[-size] - 1
-        else:
-            val = np.inf
-
-        val_list.append((code, val))
-
-    res_list = sorted(val_list, key=lambda x: x[1], reverse=False)
-
-    code_sorted = zip(*res_list).__next__()
-    print(code_sorted)
-
-    res = json.dumps(code_sorted, indent=4, ensure_ascii=False)
-    file = '%s\\code_sorted_3.txt' % res_dir
-    with open(file, "w", encoding='utf-8') as f:
-        f.write(res)
 
 
 def sort_daily_code(dir_name):
@@ -153,6 +108,7 @@ def random_code_list(code_list, pick_weight, interval, mode):
     total_list = list(map(lambda x: generate_random_list(x, weight_dict), src_list))
 
     ret = []
+    number_list = []
     while True:
         picked_list = []
         src_number = list(map(lambda x: len(x), total_list))
@@ -160,8 +116,8 @@ def random_code_list(code_list, pick_weight, interval, mode):
             break
 
         picked = pick_number(src_number, pick_weight, interval)
-
-        MainLog.add_log('pick --> %s' % picked)
+        number_list.insert(0, picked)
+        # MainLog.add_log('pick --> %s' % picked)
 
         for index, value in enumerate(picked):
             for _ in range(value):
@@ -170,6 +126,8 @@ def random_code_list(code_list, pick_weight, interval, mode):
 
         sub_list = sift_codes(source=picked_list, sort=sorted_list)
         ret.extend(sub_list)
+
+    MainLog.add_log('pick --> %s' % number_list)
 
     write_json_txt("..\\basicData\\tmp\\code_list_random.txt", ret)
     MainLog.add_split('#')
@@ -185,11 +143,16 @@ def get_weight_dict(set_all):
     base_rate = 10000000
     weight_dict = dict.fromkeys(set_all, base_rate * 3000)
 
-    date1 = dt.date.today()
+    # date1 = dt.date.today()
+    path = "..\\basicData\\dailyUpdate\\latest\\a000_log_data.txt"
+    date_txt = load_json_txt(path)['update_date']
+    date1 = dt.datetime.strptime(date_txt, '%Y-%m-%d').date()
+
     with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
         gui_counter = json.loads(f.read())
 
     counter = 0
+    counter1 = 0
     for key, value in gui_counter.items():
         if key not in set_all:
             continue
@@ -205,7 +168,8 @@ def get_weight_dict(set_all):
 
         if flag is True:
             weight = margin ** 2 * base_rate
-            MainLog.add_log('%s %s %s margin == 1' % (key, report_date, value[1]))
+            # MainLog.add_log('%s %s %s margin == 1' % (key, report_date, value[1]))
+            counter1 += 1
         elif margin > 60:
             weight = margin ** 2 * 100
             # MainLog.add_log('%s %s margin > 60' % (key, value[1]))
@@ -215,8 +179,6 @@ def get_weight_dict(set_all):
 
         weight_dict[key] = weight
 
-    MainLog.add_log('margin > 60 --> %s' % counter)
-
     weight_counter = dict()
     for weight in weight_dict.values():
         if weight in weight_counter:
@@ -225,7 +187,6 @@ def get_weight_dict(set_all):
             weight_counter[weight] = 1
 
     MainLog.add_split('-')
-    MainLog.add_log('All --> %s' % len(set_all))
 
     weight_list = list(weight_counter.keys())
     weight_list.sort()
@@ -244,6 +205,9 @@ def get_weight_dict(set_all):
         weight_str = '%s%18s%8s' % (date_str, weight, weight_counter[weight])
         MainLog.add_log(weight_str)
 
+    MainLog.add_log('      total:  %10s' % len(set_all))
+    MainLog.add_log('margin > 60:  %10s' % counter)
+    MainLog.add_log('margin < -1:  %10s' % counter1)
     MainLog.add_split('-')
 
     return weight_dict
