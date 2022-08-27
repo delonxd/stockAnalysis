@@ -884,6 +884,7 @@ class DataAnalysis:
             s1 = s1.astype('float64')
             s2 = self.smooth_data(column, 'id_163_ps_toc', delta=True)
             s3 = s2 - s1
+            s3 = s3.dropna()
             s3 = s3.rolling(4, min_periods=1).mean()
             s3.name = column
             return s3.dropna()
