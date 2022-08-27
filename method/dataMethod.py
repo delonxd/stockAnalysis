@@ -335,6 +335,7 @@ class DataAnalysis:
         self.fs_add(self.get_column(df, 's_039_profit_adjust'))
         self.fs_add(self.get_column(df, 's_040_profit_adjust2'))
         self.fs_add(self.get_column(df, 's_041_profit_adjust_ttm'))
+        self.fs_add(self.get_column(df, 's_045_main_cost_adjust'))
 
     def config_widget_data(self):
         self.config_sub_fs(DataAnalysis)
@@ -859,6 +860,33 @@ class DataAnalysis:
             s4 = s1 / s2 * s3
             s4.name = column
             return s4.dropna()
+
+        elif column == 's_045_main_cost_adjust':
+            adjust_dict = {
+                'id_299_cfs_ioa': '加： 资产减值准备',
+                'id_300_cfs_cilor': '信用减值损失',
+                'id_301_cfs_dofx_dooaga_dopba': '固定资产折旧、油气资产折耗、生产性生物资产折旧',
+                'id_302_cfs_daaorei': '投资性房地产的折旧及摊销',
+                'id_303_cfs_aoia': '无形资产摊销',
+                'id_304_cfs_aoltde': '长期待摊费用摊销',
+                'id_305_cfs_lodofaiaaolta': '处置固定资产、无形资产和其他长期资产的损失',
+                'id_306_cfs_lfsfa': '固定资产报废损失',
+                # 'id_307_cfs_lfcifv': '公允价值变动损失',
+                'id_312_cfs_dii': '存货的减少',
+            }
+
+            index_list = list(adjust_dict.keys())
+            res_df = df.loc[:, index_list].copy().dropna(axis=0, how='all')
+            res_df = pd.DataFrame(res_df.apply(lambda x: x.sum(), axis=1))
+
+            new_df = get_month_delta(res_df, column)
+            s1 = new_df[column]
+            s1 = s1.astype('float64')
+            s2 = self.smooth_data(column, 'id_163_ps_toc', delta=True)
+            s3 = s2 - s1
+            s3 = s3.rolling(4, min_periods=1).mean()
+            s3.name = column
+            return s3.dropna()
 
     @staticmethod
     def get_return_year(pe, rate):

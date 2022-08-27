@@ -168,7 +168,9 @@ if __name__ == '__main__':
     # df0 = add_new_style(df0, 's_041_profit_adjust_ttm')
     # df0 = add_new_style(df0, 's_042_roe_adjust', src='id_004_bs_tca_ta_r')
     # df0 = add_new_style(df0, 's_043_turnover_volume_ttm', src='id_041_mvs_mc')
-    df0 = add_new_style(df0, 'market_change_rate', src='s_027_pe_return_rate')
+    # df0 = add_new_style(df0, 'market_change_rate', src='s_027_pe_return_rate')
+    df0 = add_new_style(df0, 's_044_turnover_volume', src='s_043_turnover_volume_ttm')
+    df0 = add_new_style(df0, 's_045_main_cost_adjust', src='s_008_revenue')
     # df0.drop('s_012_return_year', inplace=True)
 
     # df0.loc[

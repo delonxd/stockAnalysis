@@ -188,6 +188,7 @@ class DataPix:
             's_039_profit_adjust',
             's_040_profit_adjust2',
             's_041_profit_adjust_ttm',
+            's_045_main_cost_adjust',
         ]
 
         if index_name in tmp_list:
@@ -444,6 +445,7 @@ class DataPix:
             's_027_pe_return_rate': 'pe回报率',
             'id_341_m_gp_m': '毛利率',
             'id_157_ps_toi': '主营收入',
+            'id_163_ps_toc': '主营成本',
             's_009_revenue_rate': '主营收入增速',
             's_029_return_predict': '预测回报率',
             's_016_roe_parent': 'roe',
@@ -460,6 +462,7 @@ class DataPix:
             's_041_profit_adjust_ttm': 's_041_profit_adjust_ttm',
             's_043_turnover_volume_ttm': 's_043_turnover_volume_ttm',
             'market_change_rate': 'market_change_rate',
+            's_045_main_cost_adjust': 's_045_main_cost_adjust',
         }
 
         tmp_list = list(tmp_dict.keys())
