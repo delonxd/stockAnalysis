@@ -324,9 +324,12 @@ def sort_hold():
     ret = []
     for val in hold_dict:
         code = val[0]
-        df = load_df_from_mysql(code, 'mvs')
         number = val[2]
-        price = df['id_035_mvs_sp'].iloc[-1]
+        if number == 0:
+            price = 0
+        else:
+            df = load_df_from_mysql(code, 'mvs')
+            price = df['id_035_mvs_sp'].iloc[-1]
 
         value = int(round(price * number))
         name = name_dict[code]

@@ -2,7 +2,7 @@ from method.dataMethod import sql2df
 from request.requestData import request2mysql
 from request.requestEquityData import request_eq2mysql
 from method.logMethod import log_it, MainLog
-from method.sortCode import sort_discount, sift_codes
+from method.sortCode import sort_discount, sift_codes, sort_hold
 from method.fileMethod import *
 
 from gui.checkTree import CheckTree
@@ -873,7 +873,7 @@ class MainWidget(QWidget):
 
     @staticmethod
     def get_code_list():
-
+        sort_hold()
         mission = 2
 
         code_list = []
