@@ -5,7 +5,7 @@ from method.logMethod import log_it, MainLog
 from method.sortCode import sort_discount, sift_codes, sort_hold
 from method.fileMethod import *
 
-from gui.checkTree import CheckTree
+from gui.checkTree import CheckTree, StyleWidget
 from gui.dataPix import DataPix
 from gui.stockListView import QStockListView, CodesDataFrame
 from gui.fsView import FsView
@@ -154,6 +154,8 @@ class MainWidget(QWidget):
 
         self.tree = CheckTree(self.style_df)
         self.code_widget = QStockListView(self.codes_df)
+        self.style_widget = StyleWidget()
+        self.style_dict = {}
 
         self.remark_widget = RemarkWidget(self)
         self.web_widget = WebWidget()
@@ -172,8 +174,10 @@ class MainWidget(QWidget):
 
         # self.window2 = ShowPix(main_window=self)
 
-        self.tree.update_style.connect(self.update_style)
+        # self.tree.update_style.connect(self.update_style)
         self.code_widget.table_view.change_signal.connect(self.change_stock)
+        self.style_widget.signal_all.connect(self.change_style_all)
+        self.style_widget.signal_cur.connect(self.change_style_current)
 
         self.cross = False
         self.ratio_dict = dict()
@@ -285,7 +289,7 @@ class MainWidget(QWidget):
         self.label.setMouseTracking(True)
         self.center()
 
-        self.button1.clicked.connect(self.export_style)
+        # self.button1.clicked.connect(self.export_style)
         self.button2.clicked.connect(self.save_codes)
         # self.button3.clicked.connect(self.compare_codes)
         self.button3.clicked.connect(self.show_fs_data)
@@ -297,7 +301,7 @@ class MainWidget(QWidget):
         self.button5.clicked.connect(self.request_data_quick)
         self.button6.clicked.connect(self.show_remark)
         self.button7.clicked.connect(self.show_code_list)
-        self.button8.clicked.connect(self.config_priority)
+        # self.button8.clicked.connect(self.config_priority)
         # self.button9.clicked.connect(self.show_new_window)
         self.button9.clicked.connect(self.show_plot)
         self.button10.clicked.connect(self.show_web)
@@ -498,8 +502,38 @@ class MainWidget(QWidget):
         self.run_buffer()
 
     def show_tree(self):
-        self.tree.show()
-        self.tree.activateWindow()
+        # self.tree.show()
+        # self.tree.activateWindow()
+        self.style_widget.show()
+        self.style_widget.activateWindow()
+
+    def update_style(self):
+        self.pix_dict.clear()
+        self.run_buffer()
+
+    def change_style_all(self, style_df):
+        flag = style_df.equals(self.style_df)
+        if not flag:
+            self.style_df = style_df.copy()
+            self.pix_dict.clear()
+            self.run_buffer()
+
+    def change_style_current(self, style_df):
+        code = self.stock_code
+        self.style_dict[code] = style_df.copy()
+
+        if code in self.pix_dict:
+            self.pix_dict.pop(code)
+
+        ratio = self.ratio_dict.get(code)
+        ratio = 16 if ratio is None else ratio
+
+        df = self.df_dict_copy(code)
+        message = [code, style_df, df, ratio, True]
+        self.send_message(message)
+
+        if style_df.equals(self.style_df):
+            self.style_dict.pop(code)
 
     def show_code_list(self):
         self.code_widget.show()
@@ -530,9 +564,10 @@ class MainWidget(QWidget):
         self.send_message(message)
 
     def export_style(self):
-        df = self.tree.df.copy()
-        df['child'] = None
-        save_default_style(df)
+        # df = self.tree.df.copy()
+        # df['child'] = None
+        # save_default_style(df)
+        pass
 
     def run_buffer(self):
         message_list = list()
@@ -600,6 +635,8 @@ class MainWidget(QWidget):
         self.web_widget.load_code(code)
         self.equity_change_widget.load_code(code)
         self.fs_view.load_df(code)
+
+        self.style_widget.refresh_style(self.style_df)
 
         if len(plt.get_fignums()) == 1:
             self.show_plot()
@@ -719,10 +756,6 @@ class MainWidget(QWidget):
         res = json.dumps(timestamps, indent=4, ensure_ascii=False)
         with open(path, "w", encoding='utf-8') as f:
             f.write(res)
-
-    def update_style(self):
-        self.pix_dict.clear()
-        self.run_buffer()
 
     def change_stock(self, new_index):
         if abs(new_index - self.codes_df.current_index) > 1:
