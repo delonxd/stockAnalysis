@@ -336,6 +336,7 @@ class DataAnalysis:
         self.fs_add(self.get_column(df, 's_040_profit_adjust2'))
         self.fs_add(self.get_column(df, 's_041_profit_adjust_ttm'))
         self.fs_add(self.get_column(df, 's_045_main_cost_adjust'))
+        self.fs_add(self.get_column(df, 's_046_profit_adjust3'))
 
     def config_widget_data(self):
         self.config_sub_fs(DataAnalysis)
@@ -793,8 +794,10 @@ class DataAnalysis:
 
         elif column == 's_038_pay_for_long_term_asset':
             s1 = self.smooth_data('tmp', 'id_271_cfs_cpfpfiaolta', delta=True)
-            s2 = self.smooth_data('tmp', 'id_265_cfs_crfdofiaolta', delta=True)
-            s3 = s1 - s2
+            # s2 = self.smooth_data('tmp', 'id_265_cfs_crfdofiaolta', delta=True)
+            # s2 = self.smooth_data('tmp', 'id_281_cfs_crfai', delta=True)
+            # s3 = s1 - s2
+            s3 = s1
             s3.name = column
             s3 = s3.astype('float64')
             return s3.dropna()
@@ -887,6 +890,20 @@ class DataAnalysis:
             s3 = s3.dropna()
             s3 = s3.rolling(4, min_periods=1).mean()
             s3.name = column
+            return s3.dropna()
+
+        elif column == 's_046_profit_adjust3':
+            s1 = self.get_column(df, 's_039_profit_adjust')
+            s01 = self.smooth_data('tmp', 'id_271_cfs_cpfpfiaolta', delta=True)
+            s02 = self.smooth_data('tmp', 'id_265_cfs_crfdofiaolta', delta=True)
+            s03 = self.smooth_data('tmp', 'id_281_cfs_crfai', delta=True)
+            s2 = s01 - s02 - s03
+            s2 = s2.astype('float64')
+            s3 = s1 - s2
+            s3 = s3.dropna()
+            s3 = s3.rolling(4, min_periods=1).mean()
+            s3.name = column
+            s3 = s3.astype('float64')
             return s3.dropna()
 
     @staticmethod

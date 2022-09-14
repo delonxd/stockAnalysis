@@ -189,6 +189,7 @@ class DataPix:
             's_040_profit_adjust2',
             's_041_profit_adjust_ttm',
             's_045_main_cost_adjust',
+            's_046_profit_adjust3',
         ]
 
         if index_name in tmp_list:
@@ -452,17 +453,18 @@ class DataPix:
             's_032_remain_rate': '资金留存率',
             'mir_y10': '十年期国债利率',
             's_004_pe': 'pe',
-            's_034_real_pe': 'real_pe',
-            's_035_pe2rate': 's_035_pe2rate',
-            's_036_real_pe2rate': 's_036_real_pe2rate',
+            's_034_real_pe': None,
+            's_035_pe2rate': None,
+            's_036_real_pe2rate': None,
 
-            's_038_pay_for_long_term_asset': 's_038_pay_for_long_term_asset',
-            's_039_profit_adjust': 's_039_profit_adjust',
-            's_040_profit_adjust2': 's_040_profit_adjust2',
-            's_041_profit_adjust_ttm': 's_041_profit_adjust_ttm',
-            's_043_turnover_volume_ttm': 's_043_turnover_volume_ttm',
-            'market_change_rate': 'market_change_rate',
-            's_045_main_cost_adjust': 's_045_main_cost_adjust',
+            's_038_pay_for_long_term_asset': None,
+            's_039_profit_adjust': None,
+            's_040_profit_adjust2': None,
+            's_041_profit_adjust_ttm': None,
+            's_043_turnover_volume_ttm': None,
+            'market_change_rate': None,
+            's_045_main_cost_adjust': None,
+            's_046_profit_adjust3': None,
         }
 
         tmp_list = list(tmp_dict.keys())
