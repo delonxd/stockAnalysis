@@ -203,7 +203,11 @@ class MainWidget(QWidget):
 
     @property
     def current_style(self):
-        return int(self.codes_df.df.shape[0])
+        code = self.stock_code
+        style_df = self.style_df
+        if code in self.style_dict:
+            style_df = self.style_dict[code]
+        return style_df
 
     def df_dict_copy(self, code):
         df = self.df_dict.get(code)
@@ -298,7 +302,7 @@ class MainWidget(QWidget):
         # self.button2.clicked.connect(self.scale_up)
         # self.button3.clicked.connect(self.scale_down)
 
-        self.button4.clicked.connect(self.show_tree)
+        self.button4.clicked.connect(self.show_style)
         # self.button5.clicked.connect(self.request_data)
         self.button5.clicked.connect(self.request_data_quick)
         self.button6.clicked.connect(self.show_remark)
@@ -611,10 +615,7 @@ class MainWidget(QWidget):
         self.equity_change_widget.load_code(code)
         self.fs_view.load_df(code)
 
-        style_df = self.style_df
-        if code in self.style_dict:
-            style_df = self.style_dict[code]
-        self.style_widget.refresh_style(style_df)
+        self.style_widget.refresh_style(self.current_style)
 
         if len(plt.get_fignums()) == 1:
             self.show_plot()
@@ -900,10 +901,10 @@ class MainWidget(QWidget):
         self.code_widget.show()
         self.code_widget.activateWindow()
 
-    def show_tree(self):
+    def show_style(self):
         if self.button4.isChecked():
             self.style_widget.show()
-            self.style_widget.refresh_style(self.style_df.copy())
+            self.style_widget.refresh_style(self.current_style)
             self.style_widget.activateWindow()
         else:
             self.equity_change_widget.close()
@@ -994,7 +995,7 @@ class MainWidget(QWidget):
         self.show_pix()
 
     def closeEvent(self, event):
-        # self.tree.close()
+        self.style_widget.close()
         self.code_widget.close()
         self.remark_widget.close()
         self.web_widget.close()

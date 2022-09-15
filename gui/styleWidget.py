@@ -2,10 +2,11 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from method.mainMethod import get_units_dict
-from gui.styleDataFrame import load_default_style, save_default_style
 from gui.priorityTable import PriorityTable
 
 import pandas as pd
+import pickle
+import time
 
 
 class StyleTable(QTableWidget):
@@ -297,7 +298,7 @@ class StyleWidget(QWidget):
         # print(self.style_df)
 
     def refresh_current_pix(self):
-        print(self.style_df.loc[:, 'pix4'])
+        # print(self.style_df.loc[:, 'pix4'])
         self.signal_cur.emit(self.style_df)
 
     def load_default(self):
@@ -317,6 +318,24 @@ class StyleWidget(QWidget):
         new_df = self.style_df.copy()
         new_df.loc[df.index, 'info_priority'] = df.values
         self.refresh_style(new_df)
+
+
+def load_default_style():
+    path = '../gui/styles/style_default.pkl'
+    with open(path, 'rb') as pk_f:
+        df = pickle.load(pk_f)
+    return df
+
+
+def save_default_style(df):
+    timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
+    path1 = '../gui/styles/style_%s.pkl' % timestamp
+    with open(path1, 'wb') as pk_f:
+        pickle.dump(df, pk_f)
+
+    path2 = '../gui/styles/style_default.pkl'
+    with open(path2, 'wb') as pk_f:
+        pickle.dump(df, pk_f)
 
 
 if __name__ == '__main__':

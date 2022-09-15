@@ -5,8 +5,6 @@ import sys
 import pandas as pd
 import numpy as np
 
-from gui.styleDataFrame import load_default_style
-
 
 class PriorityTable(QDialog):
     update_style = pyqtSignal(object)
