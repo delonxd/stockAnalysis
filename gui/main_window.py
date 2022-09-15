@@ -5,13 +5,11 @@ from method.logMethod import log_it, MainLog
 from method.sortCode import sort_discount, sift_codes, sort_hold
 from method.fileMethod import *
 
-from gui.checkTree import CheckTree, StyleWidget
+from gui.styleWidget import StyleWidget
 from gui.dataPix import DataPix
 from gui.stockListView import QStockListView, CodesDataFrame
 from gui.fsView import FsView
 
-from gui.styleDataFrame import save_default_style
-from gui.priorityTable import PriorityTable
 from gui.showPix import ShowPix
 from gui.showPlot import show_plt
 
@@ -153,7 +151,6 @@ class MainWidget(QWidget):
         self.bottom_label1 = QLabel()
         self.bottom_label2 = QLabel()
 
-        # self.tree = CheckTree(self.style_df)
         self.code_widget = QStockListView(self.codes_df)
         self.style_widget = StyleWidget()
         self.style_dict = {}
@@ -202,6 +199,10 @@ class MainWidget(QWidget):
 
     @property
     def len_list(self):
+        return int(self.codes_df.df.shape[0])
+
+    @property
+    def current_style(self):
         return int(self.codes_df.df.shape[0])
 
     def df_dict_copy(self, code):
@@ -502,16 +503,12 @@ class MainWidget(QWidget):
 
         self.run_buffer()
 
-
-    def update_style(self):
-        self.pix_dict.clear()
-        self.run_buffer()
-
     def change_style_all(self, style_df):
         flag = style_df.equals(self.style_df)
         if not flag:
             self.style_df = style_df.copy()
             self.pix_dict.clear()
+            self.style_dict.clear()
             self.run_buffer()
 
     def change_style_current(self, style_df):
@@ -531,18 +528,6 @@ class MainWidget(QWidget):
         if style_df.equals(self.style_df):
             self.style_dict.pop(code)
 
-    def show_code_list(self):
-        self.code_widget.show()
-        self.code_widget.activateWindow()
-
-    def editor1_changed(self, txt):
-        code_list = self.codes_df.df['code'].tolist()
-        if txt in code_list:
-            new_index = code_list.index(txt)
-            self.change_stock(new_index)
-            self.editor1.setText('')
-            self.label.setFocus()
-
     def scale_change(self, val):
         code = self.stock_code
 
@@ -558,12 +543,6 @@ class MainWidget(QWidget):
         df = self.df_dict_copy(code)
         message = [code, style, df, ratio, True]
         self.send_message(message)
-
-    def export_style(self):
-        # df = self.tree.df.copy()
-        # df['child'] = None
-        # save_default_style(df)
-        pass
 
     def run_buffer(self):
         message_list = list()
@@ -632,15 +611,13 @@ class MainWidget(QWidget):
         self.equity_change_widget.load_code(code)
         self.fs_view.load_df(code)
 
-        self.style_widget.refresh_style(self.style_df)
+        style_df = self.style_df
+        if code in self.style_dict:
+            style_df = self.style_dict[code]
+        self.style_widget.refresh_style(style_df)
 
         if len(plt.get_fignums()) == 1:
             self.show_plot()
-
-        # if self.window2.isHidden():
-        #     return
-        # else:
-        #     self.show_plot()
 
     def update_counter(self, code):
         df = self.data_pix.df
@@ -753,20 +730,6 @@ class MainWidget(QWidget):
         with open(path, "w", encoding='utf-8') as f:
             f.write(res)
 
-    def change_stock(self, new_index):
-        if abs(new_index - self.codes_df.current_index) > 1:
-            self.buffer.clear()
-
-        self.codes_df.current_index = new_index
-        self.run_buffer()
-
-        code = self.stock_code
-        if code in self.pix_dict.keys():
-            self.data_pix = self.pix_dict[code]
-        else:
-            self.data_pix = DataPix(code=code, style_df=pd.DataFrame(), df=pd.DataFrame())
-        self.update_window()
-
     def show_stock_name(self):
         row = self.codes_df.df.iloc[self.code_index]
         len_df = self.codes_df.df.shape[0]
@@ -850,6 +813,34 @@ class MainWidget(QWidget):
             self.show_list = self.show_list[:5]
 
     @staticmethod
+    def get_code_list():
+        # sort_hold()
+        code_list = sift_codes(source='hold')
+        code_index = 0
+
+        # if len(code_list) == 0:
+        #     raise KeyboardInterrupt('len(code_list) == 0')
+
+        path = '..\\basicData\\tmp\\code_list_latest.txt'
+        write_json_txt(path, code_list)
+
+        return code_list, code_index
+
+    def change_stock(self, new_index):
+        if abs(new_index - self.codes_df.current_index) > 1:
+            self.buffer.clear()
+
+        self.codes_df.current_index = new_index
+        self.run_buffer()
+
+        code = self.stock_code
+        if code in self.pix_dict.keys():
+            self.data_pix = self.pix_dict[code]
+        else:
+            self.data_pix = DataPix(code=code, style_df=pd.DataFrame(), df=pd.DataFrame())
+        self.update_window()
+
+    @staticmethod
     def get_sign(data):
         if not isinstance(data, (int, float)):
             return ''
@@ -869,9 +860,6 @@ class MainWidget(QWidget):
     def draw_cross(self, x, y):
         self.data_pix.draw_cross(x, y, self.cross)
         self.label.setPixmap(self.data_pix.pix_list[self.window_flag])
-
-        # self.window2.pix = self.data_pix.pix_list[1]
-        # self.window2.update()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -900,31 +888,25 @@ class MainWidget(QWidget):
             new_index = (self.code_index - 1) % self.len_list
             self.change_stock(new_index)
 
-    @staticmethod
-    def get_code_list():
-        # sort_hold()
-        code_list = sift_codes(source='hold')
-        code_index = 0
+    def editor1_changed(self, txt):
+        code_list = self.codes_df.df['code'].tolist()
+        if txt in code_list:
+            new_index = code_list.index(txt)
+            self.change_stock(new_index)
+            self.editor1.setText('')
+            self.label.setFocus()
 
-        # if len(code_list) == 0:
-        #     raise KeyboardInterrupt('len(code_list) == 0')
+    def show_code_list(self):
+        self.code_widget.show()
+        self.code_widget.activateWindow()
 
-        path = '..\\basicData\\tmp\\code_list_latest.txt'
-        write_json_txt(path, code_list)
-
-        return code_list, code_index
-
-    # def config_priority(self):
-    #     widget = PriorityTable(self.style_df)
-    #     widget.update_style.connect(self.config_style_df)
-    #     widget.exec()
-    #
-    # def config_style_df(self, df):
-    #     self.style_df.loc[df.index, 'info_priority'] = df.values
-    #     self.update_style()
-
-    # def show_new_window(self):
-    #     self.window2.show()
+    def show_tree(self):
+        if self.button4.isChecked():
+            self.style_widget.show()
+            self.style_widget.refresh_style(self.style_df.copy())
+            self.style_widget.activateWindow()
+        else:
+            self.equity_change_widget.close()
 
     def show_plot(self):
         df = self.data_pix.df
@@ -950,17 +932,6 @@ class MainWidget(QWidget):
             self.equity_change_widget.show()
             self.equity_change_widget.load_code(self.stock_code)
             self.equity_change_widget.activateWindow()
-        else:
-            self.equity_change_widget.close()
-
-    def show_tree(self):
-        # self.tree.show()
-        # self.tree.activateWindow()
-
-        if self.button4.isChecked():
-            self.style_widget.show()
-            self.style_widget.refresh_style(self.style_df.copy())
-            self.style_widget.activateWindow()
         else:
             self.equity_change_widget.close()
 
