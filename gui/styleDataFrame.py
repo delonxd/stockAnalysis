@@ -171,7 +171,7 @@ if __name__ == '__main__':
     # df0 = add_new_style(df0, 'market_change_rate', src='s_027_pe_return_rate')
     # df0 = add_new_style(df0, 's_044_turnover_volume', src='s_043_turnover_volume_ttm')
     # df0 = add_new_style(df0, 's_045_main_cost_adjust', src='s_008_revenue')
-    df0 = add_new_style(df0, 's_046_profit_adjust3', src='s_040_profit_adjust2')
+    # df0 = add_new_style(df0, 's_046_profit_adjust3', src='s_040_profit_adjust2')
     # df0.drop('s_012_return_year', inplace=True)
 
     # df0.loc[
@@ -181,5 +181,46 @@ if __name__ == '__main__':
     # ] = ['auto', 'auto']
     #
     # print(df0[['scale_min', 'scale_max', 'units']])
+
+    print(df0.columns.values)
+
+    tmp_dict = {
+        's_022_profit_no_expenditure': '股东盈余',
+        's_025_real_cost': '真实成本',
+        'id_041_mvs_mc': '市值',
+        'id_217_ps_npatoshopc': '归母净利润',
+        's_018_profit_parent': '归母净利润',
+        'id_124_bs_tetoshopc': '归母股东权益',
+        's_017_equity_parent': '归母股东权益',
+        'id_001_bs_ta': '资产合计',
+        's_020_cap_asset': '资本化资产',
+        'id_261_cfs_ncffoa': '经营现金流净额',
+        's_026_holder_return_rate': '股东回报率',
+        's_027_pe_return_rate': 'pe回报率',
+        'id_341_m_gp_m': '毛利率',
+        'id_157_ps_toi': '主营收入',
+        'id_163_ps_toc': '主营成本',
+        's_009_revenue_rate': '主营收入增速',
+        's_029_return_predict': '预测回报率',
+        's_016_roe_parent': 'roe',
+        's_032_remain_rate': '资金留存率',
+        'mir_y10': '十年期国债利率',
+        's_004_pe': 'pe',
+        's_034_real_pe': None,
+        's_035_pe2rate': None,
+        's_036_real_pe2rate': None,
+
+        's_038_pay_for_long_term_asset': None,
+        's_039_profit_adjust': None,
+        's_040_profit_adjust2': None,
+        's_041_profit_adjust_ttm': None,
+        's_043_turnover_volume_ttm': None,
+        'market_change_rate': None,
+        's_045_main_cost_adjust': None,
+        's_046_profit_adjust3': None,
+    }
+    index = list(tmp_dict.keys())
+    df0.loc[index, 'pix4'] = True
+    print(df0['pix4'])
     save_default_style(df0)
     pass

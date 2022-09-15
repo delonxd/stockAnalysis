@@ -136,6 +136,7 @@ class MainWidget(QWidget):
         self.button11 = QPushButton('equity_change')
         self.button12 = QPushButton('relocate')
 
+        self.button4.setCheckable(True)
         self.button9.setCheckable(True)
         self.button10.setCheckable(True)
         self.button11.setCheckable(True)
@@ -152,7 +153,7 @@ class MainWidget(QWidget):
         self.bottom_label1 = QLabel()
         self.bottom_label2 = QLabel()
 
-        self.tree = CheckTree(self.style_df)
+        # self.tree = CheckTree(self.style_df)
         self.code_widget = QStockListView(self.codes_df)
         self.style_widget = StyleWidget()
         self.style_dict = {}
@@ -501,11 +502,6 @@ class MainWidget(QWidget):
 
         self.run_buffer()
 
-    def show_tree(self):
-        # self.tree.show()
-        # self.tree.activateWindow()
-        self.style_widget.show()
-        self.style_widget.activateWindow()
 
     def update_style(self):
         self.pix_dict.clear()
@@ -906,138 +902,31 @@ class MainWidget(QWidget):
 
     @staticmethod
     def get_code_list():
-        sort_hold()
-        mission = 2
-
-        code_list = []
+        # sort_hold()
+        code_list = sift_codes(source='hold')
         code_index = 0
 
-        if mission == 0:
-
-            code_list = sift_codes(
-                source='old',
-            )
-
-            # code_index = '000408'
-            code_index = 0
-
-        elif mission == 1:
-
-            code_list = sift_codes(
-                source='real_pe',
-                # sort='real_pe',
-                market='all',
-                # random=False,
-                random=True,
-                interval=80,
-                mode='all-whitelist',
-            )
-
-        elif mission == 2:
-
-            code_list = sift_codes(
-                # ids_names=['2-出版'],
-                source='hold',
-                # source='salary',
-                # source='industry-ass/equity',
-                # source='all',
-                # source='latest_update',
-                # source='sort-equity',
-                # source='sort-ass',
-                # sort='industry',
-            )
-
-        elif mission == 3:
-
-            code_list = sift_codes(
-                source='all',
-                sort='sort-ass/equity',
-                # market='main',
-                market='main+growth',
-                # insert=0,
-                random=True,
-                interval=30,
-                # mode='whitelist+selected',
-                mode='whitelist-selected',
-            )
-
-        elif mission == 4:
-
-            code_list = sift_codes(
-                source='selected',
-                # source='mark-1',
-                sort='sort-ass/equity',
-                # sort='sort-ass/turnover',
-                # reverse=True,
-                # market='main',
-                # market='growth',
-                market='main+growth',
-
-                random=True,
-                interval=100,
-                mode='selected',
-                # mode='whitelist+selected',
-            )
-
-            # code_index = '603666'
-            # code_index = '002043'
-            code_index = 0
-
-        elif mission == 5:
-
-            code_list = sift_codes(
-                # source='all',
-                source='whitelist',
-                # sort='industry',
-                sort='industry-ass/equity',
-                # reverse=True,
-                # market='main+growth',
-            )
-            # code_index = '002043'
-            code_index = 203
-
-        elif mission == 6:
-
-            code_list = sift_codes(
-                source='whitelist',
-                blacklist='sort-ass/equity',
-                # market='main',
-                # market='non_main',
-                market='growth',
-            )
-
-        elif mission == 7:
-
-            code_list = sift_codes(
-                ids_names=['2-光伏设备'],
-                sort='real_pe',
-                market='all',
-            )
-
-        ################################################################################################################
-
-        if len(code_list) == 0:
-            raise KeyboardInterrupt('len(code_list) == 0')
+        # if len(code_list) == 0:
+        #     raise KeyboardInterrupt('len(code_list) == 0')
 
         path = '..\\basicData\\tmp\\code_list_latest.txt'
         write_json_txt(path, code_list)
 
         return code_list, code_index
 
-    def config_priority(self):
-        widget = PriorityTable(self.style_df)
-        widget.update_style.connect(self.config_style_df)
-        widget.exec()
+    # def config_priority(self):
+    #     widget = PriorityTable(self.style_df)
+    #     widget.update_style.connect(self.config_style_df)
+    #     widget.exec()
+    #
+    # def config_style_df(self, df):
+    #     self.style_df.loc[df.index, 'info_priority'] = df.values
+    #     self.update_style()
 
-    def config_style_df(self, df):
-        self.style_df.loc[df.index, 'info_priority'] = df.values
-        self.update_style()
-
-    def show_new_window(self):
-        self.window2.show()
+    # def show_new_window(self):
+    #     self.window2.show()
 
     def show_plot(self):
-
         df = self.data_pix.df
         if df.columns.size == 0:
             return
@@ -1061,6 +950,17 @@ class MainWidget(QWidget):
             self.equity_change_widget.show()
             self.equity_change_widget.load_code(self.stock_code)
             self.equity_change_widget.activateWindow()
+        else:
+            self.equity_change_widget.close()
+
+    def show_tree(self):
+        # self.tree.show()
+        # self.tree.activateWindow()
+
+        if self.button4.isChecked():
+            self.style_widget.show()
+            self.style_widget.refresh_style(self.style_df.copy())
+            self.style_widget.activateWindow()
         else:
             self.equity_change_widget.close()
 
@@ -1123,7 +1023,7 @@ class MainWidget(QWidget):
         self.show_pix()
 
     def closeEvent(self, event):
-        self.tree.close()
+        # self.tree.close()
         self.code_widget.close()
         self.remark_widget.close()
         self.web_widget.close()

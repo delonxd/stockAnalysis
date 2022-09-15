@@ -163,5 +163,8 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    request_eq2mysql(['000001'])
+    list1 = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
+    list2 = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt")
+    list3 = list(set(list1 + list2))
+    request_eq2mysql(list3)
     pass

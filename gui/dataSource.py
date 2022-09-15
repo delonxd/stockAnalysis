@@ -34,6 +34,8 @@ class DataSource:
 
             ma_mode,
             frequency,
+
+            pix_show,
     ):
 
         self.parent = parent
@@ -52,6 +54,7 @@ class DataSource:
         self.delta_mode = delta_mode
         self.ma_mode = ma_mode
         self.frequency = frequency
+        self.pix_show = pix_show
 
         # self.format_data_source()
 
@@ -305,6 +308,7 @@ class DefaultDataSource(DataSource):
         self.delta_mode = False
         self.ma_mode = 0
         self.frequency = None
+        self.pix_show = [False, False, False, False]
 
         self.format_data_source()
 

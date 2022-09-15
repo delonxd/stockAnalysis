@@ -131,6 +131,12 @@ class DataPix:
                 default_ds=row['default_ds'],
                 ma_mode=row['ma_mode'],
                 frequency=row['frequency'],
+                pix_show=[
+                    row['pix1'],
+                    row['pix2'],
+                    row['pix3'],
+                    row['pix4'],
+                ],
             )
             self.data_dict[ds.index_name] = ds
 
@@ -478,12 +484,21 @@ class DataPix:
         self.draw_split(self.pix4)
 
         for ds in self.data_dict.values():
-            if ds.ds_type == 'digit' and ds.data_type is None:
-                self.draw_data(ds, self.pix)
-                self.draw_data(ds, self.pix3)
+            pix_list = [self.pix, self.pix2, self.pix3, self.pix4]
 
-            if ds.index_name in tmp_list:
-                self.draw_data(ds, self.pix4)
+            for index in range(4):
+                flag = ds.pix_show[index]
+                pix = pix_list[index]
+
+                if flag is True:
+                    self.draw_data(ds, pix)
+
+            # if ds.ds_type == 'digit' and ds.data_type is None:
+            #     self.draw_data(ds, self.pix)
+            #     self.draw_data(ds, self.pix3)
+            #
+            # if ds.index_name in tmp_list:
+            #     self.draw_data(ds, self.pix4)
 
     def draw_percentage(self, pix, data_type):
         if 'id_001_bs_ta' not in self.data_dict.keys():

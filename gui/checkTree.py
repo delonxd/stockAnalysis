@@ -347,68 +347,41 @@ class CheckTree(QTreeWidget):
                     self.update_style.emit()
 
 
-class StyleTreeChild(QTreeWidgetItem):
-    def __init__(self, parent, row_data):
-        super().__init__(parent)
-        self.row_data = row_data
+# class StyleTreeChild(QTreeWidgetItem):
+#     def __init__(self, parent, df_index):
+#         super().__init__(parent)
+#         self.df_index = df_index
+#         self.parent_item = parent
 
 
-class StyleTreeCheckBox(QCheckBox):
-    def __init__(self, parent_item, column, tree):
+class StyleTable(QTableWidget):
+    def __init__(self):
         super().__init__()
-        self.parent_item = parent_item
-        self.column = column
-        self.tree = tree
+        self.setMinimumSize(1200, 800)
 
-        self.clicked.connect(self.self_clicked)
-
-    def self_clicked(self):
-        flag = self.isChecked()
-        tree = self.tree
-        df = self.tree.style_df
-
-        child = self.parent_item
-        row = child.row_data
-        column = self.column
-
-        if column == 'selected':
-            if flag:
-                if not row['show_name']:
-                    row['show_name'] = row['txt_CN']
-                pr = df['info_priority'].max()
-            else:
-                pr = 0
-            row['info_priority', 'selected'] = pr, flag
-
-            tree.show_item(child, 'show_name', 'str')
-            tree.show_item(child, 'info_priority', 'digit')
-
-        elif column == 'default_ds':
-            if flag:
-                if row['selected'] is True:
-                    row0 = df.loc[df['default_ds'] == True]
-                    for index in row0.index:
-                        child0 = tree.child_dict[index]
-                        child0.row_data['default_ds'] = False
-                        tree.show_item(child0, 'default_ds', typ='checkbox')
-
-                    row['default_ds'] = True
-                    tree.show_item(child, 'default_ds', 'checkbox')
-                else:
-                    self.setChecked(False)
-
-            else:
-                self.setChecked(True)
-
-        else:
-            row[column] = flag
-
-
-class StyleTreeComboBox(QComboBox):
-    def __init__(self, parent_item, column):
-        super().__init__()
-        self.parent_item = parent_item
-        self.column = column
+        self.column_type = {
+            'index_name': 'str',
+            'selected': 'bool',
+            'show_name': 'str',
+            'color': 'color',
+            'line_thick': 'digit',
+            'pen_style': 'pen',
+            'scale_min': 'digit',
+            'scale_max': 'digit',
+            'scale_div': 'digit',
+            'logarithmic': 'bool',
+            'units': 'str',
+            'txt_CN': 'str',
+            'default_ds': 'bool',
+            'info_priority': 'digit',
+            'ds_type': 'str',
+            'delta_mode': 'bool',
+            'ma_mode': 'digit',
+            # 'pix1': 'checkbox',
+            # 'pix2': 'checkbox',
+            'pix3': 'bool',
+            'pix4': 'bool',
+        }
 
         self.pen_dict = {
             Qt.NoPen: 'NoPen',
@@ -420,47 +393,10 @@ class StyleTreeComboBox(QComboBox):
             # Qt.CustomDashLine: 'CustomDashLine',
             # Qt.MPenStyle: 'MPenStyle',
         }
-        for txt in self.pen_dict.values():
-            self.addItem(txt)
 
-        self.currentIndexChanged.connect(self.selection_change)
-
-    def selection_change(self):
-        txt = self.currentText()
-        pen_style = 1
-        for key, value in self.pen_dict.items():
-            if txt == value:
-                pen_style = key
-                break
-        self.parent_item.row_data[self.column] = pen_style
-
-    def wheelEvent(self, e):
-        pass
-
-
-class StyleTree(QTreeWidget):
-    def __init__(self):
-        super().__init__()
-        self.setMinimumSize(1200, 800)
-
-        self.column_type = {
-            'index_name': 'str',
-            'selected': 'checkbox',
-            'show_name': 'str',
-            'color': 'color',
-            'line_thick': 'digit',
-            'pen_style': 'combobox',
-            'scale_min': 'digit',
-            'scale_max': 'digit',
-            'scale_div': 'digit',
-            'logarithmic': 'checkbox',
-            'units': 'str',
-            'txt_CN': 'str',
-            'default_ds': 'checkbox',
-            'info_priority': 'digit',
-            'ds_type': 'str',
-            'delta_mode': 'checkbox',
-            'ma_mode': 'digit',
+        self.bool_dict = {
+            True: '√',
+            False: '',
         }
 
         self.index_pos = dict()
@@ -470,114 +406,175 @@ class StyleTree(QTreeWidget):
         # self.column_names = self.column_type.keys()
         self.setColumnCount(len(self.column_type))
 
-        width_list = [180, 20, 70, 10, 40, 90, 50, 50, 40, 10, 30, 200, 20, 40, 50, 20, 20]
-        for idx, val in enumerate(width_list):
-            self.setColumnWidth(idx, val)
+        # width_list = [180, 22, 70, 22, 22, 90, 50, 50, 40, 10, 30, 200, 20, 40, 50, 20, 20, 20, 20]
+        # for idx, val in enumerate(width_list):
+        #     self.setColumnWidth(idx, val)
 
         self.style_df = pd.DataFrame()
-        self.child_dict = {}
 
-        self.setHeaderLabels(self.column_type)
+        self.setHorizontalHeaderLabels(self.column_type.keys())
         self.setSelectionBehavior(QAbstractItemView.SelectItems)
+        self.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
-        self.clicked.connect(self.tree_clicked)
+        self.clicked.connect(self.table_clicked)
 
     def init_style_df(self, style_df):
         self.style_df = style_df
+        print(time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())))
         self.show_style_df()
-        self.expandAll()
+        # self.expandAll()
+        print(time.strftime("%Y%m%d%H%M%S", time.localtime(time.time())))
 
     def show_style_df(self):
         df = self.style_df
         self.clear()
-        self.child_dict.clear()
 
-        root = QRootItemDf(self)
-        root.setText(0, 'root')
-        root.df = df
+        self.setRowCount(df.shape[0])
 
-        for index, row in df.iterrows():
-            child = StyleTreeChild(root, row)
-            self.child_dict[index] = child
-            for key, value in self.column_type.items():
-                self.show_item(child, key, typ=value)
+        for i, index in enumerate(df.index):
+            for j, tmp in enumerate(self.column_type.items()):
+                column, typ = tmp
+                data = df.loc[index, column]
+                item = QTableWidgetItem()
 
-    def show_item(self, child, column, typ):
-        row = child.row_data
-        pos = self.index_pos[column]
-        data = row[column]
+                self.show_item(i, j, item, data, typ)
 
+        self.resizeColumnsToContents()
+        self.setHorizontalHeaderLabels(self.column_type.keys())
+        self.setColumnWidth(0, 180)
+        self.setColumnWidth(2, 100)
+        self.setColumnWidth(11, 200)
+
+    def show_item(self, i, j, item, data, typ):
         if typ == 'str':
-            child.setText(pos, data)
+            item.setText(data)
 
         elif typ == 'digit':
-            child.setText(pos, str(data))
+            item.setText(str(data))
 
         elif typ == 'color':
             pix = QPixmap(64, 64)
             pix.fill(data)
-            child.setIcon(pos, QIcon(pix))
+            item.setIcon(QIcon(pix))
 
-        elif typ == 'checkbox':
-            check_box = StyleTreeCheckBox(child, column, self)
-            check_box.setStyleSheet('QComboBox{margin:3px};')
-            check_box.setChecked(data)
-            self.setItemWidget(child, pos, check_box)
+        elif typ == 'pen':
+            txt = self.pen_dict[data]
+            item.setText(txt)
 
-        elif typ == 'combobox':
-            combo_box = StyleTreeComboBox(child, column)
-            combo_box.setStyleSheet('QComboBox{margin:3px};')
-            combo_box.setCurrentText(combo_box.pen_dict[data])
-            self.setItemWidget(child, pos, combo_box)
+        elif typ == 'bool':
+            txt = self.bool_dict[data]
+            item.setText(txt)
+        self.setItem(i, j, item)
 
-    def tree_clicked(self, index):
-        child = self.currentItem()
-        column_label = list(self.column_type.keys())
-        column = column_label[index.column()]
-        typ = self.column_type[column]
+    def table_clicked(self, item):
+        pass
+        # child = self.currentItem()
+        # column_label = list(self.column_type.keys())
+        # column = column_label[arg1.column()]
+        # typ = self.column_type[column]
+        # df = self.style_df
+        #
+        # if isinstance(child, StyleTreeChild):
+        #     index = child.df_index
+        #
+        #     title = index
+        #     label = column + ': '
+        #     ini = df.loc[index, column]
+        #
+        #     value = None
+        #     # print('index: %s, column: %s' % (index, column))
+        #
+        #     if column in ['color']:
+        #         value = QColorDialog.getColor()
+        #
+        #     elif column in ['line_thick', 'scale_div', 'info_priority', 'ma_mode']:
+        #         text, _ = QInputDialog.getText(self, title, label)
+        #         if text.isdigit():
+        #             value = int(text)
+        #
+        #     elif column in ['scale_min', 'scale_max']:
+        #         text, _ = QInputDialog.getText(self, title, label)
+        #         if text == 'auto':
+        #             value = text
+        #         else:
+        #             try:
+        #                 value = float(text)
+        #             except Exception as e:
+        #                 print(e)
+        #                 return
+        #
+        #     elif column in ['show_name']:
+        #         value, _ = QInputDialog.getText(self, title, label, text=ini)
+        #
+        #     elif column in ['units']:
+        #         items = list(get_units_dict().keys())
+        #         current = items.index(ini)
+        #         value, _ = QInputDialog.getItem(self, title, label, items, current, False)
+        #
+        #     elif column in ['pen_style']:
+        #         value = self.item_dialog(title, label, self.pen_dict, ini)
+        #
+        #     elif column in [
+        #         'selected',
+        #         'logarithmic',
+        #         'default_ds',
+        #         'delta_mode',
+        #         'pix3',
+        #         'pix4',
+        #     ]:
+        #
+        #         flag = self.item_dialog(title, label, self.bool_dict, ini)
+        #
+        #         if ini == flag:
+        #             return
+        #
+        #         row = df.loc[index, :]
+        #         if column == 'selected':
+        #             if flag:
+        #                 if not row['show_name']:
+        #                     df.loc[index, 'show_name'] = row['txt_CN']
+        #                 pr = df['info_priority'].max() + 1
+        #             else:
+        #                 pr = 0
+        #             df.loc[index, ['info_priority', 'selected']] = pr, flag
+        #             row = df.loc[index, :]
+        #             self.show_item(child, row, 'show_name', 'str')
+        #             self.show_item(child, row, 'info_priority', 'digit')
+        #
+        #         elif column == 'default_ds':
+        #             if flag:
+        #                 if row['selected'] is True:
+        #                     df0 = df.loc[df['default_ds'] == True].copy()
+        #                     df0['default_ds'] = False
+        #                     for index0, row0 in df0.iterrows():
+        #                         df.loc[index0, 'default_ds'] = False
+        #                         child0 = self.child_dict[index0]
+        #                         self.show_item(child0, row0, 'default_ds', 'bool')
+        #
+        #                     df.loc[index, 'default_ds'] = True
+        #                     row1 = df.loc[index, :]
+        #                     self.show_item(child, row1, 'default_ds', 'bool')
+        #                     value = True
+        #                 else:
+        #                     value = False
+        #             else:
+        #                 value = True
+        #         else:
+        #             value = flag
+        #
+        #     if value is not None:
+        #         df.loc[index, column] = value
+        #         series = df.loc[index, :]
+        #         self.show_item(child, series, column, typ=typ)
 
-        if isinstance(child, StyleTreeChild):
-            index = child.row_data.name
-
-            # print('index: %s, column: %s' % (index, column))
-
-            if column in ['color']:
-                color = QColorDialog.getColor()
-                child.row_data[column] = color
-                self.show_item(child, column, typ)
-
-            elif column in ['line_thick', "scale_div", "info_priority", "ma_mode"]:
-                text, _ = QInputDialog.getText(self, column, column + ': ')
-                if text.isdigit():
-                    child.row_data[column] = int(text)
-                    self.show_item(child, column, typ)
-
-            elif column in ["scale_min", "scale_max"]:
-                text, _ = QInputDialog.getText(self, column, column + ': ')
-                if text == 'auto':
-                    val = text
-                else:
-                    try:
-                        val = float(text)
-                    except Exception as e:
-                        print(e)
-                        return
-                child.row_data[column] = val
-                self.show_item(child, column, typ)
-
-            elif column in ["show_name"]:
-                ini = child.row_data[column]
-                text, _ = QInputDialog.getText(self, column, column + ': ', text=ini)
-                child.row_data[column] = text
-                self.show_item(child, column, typ)
-
-            elif column in ["show_name"]:
-                ini = child.row_data[column]
-                text, _ = QInputDialog.getText(self, column, column + ': ', text=ini)
-
-                if text in get_units_dict().keys():
-                    child.row_data[column] = text
-                    self.show_item(child, column, typ)
+    def item_dialog(self, title, label, dict0, ini):
+        items = list(dict0.values())
+        current = items.index(dict0[ini])
+        text, _ = QInputDialog.getItem(self, title, label, items, current, False)
+        for key, value in dict0.items():
+            if text == value:
+                value = key
+                return value
 
 
 class StyleWidget(QWidget):
@@ -605,7 +602,7 @@ class StyleWidget(QWidget):
         layout1.addStretch(1)
 
         self.style_df = pd.DataFrame()
-        self.style_tree = StyleTree()
+        self.style_tree = StyleTable()
 
         layout2 = QVBoxLayout()
         layout2.addLayout(layout1)
@@ -620,14 +617,20 @@ class StyleWidget(QWidget):
         self.button5.clicked.connect(self.config_priority)
 
     def refresh_style(self, new_df):
+        if self.isHidden():
+            return
+
         df1 = self.style_df
         df2 = new_df
 
         flag = df1.equals(df2)
 
+        print(df1.size)
+        print(df2.size)
+        print(flag)
         if not flag:
             self.style_df = new_df.copy()
-            self.style_tree.init_style_df(new_df)
+            self.style_tree.init_style_df(self.style_df)
 
     def refresh_all_pix(self):
         self.signal_all.emit(self.style_df)
@@ -635,7 +638,6 @@ class StyleWidget(QWidget):
 
     def refresh_current_pix(self):
         self.signal_cur.emit(self.style_df)
-        # print(self.style_df)
 
     def load_default(self):
         new_df = load_default_style()
@@ -658,12 +660,15 @@ class StyleWidget(QWidget):
 
 if __name__ == '__main__':
     import sys
+    # pd.set_option('display.max_columns', None)
+    # pd.set_option('display.max_rows', None)
+    # pd.set_option('display.width', 100000)
 
     app = QApplication(sys.argv)
     main = StyleWidget()
+    main.show()
+    # main.showMinimized()
     main.load_default()
-    # main.show()
-    main.showMinimized()
     sys.exit(app.exec_())
 
     pass
