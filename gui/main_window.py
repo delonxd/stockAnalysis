@@ -407,17 +407,6 @@ class MainWidget(QWidget):
         write_json_txt(path, mark_dict, log=False)
         self.show_stock_name()
 
-    @staticmethod
-    def compare_codes():
-        pass
-        # widget = ComparisonWidget()
-        # widget.show()
-
-    def show_fs_data(self):
-        self.fs_view.show()
-        self.fs_view.load_df(self.stock_code)
-        self.fs_view.activateWindow()
-
     def add_code(self, path):
         row = self.codes_df.df.iloc[self.code_index]
         code = row['code']
@@ -452,10 +441,6 @@ class MainWidget(QWidget):
             f.write(res)
 
         self.show_stock_name()
-
-    def show_remark(self):
-        self.remark_widget.show()
-        self.remark_widget.activateWindow()
 
     def request_data(self):
         code = self.stock_code
@@ -896,6 +881,21 @@ class MainWidget(QWidget):
             self.change_stock(new_index)
             self.editor1.setText('')
             self.label.setFocus()
+
+    @staticmethod
+    def compare_codes():
+        pass
+        # widget = ComparisonWidget()
+        # widget.show()
+
+    def show_fs_data(self):
+        self.fs_view.show()
+        self.fs_view.load_df(self.stock_code)
+        self.fs_view.activateWindow()
+
+    def show_remark(self):
+        self.remark_widget.show()
+        self.remark_widget.activateWindow()
 
     def show_code_list(self):
         self.code_widget.show()

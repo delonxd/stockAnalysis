@@ -229,6 +229,12 @@ def sql2df(code):
     data = DataAnalysis(df1, df2)
     data.config_widget_data()
 
+    df3 = load_df_from_mysql(code, 'eq')
+    new_df = df3.loc[:, ['id_002_rate']]
+    if new_df.size > 0:
+        new_df = new_df / new_df.iloc[-1, 0]
+    new_df.columns = ['eq_002_rate']
+    data.add_df(new_df)
     # print(data.df.columns.values)
     # print(data.df['s_012_return_year'])
 
@@ -509,6 +515,9 @@ class DataAnalysis:
             suffixes=('_fs', '_mvs'),
             copy=True,
         )
+
+    def add_df(self, new_df):
+        self.df = pd.concat([self.df, new_df], axis=1, sort=True)
 
     @staticmethod
     def get_df_after_date(df, date):
