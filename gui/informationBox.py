@@ -72,6 +72,7 @@ class InformationBox:
         text_list1 = list()
         text_list2 = list()
         text_list3 = list()
+        text_list4 = list()
 
         for row in text_list:
             # if len(row) == 2:
@@ -94,6 +95,7 @@ class InformationBox:
                 text_list1.append((row[0], row[1]))
                 text_list2.append((row[0], row[1]))
                 text_list3.append((row[0], row[1]))
+                text_list4.append((row[0], row[1]))
                 continue
             ds = row[2]
 
@@ -101,41 +103,52 @@ class InformationBox:
                 text_list1.append((row[0], row[1]))
             elif ds.data_type == 'assets':
                 text_list2.append((row[0], row[1]))
-            else:
-                text_list3.append((row[0], row[1]))
+            # else:
+            #     text_list3.append((row[0], row[1]))
+            #     text_list4.append((row[0], row[1]))
 
-            page1 = [
-                'id_001_bs_ta',
-                'id_062_bs_tl',
-                'id_063_bs_lwi',
-                'id_065_bs_tl_ta_r',
-                'id_066_bs_tcl',
-                'id_110_bs_toe',
-                'id_117_bs_is',
-                's_017_equity_parent',
-                's_021_cap_expenditure',
-            ]
+            # page1 = [
+            #     'id_001_bs_ta',
+            #     'id_062_bs_tl',
+            #     'id_063_bs_lwi',
+            #     'id_065_bs_tl_ta_r',
+            #     'id_066_bs_tcl',
+            #     'id_110_bs_toe',
+            #     'id_117_bs_is',
+            #     's_017_equity_parent',
+            #     's_021_cap_expenditure',
+            # ]
+            #
+            # page2 = [
+            #     'id_001_bs_ta',
+            #     'id_003_bs_tca',
+            #     'id_032_bs_tnca',
+            #     's_019_monetary_asset',
+            #     's_020_cap_asset',
+            #     's_021_cap_expenditure',
+            # ]
+            #
+            # if ds.index_name in page1:
+            #     text_list1.append((row[0], row[1]))
+            #
+            # if ds.index_name in page2:
+            #     text_list2.append((row[0], row[1]))
 
-            page2 = [
-                'id_001_bs_ta',
-                'id_003_bs_tca',
-                'id_032_bs_tnca',
-                's_019_monetary_asset',
-                's_020_cap_asset',
-                's_021_cap_expenditure',
-            ]
-
-            if ds.index_name in page1:
+            if ds.info_show[0] is True:
                 text_list1.append((row[0], row[1]))
-
-            if ds.index_name in page2:
+            if ds.info_show[1] is True:
                 text_list2.append((row[0], row[1]))
+            if ds.info_show[2] is True:
+                text_list3.append((row[0], row[1]))
+            if ds.info_show[3] is True:
+                text_list4.append((row[0], row[1]))
 
         pix1 = self.draw_text(text_list1)
         pix2 = self.draw_text(text_list2)
         pix3 = self.draw_text(text_list3)
+        pix4 = self.draw_text(text_list4)
 
-        return pix1, pix2, pix3
+        return pix1, pix2, pix3, pix4
 
     @staticmethod
     def draw_text(text_list):

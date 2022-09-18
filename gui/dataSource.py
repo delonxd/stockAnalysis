@@ -36,6 +36,7 @@ class DataSource:
             frequency,
 
             pix_show,
+            info_show,
     ):
 
         self.parent = parent
@@ -55,6 +56,7 @@ class DataSource:
         self.ma_mode = ma_mode
         self.frequency = frequency
         self.pix_show = pix_show
+        self.info_show = info_show
 
         # self.format_data_source()
 
@@ -309,6 +311,7 @@ class DefaultDataSource(DataSource):
         self.ma_mode = 0
         self.frequency = None
         self.pix_show = [False, False, False, False]
+        self.info_show = [False, False, False, False]
 
         self.format_data_source()
 

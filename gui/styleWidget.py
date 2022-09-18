@@ -32,10 +32,14 @@ class StyleTable(QTableWidget):
             'ds_type': 'str',
             'delta_mode': 'bool',
             'ma_mode': 'digit',
-            # 'pix1': 'checkbox',
-            # 'pix2': 'checkbox',
+            'pix1': 'bool',
+            'pix2': 'bool',
             'pix3': 'bool',
             'pix4': 'bool',
+            'info1': 'bool',
+            'info2': 'bool',
+            'info3': 'bool',
+            'info4': 'bool',
         }
 
         self.pen_dict = {
@@ -90,9 +94,9 @@ class StyleTable(QTableWidget):
 
         self.resizeColumnsToContents()
         self.setHorizontalHeaderLabels(self.column_type.keys())
-        self.setColumnWidth(0, 180)
-        self.setColumnWidth(2, 100)
-        self.setColumnWidth(11, 200)
+        self.setColumnWidth(0, 120)
+        self.setColumnWidth(2, 160)
+        self.setColumnWidth(11, 160)
 
     def get_item(self, index, column):
         df = self.style_df
@@ -143,8 +147,14 @@ class StyleTable(QTableWidget):
             'logarithmic',
             'default_ds',
             'delta_mode',
+            'pix1',
+            'pix2',
             'pix3',
             'pix4',
+            'info1',
+            'info2',
+            'info3',
+            'info4',
         ]:
             data = df.loc[index, column]
             flag = not data

@@ -875,8 +875,8 @@ class DataAnalysis:
 
         elif column == 's_045_main_cost_adjust':
             adjust_dict = {
-                'id_299_cfs_ioa': '加： 资产减值准备',
-                'id_300_cfs_cilor': '信用减值损失',
+                # 'id_299_cfs_ioa': '加： 资产减值准备',
+                # 'id_300_cfs_cilor': '信用减值损失',
                 'id_301_cfs_dofx_dooaga_dopba': '固定资产折旧、油气资产折耗、生产性生物资产折旧',
                 'id_302_cfs_daaorei': '投资性房地产的折旧及摊销',
                 'id_303_cfs_aoia': '无形资产摊销',
