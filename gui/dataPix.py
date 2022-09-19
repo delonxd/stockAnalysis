@@ -207,6 +207,13 @@ class DataPix:
             's_041_profit_adjust_ttm',
             's_045_main_cost_adjust',
             's_046_profit_adjust3',
+            's_047_gross_cost',
+
+            's_048_profit_tax',
+            's_049_pf_tx_invest',
+            's_050_pf_tx_iv_outer',
+            's_051_core_profit',
+            's_052_core_profit_asset',
         ]
 
         if index_name in tmp_list:

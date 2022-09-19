@@ -83,7 +83,13 @@ if __name__ == '__main__':
     # df0 = add_new_style(df0, 's_044_turnover_volume', src='s_043_turnover_volume_ttm')
     # df0 = add_new_style(df0, 's_045_main_cost_adjust', src='s_008_revenue')
     # df0 = add_new_style(df0, 's_046_profit_adjust3', src='s_040_profit_adjust2')
-    df0 = add_new_style(df0, 'eq_002_rate', src='id_041_mvs_mc')
+    # df0 = add_new_style(df0, 's_047_gross_cost', src='s_040_profit_adjust2')
+    # df0 = add_new_style(df0, 's_048_profit_tax', src='s_040_profit_adjust2')
+    # df0 = add_new_style(df0, 's_049_pf_tx_invest', src='s_040_profit_adjust2')
+    # df0 = add_new_style(df0, 's_050_pf_tx_iv_outer', src='s_040_profit_adjust2')
+    # df0 = add_new_style(df0, 's_051_core_profit', src='s_040_profit_adjust2')
+    df0 = add_new_style(df0, 's_052_core_profit_asset', src='s_040_profit_adjust2')
+    # df0 = add_new_style(df0, 'eq_002_rate', src='id_041_mvs_mc')
     # df0.drop('s_012_return_year', inplace=True)
 
     # df0.loc[

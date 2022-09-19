@@ -83,5 +83,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     main = FsView()
     main.show()
-    main.load_df('000001')
+    main.load_df('002594')
     sys.exit(app.exec_())
