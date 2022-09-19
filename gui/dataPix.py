@@ -9,7 +9,7 @@ from method.dataMethod import get_month_data
 from method.dataMethod import sql2df
 
 from dateutil.rrule import *
-from collections import defaultdict
+# from collections import defaultdict
 
 import datetime as dt
 import numpy as np
@@ -35,8 +35,8 @@ class DataPix:
         self.d_height = d_height = 700
 
         left_blank = 130
-        right_blank = 80
-        bottom_blank = 50
+        # right_blank = 80
+        # bottom_blank = 50
 
         self.main_rect = QRect(0, 0, self.m_width, self.m_height)
         self.data_rect = QRect(left_blank, 100, d_width, d_height)
@@ -151,6 +151,12 @@ class DataPix:
         self.draw_pix()
         self.init_cross()
 
+    @staticmethod
+    def regular_series(name, series):
+        s1 = series.dropna()
+        ret = pd.DataFrame(s1, columns=[name])
+        return ret
+
     def config_data(self, data, row):
         index_name = row['index_name']
 
@@ -214,9 +220,13 @@ class DataPix:
                 return data
 
             if row['delta_mode'] is True:
-                data = get_month_delta(df=data, new_name=index_name)
+                # data = get_month_delta(df=data, new_name=index_name)
+                series = get_month_delta(data.iloc[:, 0], index_name)
             else:
-                data = get_month_data(df=data, new_name=index_name)
+                # data = get_month_data(df=data, new_name=index_name)
+                series = get_month_data(data.iloc[:, 0], index_name)
+
+            data = pd.DataFrame(series)
 
             ma_mode = row['ma_mode']
             if ma_mode > 1:

@@ -5,7 +5,6 @@ from discount.discountModel import ValueModel
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import json
 
 import datetime as dt
@@ -100,8 +99,8 @@ def get_value_from_ratio(date0, value0, date, ratio_year):
     return res
 
 
-def get_month_data(df: pd.DataFrame, new_name):
-    df = df.dropna()
+def get_month_data(series: pd.Series, new_name):
+    series = series.dropna()
 
     date0 = None
     year0 = None
@@ -112,7 +111,7 @@ def get_month_data(df: pd.DataFrame, new_name):
     indexes = list()
     values = list()
 
-    for tup in df.itertuples():
+    for tup in series.iteritems():
         date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
 
         if date0:
@@ -145,15 +144,16 @@ def get_month_data(df: pd.DataFrame, new_name):
         indexes.append(index0)
         values.append(value0)
 
-    res_df = pd.DataFrame(values, index=indexes, columns=[new_name])
+    res = pd.Series(values, index=indexes, name=new_name)
+    # res_df = pd.DataFrame(values, index=indexes, columns=[new_name])
 
     # print(res_df)
     # raise KeyboardInterrupt
 
-    return res_df
+    return res
 
 
-def get_month_delta(df: pd.DataFrame, new_name, mode='QUARTERLY'):
+def get_month_delta(series: pd.Series, new_name, mode='QUARTERLY'):
 
     if mode == 'MONTHLY':
         step = 1
@@ -168,7 +168,7 @@ def get_month_delta(df: pd.DataFrame, new_name, mode='QUARTERLY'):
     indexes = list()
     values = list()
 
-    for tup in df.itertuples():
+    for tup in series.iteritems():
         date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
         if not year == date.year:
             month0 = 0
@@ -192,37 +192,15 @@ def get_month_delta(df: pd.DataFrame, new_name, mode='QUARTERLY'):
         month0 = month1
         value0 = value1
 
-    res_df = pd.DataFrame(values, index=indexes, columns=[new_name])
+    res = pd.Series(values, index=indexes, name=new_name)
+    # res_df = pd.DataFrame(values, index=indexes, columns=[new_name])
 
-    return res_df
+    return res
 
 
 def sql2df(code):
-    # today = dt.date.today().strftime("%Y-%m-%d")
-    today = (dt.datetime.now() - dt.timedelta(hours=15)).date().strftime("%Y-%m-%d") + ' 15:30:00'
-
     df1 = load_df_from_mysql(code, 'fs')
-    # d0 = '' if df1.shape[0] == 0 else df1.iloc[-1, :]['last_update']
-    #
-    # if d0 < today:
-    #     request_data2mysql(
-    #         stock_code=code,
-    #         data_type='fs',
-    #         start_date="2021-04-01",
-    #     )
-    #     df1 = load_df_from_mysql(code, 'fs')
-
     df2 = load_df_from_mysql(code, 'mvs')
-    # d0 = '' if df2.shape[0] == 0 else df2.iloc[-1, :]['last_update']
-    #
-    # if d0 < today:
-    #     request_data2mysql(
-    #         stock_code=code,
-    #         data_type='mvs',
-    #         start_date="2021-04-01",
-    #         # start_date="1970-01-01",
-    #     )
-    #     df2 = load_df_from_mysql(code, 'mvs')
 
     # print(df1)
     # print(df2)
@@ -311,63 +289,81 @@ class DataAnalysis:
         return self.df_fs
 
     def config_fs_data(self):
+        index_list = [
+            's_017_equity_parent',
+            's_018_profit_parent',
+            's_016_roe_parent',
+
+            's_007_asset',
+            's_002_equity',
+            's_005_stocks',
+
+            's_003_profit',
+            's_010_main_profit',
+            's_011_main_profit_rate',
+
+            's_001_roe',
+            's_006_stocks_rate',
+
+            's_008_revenue',
+            's_009_revenue_rate',
+
+            's_019_monetary_asset',
+            's_020_cap_asset',
+            's_021_cap_expenditure',
+            's_022_profit_no_expenditure',
+            's_023_liabilities',
+            's_024_real_liabilities',
+
+            's_038_pay_for_long_term_asset',
+            's_039_profit_adjust',
+            's_040_profit_adjust2',
+            's_041_profit_adjust_ttm',
+            's_045_main_cost_adjust',
+            's_046_profit_adjust3',
+        ]
+
         df = self.df_fs
-        self.fs_add(self.get_column(df, 's_017_equity_parent'))
-        self.fs_add(self.get_column(df, 's_018_profit_parent'))
-        self.fs_add(self.get_column(df, 's_016_roe_parent'))
 
-        self.fs_add(self.get_column(df, 's_007_asset'))
-        self.fs_add(self.get_column(df, 's_002_equity'))
-        self.fs_add(self.get_column(df, 's_005_stocks'))
-
-        self.fs_add(self.get_column(df, 's_003_profit'))
-        self.fs_add(self.get_column(df, 's_010_main_profit'))
-        self.fs_add(self.get_column(df, 's_011_main_profit_rate'))
-
-        self.fs_add(self.get_column(df, 's_001_roe'))
-        self.fs_add(self.get_column(df, 's_006_stocks_rate'))
-
-        self.fs_add(self.get_column(df, 's_008_revenue'))
-        self.fs_add(self.get_column(df, 's_009_revenue_rate'))
-
-        self.fs_add(self.get_column(df, 's_019_monetary_asset'))
-        self.fs_add(self.get_column(df, 's_020_cap_asset'))
-        self.fs_add(self.get_column(df, 's_021_cap_expenditure'))
-        self.fs_add(self.get_column(df, 's_022_profit_no_expenditure'))
-        self.fs_add(self.get_column(df, 's_023_liabilities'))
-        self.fs_add(self.get_column(df, 's_024_real_liabilities'))
-
-        self.fs_add(self.get_column(df, 's_038_pay_for_long_term_asset'))
-        self.fs_add(self.get_column(df, 's_039_profit_adjust'))
-        self.fs_add(self.get_column(df, 's_040_profit_adjust2'))
-        self.fs_add(self.get_column(df, 's_041_profit_adjust_ttm'))
-        self.fs_add(self.get_column(df, 's_045_main_cost_adjust'))
-        self.fs_add(self.get_column(df, 's_046_profit_adjust3'))
+        for index in index_list:
+            self.fs_add(self.get_column(df, index))
 
     def config_widget_data(self):
         self.config_sub_fs(DataAnalysis)
         self.fs_add(self.get_column(self.df_fs, 'dt_fs'))
         self.mvs_add(self.get_column(self.df_mvs, 'dt_mvs'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_004_pe'))
-        # self.mvs_add(self.get_column(self.df_mvs, 's_012_return_year'))
-        # self.mvs_add(self.get_column(self.df_mvs, 's_014_pe2'))
-        # self.mvs_add(self.get_column(self.df_mvs, 's_015_return_year2'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_025_real_cost'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_026_holder_return_rate'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_027_pe_return_rate'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_028_market_value'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_029_return_predict'))
 
-        self.fs_add(self.get_column(self.df_mvs, 's_030_parent_equity_delta'))
-        self.fs_add(self.get_column(self.df_mvs, 's_031_financing_outflow'))
-        self.fs_add(self.get_column(self.df_mvs, 's_032_remain_rate'))
-        self.fs_add(self.get_column(self.df_mvs, 's_033_profit_compound'))
-        self.mvs_add(self.get_column(self.df_mvs, 'mir_y10'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_034_real_pe'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_035_pe2rate'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_036_real_pe2rate'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_043_turnover_volume_ttm'))
-        self.mvs_add(self.get_column(self.df_mvs, 'market_change_rate'))
+        df = self.df_mvs
+
+        index_list1 = [
+            's_030_parent_equity_delta',
+            's_031_financing_outflow',
+            's_032_remain_rate',
+            's_033_profit_compound',
+        ]
+        for index in index_list1:
+            self.fs_add(self.get_column(df, index))
+
+        index_list2 = [
+            's_004_pe',
+            # 's_012_return_year',
+            # 's_014_pe2',
+            # 's_015_return_year2',
+            's_025_real_cost',
+            's_026_holder_return_rate',
+            's_027_pe_return_rate',
+            's_028_market_value',
+            's_029_return_predict',
+
+            'mir_y10',
+            's_034_real_pe',
+            's_035_pe2rate',
+            's_036_real_pe2rate',
+            's_043_turnover_volume_ttm',
+            'market_change_rate',
+        ]
+        for index in index_list2:
+            self.mvs_add(self.get_column(df, index))
 
         self.config_balance_sheet()
         self.set_df()
@@ -376,13 +372,21 @@ class DataAnalysis:
         self.config_sub_fs(DailyDataAnalysis)
         self.fs_add(self.get_column(self.df_fs, 'dt_fs'))
         self.mvs_add(self.get_column(self.df_mvs, 'dt_mvs'))
-        # self.mvs_add(self.get_column(self.df_mvs, 's_004_pe'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_025_real_cost'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_026_holder_return_rate'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_027_pe_return_rate'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_028_market_value'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_037_real_pe_return_rate'))
-        self.mvs_add(self.get_column(self.df_mvs, 's_044_turnover_volume'))
+
+        df = self.df_mvs
+
+        index_list1 = [
+            # 's_004_pe',
+            's_025_real_cost',
+            's_026_holder_return_rate',
+            's_027_pe_return_rate',
+            's_028_market_value',
+            's_037_real_pe_return_rate',
+            's_044_turnover_volume',
+        ]
+        for index in index_list1:
+            self.mvs_add(self.get_column(df, index))
+
         self.set_df()
 
     def config_balance_sheet(self):
@@ -490,11 +494,12 @@ class DataAnalysis:
 
         df = self.df_fs
         for index in index_list:
-            src_df = df.loc[:, [index]].copy().dropna()
-            name = 'config_' + index
-            new_df = get_month_data(src_df, name)
-
-            res_df = pd.concat([res_df, new_df], axis=1, sort=True)
+            # src_df = df.loc[:, [index]].copy().dropna()
+            # name = 'config_' + index
+            # new_df = get_month_data(src_df, name)
+            s1 = df.loc[:, index].copy().dropna()
+            s2 = get_month_data(s1, 'config_' + index)
+            res_df = pd.concat([res_df, s2], axis=1, sort=True)
 
         self.df_fs = pd.concat([self.df_fs, res_df], axis=1, sort=True)
 
@@ -541,29 +546,32 @@ class DataAnalysis:
             return dt_mvs
 
         elif column == 'mir_y10':
-            with open("..\\basicData\\nationalDebt\\mir_y10.txt", "r", encoding="utf-8", errors="ignore") as f:
-                tmp = json.loads(f.read())
-            s1 = pd.Series(tmp)
-            s1.name = 'mir_y10'
-            return s1
+            path = "..\\basicData\\nationalDebt\\mir_y10.txt"
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                res = json.loads(f.read())
+            # s1 = pd.Series(tmp)
+            # s1.name = 'mir_y10'
+            return self.regular_series(column, pd.Series(res))
 
         elif column == 'market_change_rate':
-            with open("..\\basicData\\dailyUpdate\\latest\\a007_change_rate.txt", "r", encoding="utf-8", errors="ignore") as f:
-                tmp = json.loads(f.read())
-            s1 = pd.Series(tmp)
-            s1.name = 'market_change_rate'
-            return s1
+            path = "..\\basicData\\dailyUpdate\\latest\\a007_change_rate.txt"
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                res = json.loads(f.read())
+            # s1 = pd.Series(tmp)
+            # s1.name = 'market_change_rate'
+            return self.regular_series(column, pd.Series(res))
 
         elif column == 's_001_roe':
             s1 = self.get_column(df, 's_003_profit')
             s2 = self.get_column(df, 's_002_equity')
-            s3 = s2 - s1
-            s3[s3 <= 0] = np.nan
-            s4 = s1 / s3
-            s4.dropna(inplace=True)
-            s4[s4 <= -50] = np.nan
-            s4.name = column
-            return s4.dropna()
+            s3 = self.get_delta_rate(s1, s2)
+            # s3 = s2 - s1
+            # s3[s3 <= 0] = np.nan
+            # s4 = s1 / s3
+            # s4.dropna(inplace=True)
+            # s4[s4 <= -50] = np.nan
+            # s4.name = column
+            return self.regular_series(column, s3)
 
         elif column == 's_002_equity':
             return self.smooth_data(column, 'id_110_bs_toe')
@@ -572,11 +580,12 @@ class DataAnalysis:
             return self.smooth_data(column, 'id_211_ps_np', delta=True, ttm=True)
 
         elif column == 's_004_pe':
-            s1 = self.fs_to_mvs('tmp', 's_018_profit_parent')
-            s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
-            s3 = s2 / s1
-            s3.name = column
-            return s3.dropna()
+            s1 = self.fs_to_mvs('s_018_profit_parent')
+            s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
+            # s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            # s3 = s2 / s1
+            # s3.name = column
+            return self.regular_series(column, s2 / s1)
 
         elif column == 's_005_stocks':
             return self.smooth_data(column, 'id_023_bs_i')
@@ -584,9 +593,9 @@ class DataAnalysis:
         elif column == 's_006_stocks_rate':
             s1 = self.get_column(df, 's_005_stocks')
             s2 = self.get_column(df, 's_007_asset')
-            s3 = s1 / s2
-            s3.name = column
-            return s3.dropna()
+            # s3 = s1 / s2
+            # s3.name = column
+            return self.regular_series(column, s1 / s2)
 
         elif column == 's_007_asset':
             return self.smooth_data(column, 'id_001_bs_ta')
@@ -596,54 +605,57 @@ class DataAnalysis:
 
         elif column == 's_009_revenue_rate':
             s1 = self.get_column(df, 's_008_revenue')
-            return StandardFitModel.get_growth_rate(s1, column)
+            s2 = StandardFitModel.get_growth_rate(s1, column)
+            return self.regular_series(column, s2)
 
         elif column == 's_010_main_profit':
             return self.smooth_data(column, 'id_200_ps_op', delta=True, ttm=True)
 
         elif column == 's_011_main_profit_rate':
             s1 = self.get_column(df, 's_010_main_profit')
-            return StandardFitModel.get_growth_rate(s1, column)
+            s2 = StandardFitModel.get_growth_rate(s1, column)
+            return self.regular_series(column, s2)
 
         elif column == 's_012_return_year':
-            s1 = self.fs_to_mvs('tmp', 's_009_revenue_rate')
+            s1 = self.fs_to_mvs('s_009_revenue_rate')
             s2 = self.get_column(df, 's_004_pe')
             s3 = self.get_return_year(s2, s1)
-            s3.name = column
-            return s3
+            # s3.name = column
+            return self.regular_series(column, s3)
 
         elif column == 's_013_noc_asset':
-            s1 = self.fs_to_mvs('tmp', 's_018_profit_parent')
-            s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
-            s3 = s2 / s1
-            s3.name = column
-            return s3.dropna()
+            s1 = self.fs_to_mvs('s_018_profit_parent')
+            s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
+            # s3 = s2 / s1
+            # s3.name = column
+            return self.regular_series(column, s2 / s1)
 
         elif column == 's_014_pe2':
-            s1 = self.fs_to_mvs('tmp', 's_018_profit_parent')
-            s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
-            s3 = self.fs_to_mvs('tmp', 's_005_stocks')
-            s4 = (s2 + s3) / s1
-            s4.name = column
-            return s4.dropna()
+            s1 = self.fs_to_mvs('s_018_profit_parent')
+            s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
+            s3 = self.fs_to_mvs('s_005_stocks')
+            # s4 = (s2 + s3) / s1
+            # s4.name = column
+            return self.regular_series(column, (s2 + s3) / s1)
 
         elif column == 's_015_return_year2':
-            s1 = self.fs_to_mvs('tmp', 's_009_revenue_rate')
+            s1 = self.fs_to_mvs('s_009_revenue_rate')
             s2 = self.get_column(df, 's_014_pe2')
             s3 = self.get_return_year(s2, s1)
-            s3.name = column
-            return s3
+            # s3.name = column
+            return self.regular_series(column, s3)
 
         elif column == 's_016_roe_parent':
             s1 = self.get_column(df, 's_018_profit_parent')
             s2 = self.get_column(df, 's_017_equity_parent')
-            s3 = s2 - s1
-            s3[s3 <= 0] = np.nan
-            s4 = s1 / s3
-            s4.dropna(inplace=True)
-            s4[s4 <= -50] = np.nan
-            s4.name = column
-            return s4.dropna()
+            s3 = self.get_delta_rate(s1, s2)
+            # s3 = s2 - s1
+            # s3[s3 <= 0] = np.nan
+            # s4 = s1 / s3
+            # s4.dropna(inplace=True)
+            # s4[s4 <= -50] = np.nan
+            # s4.name = column
+            return self.regular_series(column, s3)
 
         elif column == 's_017_equity_parent':
             return self.smooth_data(column, 'id_124_bs_tetoshopc')
@@ -652,7 +664,7 @@ class DataAnalysis:
             return self.smooth_data(column, 'id_217_ps_npatoshopc', delta=True, ttm=True)
 
         elif column == 's_019_monetary_asset':
-            monetary_dict = {
+            d1 = {
                 'id_005_bs_cabb': '货币资金',
                 'id_007_bs_sr': '结算备付金',
                 'id_008_bs_pwbaofi': '拆出资金',
@@ -661,39 +673,39 @@ class DataAnalysis:
                 'id_024_bs_ca': '合同资产',
             }
 
-            index_list = list(monetary_dict.keys())
+            # res_df = df.loc[:, index_list].copy()
+            # res_df = res_df.replace(0, np.nan)
+            # res_df = res_df.dropna(axis=0, how='all')
+            # res_df = pd.DataFrame(res_df.apply(lambda x: x.sum(), axis=1))
 
-            res_df = df.loc[:, index_list].copy()
-            res_df = res_df.replace(0, np.nan)
-            res_df = res_df.dropna(axis=0, how='all')
-            res_df = pd.DataFrame(res_df.apply(lambda x: x.sum(), axis=1))
-
-            new_df = get_month_data(res_df, column)
-            return new_df[column]
+            s1 = self.sum_columns(df, list(d1.keys()))
+            s2 = get_month_data(s1, column)
+            return self.regular_series(column, s2)
 
         elif column == 's_020_cap_asset':
             s1 = self.get_column(df, 's_007_asset')
             s2 = self.get_column(df, 's_019_monetary_asset')
-            s3 = s1 - s2
-            s3.name = column
-            return s3.dropna()
+            # s3 = s1 - s2
+            # s3.name = column
+            return self.regular_series(column, s1 - s2)
 
         elif column == 's_021_cap_expenditure':
             s1 = self.get_column(df, 's_020_cap_asset')
             s2 = s1 - s1.shift(1)
             s2 = s2.fillna(0)
-            s2.name = column
-            return s2.dropna()
+            # s2.name = column
+            return self.regular_series(column, s2)
 
         elif column == 's_022_profit_no_expenditure':
-            s1 = self.smooth_data('tmp', 'id_217_ps_npatoshopc', delta=True)
+            s1 = self.smooth_data('s1', 'id_217_ps_npatoshopc', delta=True)
             s2 = self.get_column(df, 's_021_cap_expenditure')
             s2 = s2.reindex_like(s1)
             s2 = s2.fillna(0)
-            s3 = s1 - s2
-            s3 = s3.rolling(4, min_periods=1).mean()
-            s3.name = column
-            return s3.dropna()
+            s3 = self.get_ttm(s1 - s2, 4)
+            # s3 = s1 - s2
+            # s3 = s3.rolling(4, min_periods=1).mean()
+            # s3.name = column
+            return self.regular_series(column, s3)
 
         elif column == 's_023_liabilities':
             return self.smooth_data(column, 'id_062_bs_tl')
@@ -703,116 +715,122 @@ class DataAnalysis:
             s2 = self.get_column(df, 's_019_monetary_asset')
             s2 = s2.reindex_like(s1)
             s2 = s2.fillna(0)
-            s3 = s1 - s2
-            s3.name = column
-            return s3.dropna()
+            # s3 = s1 - s2
+            # s3.name = column
+            return self.regular_series(column, s1 - s2)
 
         elif column == 's_025_real_cost':
-            s1 = self.fs_to_mvs('tmp', 's_024_real_liabilities')
-            s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
-            s3 = s1 + s2
-            s3.name = column
-            return s3.dropna()
+            s1 = self.fs_to_mvs('s_024_real_liabilities')
+            s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
+            # s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            # s3 = s1 + s2
+            # s3.name = column
+            return self.regular_series(column, s1 + s2)
 
         elif column == 's_026_holder_return_rate':
-            s1 = self.fs_to_mvs('tmp', 's_022_profit_no_expenditure')
-            s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
-            s3 = s1 / s2
-            s3.name = column
-            return s3.dropna()
+            s1 = self.fs_to_mvs('s_022_profit_no_expenditure')
+            s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
+            # s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            # s3 = s1 / s2
+            # s3.name = column
+            return self.regular_series(column, s1 / s2)
 
         elif column == 's_027_pe_return_rate':
-            s1 = self.fs_to_mvs('tmp', 's_018_profit_parent')
-            s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
-            s3 = s1 / s2
-            s3.name = column
-            return s3.dropna()
+            s1 = self.fs_to_mvs('s_018_profit_parent')
+            s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
+            # s2 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            # s3 = s1 / s2
+            # s3.name = column
+            return self.regular_series(column, s1 / s2)
 
         elif column == 's_028_market_value':
-            s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
-            s1.name = column
-            return s1
+            s1 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
+            # s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            # s1.name = column
+            return self.regular_series(column, s1)
 
         elif column == 's_029_return_predict':
-            s1 = self.fs_to_mvs('tmp', 's_009_revenue_rate')
+            s1 = self.fs_to_mvs('s_009_revenue_rate')
             s2 = self.get_column(df, 's_027_pe_return_rate')
             s3 = (s1 * 5 + 1) * s2
-            s3.name = column
-            return s3.dropna()
+            # s3.name = column
+            return self.regular_series(column, s3)
 
         elif column == 's_030_parent_equity_delta':
             s1 = self.smooth_data(column, 'id_124_bs_tetoshopc')
             s2 = s1 - s1.shift(1)
-            s2 = s2.fillna(0)
-            s2.name = column
-            return s2.dropna()
+            s3 = s2.fillna(0)
+            # s2.name = column
+            return self.regular_series(column, s3)
 
         elif column == 's_031_financing_outflow':
-            s1 = self.smooth_data('tmp', 'id_217_ps_npatoshopc', delta=True)
-            s1 = s1 / 4
+            s1 = self.smooth_data('s1', 'id_217_ps_npatoshopc', delta=True)
+            # s1 = s1 / 4
             s2 = self.get_column(df, 's_030_parent_equity_delta')
-            s3 = s2 - s1
-            s3.name = column
-            return s3.dropna()
+            s3 = s2 - (s1 / 4)
+            # s3.name = column
+            return self.regular_series(column, s3)
 
         elif column == 's_032_remain_rate':
             s1 = self.get_column(df, 's_030_parent_equity_delta')
-            s1 = s1.rolling(4, min_periods=1).mean()
-            s1 = s1 * 4
+            s1 = self.get_ttm(s1 * 4, 4)
+            # s1 = s1.rolling(4, min_periods=1).mean()
+            # s1 = s1 * 4
             s2 = self.get_column(df, 's_017_equity_parent')
-            s3 = s2 - s1
-            s3[s3 <= 0] = np.nan
-            s4 = s1 / s3
-            s4.dropna(inplace=True)
-            s4[s4 <= -50] = np.nan
-            s4.name = column
-            return s4.dropna()
+            res = self.get_delta_rate(s1, s2)
+            # s3 = s2 - s1
+            # s3[s3 <= 0] = np.nan
+            # s4 = s1 / s3
+            # s4.dropna(inplace=True)
+            # s4[s4 <= -50] = np.nan
+            # s4.name = column
+            return self.regular_series(column, res)
 
         elif column == 's_033_profit_compound':
             s1 = self.get_column(df, 's_032_remain_rate')
             s2 = (s1 + 1) ** 5
             s2[s2 > 1e8] = 1e8
             s2.name = column
-            return s2.dropna()
+            return self.regular_series(column, s2)
 
         elif column == 's_034_real_pe':
-            s1 = self.fs_to_mvs('tmp', 's_018_profit_parent')
+            s1 = self.fs_to_mvs('s_018_profit_parent')
             s2 = self.get_column(df, 's_025_real_cost')
-            s3 = s2 / s1
-            s3.name = column
-            return s3.dropna()
+            # s3 = s2 / s1
+            # s3.name = column
+            return self.regular_series(column, s2 / s1)
 
         elif column == 's_035_pe2rate':
             s1 = self.get_column(df, 's_004_pe')
             s2 = self.transform_pe(s1)
-            s2.name = column
-            return s2.dropna()
+            # s2.name = column
+            return self.regular_series(column, s2)
 
         elif column == 's_036_real_pe2rate':
             s1 = self.get_column(df, 's_034_real_pe')
             s2 = self.transform_pe(s1)
-            s2.name = column
-            return s2.dropna()
+            # s2.name = column
+            return self.regular_series(column, s2)
 
         elif column == 's_037_real_pe_return_rate':
-            s1 = self.fs_to_mvs('tmp', 's_018_profit_parent')
+            s1 = self.fs_to_mvs('s_018_profit_parent')
             s2 = self.get_column(df, 's_025_real_cost')
-            s3 = s1 / s2
-            s3.name = column
-            return s3.dropna()
+            # s3 = s1 / s2
+            # s3.name = column
+            return self.regular_series(column, s1 / s2)
 
         elif column == 's_038_pay_for_long_term_asset':
-            s1 = self.smooth_data('tmp', 'id_271_cfs_cpfpfiaolta', delta=True)
+            s1 = self.smooth_data('s1', 'id_271_cfs_cpfpfiaolta', delta=True)
             # s2 = self.smooth_data('tmp', 'id_265_cfs_crfdofiaolta', delta=True)
             # s2 = self.smooth_data('tmp', 'id_281_cfs_crfai', delta=True)
             # s3 = s1 - s2
-            s3 = s1
-            s3.name = column
-            s3 = s3.astype('float64')
-            return s3.dropna()
+            # s3 = s1
+            # s3.name = column
+            # s3 = s3.astype('float64')
+            return self.regular_series(column, s1)
 
         elif column == 's_039_profit_adjust':
-            adjust_dict = {
+            d1 = {
                 'id_298_cfs_np': '净利润',
                 'id_299_cfs_ioa': '加： 资产减值准备',
                 'id_300_cfs_cilor': '信用减值损失',
@@ -826,55 +844,65 @@ class DataAnalysis:
                 'id_312_cfs_dii': '存货的减少',
             }
 
-            index_list = list(adjust_dict.keys())
-            res_df = df.loc[:, index_list].copy().dropna(axis=0, how='all')
-            res_df = pd.DataFrame(res_df.apply(lambda x: x.sum(), axis=1))
+            # index_list = list(adjust_dict.keys())
+            # res_df = df.loc[:, index_list].copy().dropna(axis=0, how='all')
+            # res_df = pd.DataFrame(res_df.apply(lambda x: x.sum(), axis=1))
 
-            new_df = get_month_delta(res_df, column)
-            s1 = new_df[column]
-            s1 = s1.astype('float64')
-            return s1.dropna()
+            s1 = self.sum_columns(df, list(d1.keys()))
+            s2 = get_month_data(s1, column)
+            # df1 = get_month_data(pd.DataFrame(s1), column)
+            return self.regular_series(column, s2)
 
         elif column == 's_040_profit_adjust2':
             s1 = self.get_column(df, 's_039_profit_adjust')
             s2 = self.get_column(df, 's_038_pay_for_long_term_asset')
-            s3 = s1 - s2
-            s3 = s3.dropna()
-            s3 = s3.rolling(4, min_periods=1).mean()
-            s3.name = column
-            s3 = s3.astype('float64')
-            return s3.dropna()
+            s3 = self.get_ttm(s1 - s2, 4)
+            # s3 = s1 - s2
+            # s3 = s3.dropna()
+            # s3 = s3.rolling(4, min_periods=1).mean()
+            # s3.name = column
+            # s3 = s3.astype('float64')
+            return self.regular_series(column, s3)
 
         elif column == 's_041_profit_adjust_ttm':
             s1 = self.get_column(df, 's_039_profit_adjust')
-            s2 = s1.rolling(4, min_periods=1).mean()
-            s2.name = column
-            return s2.dropna()
+            s2 = self.get_ttm(s1, 4)
+            # s2 = s1.rolling(4, min_periods=1).mean()
+            # s2.name = column
+            return self.regular_series(column, s2)
 
         elif column == 's_042_roe_adjust':
-            s1 = pd.Series()
-            s1.name = column
-            return s1.dropna()
+            # s1 = pd.Series()
+            # s1.name = column
+            return self.regular_series(column, pd.Series())
 
         elif column == 's_043_turnover_volume_ttm':
-            s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
-            s2 = self.df_mvs['id_042_mvs_cmc'].copy().dropna()
-            s3 = self.df_mvs['id_048_mvs_ta'].copy().dropna()
-            s4 = s1 / s2 * s3 * 10
-            s4 = s4.rolling(20, min_periods=1).mean()
-            s4.name = column
-            return s4.dropna()
+            # s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            # s2 = self.df_mvs['id_042_mvs_cmc'].copy().dropna()
+            # s3 = self.df_mvs['id_048_mvs_ta'].copy().dropna()
+            # s4 = s1 / s2 * s3 * 10
+            # s4 = s4.rolling(20, min_periods=1).mean()
+            # s4.name = column
+            s1 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
+            s2 = self.get_column(self.df_mvs, 'id_042_mvs_cmc')
+            s3 = self.get_column(self.df_mvs, 'id_048_mvs_ta')
+            s4 = self.get_ttm(s1 / s2 * s3 * 10, 20)
+            return self.regular_series(column, s4)
 
         elif column == 's_044_turnover_volume':
-            s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
-            s2 = self.df_mvs['id_042_mvs_cmc'].copy().dropna()
-            s3 = self.df_mvs['id_048_mvs_ta'].copy().dropna()
+            # s1 = self.df_mvs['id_041_mvs_mc'].copy().dropna()
+            # s2 = self.df_mvs['id_042_mvs_cmc'].copy().dropna()
+            # s3 = self.df_mvs['id_048_mvs_ta'].copy().dropna()
+            # s4 = s1 / s2 * s3
+            # s4.name = column
+            s1 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
+            s2 = self.get_column(self.df_mvs, 'id_042_mvs_cmc')
+            s3 = self.get_column(self.df_mvs, 'id_048_mvs_ta')
             s4 = s1 / s2 * s3
-            s4.name = column
-            return s4.dropna()
+            return self.regular_series(column, s4)
 
         elif column == 's_045_main_cost_adjust':
-            adjust_dict = {
+            d1 = {
                 # 'id_299_cfs_ioa': '加： 资产减值准备',
                 # 'id_300_cfs_cilor': '信用减值损失',
                 'id_301_cfs_dofx_dooaga_dopba': '固定资产折旧、油气资产折耗、生产性生物资产折旧',
@@ -887,33 +915,39 @@ class DataAnalysis:
                 'id_312_cfs_dii': '存货的减少',
             }
 
-            index_list = list(adjust_dict.keys())
-            res_df = df.loc[:, index_list].copy().dropna(axis=0, how='all')
-            res_df = pd.DataFrame(res_df.apply(lambda x: x.sum(), axis=1))
+            s1 = self.sum_columns(df, list(d1.keys()))
+            s1 = get_month_data(s1, 's1')
 
-            new_df = get_month_delta(res_df, column)
-            s1 = new_df[column]
-            s1 = s1.astype('float64')
-            s2 = self.smooth_data(column, 'id_163_ps_toc', delta=True)
-            s3 = s2 - s1
-            s3 = s3.dropna()
-            s3 = s3.rolling(4, min_periods=1).mean()
-            s3.name = column
-            return s3.dropna()
+            # index_list = list(adjust_dict.keys())
+            # res_df = df.loc[:, index_list].copy().dropna(axis=0, how='all')
+            # res_df = pd.DataFrame(res_df.apply(lambda x: x.sum(), axis=1))
+            # new_df = get_month_delta(res_df, column)
+
+            # s1 = df1['tmp']
+            # s1 = s1.astype('float64')
+            s2 = self.smooth_data('s2', 'id_163_ps_toc', delta=True)
+            s3 = self.get_ttm(s2 - s1, 4)
+            # s3 = s2 - s1
+            # s3 = s3.dropna()
+            # s3 = s3.rolling(4, min_periods=1).mean()
+            # s3.name = column
+            return self.regular_series(column, s3)
 
         elif column == 's_046_profit_adjust3':
             s1 = self.get_column(df, 's_039_profit_adjust')
-            s01 = self.smooth_data('tmp', 'id_271_cfs_cpfpfiaolta', delta=True)
-            s02 = self.smooth_data('tmp', 'id_265_cfs_crfdofiaolta', delta=True)
-            s03 = self.smooth_data('tmp', 'id_281_cfs_crfai', delta=True)
-            s2 = s01 - s02 - s03
-            s2 = s2.astype('float64')
-            s3 = s1 - s2
-            s3 = s3.dropna()
-            s3 = s3.rolling(4, min_periods=1).mean()
-            s3.name = column
-            s3 = s3.astype('float64')
-            return s3.dropna()
+            s2 = self.smooth_data('s2', 'id_271_cfs_cpfpfiaolta', delta=True)
+            s3 = self.smooth_data('s3', 'id_265_cfs_crfdofiaolta', delta=True)
+            s4 = self.smooth_data('s4', 'id_281_cfs_crfai', delta=True)
+            # s2 = s01 - s02 - s03
+            # s2 = s2.astype('float64')
+            # s3 = s1 - s2
+            # s3 = s3.dropna()
+            # s3 = s3.rolling(4, min_periods=1).mean()
+
+            s5 = self.get_ttm(s1 - (s2 - s3 - s4), 4)
+            # s3.name = column
+            # s3 = s3.astype('float64')
+            return self.regular_series(column, s5)
 
     @staticmethod
     def get_return_year(pe, rate):
@@ -929,7 +963,30 @@ class DataAnalysis:
         y[y <= 0] = np.nan
         return y.dropna()
 
-    def fs_to_mvs(self, name, src):
+    @staticmethod
+    def get_delta_rate(s1, s2):
+        s3 = s2 - s1
+        s3[s3 <= 0] = np.nan
+        s4 = s1 / s3
+        s4.dropna(inplace=True)
+        s4[s4 <= -50] = np.nan
+        return s4.dropna()
+
+    @staticmethod
+    def sum_columns(df, columns):
+        res_df = df.loc[:, columns].copy()
+        res_df = res_df.replace(0, np.nan)
+        res_df = res_df.dropna(axis=0, how='all')
+        s1 = res_df.apply(lambda x: x.sum(), axis=1)
+        return s1
+
+    @staticmethod
+    def get_ttm(series: pd.Series, ttm):
+        ret = series.dropna()
+        ret = ret.rolling(ttm, min_periods=1).mean()
+        return ret
+
+    def fs_to_mvs(self, src, name='tmp'):
         dt_fs = self.get_column(self.df_fs, 'dt_fs')
         dt_mvs = self.get_column(self.df_mvs, 'dt_mvs')
 
@@ -951,14 +1008,23 @@ class DataAnalysis:
         if df is None:
             df = self.df_fs
 
-        src_df = df.loc[:, [src]].copy().dropna()
+        # src_df = df.loc[:, [src]].copy().dropna()
+        s1 = df.loc[:, src].copy().dropna()
         if delta is False:
-            new_df = get_month_data(src_df, name)
+            res = get_month_data(s1, name)
         else:
-            new_df = get_month_delta(src_df, name)
+            res = get_month_delta(s1, name)
             if ttm is True:
-                new_df = new_df.rolling(4, min_periods=1).mean()
-        return new_df[name]
+                res = self.get_ttm(res, 4)
+                # res = res.rolling(4, min_periods=1).mean()
+        return self.regular_series(name, res)
+
+    @staticmethod
+    def regular_series(name, series):
+        ret = series.dropna()
+        ret.name = name
+        ret = ret.astype('float64')
+        return ret
 
     @staticmethod
     def return_df(df, new_df, add=False):
@@ -1058,35 +1124,45 @@ class DailyDataAnalysis(DataAnalysis):
         super().__init__(df_fs, df_mvs)
 
     def config_fs_data(self):
+
+        index_list = [
+            's_017_equity_parent',
+            's_018_profit_parent',
+            's_016_roe_parent',
+
+            's_007_asset',
+            's_002_equity',
+            # 's_005_stocks',
+
+            # 's_003_profit',
+            # 's_010_main_profit',
+            # 's_011_main_profit_rate',
+            #
+            # 's_001_roe',
+            # 's_006_stocks_rate',
+            #
+            # 's_008_revenue',
+            # 's_009_revenue_rate',
+
+            's_019_monetary_asset',
+            's_020_cap_asset',
+            's_021_cap_expenditure',
+            's_022_profit_no_expenditure',
+
+            's_023_liabilities',
+            's_024_real_liabilities',
+
+            # 's_038_pay_for_long_term_asset',
+            # 's_039_profit_adjust',
+            # 's_040_profit_adjust2',
+            # 's_041_profit_adjust_ttm',
+            # 's_045_main_cost_adjust',
+            # 's_046_profit_adjust3',
+        ]
+
         df = self.df_fs
-        self.fs_add(self.get_column(df, 's_017_equity_parent'))
-        self.fs_add(self.get_column(df, 's_018_profit_parent'))
-        self.fs_add(self.get_column(df, 's_016_roe_parent'))
-
-        self.fs_add(self.get_column(df, 's_007_asset'))
-        self.fs_add(self.get_column(df, 's_002_equity'))
-        # self.fs_add(self.get_column(df, 's_005_stocks'))
-
-        # self.fs_add(self.get_column(df, 's_003_profit'))
-        # self.fs_add(self.get_column(df, 's_010_main_profit'))
-        # self.fs_add(self.get_column(df, 's_011_main_profit_rate'))
-
-        # self.fs_add(self.get_column(df, 's_001_roe'))
-        # self.fs_add(self.get_column(df, 's_006_stocks_rate'))
-
-        # self.fs_add(self.get_column(df, 's_008_revenue'))
-        # self.fs_add(self.get_column(df, 's_009_revenue_rate'))
-
-        self.fs_add(self.get_column(df, 's_019_monetary_asset'))
-        self.fs_add(self.get_column(df, 's_020_cap_asset'))
-        self.fs_add(self.get_column(df, 's_021_cap_expenditure'))
-        self.fs_add(self.get_column(df, 's_022_profit_no_expenditure'))
-
-        self.fs_add(self.get_column(df, 's_023_liabilities'))
-        self.fs_add(self.get_column(df, 's_024_real_liabilities'))
-        # self.fs_add(self.get_column(df, 's_038_pay_for_long_term_asset'))
-        # self.fs_add(self.get_column(df, 's_039_profit_adjust'))
-        # self.fs_add(self.get_column(df, 's_040_profit_adjust2'))
+        for index in index_list:
+            self.fs_add(self.get_column(df, index))
 
 
 def test_analysis():
