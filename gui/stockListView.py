@@ -296,6 +296,9 @@ class QStockListView(QWidget):
                     self.table_view.load_code_list([key], 0)
                     return
 
+    def closeEvent(self, event):
+        self.generate_widget.close()
+
 
 class GenerateCodeListWidget(QWidget):
     generate_signal = pyqtSignal(object, object)

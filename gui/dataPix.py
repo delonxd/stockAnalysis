@@ -600,7 +600,8 @@ class DataPix:
     def init_cross(self):
         x = self.data_rect.right()
         y = self.data_rect.bottom() / 2
-        key = 's_041_profit_adjust_ttm'
+        # key = 's_041_profit_adjust_ttm'
+        key = 's_051_core_profit'
         if key in self.data_dict.keys():
             ds = self.data_dict[key]
             data_y = ds.df.iloc[:, 0].values.max()

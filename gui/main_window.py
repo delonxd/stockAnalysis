@@ -907,7 +907,7 @@ class MainWidget(QWidget):
             self.style_widget.refresh_style(self.current_style)
             self.style_widget.activateWindow()
         else:
-            self.equity_change_widget.close()
+            self.style_widget.close()
 
     def show_plot(self):
         df = self.data_pix.df
