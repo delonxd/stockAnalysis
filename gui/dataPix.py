@@ -214,6 +214,7 @@ class DataPix:
             's_050_pf_tx_iv_outer',
             's_051_core_profit',
             's_052_core_profit_asset',
+            's_053_core_profit_salary',
         ]
 
         if index_name in tmp_list:

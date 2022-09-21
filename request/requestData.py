@@ -39,6 +39,8 @@ def get_cursor(data_type):
         database = 'marketData'
     elif data_type == 'eq':
         database = 'eqData'
+    elif data_type == 'dv':
+        database = 'dvData'
     elif data_type == 'fs_hk':
         database = 'fsDataHK'
     elif data_type == 'mvs_hk':

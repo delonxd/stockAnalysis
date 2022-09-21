@@ -106,9 +106,13 @@ if __name__ == '__main__':
     # print(res[1])
     # update_basic_data()
 
-    a = request_industry_sample()
+    # a = request_industry_sample()
     # txt = json.dumps(a, indent=4, ensure_ascii=False)
     # with open("../basicData/industry/code_industry_dict.txt", "w", encoding='utf-8') as f:
     #     f.write(txt)
 
-    print(a)
+    # print(a)
+
+    from method.fileMethod import write_json_txt
+    _, _, ipo_dates = request_basic()
+    write_json_txt('..\\basicData\\ipo_date.txt', ipo_dates)

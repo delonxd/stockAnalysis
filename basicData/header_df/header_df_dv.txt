@@ -1,0 +1,58 @@
+{
+    "first_update": {
+        "txt_CN": "首次上传日期",
+        "sql_type": "VARCHAR(30)"
+    },
+    "last_update": {
+        "txt_CN": "最近上传日期",
+        "sql_type": "VARCHAR(30)"
+    },
+    "date": {
+        "txt_CN": "日期",
+        "sql_type": "VARCHAR(30)"
+    },
+    "id": {
+        "txt_CN": "索引",
+        "sql_type": "VARCHAR(30)"
+    },
+    "bonusSharesFromProfit": {
+        "txt_CN": "送股(股)",
+        "sql_type": "DOUBLE"
+    },
+    "bonusSharesFromCapitalReserve": {
+        "txt_CN": "转增(股)",
+        "sql_type": "DOUBLE"
+    },
+    "dividend": {
+        "txt_CN": "分红",
+        "sql_type": "DOUBLE"
+    },
+    "content": {
+        "txt_CN": "内容",
+        "sql_type": "VARCHAR(30)"
+    },
+    "registerDate": {
+        "txt_CN": "股权登记日",
+        "sql_type": "VARCHAR(30)"
+    },
+    "exDate": {
+        "txt_CN": "除权除息日",
+        "sql_type": "VARCHAR(30)"
+    },
+    "paymentDate": {
+        "txt_CN": "分红到账日",
+        "sql_type": "VARCHAR(30)"
+    },
+    "status": {
+        "txt_CN": "状态",
+        "sql_type": "VARCHAR(30)"
+    },
+    "originalValue": {
+        "txt_CN": "总分红",
+        "sql_type": "DOUBLE"
+    },
+    "splitRatio": {
+        "txt_CN": "拆分折算比例",
+        "sql_type": "DOUBLE"
+    }
+}

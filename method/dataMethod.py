@@ -327,6 +327,7 @@ class DataAnalysis:
             's_051_core_profit',
             's_048_profit_tax',
             's_052_core_profit_asset',
+            's_053_core_profit_salary',
         ]
 
         df = self.df_fs
@@ -901,6 +902,17 @@ class DataAnalysis:
 
             s1 = self.get_column(self.df_fs, 's_051_core_profit')
             s2 = self.get_ttm(get_month_delta(res, 's2'), 4)
+            return self.regular_series(column, s1 + s2)
+
+        elif column == 's_053_core_profit_salary':
+            d0 = {
+                'id_082_bs_sawp': '应付职工薪酬',
+                'id_105_bs_ltpoe': '长期应付职工薪酬',
+            }
+            s1 = self.sum_columns(self.df_fs, list(d0.keys()))
+            s1 = self.get_ttm((s1 - s1.shift(1))*4, 4)
+            s2 = self.smooth_data(column, 'id_257_cfs_cptofe', delta=True, ttm=True)
+            # s3 = self.get_column(df, 's_051_core_profit')
             return self.regular_series(column, s1 + s2)
 
     @staticmethod

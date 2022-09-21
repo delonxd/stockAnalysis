@@ -20,6 +20,7 @@ def basic_daily_update(dir_name):
     write_json_txt('%s\\a002_name_dict.txt' % res_dir, name_dict)
     write_json_txt('..\\basicData\\code_names_dict.txt', name_dict)
     write_json_txt('%s\\a001_code_list.txt' % res_dir, all_codes)
+    write_json_txt('..\\basicData\\ipo_date.txt', ipo_dates)
     return all_codes, name_dict, ipo_dates
 
 
