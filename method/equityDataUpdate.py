@@ -11,7 +11,7 @@ def eq_update():
 
     code_list = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
     request_eq2mysql(code_list)
-    request_dv2mysql(code_list)
+    # request_dv2mysql(code_list)
 
 
 if __name__ == '__main__':

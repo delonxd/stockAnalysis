@@ -215,6 +215,7 @@ class DataPix:
             's_051_core_profit',
             's_052_core_profit_asset',
             's_053_core_profit_salary',
+            'dv_001_dividend_value',
         ]
 
         if index_name in tmp_list:

@@ -18,7 +18,7 @@ def request_dividend(code, ipo_date=None):
 
     if ipo_date is not None:
         ipo_date = dt.datetime.strptime(ipo_date[:10], "%Y-%m-%d").date()
-        ipo_date = dt.date(ipo_date.year - 7, ipo_date.month, ipo_date.day)
+        ipo_date = dt.date(ipo_date.year - 7, 1, 1)
 
     while True:
         api = {
@@ -31,9 +31,6 @@ def request_dividend(code, ipo_date=None):
         res = data_request(url=url, api_dict=api)
         data = json.loads(res.decode())['data']
 
-        start = dt.date(start.year - 10, 1, 1)
-        end = dt.date(start.year + 9, 12, 31)
-
         if ipo_date is None:
             if len(data) == 0:
                 break
@@ -43,6 +40,9 @@ def request_dividend(code, ipo_date=None):
 
         if not len(data) == 0:
             ret.extend(data)
+
+        start = dt.date(start.year - 10, 1, 1)
+        end = dt.date(start.year + 9, 12, 31)
 
     # print(config_equity_change_data(data))
     return ret
@@ -120,14 +120,14 @@ def request_dv2mysql(stock_codes):
 
 if __name__ == '__main__':
     # pd.set_option('display.max_columns', None)
-    # pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_rows', 3)
     # pd.set_option('display.width', 10000)
 
     # list1 = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
     # list2 = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt")
     # list3 = list(set(list1 + list2))
     list1 = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
-    # request_dv2mysql(list1)
+    request_dv2mysql(list1)
     # request_dv2mysql(['600015'])
     # request_dv2mysql(['600071'])
     pass

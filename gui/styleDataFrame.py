@@ -89,7 +89,8 @@ if __name__ == '__main__':
     # df0 = add_new_style(df0, 's_050_pf_tx_iv_outer', src='s_040_profit_adjust2')
     # df0 = add_new_style(df0, 's_051_core_profit', src='s_040_profit_adjust2')
     # df0 = add_new_style(df0, 's_052_core_profit_asset', src='s_040_profit_adjust2')
-    df0 = add_new_style(df0, 's_053_core_profit_salary', src='s_040_profit_adjust2')
+    # df0 = add_new_style(df0, 's_053_core_profit_salary', src='s_040_profit_adjust2')
+    df0 = add_new_style(df0, 'dv_001_dividend_value', src='s_040_profit_adjust2')
     # df0 = add_new_style(df0, 'eq_002_rate', src='id_041_mvs_mc')
     # df0.drop('s_012_return_year', inplace=True)
 

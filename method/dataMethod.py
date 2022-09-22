@@ -26,6 +26,9 @@ def load_df_from_mysql(stock_code, data_type):
     elif data_type == 'eq':
         table = 'eq_%s' % stock_code
         check_field = 'date'
+    elif data_type == 'dv':
+        table = 'dv_%s' % stock_code
+        check_field = 'id'
     else:
         return
 
@@ -206,13 +209,9 @@ def sql2df(code):
     # print(df2)
     data = DataAnalysis(df1, df2)
     data.config_widget_data()
+    data.add_eq_data(code)
+    data.add_dv_data(code)
 
-    df3 = load_df_from_mysql(code, 'eq')
-    new_df = df3.loc[:, ['id_002_rate']]
-    if new_df.size > 0:
-        new_df = new_df / new_df.iloc[-1, 0]
-    new_df.columns = ['eq_002_rate']
-    data.add_df(new_df)
     # print(data.df.columns.values)
     # print(data.df['s_012_return_year'])
 
@@ -530,6 +529,55 @@ class DataAnalysis:
 
     def add_df(self, new_df):
         self.df = pd.concat([self.df, new_df], axis=1, sort=True)
+
+    def add_eq_data(self, code):
+        df = load_df_from_mysql(code, 'eq')
+        df = df.loc[:, ['id_002_rate']]
+        if df.size > 0:
+            df = df / df.iloc[-1, 0]
+        df.columns = ['eq_002_rate']
+        self.add_df(df)
+
+    def add_dv_data(self, code):
+        df = load_df_from_mysql(code, 'dv')
+        s1 = df.loc[:, 'originalValue'].dropna().copy()
+        if s1.index.is_unique is False:
+            d0 = dict()
+            for index, value in s1.iteritems():
+                if index in d0:
+                    d0[index] = d0[index] + value
+                else:
+                    d0[index] = value
+            s1 = pd.Series(d0)
+
+        s1 = s1.sort_index(ascending=False)
+
+        s1.index = self.report_date2standard(s1.index)
+        s1 = s1.drop('None', errors='ignore').dropna()
+        s1 = s1.sort_index(ascending=True)
+        s2 = self.get_column(self.df_fs, 's_003_profit')
+        s3 = s1.reindex_like(s2).fillna(0)
+        s3 = self.get_ttm(s3, 4) * 4
+        s3.name = 'dv_001_dividend_value'
+
+        new_df = pd.DataFrame(s3)
+        self.add_df(new_df)
+
+    def report_date2standard(self, s1):
+        report_date = self.df_fs['reportDate'].copy().dropna()
+        report_date = report_date.sort_index(ascending=False)
+
+        res = list()
+        for date1 in s1:
+            tmp = 'None'
+            for index, value in report_date.iteritems():
+                date2 = value[:10]
+                if date1 > date2:
+                    break
+                if date1 <= date2:
+                    tmp = index
+            res.append(tmp)
+        return pd.Series(res, dtype='str')
 
     @staticmethod
     def get_df_after_date(df, date):
@@ -1156,5 +1204,6 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    test_analysis()
+    # a = sql2df('600015')
+    # test_analysis()
     pass
