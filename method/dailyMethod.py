@@ -40,7 +40,7 @@ def mysql_daily_update(dir_name, all_codes, ipo_dates):
     for code, date in ipo_dates.items():
         if not date:
             new_codes.append(code)
-        elif date > '2021-11-01':
+        elif date > '2022-03-01':
             new_codes.append(code)
 
     MainLog.add_log('Length of all codes: %s' % len(all_codes))
