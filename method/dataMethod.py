@@ -327,6 +327,10 @@ class DataAnalysis:
             's_048_profit_tax',
             's_052_core_profit_asset',
             's_053_core_profit_salary',
+            's_054_gross_profit_rate',
+            's_055_gross_cost',
+            's_056_inventory_turnaround',
+            's_057_core_roe',
         ]
 
         df = self.df_fs
@@ -541,6 +545,10 @@ class DataAnalysis:
     def add_dv_data(self, code):
         df = load_df_from_mysql(code, 'dv')
         s1 = df.loc[:, 'originalValue'].dropna().copy()
+        s1 = s1.sort_index(ascending=False)
+        s1.index = self.report_date2standard(s1.index)
+        s1 = s1.drop('None', errors='ignore').dropna()
+
         if s1.index.is_unique is False:
             d0 = dict()
             for index, value in s1.iteritems():
@@ -550,11 +558,6 @@ class DataAnalysis:
                     d0[index] = value
             s1 = pd.Series(d0)
 
-        s1 = s1.sort_index(ascending=False)
-
-        s1.index = self.report_date2standard(s1.index)
-        s1 = s1.drop('None', errors='ignore').dropna()
-        s1 = s1.sort_index(ascending=True)
         s2 = self.get_column(self.df_fs, 's_003_profit')
         s3 = s1.reindex_like(s2).fillna(0)
         s3 = self.get_ttm(s3, 4) * 4
@@ -963,6 +966,27 @@ class DataAnalysis:
             # s3 = self.get_column(df, 's_051_core_profit')
             return self.regular_series(column, s1 + s2)
 
+        elif column == 's_054_gross_profit_rate':
+            s1 = self.get_column(df, 's_051_core_profit')
+            s2 = self.get_column(df, 's_008_revenue')
+            return self.regular_series(column, s1 / s2)
+
+        elif column == 's_055_gross_cost':
+            s1 = self.get_column(df, 's_051_core_profit')
+            s2 = self.get_column(df, 's_008_revenue')
+            return self.regular_series(column, s2 - s1)
+
+        elif column == 's_056_inventory_turnaround':
+            s1 = self.get_column(df, 'id_023_bs_i')
+            s1 = self.get_ttm(get_month_data(s1, 's1'), 4)
+            s2 = self.get_column(df, 's_055_gross_cost')
+            return self.regular_series(column, s1 / s2)
+
+        elif column == 's_057_core_roe':
+            s1 = self.get_column(df, 's_051_core_profit')
+            s2 = self.get_column(df, 's_002_equity')
+            return self.regular_series(column, s1 / s2)
+
     @staticmethod
     def get_return_year(pe, rate):
         a = 1 + rate
@@ -1204,6 +1228,6 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    # a = sql2df('600015')
+    a = sql2df('000933')
     # test_analysis()
     pass

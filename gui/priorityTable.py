@@ -22,6 +22,8 @@ class PriorityTable(QDialog):
         self.button1 = QPushButton('up')
         self.button2 = QPushButton('down')
         self.button3 = QPushButton('submit')
+        self.button4 = QPushButton('<<')
+        self.button5 = QPushButton('>>')
         self.model = QStandardItemModel()
 
         self.load_df()
@@ -32,8 +34,10 @@ class PriorityTable(QDialog):
         self.resize(500, 800)
 
         layout1 = QVBoxLayout()
+        layout1.addWidget(self.button4)
         layout1.addWidget(self.button1)
         layout1.addWidget(self.button2)
+        layout1.addWidget(self.button5)
         layout1.addWidget(self.button3)
 
         layout = QHBoxLayout()
@@ -47,6 +51,8 @@ class PriorityTable(QDialog):
         self.button1.clicked.connect(self.on_button1_clicked)
         self.button2.clicked.connect(self.on_button2_clicked)
         self.button3.clicked.connect(self.on_button3_clicked)
+        self.button4.clicked.connect(self.on_button4_clicked)
+        self.button5.clicked.connect(self.on_button5_clicked)
 
     def load_df(self):
         self.df = self.df.sort_values('info_priority')
@@ -75,6 +81,14 @@ class PriorityTable(QDialog):
         row1 = self.table_view.currentIndex().row()
         row2 = size if row1 == size else row1 + 1
         self.exchange_priority(row1, row2)
+
+    def on_button4_clicked(self):
+        for _ in range(10):
+            self.on_button1_clicked()
+
+    def on_button5_clicked(self):
+        for _ in range(10):
+            self.on_button2_clicked()
 
     def exchange_priority(self, row1, row2):
         priority1 = self.df.iloc[row1, 2]

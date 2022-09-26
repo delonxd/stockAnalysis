@@ -571,7 +571,7 @@ class GenerateCodeListWidget(QWidget):
             editor_dict['source'] = 'old'
 
         elif mission == '1_selected':
-            editor_dict['source'] = 'selected'
+            editor_dict['source'] = 'whitelist'
             editor_dict['sort'] = 'sort-ass/equity'
 
         elif mission == '2_hold':

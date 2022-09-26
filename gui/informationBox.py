@@ -12,51 +12,49 @@ class InformationBox:
         self.parent = parent
         self.background = None
 
-    def load_value(self, d1, d2, d_report):
-        box_df = pd.DataFrame(columns=['priority', 'data_source', 'show_name', 'value', 'real_date'])
+    def load_value(self, d1, d2, d_report, window_flag):
+        df = self.parent.ds_df
+        s1 = df.loc[d1, :].copy() if d1 in df.index else pd.Series()
+        s2 = df.loc[d2, :].copy() if d2 in df.index else pd.Series()
 
+        box = list()
         for ds in self.parent.data_dict.values():
-            # if ds.data_type == 'assets':
-            #     continue
-            if ds.frequency == 'DAILY':
-                date = d1
-            else:
-                date = d2
+            if ds.info_show[window_flag] is False:
+                continue
 
             index_name = ds.index_name
 
-            box_df.loc[index_name, 'real_date'] = None
-
-            if date in ds.df.index:
-                box_df.loc[index_name, 'value'] = ds.df.loc[date][0]
-            else:
-                s1 = ds.df.iloc[:, 0].copy().dropna()
-                if s1.size > 0:
-                    box_df.loc[index_name, 'value'] = s1[-1]
-                    box_df.loc[index_name, 'real_date'] = s1.index[-1]
-                else:
-                    box_df.loc[index_name, 'value'] = None
-
-            box_df.loc[index_name, 'priority'] = ds.info_priority
-            box_df.loc[index_name, 'data_source'] = ds
-            box_df.loc[index_name, 'show_name'] = ds.show_name
+            row = [ds.info_priority, ds, ds.show_name, None, None]
 
             if ds.frequency == 'DAILY':
-                box_df.loc[index_name, 'real_date'] = d1
+                row[4] = d1
+                value = s1[index_name] if index_name in s1 else None
+                if pd.isna(value):
+                    sub = ds.df.iloc[:, 0].copy().dropna()
+                    value = sub[-1] if sub.size > 0 else None
+                row[3] = value
+            else:
+                value = s2[index_name] if index_name in s1 else None
+                if pd.isna(value):
+                    sub = ds.df.iloc[:, 0].copy().dropna()
+                    if sub.size > 0:
+                        value = sub[-1]
+                        row[4] = sub.index[-1]
+                row[3] = value
 
-        box_df.sort_values('priority', inplace=True)
+            box.append(row)
+
+        box.sort(key=lambda x: x[0])
 
         res = list()
         res.append(('公布日期: %s' % d_report, QPen(Qt.red, 1, Qt.SolidLine)))
         res.append(('报告日期: %s' % d2, QPen(Qt.white, 1, Qt.SolidLine)))
         res.append(('当前日期: %s' % d1, QPen(Qt.white, 1, Qt.SolidLine)))
 
-        for _, row in box_df.iterrows():
-            name, value, ds = row['show_name'], row['value'], row['data_source']
+        for _, ds, name, value, real_date in box:
             txt = ds.format(value)
-            if row['real_date'] is not None:
-                # txt = '%s (%s)' % (txt, row['real_date'])
-                name = '%s (%s)' % (name, row['real_date'])
+            if real_date is not None:
+                name = '%s (%s)' % (name, real_date)
 
             # num = self.chinese_num(txt)
             # txt = '{0:>{width}}'.format(txt, width=7-num)
@@ -68,87 +66,21 @@ class InformationBox:
 
     def draw_pix(self, *args):
         text_list = self.load_value(*args)
+        window_flag = args[3]
 
-        text_list1 = list()
-        text_list2 = list()
-        text_list3 = list()
-        text_list4 = list()
-
+        res_list = []
         for row in text_list:
-            # if len(row) == 2:
-            #     text_list1.append((row[0], row[1]))
-            #     continue
-            #
-            # ds = row[2]
-            # if ds.data_type == 'assets':
-            #     text_list2.append((row[0], row[1]))
-            # else:
-            #     if len(text_list1) > 54:
-            #         text_list2.append((row[0], row[1]))
-            #     else:
-            #         text_list1.append((row[0], row[1]))
-            #
-            # if ds.data_type != 'assets' and ds.data_type != 'equity':
-            #     text_list3.append((row[0], row[1]))
 
             if len(row) == 2:
-                text_list1.append((row[0], row[1]))
-                text_list2.append((row[0], row[1]))
-                text_list3.append((row[0], row[1]))
-                text_list4.append((row[0], row[1]))
+                res_list.append((row[0], row[1]))
                 continue
             ds = row[2]
 
-            if ds.data_type == 'equity':
-                text_list1.append((row[0], row[1]))
-            elif ds.data_type == 'assets':
-                text_list2.append((row[0], row[1]))
-            # else:
-            #     text_list3.append((row[0], row[1]))
-            #     text_list4.append((row[0], row[1]))
+            if ds.info_show[window_flag] is True:
+                res_list.append((row[0], row[1]))
 
-            # page1 = [
-            #     'id_001_bs_ta',
-            #     'id_062_bs_tl',
-            #     'id_063_bs_lwi',
-            #     'id_065_bs_tl_ta_r',
-            #     'id_066_bs_tcl',
-            #     'id_110_bs_toe',
-            #     'id_117_bs_is',
-            #     's_017_equity_parent',
-            #     's_021_cap_expenditure',
-            # ]
-            #
-            # page2 = [
-            #     'id_001_bs_ta',
-            #     'id_003_bs_tca',
-            #     'id_032_bs_tnca',
-            #     's_019_monetary_asset',
-            #     's_020_cap_asset',
-            #     's_021_cap_expenditure',
-            # ]
-            #
-            # if ds.index_name in page1:
-            #     text_list1.append((row[0], row[1]))
-            #
-            # if ds.index_name in page2:
-            #     text_list2.append((row[0], row[1]))
-
-            if ds.info_show[0] is True:
-                text_list1.append((row[0], row[1]))
-            if ds.info_show[1] is True:
-                text_list2.append((row[0], row[1]))
-            if ds.info_show[2] is True:
-                text_list3.append((row[0], row[1]))
-            if ds.info_show[3] is True:
-                text_list4.append((row[0], row[1]))
-
-        pix1 = self.draw_text(text_list1)
-        pix2 = self.draw_text(text_list2)
-        pix3 = self.draw_text(text_list3)
-        pix4 = self.draw_text(text_list4)
-
-        return pix1, pix2, pix3, pix4
+        pix = self.draw_text(res_list)
+        return pix
 
     @staticmethod
     def draw_text(text_list):

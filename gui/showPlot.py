@@ -25,7 +25,9 @@ def show_test_plot():
     # s0 = s0[-750:]
     # if s0.size == 0:
     #     return
-    show_plt(code, df, 10, 33)
+    show_plt(code, df, 10, 33, 1600, 900)
+    print(222)
+    show_plt(code, df, 10, 33, 1600, 900)
     # self.show_plot(code, pd.Series())
 
 
@@ -33,13 +35,14 @@ def show_plt(title, df, x00, y00, width, height):
     if df.index.size == 0:
         return
 
-    if len(plt.get_fignums()) == 1:
+    if plt.fignum_exists(1):
+        plt.figure(1, figsize=(16, 9), dpi=100)
         rect = plt.get_current_fig_manager().window.geometry()
     else:
         rect = QRect(x00, y00, width, height)
 
-    plt.close("all")
-    plt.figure(figsize=(16, 9), dpi=100)
+    plt.close(1)
+    plt.figure(1, figsize=(16, 9), dpi=100)
     plt.rcParams['font.sans-serif'] = 'SimHei'
     plt.rcParams['axes.unicode_minus'] = False
     plt.rcParams.update({"font.size": 20})

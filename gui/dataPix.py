@@ -42,13 +42,15 @@ class DataPix:
         self.data_rect = QRect(left_blank, 100, d_width, d_height)
 
         # pix
+        self.pix_num = 4
+        self.pix_list = []
+        self.pix_show = []
         self.pix = QPixmap(self.m_width, self.m_height)
-        self.pix2 = QPixmap(self.pix)
-        self.pix3 = QPixmap(self.pix)
-        self.pix4 = QPixmap(self.pix)
-        self.pix_show = QPixmap(self.pix)
+        # self.pix_show = QPixmap(self.pix)
         self.struct_pix = QPixmap(self.pix)
-        self.pix_list = [self.pix, self.pix2, self.pix3, self.pix4]
+        for _ in range(self.pix_num):
+            self.pix_list.append(QPixmap(self.pix))
+            self.pix_show.append(QPixmap(self.pix))
 
         # date metrics
         self.date_max = dt.date(2023, 7, 20)
@@ -66,10 +68,12 @@ class DataPix:
 
         self.dt_fs = pd.Series()
         self.dt_mvs = pd.Series()
+        self.ds_df = pd.DataFrame()
 
         # self.scale_ratio = 4
         self.scale_ratio = 16 if ratio is None else ratio
 
+        # self.x_dict = dict()
         self.update_pix(style_df)
 
     def load_df(self, df):
@@ -91,7 +95,7 @@ class DataPix:
         if len(self.df.index) == 0:
             self.init_pix()
             self.draw_struct()
-            self.pix_show = self.pix
+            # self.pix_show = self.pix
             return
 
         style_df = style_df[style_df['selected'].values]
@@ -148,8 +152,28 @@ class DataPix:
             if ds.default_ds is True:
                 self.default_ds = ds
 
+        df_list = [pd.DataFrame()]
+        for index, ds in self.data_dict.items():
+            df_list.append(ds.df)
+        self.ds_df = pd.concat(df_list, axis=1, sort=True)
+
         self.draw_pix()
+        # self.init_x_dict()
         self.init_cross()
+
+    # def init_x_dict(self):
+    #     self.x_dict = dict()
+    #
+    #     d_left = self.data_rect.left()
+    #     d_right = self.data_rect.right()
+    #
+    #     for x in range(d_left, d_right+1):
+    #         d0 = self.x_px2data(x).strftime("%Y-%m-%d")
+    #
+    #         d1 = self.get_last_date(d0, self.dt_mvs.values)
+    #         d_report = self.get_last_date(d0, self.dt_fs.index.values)
+    #         d2 = None if d_report is None else self.dt_fs[d_report]
+    #         self.x_dict[x] = [d0, d1, d2, d_report]
 
     @staticmethod
     def regular_series(name, series):
@@ -215,6 +239,7 @@ class DataPix:
             's_051_core_profit',
             's_052_core_profit_asset',
             's_053_core_profit_salary',
+            's_055_gross_cost',
             'dv_001_dividend_value',
         ]
 
@@ -289,14 +314,16 @@ class DataPix:
         self.draw_auxiliary_line(self.default_ds)
 
         self.struct_pix = QPixmap(self.pix)
-        self.pix2 = QPixmap(self.pix)
-        self.pix3 = QPixmap(self.pix)
-        self.pix4 = QPixmap(self.pix)
+
+        self.pix_list = []
+        for _ in range(self.pix_num):
+            self.pix_list.append(QPixmap(self.pix))
 
         self.draw_data_dict()
 
-        self.pix_show = self.pix
-        self.pix_list = [self.pix, self.pix2, self.pix3, self.pix4]
+        self.pix_show = []
+        for pix in self.pix_list:
+            self.pix_show.append(pix)
 
     def draw_struct(self):
         pix_painter = QPainter(self.pix)
@@ -461,20 +488,16 @@ class DataPix:
         pix_painter.end()
 
     def draw_data_dict(self):
-        self.draw_percentage(self.pix2, 'assets')
-        self.draw_percentage(self.pix, 'equity')
+        self.draw_percentage(self.pix_list[1], 'assets')
+        self.draw_percentage(self.pix_list[0], 'equity')
 
-        self.draw_split(self.pix)
-        self.draw_split(self.pix2)
-        self.draw_split(self.pix3)
-        self.draw_split(self.pix4)
+        for pix in self.pix_list:
+            self.draw_split(pix)
 
         for ds in self.data_dict.values():
-            pix_list = [self.pix, self.pix2, self.pix3, self.pix4]
-
             for index in range(4):
                 flag = ds.pix_show[index]
-                pix = pix_list[index]
+                pix = self.pix_list[index]
 
                 if flag is True:
                     self.draw_data(ds, pix)
@@ -610,9 +633,9 @@ class DataPix:
             y = self.y_data2px(data_y, ds)
             if np.isnan(y):
                 return
-        self.draw_cross(x, y, False)
+        self.draw_cross(x, y, False, 3)
 
-    def draw_cross(self, x, y, state):
+    def draw_cross(self, x, y, state, window_flag):
         if x is None and y is None:
             return
 
@@ -624,15 +647,18 @@ class DataPix:
 
         x, y, d0, d1, d2, d_report = self.get_d1_d2(x, y)
         box = InformationBox(parent=self)
-        pixes = box.draw_pix(d1, d2, d_report)
+        pix = box.draw_pix(d1, d2, d_report, window_flag)
 
         thick = 3 if state is True else 1
-        show1 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, pixes[0], self.pix)
-        show2 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, pixes[1], self.pix2)
-        show3 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, pixes[2], self.pix3)
-        show4 = self.draw_sub_cross(x, y, d0, d1, d2, state, thick, pixes[3], self.pix4)
+        show = self.draw_sub_cross(x, y, d0, d1, d2, state, thick, pix, self.pix_list[window_flag])
+        self.pix_show[window_flag] = show
 
-        self.pix_list = [show1, show2, show3, show4]
+        # show1 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, pixes[0], self.pix_list[0])
+        # show2 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, pixes[1], self.pix_list[1])
+        # show3 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, pixes[2], self.pix_list[2])
+        # show4 = self.draw_sub_cross(x, y, d0, d1, d2, state, thick, pixes[3], self.pix_list[3])
+        #
+        # self.pix_show = [show1, show2, show3, show4]
 
     def get_d1_d2(self, x, y):
 
@@ -714,9 +740,9 @@ class DataPix:
                 x=px_x2,
             )
 
-        for ds in self.data_dict.values():
-            if ds.frequency == 'DAILY':
-                self.draw_data(ds, pix)
+        # for ds in self.data_dict.values():
+        #     if ds.frequency == 'DAILY':
+        #         self.draw_data(ds, pix)
 
         self.draw_mask_pix(
             pix=pix,

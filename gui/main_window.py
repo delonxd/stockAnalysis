@@ -169,7 +169,7 @@ class MainWidget(QWidget):
         self.turnover = 0
 
         self.plt_rect = [10, 32, 1600, 900]
-
+        self.mouse_pos = [None, None]
         # self.window2 = ShowPix(main_window=self)
 
         # self.tree.update_style.connect(self.update_style)
@@ -587,7 +587,9 @@ class MainWidget(QWidget):
             # self.show_pix()
 
     def show_pix(self):
-        self.label.setPixmap(self.data_pix.pix_list[self.window_flag])
+        x, y = self.mouse_pos
+        self.data_pix.draw_cross(x, y, self.cross, self.window_flag)
+        self.label.setPixmap(self.data_pix.pix_show[self.window_flag])
 
     def update_window(self):
         code = self.stock_code
@@ -602,7 +604,7 @@ class MainWidget(QWidget):
 
         self.style_widget.refresh_style(self.current_style)
 
-        if len(plt.get_fignums()) == 1:
+        if plt.fignum_exists(1):
             self.show_plot()
 
     def update_counter(self, code):
@@ -844,8 +846,8 @@ class MainWidget(QWidget):
         self.move(qr.topLeft().x() - 11, qr.topLeft().y() - 45)
 
     def draw_cross(self, x, y):
-        self.data_pix.draw_cross(x, y, self.cross)
-        self.label.setPixmap(self.data_pix.pix_list[self.window_flag])
+        self.data_pix.draw_cross(x, y, self.cross, self.window_flag)
+        self.label.setPixmap(self.data_pix.pix_show[self.window_flag])
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -863,6 +865,7 @@ class MainWidget(QWidget):
         # if self.cross:
         pos = event.pos() - self.label.pos()
         self.draw_cross(pos.x(), pos.y())
+        self.mouse_pos = [pos.x(), pos.y()]
 
     def wheelEvent(self, event):
         a = event.angleDelta().y() / 120
@@ -937,12 +940,6 @@ class MainWidget(QWidget):
             self.equity_change_widget.close()
 
     def relocate(self):
-        if len(plt.get_fignums()) == 1:
-            plt_flag = True
-            rect = plt.get_current_fig_manager().window.geometry()
-        else:
-            plt_flag = False
-            rect = QRect(*self.plt_rect)
 
         if self.button12.isChecked():
             self.showMaximized()
@@ -954,9 +951,13 @@ class MainWidget(QWidget):
             self.equity_change_widget.move(-1916, -10)
 
             # self.window2.move(-1906, 10)
-            self.plt_rect = [-1916, 32, rect.width(), rect.height()]
 
             self.fs_view.move(152-1920, 60)
+
+            if plt.fignum_exists(1):
+                plt.figure(1, figsize=(16, 9), dpi=100)
+                rect = [-1916, 32, 1600, 900]
+                plt.get_current_fig_manager().window.setGeometry(*rect)
 
         else:
             self.showMaximized()
@@ -970,12 +971,10 @@ class MainWidget(QWidget):
             # self.window2.move(10, 10)
             self.fs_view.move(152, 60)
 
-            self.plt_rect = [10, 32, rect.width(), rect.height()]
-
-        if plt_flag is True:
-            plt.get_current_fig_manager().window.setGeometry(*self.plt_rect)
-        else:
-            plt.close("all")
+            if plt.fignum_exists(1):
+                plt.figure(1, figsize=(16, 9), dpi=100)
+                rect = [10, 32, 1600, 900]
+                plt.get_current_fig_manager().window.setGeometry(*rect)
 
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_1:
