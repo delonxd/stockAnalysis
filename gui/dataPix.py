@@ -45,12 +45,19 @@ class DataPix:
         self.pix_num = 4
         self.pix_list = []
         self.pix_show = []
+        self.pix_list_daily = []
+
         self.pix = QPixmap(self.m_width, self.m_height)
+
+        self.pix_daily = QPixmap(self.m_width, self.m_height)
+        self.pix_daily.fill(QColor(0, 0, 0, 0))
+
         # self.pix_show = QPixmap(self.pix)
         self.struct_pix = QPixmap(self.pix)
         for _ in range(self.pix_num):
             self.pix_list.append(QPixmap(self.pix))
             self.pix_show.append(QPixmap(self.pix))
+            self.pix_list_daily.append(QPixmap(self.pix_daily))
 
         # date metrics
         self.date_max = dt.date(2023, 7, 20)
@@ -498,9 +505,12 @@ class DataPix:
             for index in range(4):
                 flag = ds.pix_show[index]
                 pix = self.pix_list[index]
+                pix_daily = self.pix_list_daily[index]
 
                 if flag is True:
                     self.draw_data(ds, pix)
+                    if ds.frequency == 'DAILY':
+                        self.draw_data(ds, pix_daily)
 
             # if ds.ds_type == 'digit' and ds.data_type is None:
             #     self.draw_data(ds, self.pix)
@@ -585,7 +595,10 @@ class DataPix:
 
             df_point = pd.DataFrame()
             df_point['px_x'] = px_x
-            df_point['px_y'] = self.y_data2px_vector(data_y, ds)
+            tmp = self.y_data2px_vector(data_y, ds)
+            tmp[tmp > 1e5] = 1e5
+            tmp[tmp < -1e5] = -1e5
+            df_point['px_y'] = tmp
             df_point.dropna(inplace=True)
 
             try:
@@ -633,6 +646,7 @@ class DataPix:
             y = self.y_data2px(data_y, ds)
             if np.isnan(y):
                 return
+        self.draw_cross(x, y, False, 2)
         self.draw_cross(x, y, False, 3)
 
     def draw_cross(self, x, y, state, window_flag):
@@ -649,16 +663,9 @@ class DataPix:
         box = InformationBox(parent=self)
         pix = box.draw_pix(d1, d2, d_report, window_flag)
 
-        thick = 3 if state is True else 1
-        show = self.draw_sub_cross(x, y, d0, d1, d2, state, thick, pix, self.pix_list[window_flag])
+        thick = 1 if state is True else 1
+        show = self.draw_sub_cross(x, y, d0, d1, d2, state, thick, pix, window_flag)
         self.pix_show[window_flag] = show
-
-        # show1 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, pixes[0], self.pix_list[0])
-        # show2 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, pixes[1], self.pix_list[1])
-        # show3 = self.draw_sub_cross(x, y, d0, d1, d2, False, thick, pixes[2], self.pix_list[2])
-        # show4 = self.draw_sub_cross(x, y, d0, d1, d2, state, thick, pixes[3], self.pix_list[3])
-        #
-        # self.pix_show = [show1, show2, show3, show4]
 
     def get_d1_d2(self, x, y):
 
@@ -684,8 +691,8 @@ class DataPix:
 
         return x, y, d0, d1, d2, d_report
 
-    def draw_sub_cross(self, x, y, d0, d1, d2, state, thick, box, pix):
-
+    def draw_sub_cross(self, x, y, d0, d1, d2, state, thick, box, window_flag):
+        pix = self.pix_list[window_flag]
         pix_show = QPixmap(pix)
 
         d_left = self.data_rect.left()
@@ -700,7 +707,7 @@ class DataPix:
         px_x2 = x if d2 is None else self.x_data2px(dt.datetime.strptime(d2, "%Y-%m-%d").date())
 
         if state is True:
-            self.draw_mask(px_x0, px_x2, pix_show)
+            self.draw_mask(px_x0, px_x2, pix_show, window_flag)
 
         # draw cross
         pix_painter = QPainter(pix_show)
@@ -733,12 +740,17 @@ class DataPix:
 
         return res
 
-    def draw_mask(self, px_x0, px_x2, pix):
+    def draw_mask(self, px_x0, px_x2, pix, window_flag):
         if px_x2:
             self.draw_mask_pix(
                 pix=pix,
-                x=px_x2,
+                x=px_x2-1,
             )
+
+        pix_daily = self.pix_list_daily[window_flag]
+        pix_painter = QPainter(pix)
+        pix_painter.drawPixmap(0, 0, pix_daily)
+        pix_painter.end()
 
         # for ds in self.data_dict.values():
         #     if ds.frequency == 'DAILY':

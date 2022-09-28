@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from method.mainMethod import get_units_dict
-from gui.priorityTable import PriorityTable
+# from gui.priorityTable import PriorityTable
 
 import pandas as pd
 import pickle
@@ -263,6 +263,9 @@ class StyleWidget(QWidget):
         self.button3 = QPushButton('加载默认')
         self.button4 = QPushButton('保存默认')
         self.button5 = QPushButton('优先级')
+        self.button6 = QPushButton('索引排序')
+        self.button7 = QPushButton('添加行')
+        self.button8 = QPushButton('删除行')
 
         # self.resize(1600, 900)
 
@@ -273,6 +276,9 @@ class StyleWidget(QWidget):
         layout1.addWidget(self.button3, 0, Qt.AlignCenter)
         layout1.addWidget(self.button4, 0, Qt.AlignCenter)
         layout1.addWidget(self.button5, 0, Qt.AlignCenter)
+        layout1.addWidget(self.button6, 0, Qt.AlignCenter)
+        layout1.addWidget(self.button7, 0, Qt.AlignCenter)
+        layout1.addWidget(self.button8, 0, Qt.AlignCenter)
         layout1.addStretch(1)
 
         self.style_df = pd.DataFrame()
@@ -289,6 +295,9 @@ class StyleWidget(QWidget):
         self.button3.clicked.connect(self.load_default)
         self.button4.clicked.connect(self.save_default)
         self.button5.clicked.connect(self.config_priority)
+        self.button6.clicked.connect(self.sort_index)
+        self.button7.clicked.connect(self.add_row)
+        self.button8.clicked.connect(self.drop_row)
 
     def refresh_style(self, new_df):
         if self.isHidden():
@@ -328,6 +337,256 @@ class StyleWidget(QWidget):
         new_df = self.style_df.copy()
         new_df.loc[df.index, 'info_priority'] = df.values
         self.refresh_style(new_df)
+
+    def sort_index(self):
+        widget = IndexTable(self.style_df)
+        widget.update_style.connect(self.reindex)
+        widget.exec()
+
+    def reindex(self, index):
+        new_df = self.style_df.copy()
+        new_df = new_df.reindex(index)
+        self.refresh_style(new_df)
+
+    def add_row(self):
+        df = self.style_df.copy()
+
+        index_name, _ = QInputDialog.getText(self, '', '')
+        if index_name in df.index:
+            return
+        items = [
+            'id_041_mvs_mc',
+            's_016_roe_parent',
+            's_027_pe_return_rate',
+            's_040_profit_adjust2',
+        ]
+
+        src, _ = QInputDialog.getItem(self, '', '', items, 0, False)
+        if src not in df.index:
+            return
+
+        row = df.loc[[src], :].copy()
+
+        row['default_ds'] = False
+        row['selected'] = False
+
+        row['show_name'] = index_name
+        row['index_name'] = index_name
+
+        row['txt_CN'] = index_name
+        row['sql_type'] = ''
+        row['sheet_name'] = ''
+        row['api'] = ''
+
+        row.index = [index_name]
+
+        new_df = df.append(row)
+        self.refresh_style(new_df)
+
+    def drop_row(self):
+        df = self.style_df.copy()
+
+        index_name, _ = QInputDialog.getText(self, '', '')
+        if index_name not in df.index:
+            return
+        new_df = df.drop(index_name)
+        self.refresh_style(new_df)
+
+
+class PriorityTable(QDialog):
+    update_style = pyqtSignal(object)
+
+    def __init__(self, style_df):
+        super().__init__()
+
+        df = style_df.copy()
+        df = df.loc[df['selected'] == True, :].copy()
+
+        self.columns = ['index_name', 'show_name', 'info_priority']
+        self.df = df.loc[:, self.columns].copy()
+
+        self.table_view = QTableView()
+        self.button1 = QPushButton('up')
+        self.button2 = QPushButton('down')
+        self.button3 = QPushButton('submit')
+        self.button4 = QPushButton('<<')
+        self.button5 = QPushButton('>>')
+        self.model = QStandardItemModel()
+
+        self.load_df()
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle('QTableViewDemo')
+        self.resize(500, 800)
+
+        layout1 = QVBoxLayout()
+        layout1.addWidget(self.button4)
+        layout1.addWidget(self.button1)
+        layout1.addWidget(self.button2)
+        layout1.addWidget(self.button5)
+        layout1.addWidget(self.button3)
+
+        layout = QHBoxLayout()
+        layout.addWidget(self.table_view)
+        layout.addLayout(layout1)
+
+        self.table_view.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+        self.setLayout(layout)
+        self.button1.clicked.connect(self.on_button1_clicked)
+        self.button2.clicked.connect(self.on_button2_clicked)
+        self.button3.clicked.connect(self.on_button3_clicked)
+        self.button4.clicked.connect(self.on_button4_clicked)
+        self.button5.clicked.connect(self.on_button5_clicked)
+
+    def load_df(self):
+        self.df = self.df.sort_values('info_priority')
+        row = self.df.index.size
+        self.model = QStandardItemModel(row, 3)
+
+        self.model.setHorizontalHeaderLabels(self.columns)
+        self.model.setVerticalHeaderLabels([str(i) for i in range(row)])
+
+        for i in range(self.df.shape[0]):
+            for j in range(self.df.shape[1]):
+
+                value = self.df.iloc[i, j]
+
+                item = QStandardItem(str(value))
+                self.model.setItem(i, j, item)
+        self.table_view.setModel(self.model)
+
+    def on_button1_clicked(self):
+        row1 = self.table_view.currentIndex().row()
+        row2 = 0 if row1 == 0 else row1 - 1
+        self.exchange_priority(row1, row2)
+
+    def on_button2_clicked(self):
+        size = self.df.index.size - 1
+        row1 = self.table_view.currentIndex().row()
+        row2 = size if row1 == size else row1 + 1
+        self.exchange_priority(row1, row2)
+
+    def on_button4_clicked(self):
+        for _ in range(10):
+            self.on_button1_clicked()
+
+    def on_button5_clicked(self):
+        for _ in range(10):
+            self.on_button2_clicked()
+
+    def exchange_priority(self, row1, row2):
+        priority1 = self.df.iloc[row1, 2]
+        priority2 = self.df.iloc[row2, 2]
+        self.df.iloc[row1, 2] = priority2
+        self.df.iloc[row2, 2] = priority1
+        self.load_df()
+        self.table_view.selectRow(row2)
+
+    def on_button3_clicked(self):
+        df = self.df['info_priority']
+
+        self.update_style.emit(df)
+
+
+class IndexTable(QDialog):
+    update_style = pyqtSignal(object)
+
+    def __init__(self, style_df):
+        super().__init__()
+
+        self.columns = ['index_name', 'show_name']
+        self.df = style_df.loc[:, self.columns].copy()
+
+        self.table_view = QTableView()
+        self.button1 = QPushButton('<<')
+        self.button2 = QPushButton('up')
+        self.button3 = QPushButton('down')
+        self.button4 = QPushButton('>>')
+        self.button5 = QPushButton('submit')
+        self.model = QStandardItemModel()
+
+        self.load_df()
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle('IndexTable')
+        self.resize(500, 700)
+
+        layout1 = QVBoxLayout()
+        layout1.addStretch(1)
+        layout1.addWidget(self.button1)
+        layout1.addWidget(self.button2)
+        layout1.addWidget(self.button3)
+        layout1.addWidget(self.button4)
+        layout1.addWidget(self.button5)
+        layout1.addStretch(1)
+
+        layout = QHBoxLayout()
+        layout.addWidget(self.table_view)
+        layout.addLayout(layout1)
+
+        self.table_view.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+        self.setLayout(layout)
+        self.button1.clicked.connect(self.on_button1_clicked)
+        self.button2.clicked.connect(self.on_button2_clicked)
+        self.button3.clicked.connect(self.on_button3_clicked)
+        self.button4.clicked.connect(self.on_button4_clicked)
+        self.button5.clicked.connect(self.on_button5_clicked)
+
+    def load_df(self):
+        row = self.df.index.size
+        self.model = QStandardItemModel(row, 2)
+
+        self.model.setHorizontalHeaderLabels(self.columns)
+        self.model.setVerticalHeaderLabels([str(i) for i in range(row)])
+
+        for i in range(self.df.shape[0]):
+            for j in range(self.df.shape[1]):
+
+                value = self.df.iloc[i, j]
+                item = QStandardItem(str(value))
+                self.model.setItem(i, j, item)
+        self.table_view.setModel(self.model)
+        self.table_view.setColumnWidth(0, 150)
+        self.table_view.setColumnWidth(1, 150)
+
+    def on_button1_clicked(self):
+        for _ in range(10):
+            self.on_button2_clicked()
+
+    def on_button2_clicked(self):
+        row1 = self.table_view.currentIndex().row()
+        row2 = 0 if row1 == 0 else row1 - 1
+        self.exchange_index(row1, row2)
+
+    def on_button3_clicked(self):
+        size = self.df.index.size - 1
+        row1 = self.table_view.currentIndex().row()
+        row2 = size if row1 == size else row1 + 1
+        self.exchange_index(row1, row2)
+
+    def on_button4_clicked(self):
+        for _ in range(10):
+            self.on_button3_clicked()
+
+    def exchange_index(self, row1, row2):
+        index = list(self.df.index)
+
+        index_name = index.pop(row1)
+        index.insert(row2, index_name)
+
+        self.df = self.df.reindex(index)
+        self.load_df()
+        self.table_view.selectRow(row2)
+
+    def on_button5_clicked(self):
+        index = self.df.index.copy()
+        self.update_style.emit(index)
 
 
 def load_default_style():

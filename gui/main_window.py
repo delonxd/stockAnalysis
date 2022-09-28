@@ -587,8 +587,6 @@ class MainWidget(QWidget):
             # self.show_pix()
 
     def show_pix(self):
-        x, y = self.mouse_pos
-        self.data_pix.draw_cross(x, y, self.cross, self.window_flag)
         self.label.setPixmap(self.data_pix.pix_show[self.window_flag])
 
     def update_window(self):
@@ -989,8 +987,13 @@ class MainWidget(QWidget):
             self.cross = not self.cross
         elif e.key() == Qt.Key_S:
             GuiLog.write(self.log_path)
-
+            return
+        else:
+            return
         # self.update_window()
+
+        x, y = self.mouse_pos
+        self.data_pix.draw_cross(x, y, self.cross, self.window_flag)
         self.show_pix()
 
     def closeEvent(self, event):
