@@ -208,7 +208,7 @@ class StyleTable(QTableWidget):
         # print('index: %s, column: %s' % (index, column))
 
         if column in ['color']:
-            value = QColorDialog.getColor()
+            value = QColorDialog.getColor(initial=ini)
 
         elif column in ['line_thick', 'scale_div', 'info_priority', 'ma_mode']:
             text, _ = QInputDialog.getText(self, title, label)
@@ -355,6 +355,7 @@ class StyleWidget(QWidget):
         if index_name in df.index:
             return
         items = [
+            'id_001_bs_ta',
             'id_041_mvs_mc',
             's_016_roe_parent',
             's_027_pe_return_rate',

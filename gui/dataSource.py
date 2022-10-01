@@ -114,6 +114,7 @@ class DataSource:
             'id_010_bs_cdfa': '衍生金融资产(流动)',
             'id_012_bs_nr': '应收票据',
             'id_013_bs_ar': '应收账款',
+            's_005_receivables_surplus': '剩余应收',
             'id_014_bs_rf': '应收款项融资',
             'id_015_bs_ats': '预付款项',
             'id_016_bs_pr': '应收保费',

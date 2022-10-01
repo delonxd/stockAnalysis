@@ -295,14 +295,15 @@ class DataAnalysis:
 
             's_007_asset',
             's_002_equity',
-            's_005_stocks',
+
+            's_005_receivables_surplus',
 
             's_003_profit',
-            's_010_main_profit',
-            's_011_main_profit_rate',
+            # 's_010_main_profit',
+            # 's_011_main_profit_rate',
 
             's_001_roe',
-            's_006_stocks_rate',
+            # 's_006_stocks_rate',
 
             's_008_revenue',
             's_047_gross_cost',
@@ -310,10 +311,20 @@ class DataAnalysis:
 
             's_019_monetary_asset',
             's_020_cap_asset',
-            's_021_cap_expenditure',
-            's_022_profit_no_expenditure',
+            # 's_021_cap_expenditure',
+            # 's_022_profit_no_expenditure',
             's_023_liabilities',
             's_024_real_liabilities',
+
+            's_010_cash_asset',
+            's_011_insurance_asset',
+            's_012_financial_asset',
+            's_013_invest_asset',
+            's_014_turnover_asset',
+            's_015_inventory_asset',
+            's_021_fixed_asset',
+            's_022_capitalized_asset',
+            's_026_liquidation_asset',
 
             # 's_038_pay_for_long_term_asset',
             # 's_039_profit_adjust',
@@ -331,6 +342,9 @@ class DataAnalysis:
             's_055_gross_cost',
             's_056_inventory_turnaround',
             's_057_core_roe',
+            's_058_equity_adj',
+            's_059_total_expend',
+            's_060_total_expend_rate',
         ]
 
         df = self.df_fs
@@ -346,10 +360,10 @@ class DataAnalysis:
         df = self.df_mvs
 
         index_list1 = [
-            's_030_parent_equity_delta',
-            's_031_financing_outflow',
-            's_032_remain_rate',
-            's_033_profit_compound',
+            # 's_030_parent_equity_delta',
+            # 's_031_financing_outflow',
+            # 's_032_remain_rate',
+            # 's_033_profit_compound',
         ]
         for index in index_list1:
             self.fs_add(self.get_column(df, index))
@@ -360,10 +374,10 @@ class DataAnalysis:
             # 's_014_pe2',
             # 's_015_return_year2',
             's_025_real_cost',
-            's_026_holder_return_rate',
+            # 's_026_holder_return_rate',
             's_027_pe_return_rate',
             's_028_market_value',
-            's_029_return_predict',
+            # 's_029_return_predict',
 
             'mir_y10',
             's_034_real_pe',
@@ -376,27 +390,6 @@ class DataAnalysis:
             self.mvs_add(self.get_column(df, index))
 
         self.config_balance_sheet()
-        self.set_df()
-
-    def config_daily_data(self):
-        self.config_sub_fs(DailyDataAnalysis)
-        self.fs_add(self.get_column(self.df_fs, 'dt_fs'))
-        self.mvs_add(self.get_column(self.df_mvs, 'dt_mvs'))
-
-        df = self.df_mvs
-
-        index_list1 = [
-            # 's_004_pe',
-            's_025_real_cost',
-            's_026_holder_return_rate',
-            's_027_pe_return_rate',
-            's_028_market_value',
-            's_037_real_pe_return_rate',
-            's_044_turnover_volume',
-        ]
-        for index in index_list1:
-            self.mvs_add(self.get_column(df, index))
-
         self.set_df()
 
     def config_balance_sheet(self):
@@ -632,13 +625,18 @@ class DataAnalysis:
             s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
             return self.regular_series(column, s2 / s1)
 
-        elif column == 's_005_stocks':
-            return self.smooth_data(column, 'id_023_bs_i')
+        elif column == 's_005_receivables_surplus':
+            s1 = self.get_column(self.df_fs, 'id_011_bs_nraar')
+            s2 = self.get_column(self.df_fs, 'id_012_bs_nr')
+            s3 = self.get_column(self.df_fs, 'id_013_bs_ar')
+            s4 = s1 - (s2 + s3)
+            return self.regular_series(column, s4)
 
-        elif column == 's_006_stocks_rate':
-            s1 = self.get_column(df, 's_005_stocks')
-            s2 = self.get_column(df, 's_007_asset')
-            return self.regular_series(column, s1 / s2)
+        # 待删除
+        # elif column == 's_006_stocks_rate':
+        #     s1 = self.get_column(df, 's_005_stocks')
+        #     s2 = self.get_column(df, 's_007_asset')
+        #     return self.regular_series(column, s1 / s2)
 
         elif column == 's_007_asset':
             return self.smooth_data(column, 'id_001_bs_ta')
@@ -648,39 +646,88 @@ class DataAnalysis:
 
         elif column == 's_009_revenue_rate':
             s1 = self.get_column(df, 's_008_revenue')
-            s2 = StandardFitModel.get_growth_rate(s1, column)
+            s2 = StandardFitModel.get_growth_rate(s1, column, 12)
             return self.regular_series(column, s2)
 
-        elif column == 's_010_main_profit':
-            return self.smooth_data(column, 'id_200_ps_op', delta=True, ttm=True)
+        elif column == 's_010_cash_asset':
+            d1 = {
+                'id_005_bs_cabb': '货币资金',
+                'id_007_bs_sr': '结算备付金',
+                'id_008_bs_pwbaofi': '拆出资金',
+            }
 
-        elif column == 's_011_main_profit_rate':
-            s1 = self.get_column(df, 's_010_main_profit')
-            s2 = StandardFitModel.get_growth_rate(s1, column)
+            s1 = self.sum_columns(df, list(d1.keys()))
+            s2 = get_month_data(s1, column)
             return self.regular_series(column, s2)
 
-        elif column == 's_012_return_year':
-            s1 = self.fs_to_mvs('s_009_revenue_rate')
-            s2 = self.get_column(df, 's_004_pe')
-            s3 = self.get_return_year(s2, s1)
-            return self.regular_series(column, s3)
+        elif column == 's_011_insurance_asset':
+            d1 = {
+                'id_016_bs_pr': '应收保费',
+                'id_017_bs_rir': '应收分保账款',
+                'id_018_bs_crorir': '应收分保合同准备金',
+            }
 
-        elif column == 's_013_noc_asset':
-            s1 = self.fs_to_mvs('s_018_profit_parent')
-            s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
-            return self.regular_series(column, s2 / s1)
+            s1 = self.sum_columns(df, list(d1.keys()))
+            s2 = get_month_data(s1, column)
+            return self.regular_series(column, s2)
 
-        elif column == 's_014_pe2':
-            s1 = self.fs_to_mvs('s_018_profit_parent')
-            s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
-            s3 = self.fs_to_mvs('s_005_stocks')
-            return self.regular_series(column, (s2 + s3) / s1)
+        elif column == 's_012_financial_asset':
+            d1 = {
+                'id_036_bs_cri': '债权投资',
+                'id_037_bs_ocri': '其他债权投资',
+                'id_039_bs_htmi': '持有至到期投资',
+                'id_009_bs_tfa': '交易性金融资产',
+                'id_010_bs_cdfa': '衍生金融资产(流动)',
+                'id_022_bs_fahursa': '买入返售金融资产',
+                'id_042_bs_oeii': '其他权益工具投资',
+                'id_038_bs_ncafsfa': '可供出售金融资产(非流动)',
+                'id_043_bs_oncfa': '其他非流动金融资产',
+            }
 
-        elif column == 's_015_return_year2':
-            s1 = self.fs_to_mvs('s_009_revenue_rate')
-            s2 = self.get_column(df, 's_014_pe2')
-            s3 = self.get_return_year(s2, s1)
-            return self.regular_series(column, s3)
+            s1 = self.sum_columns(df, list(d1.keys()))
+            s2 = get_month_data(s1, column)
+            return self.regular_series(column, s2)
+
+        elif column == 's_013_invest_asset':
+            d1 = {
+                'id_026_bs_claatc': '发放贷款及垫款(流动)',
+                'id_035_bs_nclaatc': '发放贷款及垫款(非流动)',
+                'id_029_bs_oca': '其他流动资产',
+                'id_025_bs_ahfs': '持有待售资产',
+                'id_041_bs_ltei': '长期股权投资',
+                'id_044_bs_rei': '投资性房地产',
+            }
+
+            s1 = self.sum_columns(df, list(d1.keys()))
+            s2 = get_month_data(s1, column)
+            return self.regular_series(column, s2)
+
+        elif column == 's_014_turnover_asset':
+            d1 = {
+                'id_015_bs_ats': '预付款项',
+                'id_060_bs_dita': '递延所得税资产',
+                'id_024_bs_ca': '合同资产',
+                'id_014_bs_rf': '应收款项融资',
+                'id_011_bs_nraar': '应收票据及应收账款',
+                'id_040_bs_ltar': '长期应收款',
+                'id_019_bs_or': '其他应收款',
+            }
+
+            s1 = self.sum_columns(df, list(d1.keys()))
+            s2 = get_month_data(s1, column)
+            return self.regular_series(column, s2)
+
+        elif column == 's_015_inventory_asset':
+            d1 = {
+                'id_023_bs_i': '存货',
+                'id_052_bs_oaga': '油气资产',
+                'id_051_bs_pba': '生产性生物资产',
+                'id_053_bs_pwba': '公益性生物资产',
+            }
+
+            s1 = self.sum_columns(df, list(d1.keys()))
+            s2 = get_month_data(s1, column)
+            return self.regular_series(column, s2)
 
         elif column == 's_016_roe_parent':
             s1 = self.get_column(df, 's_018_profit_parent')
@@ -713,19 +760,31 @@ class DataAnalysis:
             s2 = self.get_column(df, 's_019_monetary_asset')
             return self.regular_series(column, s1 - s2)
 
-        elif column == 's_021_cap_expenditure':
-            s1 = self.get_column(df, 's_020_cap_asset')
-            s2 = s1 - s1.shift(1)
-            s2 = s2.fillna(0)
+        elif column == 's_021_fixed_asset':
+            d1 = {
+                'id_045_bs_fa': '固定资产',
+                'id_048_bs_cip': '在建工程',
+            }
+
+            s1 = self.sum_columns(df, list(d1.keys()))
+            s2 = get_month_data(s1, column)
             return self.regular_series(column, s2)
 
-        elif column == 's_022_profit_no_expenditure':
-            s1 = self.smooth_data('s1', 'id_217_ps_npatoshopc', delta=True)
-            s2 = self.get_column(df, 's_021_cap_expenditure')
-            s2 = s2.reindex_like(s1)
-            s2 = s2.fillna(0)
-            s3 = self.get_ttm(s1 - s2, 4)
-            return self.regular_series(column, s3)
+        elif column == 's_022_capitalized_asset':
+            d1 = {
+                'id_061_bs_onca': '其他非流动资产',
+                'id_028_bs_ncadwioy': '一年内到期的非流动资产',
+                'id_054_bs_roua': '使用权资产',
+                'id_055_bs_ia': '无形资产',
+                'id_027_bs_pe': '待摊费用',
+                'id_059_bs_ltpe': '长期待摊费用',
+                'id_056_bs_rade': '开发支出',
+                'id_057_bs_gw': '商誉',
+            }
+
+            s1 = self.sum_columns(df, list(d1.keys()))
+            s2 = get_month_data(s1, column)
+            return self.regular_series(column, s2)
 
         elif column == 's_023_liabilities':
             return self.smooth_data(column, 'id_062_bs_tl')
@@ -742,10 +801,20 @@ class DataAnalysis:
             s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
             return self.regular_series(column, s1 + s2)
 
-        elif column == 's_026_holder_return_rate':
-            s1 = self.fs_to_mvs('s_022_profit_no_expenditure')
-            s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
-            return self.regular_series(column, s1 / s2)
+        elif column == 's_026_liquidation_asset':
+            tmp = list()
+            tmp.append(self.get_column(df, 's_010_cash_asset'))
+            tmp.append(self.get_column(df, 's_011_insurance_asset'))
+            tmp.append(self.get_column(df, 's_012_financial_asset'))
+            tmp.append(self.get_column(df, 's_013_invest_asset') * 0.5)
+            tmp.append(self.get_column(df, 's_014_turnover_asset') * 0.3)
+            tmp.append(self.get_column(df, 's_015_inventory_asset') * 0.2)
+            tmp.append(self.get_column(df, 's_021_fixed_asset') * 0.1)
+            tmp.append(self.get_column(df, 's_023_liabilities') * -1)
+
+            df1 = pd.concat(tmp, axis=1, sort=True)
+            s1 = df1.apply(lambda x: x.sum(), axis=1)
+            return self.regular_series(column, s1)
 
         elif column == 's_027_pe_return_rate':
             s1 = self.fs_to_mvs('s_018_profit_parent')
@@ -756,37 +825,37 @@ class DataAnalysis:
             s1 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
             return self.regular_series(column, s1)
 
-        elif column == 's_029_return_predict':
-            s1 = self.fs_to_mvs('s_009_revenue_rate')
-            s2 = self.get_column(df, 's_027_pe_return_rate')
-            s3 = (s1 * 5 + 1) * s2
-            return self.regular_series(column, s3)
+        # elif column == 's_029_return_predict':
+        #     s1 = self.fs_to_mvs('s_009_revenue_rate')
+        #     s2 = self.get_column(df, 's_027_pe_return_rate')
+        #     s3 = (s1 * 5 + 1) * s2
+        #     return self.regular_series(column, s3)
 
-        elif column == 's_030_parent_equity_delta':
-            s1 = self.smooth_data(column, 'id_124_bs_tetoshopc')
-            s2 = s1 - s1.shift(1)
-            s3 = s2.fillna(0)
-            return self.regular_series(column, s3)
+        # elif column == 's_030_parent_equity_delta':
+        #     s1 = self.smooth_data(column, 'id_124_bs_tetoshopc')
+        #     s2 = s1 - s1.shift(1)
+        #     s3 = s2.fillna(0)
+        #     return self.regular_series(column, s3)
 
-        elif column == 's_031_financing_outflow':
-            s1 = self.smooth_data('s1', 'id_217_ps_npatoshopc', delta=True)
-            s2 = self.get_column(df, 's_030_parent_equity_delta')
-            s3 = s2 - (s1 / 4)
-            return self.regular_series(column, s3)
+        # elif column == 's_031_financing_outflow':
+        #     s1 = self.smooth_data('s1', 'id_217_ps_npatoshopc', delta=True)
+        #     s2 = self.get_column(df, 's_030_parent_equity_delta')
+        #     s3 = s2 - (s1 / 4)
+        #     return self.regular_series(column, s3)
 
-        elif column == 's_032_remain_rate':
-            s1 = self.get_column(df, 's_030_parent_equity_delta')
-            s1 = self.get_ttm(s1 * 4, 4)
-            s2 = self.get_column(df, 's_017_equity_parent')
-            res = self.get_delta_rate(s1, s2)
-            return self.regular_series(column, res)
+        # elif column == 's_032_remain_rate':
+        #     s1 = self.get_column(df, 's_030_parent_equity_delta')
+        #     s1 = self.get_ttm(s1 * 4, 4)
+        #     s2 = self.get_column(df, 's_017_equity_parent')
+        #     res = self.get_delta_rate(s1, s2)
+        #     return self.regular_series(column, res)
 
-        elif column == 's_033_profit_compound':
-            s1 = self.get_column(df, 's_032_remain_rate')
-            s2 = (s1 + 1) ** 5
-            s2[s2 > 1e8] = 1e8
-            s2.name = column
-            return self.regular_series(column, s2)
+        # elif column == 's_033_profit_compound':
+        #     s1 = self.get_column(df, 's_032_remain_rate')
+        #     s2 = (s1 + 1) ** 5
+        #     s2[s2 > 1e8] = 1e8
+        #     s2.name = column
+        #     return self.regular_series(column, s2)
 
         elif column == 's_034_real_pe':
             s1 = self.fs_to_mvs('s_018_profit_parent')
@@ -808,42 +877,42 @@ class DataAnalysis:
             s2 = self.get_column(df, 's_025_real_cost')
             return self.regular_series(column, s1 / s2)
 
-        elif column == 's_038_pay_for_long_term_asset':
-            s1 = self.smooth_data('s1', 'id_271_cfs_cpfpfiaolta', delta=True)
-            return self.regular_series(column, s1)
+        # elif column == 's_038_pay_for_long_term_asset':
+        #     s1 = self.smooth_data('s1', 'id_271_cfs_cpfpfiaolta', delta=True)
+        #     return self.regular_series(column, s1)
 
-        elif column == 's_039_profit_adjust':
-            d1 = {
-                'id_298_cfs_np': '净利润',
-                'id_299_cfs_ioa': '加： 资产减值准备',
-                'id_300_cfs_cilor': '信用减值损失',
-                'id_301_cfs_dofx_dooaga_dopba': '固定资产折旧、油气资产折耗、生产性生物资产折旧',
-                'id_302_cfs_daaorei': '投资性房地产的折旧及摊销',
-                'id_303_cfs_aoia': '无形资产摊销',
-                'id_304_cfs_aoltde': '长期待摊费用摊销',
-                'id_305_cfs_lodofaiaaolta': '处置固定资产、无形资产和其他长期资产的损失',
-                'id_306_cfs_lfsfa': '固定资产报废损失',
-                # 'id_307_cfs_lfcifv': '公允价值变动损失',
-                'id_312_cfs_dii': '存货的减少',
-            }
+        # elif column == 's_039_profit_adjust':
+        #     d1 = {
+        #         'id_298_cfs_np': '净利润',
+        #         'id_299_cfs_ioa': '加： 资产减值准备',
+        #         'id_300_cfs_cilor': '信用减值损失',
+        #         'id_301_cfs_dofx_dooaga_dopba': '固定资产折旧、油气资产折耗、生产性生物资产折旧',
+        #         'id_302_cfs_daaorei': '投资性房地产的折旧及摊销',
+        #         'id_303_cfs_aoia': '无形资产摊销',
+        #         'id_304_cfs_aoltde': '长期待摊费用摊销',
+        #         'id_305_cfs_lodofaiaaolta': '处置固定资产、无形资产和其他长期资产的损失',
+        #         'id_306_cfs_lfsfa': '固定资产报废损失',
+        #         # 'id_307_cfs_lfcifv': '公允价值变动损失',
+        #         'id_312_cfs_dii': '存货的减少',
+        #     }
+        #
+        #     s1 = self.sum_columns(df, list(d1.keys()))
+        #     s2 = get_month_delta(s1, column)
+        #     return self.regular_series(column, s2)
 
-            s1 = self.sum_columns(df, list(d1.keys()))
-            s2 = get_month_delta(s1, column)
-            return self.regular_series(column, s2)
+        # elif column == 's_040_profit_adjust2':
+        #     s1 = self.get_column(df, 's_039_profit_adjust')
+        #     s2 = self.get_column(df, 's_038_pay_for_long_term_asset')
+        #     s3 = self.get_ttm(s1 - s2, 4)
+        #     return self.regular_series(column, s3)
 
-        elif column == 's_040_profit_adjust2':
-            s1 = self.get_column(df, 's_039_profit_adjust')
-            s2 = self.get_column(df, 's_038_pay_for_long_term_asset')
-            s3 = self.get_ttm(s1 - s2, 4)
-            return self.regular_series(column, s3)
+        # elif column == 's_041_profit_adjust_ttm':
+        #     s1 = self.get_column(df, 's_039_profit_adjust')
+        #     s2 = self.get_ttm(s1, 4)
+        #     return self.regular_series(column, s2)
 
-        elif column == 's_041_profit_adjust_ttm':
-            s1 = self.get_column(df, 's_039_profit_adjust')
-            s2 = self.get_ttm(s1, 4)
-            return self.regular_series(column, s2)
-
-        elif column == 's_042_roe_adjust':
-            return self.regular_series(column, pd.Series())
+        # elif column == 's_042_roe_adjust':
+        #     return self.regular_series(column, pd.Series())
 
         elif column == 's_043_turnover_volume_ttm':
             s1 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
@@ -859,33 +928,33 @@ class DataAnalysis:
             s4 = s1 / s2 * s3
             return self.regular_series(column, s4)
 
-        elif column == 's_045_main_cost_adjust':
-            d1 = {
-                # 'id_299_cfs_ioa': '加： 资产减值准备',
-                # 'id_300_cfs_cilor': '信用减值损失',
-                'id_301_cfs_dofx_dooaga_dopba': '固定资产折旧、油气资产折耗、生产性生物资产折旧',
-                'id_302_cfs_daaorei': '投资性房地产的折旧及摊销',
-                'id_303_cfs_aoia': '无形资产摊销',
-                'id_304_cfs_aoltde': '长期待摊费用摊销',
-                'id_305_cfs_lodofaiaaolta': '处置固定资产、无形资产和其他长期资产的损失',
-                'id_306_cfs_lfsfa': '固定资产报废损失',
-                # 'id_307_cfs_lfcifv': '公允价值变动损失',
-                'id_312_cfs_dii': '存货的减少',
-            }
+        # elif column == 's_045_main_cost_adjust':
+        #     d1 = {
+        #         # 'id_299_cfs_ioa': '加： 资产减值准备',
+        #         # 'id_300_cfs_cilor': '信用减值损失',
+        #         'id_301_cfs_dofx_dooaga_dopba': '固定资产折旧、油气资产折耗、生产性生物资产折旧',
+        #         'id_302_cfs_daaorei': '投资性房地产的折旧及摊销',
+        #         'id_303_cfs_aoia': '无形资产摊销',
+        #         'id_304_cfs_aoltde': '长期待摊费用摊销',
+        #         'id_305_cfs_lodofaiaaolta': '处置固定资产、无形资产和其他长期资产的损失',
+        #         'id_306_cfs_lfsfa': '固定资产报废损失',
+        #         # 'id_307_cfs_lfcifv': '公允价值变动损失',
+        #         'id_312_cfs_dii': '存货的减少',
+        #     }
+        #
+        #     s1 = self.sum_columns(df, list(d1.keys()))
+        #     s1 = get_month_delta(s1, 's1')
+        #     s2 = self.smooth_data('s2', 'id_163_ps_toc', delta=True)
+        #     s3 = self.get_ttm(s2 - s1, 4)
+        #     return self.regular_series(column, s3)
 
-            s1 = self.sum_columns(df, list(d1.keys()))
-            s1 = get_month_delta(s1, 's1')
-            s2 = self.smooth_data('s2', 'id_163_ps_toc', delta=True)
-            s3 = self.get_ttm(s2 - s1, 4)
-            return self.regular_series(column, s3)
-
-        elif column == 's_046_profit_adjust3':
-            s1 = self.get_column(df, 's_039_profit_adjust')
-            s2 = self.smooth_data('s2', 'id_271_cfs_cpfpfiaolta', delta=True)
-            s3 = self.smooth_data('s3', 'id_265_cfs_crfdofiaolta', delta=True)
-            s4 = self.smooth_data('s4', 'id_281_cfs_crfai', delta=True)
-            s5 = self.get_ttm(s1 - (s2 - s3 - s4), 4)
-            return self.regular_series(column, s5)
+        # elif column == 's_046_profit_adjust3':
+        #     s1 = self.get_column(df, 's_039_profit_adjust')
+        #     s2 = self.smooth_data('s2', 'id_271_cfs_cpfpfiaolta', delta=True)
+        #     s3 = self.smooth_data('s3', 'id_265_cfs_crfdofiaolta', delta=True)
+        #     s4 = self.smooth_data('s4', 'id_281_cfs_crfai', delta=True)
+        #     s5 = self.get_ttm(s1 - (s2 - s3 - s4), 4)
+        #     return self.regular_series(column, s5)
 
         elif column == 's_047_gross_cost':
             return self.smooth_data(column, 'id_164_ps_oc', delta=True, ttm=True)
@@ -987,6 +1056,32 @@ class DataAnalysis:
             s2 = self.get_column(df, 's_002_equity')
             return self.regular_series(column, s1 / s2)
 
+        elif column == 's_058_equity_adj':
+            d0 = {
+                'id_299_cfs_ioa': '加： 资产减值准备',
+                'id_300_cfs_cilor': '信用减值损失',
+                'id_301_cfs_dofx_dooaga_dopba': '固定资产折旧、油气资产折耗、生产性生物资产折旧',
+                'id_302_cfs_daaorei': '投资性房地产的折旧及摊销',
+                'id_303_cfs_aoia': '无形资产摊销',
+                'id_304_cfs_aoltde': '长期待摊费用摊销',
+                'id_306_cfs_lfsfa': '固定资产报废损失',
+            }
+            s1 = self.sum_columns(self.df_fs, list(d0.keys()))
+            s2 = get_month_delta(s1, 's2')
+            s3 = s2.cumsum()
+            s4 = self.get_column(df, 's_002_equity')
+            return self.regular_series(column, s3 + s4)
+
+        elif column == 's_059_total_expend':
+            s1 = self.get_column(df, 's_058_equity_adj')
+            s2 = self.get_column(df, 's_026_liquidation_asset')
+            return self.regular_series(column, s1 - s2)
+
+        elif column == 's_060_total_expend_rate':
+            s1 = self.get_column(df, 's_059_total_expend')
+            s2 = StandardFitModel.get_growth_rate(s1, column, 12)
+            return self.regular_series(column, s2)
+
     @staticmethod
     def get_return_year(pe, rate):
         a = 1 + rate
@@ -1009,6 +1104,14 @@ class DataAnalysis:
         s4.dropna(inplace=True)
         s4[s4 <= -50] = np.nan
         return s4.dropna()
+
+    @staticmethod
+    def sum_series(src_list):
+        res_df = pd.concat(src_list, axis=1, sort=True)
+        res_df = res_df.replace(0, np.nan)
+        res_df = res_df.dropna(axis=0, how='all')
+        s1 = res_df.apply(lambda x: x.sum(), axis=1)
+        return s1
 
     @staticmethod
     def sum_columns(df, columns):
@@ -1110,24 +1213,27 @@ class DataAnalysis:
 
 class StandardFitModel:
     @classmethod
-    def get_growth_rate(cls, series, name):
+    def get_growth_rate(cls, series, name, size):
         data = series
         data[data <= 0] = np.nan
-        data3 = data.rolling(12, min_periods=1).apply(cls.window_method, raw=True)
+        data3 = data.rolling(size, min_periods=1).apply(
+            lambda x: cls.window_method(x, size),
+            raw=True
+        )
         data4 = np.exp(data3) - 1
         data4.name = name
         return data4
 
     @classmethod
-    def window_method(cls, arr_y):
-        arr_y = cls.config_window_array(arr_y)
+    def window_method(cls, arr_y, size):
+        arr_y = cls.config_window_array(arr_y, size)
         if arr_y is None:
             return 0
         delta = cls.curve_fit(arr_y) * 4
         return delta
 
     @classmethod
-    def config_window_array(cls, arr_y):
+    def config_window_array(cls, arr_y, size):
         tmp = np.where(np.isnan(arr_y))[0]
         if tmp.size > 0:
             index = tmp[-1] + 1
@@ -1136,7 +1242,7 @@ class StandardFitModel:
         if arr_y.size == 0:
             return None
 
-        size = 12
+        # size = 12
         pre = np.ones(size - arr_y.size) * arr_y[0]
         arr_y = np.append(pre, arr_y)
 
@@ -1184,8 +1290,8 @@ class DailyDataAnalysis(DataAnalysis):
 
             's_019_monetary_asset',
             's_020_cap_asset',
-            's_021_cap_expenditure',
-            's_022_profit_no_expenditure',
+            # 's_021_cap_expenditure',
+            # 's_022_profit_no_expenditure',
 
             's_023_liabilities',
             's_024_real_liabilities',
@@ -1202,6 +1308,27 @@ class DailyDataAnalysis(DataAnalysis):
         for index in index_list:
             self.fs_add(self.get_column(df, index))
 
+    def config_daily_data(self):
+        self.config_sub_fs(DailyDataAnalysis)
+        self.fs_add(self.get_column(self.df_fs, 'dt_fs'))
+        self.mvs_add(self.get_column(self.df_mvs, 'dt_mvs'))
+
+        df = self.df_mvs
+
+        index_list1 = [
+            # 's_004_pe',
+            's_025_real_cost',
+            # 's_026_holder_return_rate',
+            's_027_pe_return_rate',
+            's_028_market_value',
+            's_037_real_pe_return_rate',
+            's_044_turnover_volume',
+        ]
+        for index in index_list1:
+            self.mvs_add(self.get_column(df, index))
+
+        self.set_df()
+
 
 def test_analysis():
     code = '603889'
@@ -1217,10 +1344,10 @@ def test_analysis():
     # print(s1)
 
     # s2 = data.df['s_018_profit_parent'].copy().dropna()
-    s2 = data.df['s_040_profit_adjust2'].copy().dropna()
+    # s2 = data.df['s_040_profit_adjust2'].copy().dropna()
     # s2 = data.df['s_038_pay_for_long_term_asset'].copy().dropna()
     # s2 = data.df['s_039_profit_adjust'].copy().dropna()
-    print(s2)
+    # print(s2)
 
 
 if __name__ == '__main__':

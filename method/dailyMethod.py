@@ -4,7 +4,7 @@ from method.sql_update import update_latest_data
 from method.sql_update import update_all_data
 from request.requestData import request2mysql
 from method.dataMethod import load_df_from_mysql
-from method.dataMethod import DataAnalysis
+from method.dataMethod import DataAnalysis, DailyDataAnalysis
 from method.showTable import add_bool_column, get_recent_val, sum_value
 import numpy as np
 import os
@@ -94,7 +94,7 @@ def daily_analysis(dir_name, all_codes):
         # 's_004_pe',
         # 's_005_stocks',
         # 's_006_stocks_rate',
-        's_007_asset',
+        # 's_007_asset',
         # 's_008_revenue',
         # 's_009_revenue_rate',
         # 's_010_main_profit',
@@ -104,16 +104,16 @@ def daily_analysis(dir_name, all_codes):
         # 's_014_pe2',
         # 's_015_return_year2',
         's_016_roe_parent',
-        's_017_equity_parent',
+        # 's_017_equity_parent',
         # 's_018_profit_parent',
         # 's_019_monetary_asset',
         # 's_020_cap_asset',
         # 's_021_cap_expenditure',
-        's_022_profit_no_expenditure',
+        # 's_022_profit_no_expenditure',
         # 's_023_liabilities',
         # 's_024_real_liabilities',
         's_025_real_cost',
-        's_026_holder_return_rate',
+        # 's_026_holder_return_rate',
         's_027_pe_return_rate',
         's_028_market_value',
         's_037_real_pe_return_rate',
@@ -140,7 +140,7 @@ def daily_analysis(dir_name, all_codes):
             df1 = load_df_from_mysql(code, 'fs')
             df2 = load_df_from_mysql(code, 'mvs')
 
-            data = DataAnalysis(df1, df2)
+            data = DailyDataAnalysis(df1, df2)
             data.config_daily_data()
 
             df = data.df[columns].copy()

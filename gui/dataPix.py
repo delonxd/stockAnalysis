@@ -231,6 +231,16 @@ class DataPix:
             return data
 
         tmp_list = [
+            's_010_cash_asset',
+            's_011_insurance_asset',
+            's_012_financial_asset',
+            's_013_invest_asset',
+            's_014_turnover_asset',
+            's_015_inventory_asset',
+            's_021_fixed_asset',
+            's_022_capitalized_asset',
+            's_026_liquidation_asset',
+
             's_022_profit_no_expenditure',
             's_038_pay_for_long_term_asset',
             's_039_profit_adjust',
