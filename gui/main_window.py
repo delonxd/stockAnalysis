@@ -162,7 +162,9 @@ class MainWidget(QWidget):
         # self.window2 = ShowPlot()
 
         self.counter_info = None
-        self.real_cost = None
+        self.real_cost = np.nan
+        self.market_value = np.nan
+        self.liquidation_asset = np.nan
         self.equity = np.nan
         self.listing_date = None
         self.max_increase_30 = 0
@@ -636,16 +638,25 @@ class MainWidget(QWidget):
 
         self.max_increase_30 = np.inf
         self.listing_date = None
+        self.market_value = np.nan
         if 's_028_market_value' in df.columns:
             s0 = self.data_pix.df['s_028_market_value'].copy().dropna()
             if s0.size > 0:
                 recent = s0[-1]
+                self.market_value = recent / 1e8
+
                 size0 = min(s0.size, 90)
                 minimum = min(s0[-size0:])
                 self.max_increase_30 = recent / minimum - 1
                 self.listing_date = s0.index[0]
 
-        self.real_cost = None
+        self.liquidation_asset = np.nan
+        if 's_026_liquidation_asset' in df.columns:
+            s0 = self.data_pix.df['s_026_liquidation_asset'].copy().dropna()
+            if s0.size > 0:
+                self.liquidation_asset = s0[-1] / 1e8
+
+        self.real_cost = np.nan
         if 's_025_real_cost' in df.columns:
             s0 = self.data_pix.df['s_025_real_cost'].copy().dropna()
             if s0.size > 0:
@@ -764,20 +775,22 @@ class MainWidget(QWidget):
                 except Exception as e:
                     print(e)
 
-        real_cost = self.real_cost
-        equity = self.equity
+        if ass is not None:
+            ass2 = ass + self.liquidation_asset
 
-        txt_bottom1 = 'None'
+            rate = self.market_value / ass2
+            txt_bottom1 = '%.0f亿 / %.0f(%.0f+%.0f)' % (
+                self.market_value,
+                ass2,
+                self.liquidation_asset,
+                ass,
+            )
+            list0.append('%.2f' % rate)
 
-        if real_cost is not None:
-            if ass is not None:
-                rate = real_cost / ass
-                txt_bottom1 = '%.2f亿 / %s亿' % (real_cost, ass)
-                list0.append('%.2f' % rate)
-                rate = ass / equity
-                list0.append('%.2f' % rate)
-            else:
-                txt_bottom1 = '%s%.2f亿' % ('cost: ', real_cost)
+            rate = ass / self.equity
+            list0.append('%.2f' % rate)
+        else:
+            txt_bottom1 = '%s%.2f亿' % ('cost: ', self.real_cost)
 
         if ass is not None:
             rate = self.turnover / 1e6 / ass
