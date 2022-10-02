@@ -14,7 +14,7 @@ from scipy.optimize import curve_fit
 from functools import wraps
 
 
-def load_df_from_mysql(stock_code, data_type):
+def load_df_from_mysql(stock_code, data_type, fields=None):
     db, cursor = get_cursor(data_type)
 
     if data_type == 'fs':
@@ -34,7 +34,11 @@ def load_df_from_mysql(stock_code, data_type):
 
     flag = sql_if_table_exists(cursor=cursor, table=table)
     if flag:
-        sql_df = get_data_frame(cursor=cursor, table=table)
+        if fields is None:
+            sql_df = get_data_frame(cursor=cursor, table=table)
+        else:
+            sql_df = get_data_frame(cursor=cursor, table=table, fields=fields)
+
         sql_df = sql_df.set_index(check_field, drop=False)
         # sql_df = sql_df.where(sql_df.notnull(), None)
         sql_df.sort_index(inplace=True)
@@ -43,8 +47,11 @@ def load_df_from_mysql(stock_code, data_type):
         sql_df.index = sql_df.index.map(lambda x: x[:10])
         return sql_df
     else:
-        header_df = get_header_df(data_type)
-        return pd.DataFrame(columns=header_df.columns)
+        if fields is None:
+            header_df = get_header_df(data_type)
+            return pd.DataFrame(columns=header_df.columns)
+        else:
+            return pd.DataFrame(columns=fields)
 
 
 def data_by_dates(df: pd.DataFrame, dates: list):
@@ -309,12 +316,10 @@ class DataAnalysis:
             's_047_gross_cost',
             's_009_revenue_rate',
 
-            's_019_monetary_asset',
-            's_020_cap_asset',
+            # 's_019_monetary_asset',
+            # 's_020_cap_asset',
             # 's_021_cap_expenditure',
             # 's_022_profit_no_expenditure',
-            's_023_liabilities',
-            's_024_real_liabilities',
 
             's_010_cash_asset',
             's_011_insurance_asset',
@@ -324,6 +329,9 @@ class DataAnalysis:
             's_015_inventory_asset',
             's_021_fixed_asset',
             's_022_capitalized_asset',
+
+            's_023_liabilities',
+            's_024_real_liabilities',
             's_026_liquidation_asset',
 
             # 's_038_pay_for_long_term_asset',
@@ -741,24 +749,24 @@ class DataAnalysis:
         elif column == 's_018_profit_parent':
             return self.smooth_data(column, 'id_217_ps_npatoshopc', delta=True, ttm=True)
 
-        elif column == 's_019_monetary_asset':
-            d1 = {
-                'id_005_bs_cabb': '货币资金',
-                'id_007_bs_sr': '结算备付金',
-                'id_008_bs_pwbaofi': '拆出资金',
-                'id_009_bs_tfa': '交易性金融资产',
-                'id_010_bs_cdfa': '衍生金融资产(流动)',
-                'id_024_bs_ca': '合同资产',
-            }
+        # elif column == 's_019_monetary_asset':
+        #     d1 = {
+        #         'id_005_bs_cabb': '货币资金',
+        #         'id_007_bs_sr': '结算备付金',
+        #         'id_008_bs_pwbaofi': '拆出资金',
+        #         'id_009_bs_tfa': '交易性金融资产',
+        #         'id_010_bs_cdfa': '衍生金融资产(流动)',
+        #         'id_024_bs_ca': '合同资产',
+        #     }
+        #
+        #     s1 = self.sum_columns(df, list(d1.keys()))
+        #     s2 = get_month_data(s1, column)
+        #     return self.regular_series(column, s2)
 
-            s1 = self.sum_columns(df, list(d1.keys()))
-            s2 = get_month_data(s1, column)
-            return self.regular_series(column, s2)
-
-        elif column == 's_020_cap_asset':
-            s1 = self.get_column(df, 's_007_asset')
-            s2 = self.get_column(df, 's_019_monetary_asset')
-            return self.regular_series(column, s1 - s2)
+        # elif column == 's_020_cap_asset':
+        #     s1 = self.get_column(df, 's_007_asset')
+        #     s2 = self.get_column(df, 's_019_monetary_asset')
+        #     return self.regular_series(column, s1 - s2)
 
         elif column == 's_021_fixed_asset':
             d1 = {
@@ -790,16 +798,20 @@ class DataAnalysis:
             return self.smooth_data(column, 'id_062_bs_tl')
 
         elif column == 's_024_real_liabilities':
-            s1 = self.get_column(df, 's_023_liabilities')
-            s2 = self.get_column(df, 's_019_monetary_asset')
-            s2 = s2.reindex_like(s1)
-            s2 = s2.fillna(0)
-            return self.regular_series(column, s1 - s2)
+            tmp = list()
+            tmp.append(self.get_column(df, 's_010_cash_asset') * -1)
+            tmp.append(self.get_column(df, 's_011_insurance_asset') * -1)
+            tmp.append(self.get_column(df, 's_012_financial_asset') * -1)
+            tmp.append(self.get_column(df, 's_023_liabilities'))
+
+            df1 = pd.concat(tmp, axis=1, sort=True)
+            s1 = df1.apply(lambda x: x.sum(), axis=1)
+            return self.regular_series(column, s1)
 
         elif column == 's_025_real_cost':
-            s1 = self.fs_to_mvs('s_024_real_liabilities')
+            s1 = self.fs_to_mvs('s_026_liquidation_asset')
             s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
-            return self.regular_series(column, s1 + s2)
+            return self.regular_series(column, s2 - s1)
 
         elif column == 's_026_liquidation_asset':
             tmp = list()
@@ -1288,13 +1300,14 @@ class DailyDataAnalysis(DataAnalysis):
             # 's_008_revenue',
             # 's_009_revenue_rate',
 
-            's_019_monetary_asset',
-            's_020_cap_asset',
+            # 's_019_monetary_asset',
+            # 's_020_cap_asset',
             # 's_021_cap_expenditure',
             # 's_022_profit_no_expenditure',
 
-            's_023_liabilities',
-            's_024_real_liabilities',
+            # 's_023_liabilities',
+            # 's_024_real_liabilities',
+            's_026_liquidation_asset',
 
             # 's_038_pay_for_long_term_asset',
             # 's_039_profit_adjust',
@@ -1309,6 +1322,7 @@ class DailyDataAnalysis(DataAnalysis):
             self.fs_add(self.get_column(df, index))
 
     def config_daily_data(self):
+
         self.config_sub_fs(DailyDataAnalysis)
         self.fs_add(self.get_column(self.df_fs, 'dt_fs'))
         self.mvs_add(self.get_column(self.df_mvs, 'dt_mvs'))

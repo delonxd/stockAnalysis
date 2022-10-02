@@ -279,26 +279,37 @@ def get_sql_header(data_header, ini_header):
     return sql_header
 
 
-def get_data_frame(cursor, table):
+def get_data_frame(cursor, table, fields=None):
     # check_str = sql_format_select(
     #     select='COLUMN_name',
     #     table='information_schema.COLUMNS',
     #     where='table_name = "%s"' % table,
     #     order_by='ordinal_position',
     # )
-    check_str = 'SHOW FIELDS FROM %s;' % table
-    cursor.execute(check_str)
-    res = cursor.fetchall()
+    if fields is None:
+        check_str = 'SHOW FIELDS FROM %s;' % table
+        cursor.execute(check_str)
+        res = cursor.fetchall()
 
-    header_sql = [value[0] for value in res]
+        header_sql = [value[0] for value in res]
 
-    select_str = sql_format_select('*', table)
-    # cursor.execute(select_str, multi=True)
-    cursor.execute(select_str)
-    tmp_res = cursor.fetchall()
+        select_str = sql_format_select('*', table)
+        # cursor.execute(select_str, multi=True)
+        cursor.execute(select_str)
+        tmp_res = cursor.fetchall()
 
-    df = pd.DataFrame(tmp_res, columns=header_sql)
-    return df
+        df = pd.DataFrame(tmp_res, columns=header_sql)
+        return df
+
+    else:
+        field_str = ','.join(fields)
+        select_str = sql_format_select(field_str, table)
+        # cursor.execute(select_str, multi=True)
+        cursor.execute(select_str)
+        tmp_res = cursor.fetchall()
+
+        df = pd.DataFrame(tmp_res, columns=fields)
+        return df
 
 
 def sql_if_table_exists(cursor, table):

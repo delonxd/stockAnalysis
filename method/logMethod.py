@@ -1,5 +1,6 @@
 from functools import wraps
 import time
+import datetime as dt
 
 
 class MainLog:
@@ -15,6 +16,12 @@ class MainLog:
     @classmethod
     def add_log(cls, log_str):
         row = get_log_time() + log_str
+        cls.content = cls.content + row + '\n'
+        print(row)
+
+    @classmethod
+    def add_log_accurate(cls, log_str):
+        row = get_log_time_accurate() + log_str
         cls.content = cls.content + row + '\n'
         print(row)
 
@@ -51,6 +58,10 @@ class MainLog:
 
 def get_log_time():
     return time.strftime("%Y-%m-%d %H:%M:%S  ", time.localtime(time.time()))
+
+
+def get_log_time_accurate():
+    return '%s  ' % dt.datetime.now()
 
 
 def log_it(logfile):

@@ -1,6 +1,6 @@
-from method.mainMethod import *
-from method.sqlMethod import *
-import mysql.connector
+# from method.mainMethod import *
+# from method.sqlMethod import *
+# import mysql.connector
 
 
 if __name__ == '__main__':

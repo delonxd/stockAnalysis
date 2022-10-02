@@ -135,10 +135,19 @@ def daily_analysis(dir_name, all_codes):
     while index < end:
         try:
             code = all_codes[index]
-            MainLog.add_log('Analysis: %s/%s --> %s' % (index, end, code))
+            # MainLog.add_log('Analysis: %s/%s --> %s' % (index, end, code))
+            MainLog.add_log_accurate('Analysis: %s/%s --> %s' % (index, end, code))
 
             df1 = load_df_from_mysql(code, 'fs')
-            df2 = load_df_from_mysql(code, 'mvs')
+
+            fields = [
+                'date',
+                'id_041_mvs_mc',
+                'id_042_mvs_cmc',
+                'id_048_mvs_ta',
+            ]
+
+            df2 = load_df_from_mysql(code, 'mvs', fields=fields)
 
             data = DailyDataAnalysis(df1, df2)
             data.config_daily_data()

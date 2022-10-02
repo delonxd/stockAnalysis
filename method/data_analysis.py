@@ -1,4 +1,4 @@
-from method.dataMethod import load_df_from_mysql
+# from method.dataMethod import load_df_from_mysql
 # from method.dataMethod import get_month_delta
 # from method.dataMethod import get_month_data
 from method.dataMethod import DataAnalysis

@@ -34,6 +34,8 @@ def show_var(name, var):
 
 
 if __name__ == '__main__':
+
+    print(dt.datetime.now())
     # 得到 str类型
     time_str = '2018-05-22 08:30:00'
     show_var('time_str', time_str)
@@ -114,3 +116,4 @@ if __name__ == '__main__':
     today = dt.date.today()
     next_month_day = today + relativedelta(months=5)
     show_var('next_month_day', next_month_day)
+    print(dt.datetime.now())
