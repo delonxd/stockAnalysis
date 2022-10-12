@@ -37,6 +37,10 @@ def daily_update():
     mysql_daily_update(dir_name, all_codes, ipo_dates)
     MainLog.add_log('mysql_daily_update complete')
 
+    MainLog.add_split('#')
+    update_sw_2021()
+    MainLog.add_log('update_sw_2021 complete')
+
     MainLog.write('%s\\logs1.txt' % res_dir)
     MainLog.init_log()
 
@@ -74,10 +78,6 @@ def daily_update():
     # MainLog.add_split('#')
     # request_industry_sample()
     # MainLog.add_log('request_industry_sample complete')
-
-    MainLog.add_split('#')
-    update_sw_2021()
-    MainLog.add_log('update_sw_2021 complete')
 
     MainLog.write('%s\\logs2.txt' % res_dir)
     MainLog.init_log()

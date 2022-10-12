@@ -1,8 +1,6 @@
-from method.dataMethod import sql2df
 from request.requestData import request2mysql
 from request.requestEquityData import request_eq2mysql
-from method.logMethod import log_it, MainLog
-from method.sortCode import sort_discount, sift_codes, sort_hold
+from method.sortCode import sift_codes
 from method.fileMethod import *
 
 from gui.styleWidget import StyleWidget
@@ -10,13 +8,11 @@ from gui.dataPix import DataPix
 from gui.stockListView import QStockListView, CodesDataFrame
 from gui.fsView import FsView
 
-from gui.showPix import ShowPix
 from gui.showPlot import show_plt
 
 from gui.remarkWidget import RemarkWidget
 from gui.webWidget import WebWidget
 from gui.equityChangeWidget import EquityChangeWidget
-from gui.comparisonWidget import ComparisonWidget
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -180,6 +176,7 @@ class MainWidget(QWidget):
         self.style_widget.signal_cur.connect(self.change_style_current)
 
         self.cross = False
+        self.box = True
         self.ratio_dict = dict()
         self.init_ui()
 
@@ -857,7 +854,7 @@ class MainWidget(QWidget):
         self.move(qr.topLeft().x() - 11, qr.topLeft().y() - 45)
 
     def draw_cross(self, x, y):
-        self.data_pix.draw_cross(x, y, self.cross, self.window_flag)
+        self.data_pix.draw_cross(x, y, self.cross, self.box, self.window_flag)
         self.label.setPixmap(self.data_pix.pix_show[self.window_flag])
 
     def mousePressEvent(self, event):
@@ -998,6 +995,8 @@ class MainWidget(QWidget):
             self.window_flag = 3
         elif e.key() == Qt.Key_Space:
             self.cross = not self.cross
+        elif e.key() == Qt.Key_B:
+            self.box = not self.box
         elif e.key() == Qt.Key_S:
             GuiLog.write(self.log_path)
             return
@@ -1006,7 +1005,7 @@ class MainWidget(QWidget):
         # self.update_window()
 
         x, y = self.mouse_pos
-        self.data_pix.draw_cross(x, y, self.cross, self.window_flag)
+        self.data_pix.draw_cross(x, y, self.cross, self.box, self.window_flag)
         self.show_pix()
 
     def closeEvent(self, event):

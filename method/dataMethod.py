@@ -353,6 +353,7 @@ class DataAnalysis:
             's_058_equity_adj',
             's_059_total_expend',
             's_060_total_expend_rate',
+            's_061_total_return_rate',
         ]
 
         df = self.df_fs
@@ -1082,7 +1083,7 @@ class DataAnalysis:
             s2 = get_month_delta(s1, 's2')
             s3 = s2.cumsum()
             s4 = self.get_column(df, 's_002_equity')
-            return self.regular_series(column, s3 + s4)
+            return self.regular_series(column, s3 / 4 + s4)
 
         elif column == 's_059_total_expend':
             s1 = self.get_column(df, 's_058_equity_adj')
@@ -1090,9 +1091,14 @@ class DataAnalysis:
             return self.regular_series(column, s1 - s2)
 
         elif column == 's_060_total_expend_rate':
-            s1 = self.get_column(df, 's_059_total_expend')
+            s1 = self.get_column(df, 's_058_equity_adj')
             s2 = StandardFitModel.get_growth_rate(s1, column, 12)
             return self.regular_series(column, s2)
+
+        elif column == 's_061_total_return_rate':
+            s1 = self.get_column(df, 's_051_core_profit')
+            s2 = self.get_column(df, 's_058_equity_adj')
+            return self.regular_series(column, s1 / s2)
 
     @staticmethod
     def get_return_year(pe, rate):
@@ -1225,6 +1231,50 @@ class DataAnalysis:
 
 class StandardFitModel:
     @classmethod
+    def get_growth_rate2(cls, series, name, size):
+        s1 = series.copy()
+        s1[s1 <= 0] = np.nan
+        s2 = np.log(s1)
+        s3 = s2.rolling(size, min_periods=1).apply(
+            lambda x: cls.window_method2(x, size),
+            raw=True
+        )
+        s4 = np.exp(s3) ** 4 - 1
+        s4.name = name
+        # print(s1)
+        # print(s4)
+
+        return s4
+
+    @classmethod
+    def window_method2(cls, src, error):
+        error = np.log(1.02) / 4
+        arr_y = src
+        val_nan = np.where(np.isnan(src))[0]
+        if val_nan.size > 0:
+            index = val_nan[-1] + 1
+            arr_y = src[index:]
+
+        error_min = np.inf
+        res = np.nan
+        while True:
+            if arr_y.size <= 2:
+                break
+            arr_x = np.arange(arr_y.size)
+            fit = np.polyfit(arr_x, arr_y, deg=1)
+            arr_error = arr_y - (arr_x * fit[0] + fit[1])
+            tmp_max = np.max(np.abs(arr_error))
+            if tmp_max <= error_min:
+                res = fit[0]
+                error_min = tmp_max
+                if error_min <= error:
+                    break
+
+            arr_y = arr_y[1:]
+
+        return res
+
+    @classmethod
     def get_growth_rate(cls, series, name, size):
         data = series
         data[data <= 0] = np.nan
@@ -1308,6 +1358,7 @@ class DailyDataAnalysis(DataAnalysis):
             # 's_023_liabilities',
             # 's_024_real_liabilities',
             's_026_liquidation_asset',
+            's_061_total_return_rate',
 
             # 's_038_pay_for_long_term_asset',
             # 's_039_profit_adjust',
@@ -1369,6 +1420,14 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    a = sql2df('000933')
+    df_tmp = sql2df('600438')
+    # a = pd.Series(range(100))
+    # a = np.power(1.1, a)
+    # a[3] = -1
+    # a[6] = -1
+    # print(a)
+    # b = StandardFitModel.get_growth_rate(a, '', 20)
+    # for i, v in b.iteritems():
+    #     print(i, '%.2f' % v)
     # test_analysis()
     pass

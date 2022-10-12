@@ -21,6 +21,7 @@ def basic_daily_update(dir_name):
     write_json_txt('..\\basicData\\code_names_dict.txt', name_dict)
     write_json_txt('%s\\a001_code_list.txt' % res_dir, all_codes)
     write_json_txt('..\\basicData\\ipo_date.txt', ipo_dates)
+    write_json_txt('%s\\s004_code_latest_update.txt' % res_dir, [])
     return all_codes, name_dict, ipo_dates
 
 
@@ -119,6 +120,7 @@ def daily_analysis(dir_name, all_codes):
         's_037_real_pe_return_rate',
         # 'id_048_mvs_ta',
         's_044_turnover_volume',
+        's_061_total_return_rate',
     ]
 
     index = 0
@@ -234,6 +236,9 @@ def generate_daily_table(dir_name):
 
         val = get_recent_val(src, 's_025_real_cost', np.inf)
         df.loc[code, 'real_cost'] = val
+
+        val = get_recent_val(src, 's_061_total_return_rate', -np.inf)
+        df.loc[code, 'total_return_rate'] = val
 
         val = get_recent_val(src, 's_028_market_value', np.inf)
         df.loc[code, 'market_value_1'] = val

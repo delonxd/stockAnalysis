@@ -199,6 +199,7 @@ def generate_show_table():
         'market_value_1',
         'market_value_2',
         'real_cost',
+        'total_return_rate',
         'equity',
         'turnover_ttm20',
         'salary',
@@ -260,6 +261,7 @@ def generate_show_table_mask(df):
         'pe_return_rate',
         'real_pe_return_rate',
         'counter_delta',
+        'total_return_rate',
     ]:
         df[column] = df[column].apply(lambda x: '%.2f%%' % (x * 100))
 
