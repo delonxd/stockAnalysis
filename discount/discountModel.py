@@ -60,6 +60,87 @@ class ValueModel:
         print("Max_Percent: {:.1f}%\n".format(max_a * 100))
 
 
+class ValueModel2:
+    def __init__(self, rate, year, rate0, asset: 120, profit: 10):
+        self.code = ''
+        self.name = ''
+        self.asset = asset
+        self.profit = profit
+
+        self.rate0 = rate0
+
+        self.rate = rate
+        self.year = year
+
+        self.sq = list(zip(self.rate, self.year))
+
+    @property
+    def value(self):
+        sq = self.sq.copy()
+        _, x = sum_profit(self.profit, sq, self.rate0)
+        ret = x + self.asset
+        return ret
+
+    def sum_profit(self, ini):
+        sq = self.sq.copy()
+        return sum_profit(ini, sq, self.rate0)
+
+    def split_sq(self, t):
+        ret = []
+        counter = 0
+        for rate, year in self.sq:
+            if counter + year >= t:
+                ret.append((rate, t-counter))
+                break
+            counter += year
+            ret.append((rate, year))
+        return ret
+
+    def iter_sum(self):
+        ret = []
+        profit = self.profit
+        asset = self.asset
+        total = sum_profit(1, self.sq.copy(), self.rate0)[1]
+        r0 = 1 / (1 + self.rate0 / 100)
+        for t in range(50):
+            sub_sq = self.split_sq(t)
+
+            r1, val1 = sum_profit(1, sub_sq, self.rate0)
+            r2, val2 = sum_profit(1, sub_sq, 0)
+            s1 = ((profit * val2) + asset) * (r0 ** t)
+            s2 = profit * (total - val1)
+            ret.append(s1 + s2)
+        return ret
+
+    # def iter_sum2(self):
+    #     ret = []
+    #     profit = self.profit
+    #     asset = self.asset
+    #     total = sum_profit(1, self.sq.copy(), self.rate0)[1]
+    #     r0 = 1 / (1 + self.rate0 / 100)
+    #
+    #     for t in range(50):
+    #         val1 =
+
+
+def sum_profit(ini, sq, adj):
+    if len(sq) == 0:
+        return ini, 0
+    else:
+        rate, year = sq.pop(0)
+        r1 = 1 + rate / 100
+        r2 = 1 - adj / 100
+        r0 = r1 * r2
+        t1 = cal_value(r0, year) * ini
+        if ini == 0 or r0 ** year == 0:
+            ini2 = 0
+        else:
+            ini2 = ini * (r0 ** year)
+        last, t2 = sum_profit(ini2, sq, adj)
+        t = t1 + t2
+        return last, t
+
+
 def cal_value(a, n):
     if a == 1:
         res = n
@@ -227,4 +308,10 @@ def test_remain_rate():
 
 
 if __name__ == '__main__':
-    test_remain_rate()
+    # test_remain_rate()
+    m1 = ValueModel2([15, 10, 0], [10, 10, np.inf], 10, 120, 10)
+    # res = m1.value
+    res = m1.iter_sum()
+    print(res)
+    # res = sum_profit(1, [(0, 0), (0, np.inf)], -10)
+    # print(res)

@@ -28,13 +28,13 @@ class InformationBox:
 
             if ds.frequency == 'DAILY':
                 row[4] = d1
-                value = s1[index_name] if index_name in s1 else None
+                value = s1[index_name] if index_name in s1.index else None
                 if pd.isna(value):
                     sub = ds.df.iloc[:, 0].copy().dropna()
                     value = sub[-1] if sub.size > 0 else None
                 row[3] = value
             else:
-                value = s2[index_name] if index_name in s1 else None
+                value = s2[index_name] if index_name in s2.index else None
                 if pd.isna(value):
                     sub = ds.df.iloc[:, 0].copy().dropna()
                     if sub.size > 0:

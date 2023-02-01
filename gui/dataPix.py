@@ -538,10 +538,10 @@ class DataPix:
         p_dict = dict()
         for ds in self.data_dict.values():
             if ds.ds_type == 'digit' and ds.frequency == 'QUARTERLY' and ds.data_type == data_type:
-                data = ds.df.iloc[:, 0].copy() / df_assets
+                data = ds.df.iloc[:, 0].copy()
                 data.name = ds.info_priority
                 p_dict[ds.info_priority] = ds
-                df0 = pd.concat([df0, data], axis=1)
+                df0 = pd.concat([df0, data], axis=1, sort=True)
         df0 = df0.reindex(df_assets.index)
         df0.fillna(0, inplace=True)
         # print(df0)
@@ -551,12 +551,13 @@ class DataPix:
 
         top = self.data_rect.top()
         p_list1 = [QPoint(x, top) for x in px_x]
-        percent = np.zeros(df0.index.size)
+        total = np.zeros(df0.index.size)
 
         c_list = df0.columns.to_list()
         c_list.sort()
         for column in c_list:
-            percent = percent + df0[column].values.copy()
+            total = total + df0[column].values.copy()
+            percent = (total / df_assets).values
 
             df_point = pd.DataFrame()
             df_point['px_x'] = px_x

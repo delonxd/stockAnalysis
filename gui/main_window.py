@@ -52,10 +52,12 @@ class ReadSQLThread(QThread):
                 self.current = code
             else:
                 break
-            # print(zip(*self.buffer_list).__next__())
             self.lock.release()
             res0 = DataPix(code=code, style_df=style_df, df=df, ratio=ratio)
             GuiLog.add_log('    add buffer %s' % code)
+            # print(len(self.buffer_list))
+            # if len(self.buffer_list) > 0:
+            #     print(zip(*self.buffer_list).__next__())
             self.signal1.emit(res0)
 
         self.current = ''
@@ -334,8 +336,11 @@ class MainWidget(QWidget):
         action7 = QAction('下移', menu)
         action8 = QAction('添加白名单', menu)
         action9 = QAction('删除白名单', menu)
-        action10 = QAction('添加非周期', menu)
-        action11 = QAction('删除非周期', menu)
+        action10 = QAction('添加周期股', menu)
+        action11 = QAction('删除周期股', menu)
+        action12 = QAction('添加周期行业', menu)
+        action13 = QAction('添加toc', menu)
+        action14 = QAction('删除toc', menu)
 
         action_mark0 = QAction('取消标记', menu)
         action_mark1 = QAction('标记1', menu)
@@ -355,6 +360,12 @@ class MainWidget(QWidget):
         menu.addSeparator()
         menu.addAction(action10)
         menu.addAction(action11)
+        menu.addAction(action12)
+
+        menu.addSeparator()
+        menu.addAction(action13)
+        menu.addAction(action14)
+
         menu.addSeparator()
         menu.addAction(action6)
         menu.addAction(action7)
@@ -375,8 +386,11 @@ class MainWidget(QWidget):
         action5.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_blacklist.txt"))
         action8.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_whitelist.txt"))
         action9.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_whitelist.txt"))
-        action10.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_non_cyclical.txt"))
-        action11.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_non_cyclical.txt"))
+        action10.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_cyclical.txt"))
+        action11.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_cyclical.txt"))
+        action12.triggered.connect(self.add_cyclical_industry)
+        action13.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_toc.txt"))
+        action14.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_toc.txt"))
 
         action_mark0.triggered.connect(lambda x: self.add_mark(0))
         action_mark1.triggered.connect(lambda x: self.add_mark(1))
@@ -404,6 +418,33 @@ class MainWidget(QWidget):
             mark_dict[code] = mark
 
         write_json_txt(path, mark_dict, log=False)
+        self.show_stock_name()
+
+    def add_cyclical_industry(self):
+        row = self.codes_df.df.iloc[self.code_index]
+        code = row['code']
+
+        sw_2021 = load_json_txt('..\\basicData\\industry\\sw_2021_dict.txt')
+
+        industry = sw_2021[code]
+
+        if industry is None:
+            return
+
+        path = "../basicData/self_selected/gui_cyclical.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            code_list = json.loads(f.read())
+
+        for key, value in sw_2021.items():
+            if value == industry:
+                if key in code_list:
+                    continue
+                else:
+                    code_list.append(key)
+
+        res = json.dumps(code_list, indent=4, ensure_ascii=False)
+        with open(path, "w", encoding='utf-8') as f:
+            f.write(res)
         self.show_stock_name()
 
     def add_code(self, path):
@@ -735,14 +776,16 @@ class MainWidget(QWidget):
         list0 = []
         list1 = []
 
+        if code in load_json_txt("../basicData/self_selected/gui_toc.txt", log=False):
+            list0.append('ToC')
         if code in load_json_txt("../basicData/self_selected/gui_selected.txt", log=False):
             list0.append('自选')
         if code in load_json_txt("../basicData/self_selected/gui_whitelist.txt", log=False):
             list0.append('白')
         if code in load_json_txt("../basicData/self_selected/gui_blacklist.txt", log=False):
             list0.append('黑')
-        if code in load_json_txt("../basicData/self_selected/gui_non_cyclical.txt", log=False):
-            list0.append('非周期')
+        if code in load_json_txt("../basicData/self_selected/gui_cyclical.txt", log=False):
+            list0.append('周期')
 
         mark = load_json_txt("../basicData/self_selected/gui_mark.txt", log=False).get(code)
         if mark is not None:
@@ -812,6 +855,7 @@ class MainWidget(QWidget):
     def get_code_list():
         # sort_hold()
         code_list = sift_codes(source='hold')
+        # code_list = sift_codes(source='old')
         code_index = 0
 
         # if len(code_list) == 0:
