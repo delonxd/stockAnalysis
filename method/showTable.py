@@ -180,6 +180,8 @@ def generate_show_table():
     df['market_v/ass'] = df['market_value_1'] / df['gui_assessment']
     df['tov/market_value'] = df['turnover_ttm20'] / df['market_value_1']
     df['tov/ass'] = df['turnover_ttm20'] / df['gui_assessment']
+    # df['r_discount'] = (df['market_value_1'] + df['equity']) / df['gui_assessment']
+    df['r_discount'] = (df['market_value_1'] + df['equity'] + df['equity'] - df['liquidation']) / df['gui_assessment']
 
     order = [
         'code',
@@ -188,6 +190,7 @@ def generate_show_table():
         'level2',
         'level3',
 
+        'r_discount',
         'real_c/ass',
         'market_v/ass',
         'ass/equity',
@@ -201,6 +204,7 @@ def generate_show_table():
         'real_cost',
         'total_return_rate',
         'equity',
+        'liquidation',
         'turnover_ttm20',
         'salary',
 
@@ -278,6 +282,7 @@ def generate_show_table_mask(df):
         'real_cost',
         'equity',
         'turnover_ttm20',
+        'liquidation',
         # 'salary',
     ]:
         df[column] = df[column].apply(lambda x: format(x, '0,.0f'))
@@ -289,6 +294,7 @@ def generate_show_table_mask(df):
     df[column] = df[column].apply(lambda x: format(x/1e4, '.2f'))
 
     for column in [
+        'r_discount',
         'ass/equity',
         'real_c/ass',
         'market_v/ass',

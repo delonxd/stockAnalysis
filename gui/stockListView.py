@@ -326,6 +326,7 @@ class GenerateCodeListWidget(QWidget):
             '',
             'old',
             'old_random',
+            'toc',
             'all',
             'hold',
             'mark-0',
@@ -363,7 +364,7 @@ class GenerateCodeListWidget(QWidget):
             '3_random_s',
             '4_random_w-s',
             '5_random_a-w',
-            '6',
+            '6_toc',
             '7',
             '8',
         ]
@@ -601,10 +602,9 @@ class GenerateCodeListWidget(QWidget):
             editor_dict['interval'] = '80'
             editor_dict['mode'] = 'all-whitelist'
 
-        elif mission == '6':
-            editor_dict['source'] = 'whitelist'
-            editor_dict['sort'] = 'industry-ass/equity'
-            editor_dict['code_index'] = '203'
+        elif mission == '6_toc':
+            editor_dict['source'] = 'toc'
+            editor_dict['sort'] = 'sort-ass/equity'
 
         elif mission == '7':
             editor_dict['source'] = 'whitelist'

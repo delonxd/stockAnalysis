@@ -516,6 +516,9 @@ def str_recognition(src):
         elif src == 'salary':
             ret = load_json_txt("..\\test\\salary_code.txt")
 
+        elif src == 'toc':
+            ret = load_json_txt("..\\basicData\\self_selected\\gui_toc.txt")
+
         elif src == 'pe':
             ret = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s001_code_sorted_pe.txt")
 

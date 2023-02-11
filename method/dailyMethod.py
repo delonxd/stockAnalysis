@@ -114,6 +114,7 @@ def daily_analysis(dir_name, all_codes):
         # 's_023_liabilities',
         # 's_024_real_liabilities',
         's_025_real_cost',
+        's_026_liquidation_asset',
         # 's_026_holder_return_rate',
         's_027_pe_return_rate',
         's_028_market_value',
@@ -248,6 +249,9 @@ def generate_daily_table(dir_name):
 
         val = get_recent_val(src, 's_002_equity', np.nan)
         df.loc[code, 'equity'] = val
+
+        val = get_recent_val(src, 's_026_liquidation_asset', np.nan)
+        df.loc[code, 'liquidation'] = val
 
         s0 = src.loc[:, 's_028_market_value'].copy().dropna()
         df.loc[code, 'ipo_date'] = s0.index[0] if s0.size > 0 else np.nan

@@ -11,6 +11,7 @@ from gui.fsView import FsView
 from gui.showPlot import show_plt
 
 from gui.remarkWidget import RemarkWidget
+from gui.checkWidget import CheckWidget
 from gui.webWidget import WebWidget
 from gui.equityChangeWidget import EquityChangeWidget
 
@@ -126,7 +127,7 @@ class MainWidget(QWidget):
         self.button5 = QPushButton('request')
         self.button6 = QPushButton('remark')
         self.button7 = QPushButton('code list')
-        self.button8 = QPushButton('priority')
+        self.button8 = QPushButton('check')
         self.button9 = QPushButton('plot')
         self.button10 = QPushButton('web')
         self.button11 = QPushButton('equity_change')
@@ -154,6 +155,8 @@ class MainWidget(QWidget):
         self.style_dict = {}
 
         self.remark_widget = RemarkWidget(self)
+        self.check_widget = CheckWidget(self)
+
         self.web_widget = WebWidget()
         self.equity_change_widget = EquityChangeWidget()
         self.fs_view = FsView()
@@ -308,7 +311,7 @@ class MainWidget(QWidget):
         self.button5.clicked.connect(self.request_data_quick)
         self.button6.clicked.connect(self.show_remark)
         self.button7.clicked.connect(self.show_code_list)
-        # self.button8.clicked.connect(self.config_priority)
+        self.button8.clicked.connect(self.show_check)
         # self.button9.clicked.connect(self.show_new_window)
         self.button9.clicked.connect(self.show_plot)
         self.button10.clicked.connect(self.show_web)
@@ -635,6 +638,7 @@ class MainWidget(QWidget):
         self.show_pix()
         self.show_stock_name()
         self.remark_widget.download()
+        self.check_widget.download()
 
         self.web_widget.load_code(code)
         self.equity_change_widget.load_code(code)
@@ -818,6 +822,9 @@ class MainWidget(QWidget):
         if ass is not None:
             ass2 = ass + self.liquidation_asset
 
+            rate = (self.market_value + self.equity - self.liquidation_asset) / ass
+            list0.append('%.2f' % rate)
+
             rate = self.market_value / ass2
             txt_bottom1 = '%.0f亿 / %.0f(%.0f+%.0f)' % (
                 self.market_value,
@@ -952,6 +959,10 @@ class MainWidget(QWidget):
         self.remark_widget.show()
         self.remark_widget.activateWindow()
 
+    def show_check(self):
+        self.check_widget.show()
+        self.check_widget.activateWindow()
+
     def show_code_list(self):
         self.code_widget.show()
         self.code_widget.activateWindow()
@@ -1056,6 +1067,7 @@ class MainWidget(QWidget):
         self.style_widget.close()
         self.code_widget.close()
         self.remark_widget.close()
+        self.check_widget.close()
         self.web_widget.close()
         self.equity_change_widget.close()
         self.fs_view.close()
