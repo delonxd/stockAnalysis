@@ -27,6 +27,8 @@ def basic_daily_update(dir_name):
 
 def mysql_daily_update(dir_name, all_codes, ipo_dates):
     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
+    ret1 = []
+    ret2 = []
 
     # industry_dict = request_industry_sample()
     # res = json.dumps(industry_dict, indent=4, ensure_ascii=False)
@@ -41,7 +43,7 @@ def mysql_daily_update(dir_name, all_codes, ipo_dates):
     for code, date in ipo_dates.items():
         if not date:
             new_codes.append(code)
-        elif date > '2022-03-01':
+        elif date > '2022-07-01':
             new_codes.append(code)
 
     MainLog.add_log('Length of all codes: %s' % len(all_codes))
@@ -52,7 +54,7 @@ def mysql_daily_update(dir_name, all_codes, ipo_dates):
     if weekday in [5, 6]:
         mvs_flag = False
 
-    ret1 = update_all_data(new_codes, start_date='2013-01-01', mvs_flag=mvs_flag)
+    ret1 = update_all_data(new_codes, start_date='2014-01-01', mvs_flag=mvs_flag)
     ret2 = update_latest_data(all_codes, mvs_flag=mvs_flag)
     updated_code = list(set(ret1 + ret2))
     updated_code.sort()
@@ -346,13 +348,16 @@ def generate_log_data(dir_name):
 
 
 if __name__ == '__main__':
+    from request.requestMirData import request_mir_y10
+
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    # dir_daily = 'update_20220713153503'
-    # generate_daily_table(dir_daily)
-    # save_latest_list(dir_daily)
+    dir_daily = 'update_20230221221007'
+    generate_daily_table(dir_daily)
+    save_latest_list(dir_daily)
+    request_mir_y10()
 
     # test_daily_analysis()
-    generate_log_data('update_20220723153503')
+    # generate_log_data('update_20220723153503')
