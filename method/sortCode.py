@@ -320,6 +320,7 @@ def sort_hold():
     hold_dict = load_json_txt(path)
 
     name_dict = load_json_txt('..\\basicData\\code_names_dict.txt')
+    ass_dict = load_json_txt('..\\basicData\\self_selected\\gui_assessment.txt')
 
     ret = []
     for val in hold_dict:
@@ -327,14 +328,20 @@ def sort_hold():
         number = val[2]
         if number == 0:
             price = 0
+            mkt = np.inf
+            ass = 0
         else:
             df = load_df_from_mysql(code, 'mvs')
             price = df['id_035_mvs_sp'].iloc[-1]
 
+            mkt = df['id_041_mvs_mc'].iloc[-1]
+            ass = int(ass_dict[code])
+
         value = int(round(price * number))
+        i_value = int(round(price * number / mkt * ass * 1e8))
         name = name_dict[code]
 
-        tmp = [code, name, number, value, price]
+        tmp = [code, name, number, value, i_value, price, mkt, ass]
         print(tmp)
         ret.append(tmp)
     ret.sort(key=lambda x: x[3], reverse=True)
