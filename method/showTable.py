@@ -177,12 +177,13 @@ def generate_show_table():
 
     df['ass/equity'] = df['gui_assessment'] / df['equity']
     df['real_c/ass'] = df['real_cost'] / df['gui_assessment']
-    df['market_v/ass'] = df['market_value_1'] / df['gui_assessment']
+    real_ass = df['gui_assessment'] + df['gui_assessment'] - (df['equity'] - df['liquidation'])
+    df['market_v/ass'] = df['market_value_1'] / real_ass * 2
     df['tov/market_value'] = df['turnover_ttm20'] / df['market_value_1']
     df['tov/ass'] = df['turnover_ttm20'] / df['gui_assessment']
     # df['r_discount'] = (df['market_value_1'] + df['equity']) / df['gui_assessment']
-    df['r_discount'] = (df['market_value_1'] + df['equity'] + df['equity'] - df['liquidation']) / df['gui_assessment']
-
+    df['r_discount1'] = df['market_value_1'] / (df['gui_assessment'] + df['gui_assessment'] + df['liquidation']) * 2
+    df['r_discount2'] = df['market_value_1'] / real_ass * 2
     order = [
         'code',
         'name',
@@ -190,7 +191,8 @@ def generate_show_table():
         'level2',
         'level3',
 
-        'r_discount',
+        'r_discount1',
+        'r_discount2',
         'real_c/ass',
         'market_v/ass',
         'ass/equity',
@@ -294,7 +296,9 @@ def generate_show_table_mask(df):
     df[column] = df[column].apply(lambda x: format(x/1e4, '.2f'))
 
     for column in [
-        'r_discount',
+        # 'r_discount',
+        'r_discount1',
+        'r_discount2',
         'ass/equity',
         'real_c/ass',
         'market_v/ass',

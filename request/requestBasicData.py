@@ -22,7 +22,7 @@ def request_basic():
     for data in data_list:
         code = data["stockCode"]
         if "name" in data:
-            name = data["name"]["cmn_hans_cn"]
+            name = data["name"]
             name_dict[code] = name
         if "ipoDate" in data:
             ipo_date = data["ipoDate"]

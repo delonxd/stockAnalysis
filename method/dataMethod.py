@@ -354,6 +354,9 @@ class DataAnalysis:
             's_059_total_expend',
             's_060_total_expend_rate',
             's_061_total_return_rate',
+
+            's_063_profit_salary2',
+            's_064_profit_salary3',
         ]
 
         df = self.df_fs
@@ -812,7 +815,8 @@ class DataAnalysis:
         elif column == 's_025_real_cost':
             s1 = self.fs_to_mvs('s_026_liquidation_asset')
             s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
-            return self.regular_series(column, s2 - s1)
+            s3 = self.fs_to_mvs('s_002_equity')
+            return self.regular_series(column, s2 - s1 + s3)
 
         elif column == 's_026_liquidation_asset':
             tmp = list()
@@ -871,18 +875,20 @@ class DataAnalysis:
         #     return self.regular_series(column, s2)
 
         elif column == 's_034_real_pe':
-            s1 = self.fs_to_mvs('s_018_profit_parent')
+            # s1 = self.fs_to_mvs('s_018_profit_parent')
+            s1 = self.fs_to_mvs('s_051_core_profit')
             s2 = self.get_column(df, 's_025_real_cost')
             return self.regular_series(column, s2 / s1)
 
         elif column == 's_035_pe2rate':
-            s1 = self.get_column(df, 's_004_pe')
+            # s1 = self.get_column(df, 's_004_pe')
+            s1 = self.get_column(df, 's_034_real_pe')
             s2 = self.transform_pe(s1)
             return self.regular_series(column, s2)
 
         elif column == 's_036_real_pe2rate':
             s1 = self.get_column(df, 's_034_real_pe')
-            s2 = self.transform_pe(s1)
+            s2 = self.transform_pe(s1/2)
             return self.regular_series(column, s2)
 
         elif column == 's_037_real_pe_return_rate':
@@ -1100,6 +1106,25 @@ class DataAnalysis:
             s2 = self.get_column(df, 's_058_equity_adj')
             return self.regular_series(column, s1 / s2)
 
+        elif column == 's_062_equity_ratio':
+            s1 = self.get_column(df, 's_051_core_profit')
+            s2 = self.get_column(df, 's_058_equity_adj')
+            return self.regular_series(column, s1 / s2)
+
+        elif column == 's_063_profit_salary2':
+            s1 = self.get_column(df, 's_051_core_profit')
+            s2 = self.get_column(df, 's_053_core_profit_salary')
+            s3 = s1 + s2
+            s3 = s3 / 0.1
+            return self.regular_series(column, s3)
+
+        elif column == 's_064_profit_salary3':
+            s1 = self.get_column(df, 's_052_core_profit_asset')
+            s2 = self.get_column(df, 's_053_core_profit_salary')
+            s3 = s1 + s2
+            s3 = s3 / 0.1
+            return self.regular_series(column, s3)
+
     @staticmethod
     def get_return_year(pe, rate):
         a = 1 + rate
@@ -1151,6 +1176,11 @@ class DataAnalysis:
 
         data = self.get_column(self.df_fs, src)
         data = data.reindex_like(pd.Series(index=dt_fs.values))
+
+        if data.size > 1:
+            if pd.isna(data[-1]):
+                data[-1] = data[-2]
+
         data.fillna(np.inf, inplace=True)
         data.index = dt_fs.index
 

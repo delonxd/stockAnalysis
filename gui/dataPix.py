@@ -258,6 +258,8 @@ class DataPix:
             's_053_core_profit_salary',
             's_055_gross_cost',
             'dv_001_dividend_value',
+            's_063_profit_salary2',
+            's_064_profit_salary3',
         ]
 
         if index_name in tmp_list:
