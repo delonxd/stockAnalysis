@@ -61,7 +61,7 @@ class ValueModel:
 
 
 class ValueModel2:
-    def __init__(self, rate, year, rate0, asset: 120, profit: 10):
+    def __init__(self, rate, year, rate0, asset, profit, r_ratio):
         self.code = ''
         self.name = ''
         self.asset = asset
@@ -72,6 +72,8 @@ class ValueModel2:
         self.rate = rate
         self.year = year
 
+        self.r_ratio = r_ratio / 100
+
         self.sq = list(zip(self.rate, self.year))
 
     @property
@@ -79,6 +81,21 @@ class ValueModel2:
         sq = self.sq.copy()
         _, x = sum_profit(self.profit, sq, self.rate0)
         ret = x + self.asset
+        return ret
+
+    @property
+    def value_reserved(self):
+        sq = self.sq.copy()
+        _, x = sum_profit(self.profit, sq, 0)
+        year = sum(self.year)
+        r = 1 - self.rate0 / 100
+        x = x + self.asset
+        ret = x * (r ** year)
+        return ret
+
+    @property
+    def value_average(self):
+        ret = self.value * self.r_ratio + self.value_reserved * (1 - self.r_ratio)
         return ret
 
     def sum_profit(self, ini):
@@ -110,6 +127,15 @@ class ValueModel2:
             s1 = ((profit * val2) + asset) * (r0 ** t)
             s2 = profit * (total - val1)
             ret.append(s1 + s2)
+        return ret
+
+    @staticmethod
+    def iter_return(value, mkv, year: int):
+        val = value / mkv
+        ret = []
+        for t in range(1, year+1):
+            tmp = (val ** (1/t)-1) * 100
+            ret.append(tmp)
         return ret
 
     # def iter_sum2(self):
@@ -311,7 +337,7 @@ if __name__ == '__main__':
     # test_remain_rate()
     m1 = ValueModel2([15, 10, 0], [10, 10, np.inf], 10, 120, 10)
     # res = m1.value
-    res = m1.iter_sum()
+    res = m1.iter_return(2000, 50)
     print(res)
     # res = sum_profit(1, [(0, 0), (0, np.inf)], -10)
     # print(res)
