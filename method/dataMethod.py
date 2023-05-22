@@ -357,6 +357,8 @@ class DataAnalysis:
 
             's_063_profit_salary2',
             's_064_profit_salary3',
+            's_065_profit_salary_adj',
+            's_066_profit_salary_min',
         ]
 
         df = self.df_fs
@@ -1125,6 +1127,19 @@ class DataAnalysis:
             s3 = s3 / 0.1
             return self.regular_series(column, s3)
 
+        elif column == 's_065_profit_salary_adj':
+            s1 = self.get_column(df, 's_063_profit_salary2')
+            s2 = self.get_column(df, 's_003_profit')
+            s3 = self.get_column(df, 's_018_profit_parent')
+            s4 = s1 / s2 * s3
+            return self.regular_series(column, s4)
+
+        elif column == 's_066_profit_salary_min':
+            s1 = self.get_column(df, 's_063_profit_salary2')
+            s2 = self.get_column(df, 's_065_profit_salary_adj')
+            s3 = pd.DataFrame([s1, s2]).min(axis=0)
+            return self.regular_series(column, s3)
+
     @staticmethod
     def get_return_year(pe, rate):
         a = 1 + rate
@@ -1389,6 +1404,7 @@ class DailyDataAnalysis(DataAnalysis):
             # 's_024_real_liabilities',
             's_026_liquidation_asset',
             's_061_total_return_rate',
+            's_066_profit_salary_min',
 
             # 's_038_pay_for_long_term_asset',
             # 's_039_profit_adjust',
