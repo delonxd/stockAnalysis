@@ -19,7 +19,7 @@ def request_mir_y10():
             "areaCode": "cn",
             "startDate": start.strftime("%Y-%m-%d"),
             "endDate": end.strftime("%Y-%m-%d"),
-            "metricsList": ["mir_y10"],
+            "metricsList": ["tcm_y10"],
         }
 
         res = data_request(url=url, api_dict=api)
@@ -34,7 +34,7 @@ def request_mir_y10():
     dict0 = dict()
     for row in data:
         date = row['date'][:10]
-        value = row['mir_y10']
+        value = row['tcm_y10']
         dict0[date] = value
 
     tmp = json.dumps(dict0, indent=4, ensure_ascii=False)
