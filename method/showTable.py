@@ -11,6 +11,13 @@ def get_recent_val(df, column, default, shift=1):
     return val
 
 
+def get_recent_index(df, column, default, shift=1):
+    series = df.loc[:, column].copy().dropna()
+    series = series.index
+    val = series[-shift] if series.size >= shift else default
+    return val
+
+
 def generate_gui_table():
     df = pd.DataFrame()
 
@@ -83,6 +90,12 @@ def generate_gui_table():
 
     s0 = pd.Series(res, name='gui_assessment')
     s0 = s0.apply(lambda x: int(x) * 1e8)
+    df = pd.concat([df, s0], axis=1, sort=False)
+
+    res = load_json_txt("..\\basicData\\self_selected\\gui_rate.txt")
+
+    s0 = pd.Series(res, name='gui_rate')
+    s0 = s0.apply(lambda x: int(x))
     df = pd.concat([df, s0], axis=1, sort=False)
 
     # for key, value in res.items():
@@ -175,15 +188,27 @@ def generate_show_table():
     s0 = pd.Series(df.index, index=df.index, name='code')
     df = pd.concat([s0, df], axis=1, sort=False)
 
+    rate_adj = df['gui_rate'].copy()
+    rate_adj[rate_adj > 25] = 25
+    s_predict = rate_adj * df['predict_delta'] / 36500 + 1
+    df['predict_adj'] = s_predict.fillna(value=1)
+    df['predict_ass'] = df['gui_assessment'] * df['predict_adj']
+
     df['ass/equity'] = df['gui_assessment'] / df['equity']
-    df['real_c/ass'] = df['real_cost'] / df['gui_assessment']
-    real_ass = df['gui_assessment'] + df['gui_assessment'] - (df['equity'] - df['liquidation'])
+    df['real_c/ass'] = df['real_cost'] / df['predict_ass']
+    real_ass = df['predict_ass'] + df['predict_ass'] - (df['equity'] - df['liquidation'])
     df['market_v/ass'] = df['market_value_1'] / real_ass * 2
+
     df['tov/market_value'] = df['turnover_ttm20'] / df['market_value_1']
-    df['tov/ass'] = df['turnover_ttm20'] / df['gui_assessment']
-    # df['r_discount'] = (df['market_value_1'] + df['equity']) / df['gui_assessment']
-    df['r_discount1'] = df['market_value_1'] / (df['gui_assessment'] + df['gui_assessment'] + df['liquidation']) * 2
+    df['tov/ass'] = df['turnover_ttm20'] / df['predict_ass']
+
+    # df['r_discount'] = (df['market_value_1'] + df['equity']) / df['predict_ass']
+    df['r_discount1'] = df['market_value_1'] / (df['predict_ass'] + df['predict_ass'] + df['liquidation']) * 2
     df['r_discount2'] = df['market_value_1'] / real_ass * 2
+
+    df['predict_profit'] = df['profit_salary_adj'] * df['predict_adj']
+    df['predict_discount'] = df['predict_profit'] / df['real_cost'] * 10
+
     order = [
         'code',
         'name',
@@ -191,6 +216,12 @@ def generate_show_table():
         'level2',
         'level3',
 
+        'predict_adj',
+        'profit_salary_adj',
+        'predict_profit',
+        'predict_discount',
+
+        'gui_rate',
         'r_discount1',
         'r_discount2',
         'real_c/ass',
@@ -200,7 +231,11 @@ def generate_show_table():
         'tov/ass',
         'tov/market_value',
 
+        'recent_date',
+        'predict_delta',
+
         'gui_assessment',
+        'predict_ass',
         'market_value_1',
         'market_value_2',
         'real_cost',
@@ -286,14 +321,27 @@ def generate_show_table_mask(df):
         'turnover_ttm20',
         'liquidation',
         # 'salary',
+        'predict_delta',
     ]:
         df[column] = df[column].apply(lambda x: format(x, '0,.0f'))
 
-    column = 'gui_assessment'
-    df[column] = df[column].apply(lambda x: format(x/1e8, '0,.0f'))
+    for column in [
+        'gui_assessment',
+        'predict_ass',
+    ]:
+        df[column] = df[column].apply(lambda x: format(x/1e8, '0,.0f'))
+
+    column = 'gui_rate'
+    df[column] = df[column].apply(lambda x: format(x, '0,.0f'))
 
     column = 'salary'
     df[column] = df[column].apply(lambda x: format(x/1e4, '.2f'))
+
+    for column in [
+        'profit_salary_adj',
+        'predict_profit',
+    ]:
+        df[column] = df[column].apply(lambda x: format(x/10, '0,.0f'))
 
     for column in [
         # 'r_discount',
@@ -304,6 +352,8 @@ def generate_show_table_mask(df):
         'market_v/ass',
 
         'counter_real_pe',
+        'predict_discount',
+        'predict_adj',
     ]:
         df[column] = df[column].apply(lambda x: format(x, '.2f'))
 
