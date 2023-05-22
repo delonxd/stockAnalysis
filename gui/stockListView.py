@@ -242,6 +242,14 @@ class QDataFrameTable(QTableWidget):
         self.sort_flags[column] = flag
         self.change_signal.emit(self.code_df.current_index)
 
+    def selected_codes(self):
+        rect = self.selectedRanges()[0]
+        ret = []
+        for row in range(rect.topRow(), rect.bottomRow() + 1):
+            code = self.code_df.df.iloc[row, 0]
+            ret.append(code)
+        return ret
+
 
 class QStockListView(QWidget):
     def __init__(self, code_df):
@@ -259,12 +267,16 @@ class QStockListView(QWidget):
 
         self.button1 = QPushButton('<<')
         self.button2 = QPushButton('>>')
-        self.button3 = QPushButton('load')
-        self.button4 = QPushButton('select')
+        self.button3 = QPushButton('加载')
+        self.button4 = QPushButton('选择')
+        self.button5 = QPushButton('添加')
+        self.button6 = QPushButton('删除')
 
         layout0.addWidget(self.button1, 0)
         layout0.addWidget(self.button4, 0)
         layout0.addWidget(self.button3, 0)
+        layout0.addWidget(self.button5, 0)
+        layout0.addWidget(self.button6, 0)
         layout0.addWidget(self.button2, 0)
 
         layout0.addStretch(1)
@@ -277,6 +289,9 @@ class QStockListView(QWidget):
         self.button2.clicked.connect(self.table_view.forward)
         self.button3.clicked.connect(self.generate_widget.show)
         self.button4.clicked.connect(self.select_code)
+
+        self.button5.clicked.connect(self.add_codes)
+        self.button6.clicked.connect(self.del_codes)
 
         self.generate_widget.generate_signal.connect(self.table_view.load_code_list)
 
@@ -295,6 +310,24 @@ class QStockListView(QWidget):
                 if value == txt:
                     self.table_view.load_code_list([key], 0)
                     return
+
+    def get_gui_path(self):
+        items = [
+            'gui_test_20230516.txt',
+        ]
+        file, _ = QInputDialog.getItem(self, '获取列表中的选项', '文件列表', items, editable=False)
+        ret = "../basicData/self_selected/%s" % file
+        return ret
+
+    def add_codes(self):
+        codes = self.table_view.selected_codes()
+        path = self.get_gui_path()
+        file_add_codes(codes, path, log=True)
+
+    def del_codes(self):
+        codes = self.table_view.selected_codes()
+        path = self.get_gui_path()
+        file_del_codes(codes, path, log=True)
 
     def closeEvent(self, event):
         self.generate_widget.close()
@@ -329,10 +362,18 @@ class GenerateCodeListWidget(QWidget):
             'toc',
             'all',
             'hold',
+
             'mark-0',
-            'mark-1',
-            'mark-2',
-            'mark-3',
+            'mark-AAA',
+            'mark-AA',
+            'mark-A',
+            'mark-BBB',
+            'mark-BB',
+            'mark-B',
+            'mark-CCC',
+            'mark-CC',
+            'mark-C',
+
             'selected',
             'whitelist',
             'blacklist',

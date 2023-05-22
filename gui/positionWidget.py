@@ -81,7 +81,7 @@ class PositionWidget(QWidget):
         self.src_value = dict()
         self.total1 = 0
         self.total2 = 0
-        self.cash = 7352
+        self.cash = 6443
 
         self.load()
         self.calculate()

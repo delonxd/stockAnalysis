@@ -12,19 +12,23 @@ from matplotlib.widgets import Cursor
 class CalculatorTable(QTableWidget):
     def __init__(self):
         super().__init__()
-        self.setMinimumSize(700, 200)
+        self.setMinimumSize(1100, 200)
 
         self.column_type = {
-            'asset': 'int',
-            'profit': 'int',
+            'mkv': 'float',
+            'asset': 'float',
+            'profit': 'float',
+            'r_ratio': 'ratio',
+            'rate0': 'rate0',
             'rate1': 'rate',
             't1': 'year',
             'rate2': 'rate',
             't2': 'year',
             'rate3': 'rate',
             't3': 'year',
-            'pe': 'float',
-            'result': 'int',
+            'val1': 'float',
+            'val2': 'float',
+            'val3': 'float',
         }
 
         self.setColumnCount(len(self.column_type))
@@ -53,25 +57,37 @@ class CalculatorTable(QTableWidget):
         self.resizeColumnsToContents()
         self.setHorizontalHeaderLabels(self.column_type.keys())
 
-        for i in [0, 1, 8, 9]:
-            self.setColumnWidth(i, 80)
-        for i in [2, 4, 6]:
-            self.setColumnWidth(i, 60)
-        for i in [3, 5, 7]:
-            self.setColumnWidth(i, 50)
+        list0 = list(self.column_type.keys())
+
+        for key in ['mkv', 'asset', 'profit', 'val1', 'val2', 'val3']:
+            self.setColumnWidth(list0.index(key), 80)
+        for key in ['r_ratio', 'rate0', 'rate1', 'rate2', 'rate3']:
+            self.setColumnWidth(list0.index(key), 60)
+        for key in ['t1', 't2', 't3']:
+            self.setColumnWidth(list0.index(key), 50)
 
         # self.calculate()
+
+    @staticmethod
+    def init_model(row):
+        rate = [row['rate1'], row['rate2'], row['rate3']]
+        year = [row['t1'], row['t2'], row['t3']]
+        ret = ValueModel2(
+            rate, year,
+            row['rate0'], row['asset'], row['profit'],
+            row['r_ratio'],
+        )
+        return ret
 
     def show_data(self):
         df = self.df
 
         for i, row in df.iterrows():
-            rate = [row['rate1'], row['rate2'], row['rate3']]
-            year = [row['t1'], row['t2'], row['t3']]
-            m = ValueModel2(rate, year, 10, row['asset'], row['profit'])
-
-            df.loc[i, 'pe'] = m.sum_profit(1)[1]
-            df.loc[i, 'result'] = m.value
+            m = self.init_model(row)
+            # df.loc[i, 'pe'] = m.sum_profit(1)[1]
+            df.loc[i, 'val1'] = m.value_reserved
+            df.loc[i, 'val2'] = m.value
+            df.loc[i, 'val3'] = m.value_average
 
         for i, index in enumerate(df.index):
             for j, tmp in enumerate(self.column_type.items()):
@@ -98,20 +114,28 @@ class CalculatorTable(QTableWidget):
         plt.grid(True)
         plt.get_current_fig_manager().window.setGeometry(rect)
         plt.title('test')
-
+        plt.ylim([-20, 40])
         min_value = np.inf
         max_value = -np.inf
 
         for i, row in df.iterrows():
-            rate = [row['rate1'], row['rate2'], row['rate3']]
-            year = [row['t1'], row['t2'], row['t3']]
-            m = ValueModel2(rate, year, 10, row['asset'], row['profit'])
+            m = self.init_model(row)
 
-            x = range(50)
-            y = m.iter_sum()
-
-            plt.plot(x, y, color='r', linestyle=':', linewidth=1.2, marker='.',
+            mkv = row['mkv']
+            t_year = int(sum(m.year))
+            x = range(t_year)
+            # y = m.iter_sum()
+            y1 = m.iter_return(m.value, mkv, t_year)
+            plt.plot(x, y1, color='r', linestyle=':', linewidth=1.2, marker='.',
                      markersize=7, markerfacecolor='b', markeredgecolor='g')
+
+            y2 = m.iter_return(m.value_reserved, mkv, t_year)
+            plt.plot(x, y2, color='r', linestyle=':', linewidth=1.2, marker='.',
+                     markersize=7, markerfacecolor='yellow', markeredgecolor='g')
+
+            y3 = m.iter_return(m.value_average, mkv, t_year)
+            plt.plot(x, y3, color='r', linestyle=':', linewidth=1.2, marker='.',
+                     markersize=7, markerfacecolor='red', markeredgecolor='g')
 
         # y_stick = []
         # y_label = []
@@ -145,6 +169,14 @@ class CalculatorTable(QTableWidget):
             item.setText('%.0f%%' % data)
             item.setForeground(QBrush(Qt.red))
 
+        elif typ == 'rate0':
+            item.setText('%.0f%%' % data)
+            item.setForeground(QBrush(Qt.green))
+
+        elif typ == 'ratio':
+            item.setText('%.0f%%' % data)
+            item.setForeground(QBrush(Qt.blue))
+
     # def calculate(self):
     #     df = self.df
     #     for i, row in df.iterrows():
@@ -171,12 +203,15 @@ class CalculatorTable(QTableWidget):
         if column in [
             'asset',
             'profit',
+            'rate0',
+            'r_ratio',
             'rate1',
             't1',
             'rate2',
             't2',
             'rate3',
             't3',
+            'mkv',
         ]:
             text, _ = QInputDialog.getText(self, title, label)
             if text is None:
@@ -221,10 +256,17 @@ class CalculatorWidget(QWidget):
         self.load_code(0)
 
     def load_code(self, code):
+        # l0 = [
+        #     [120, 10, 15, 10, 10, 10, 0, np.inf, 0, 0],
+        #     [-300, 10, 15, 10, 10, 10, 0, np.inf, 0, 0],
+        #     [0, 10, 20, np.inf, 10, 10, 0, np.inf, 0, 0],
+        # ]
+
         l0 = [
-            [120, 10, 15, 10, 10, 10, 0, np.inf, 0, 0],
-            [-300, 10, 15, 10, 10, 10, 0, np.inf, 0, 0],
-            [0, 10, 20, np.inf, 10, 10, 0, np.inf, 0, 0],
+            [1000, 3471, 850, 3, 8, 0, 10, 0, 10, 0, 100, None, None, None],
+            # [120, 10, 15, 10, 10, 10, 0, 100, 0, 0],
+            # [-300, 10, 15, 10, 10, 10, 0, 100, 0, 0],
+            # [0, 10, 20, np.inf, 10, 10, 0, 100, 0, 0],
         ]
         self.cal_df = pd.DataFrame(l0)
 

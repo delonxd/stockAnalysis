@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 
 import sys
 import json
@@ -15,28 +16,54 @@ class RemarkWidget(QWidget):
         self.main_widget = main_widget
 
         self.label = QLabel('000000: 测试')
+        self.label1 = QLabel('  复合增长率：')
+        self.label2 = QLabel('%     估值：')
+        self.label3 = QLabel('亿')
+
         self.editor0 = QLineEdit()
         self.editor1 = QLineEdit()
         self.editor2 = QTextEdit()
+        self.editor3 = QLineEdit()
         self.button1 = QPushButton('上传备注')
         self.button2 = QPushButton('下载备注')
 
         self.label.setFont(QFont('Consolas', 18))
-        self.editor0.setFont(QFont('Consolas', 18))
+        self.label1.setFont(QFont('Consolas', 15))
+        self.label2.setFont(QFont('Consolas', 15))
+        self.label3.setFont(QFont('Consolas', 15))
+
+        self.editor0.setFont(QFont('Consolas', 15))
         self.editor1.setFont(QFont('Consolas', 18))
         self.editor2.setFont(QFont('Consolas', 18))
+        self.editor3.setFont(QFont('Consolas', 15))
+
+        self.editor0.setAlignment(Qt.AlignRight)
+        self.editor3.setAlignment(Qt.AlignRight)
 
         validator = QIntValidator(self)
         validator.setRange(1, 1000000)
         self.editor0.setValidator(validator)
+
+        validator = QIntValidator(self)
+        validator.setRange(0, 200)
+        self.editor3.setValidator(validator)
 
         self.code = None
         self.name = None
 
         layout = QVBoxLayout()
 
+        layout1 = QHBoxLayout()
+        layout1.addStretch(0)
+        layout1.addWidget(self.label1)
+        layout1.addWidget(self.editor3, 1)
+        layout1.addWidget(self.label2)
+        layout1.addWidget(self.editor0, 1)
+        layout1.addWidget(self.label3)
+        layout1.addStretch(0)
+
         layout.addWidget(self.label)
-        layout.addWidget(self.editor0)
+        layout.addLayout(layout1)
         layout.addWidget(self.editor1)
         layout.addWidget(self.editor2)
         layout.addWidget(self.button1)
@@ -64,10 +91,25 @@ class RemarkWidget(QWidget):
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             value_dict = json.loads(f.read())
         value_dict[self.code] = value
+        if value == '':
+            value_dict.pop(self.code)
 
         res = json.dumps(value_dict, indent=4, ensure_ascii=False)
         with open(path, "w", encoding='utf-8') as f:
             f.write(res)
+
+        value = self.editor3.text()
+        path = "../basicData/self_selected/gui_rate.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            value_dict = json.loads(f.read())
+        value_dict[self.code] = value
+        if value == '':
+            value_dict.pop(self.code)
+
+        res = json.dumps(value_dict, indent=4, ensure_ascii=False)
+        with open(path, "w", encoding='utf-8') as f:
+            f.write(res)
+
         self.main_widget.show_stock_name()
 
     def download(self):
@@ -91,10 +133,19 @@ class RemarkWidget(QWidget):
         else:
             value = ''
 
+        path = "../basicData/self_selected/gui_rate.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            value_dict = json.loads(f.read())
+        if code in value_dict:
+            value1 = str(value_dict[self.code])
+        else:
+            value1 = ''
+
         self.label.setText(txt1)
         self.editor1.setText(txt2)
         self.editor2.setText(txt3)
         self.editor0.setText(value)
+        self.editor3.setText(value1)
 
         # print(self.textEdit.toHtml())
 
