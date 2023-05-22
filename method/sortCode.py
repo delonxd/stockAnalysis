@@ -579,10 +579,11 @@ def str_recognition(src):
             ret = df.index.to_list()
 
         elif src[:4] == 'mark':
-            mark = int(src.split('-')[1])
+            # mark = int(src.split('-')[1])
+            mark = src.split('-')[1]
             mark_dict = load_json_txt("..\\basicData\\self_selected\\gui_mark.txt")
 
-            if mark == 0:
+            if mark == '0':
                 ret = list(mark_dict.keys())
             else:
                 ret = []
