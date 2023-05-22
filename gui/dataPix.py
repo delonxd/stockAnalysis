@@ -60,8 +60,8 @@ class DataPix:
             self.pix_list_daily.append(QPixmap(self.pix_daily))
 
         # date metrics
-        self.date_max = dt.date(2023, 7, 20)
-        self.date_min = dt.date(1997, 7, 20)
+        self.date_max = dt.date(2024, 3, 20)
+        self.date_min = dt.date(1998, 3, 20)
         self.d_date = (self.date_max - self.date_min).days
 
         self.date_metrics1 = self.get_date_list('INTERIM')
@@ -260,6 +260,8 @@ class DataPix:
             'dv_001_dividend_value',
             's_063_profit_salary2',
             's_064_profit_salary3',
+            's_065_profit_salary_adj',
+            's_066_profit_salary_min',
         ]
 
         if index_name in tmp_list:
@@ -659,10 +661,10 @@ class DataPix:
             y = self.y_data2px(data_y, ds)
             if np.isnan(y):
                 return
-        self.draw_cross(x, y, False, True, 2)
-        self.draw_cross(x, y, False, True, 3)
+        self.draw_cross(x, y, False, True, 2, None)
+        self.draw_cross(x, y, False, True, 3, None)
 
-    def draw_cross(self, x, y, cross_flag, box_flag, window_flag):
+    def draw_cross(self, x, y, cross_flag, box_flag, window_flag, draw_pos):
         if x is None and y is None:
             return
 
@@ -676,7 +678,7 @@ class DataPix:
         info_box = InformationBox(parent=self)
         box = info_box.draw_pix(d1, d2, d_report, window_flag)
 
-        thick = 1 if cross_flag is True else 1
+        thick = 1
         show = self.draw_sub_cross(
             x, y,
             d0, d1, d2,
@@ -686,7 +688,35 @@ class DataPix:
             box,
             window_flag,
         )
+        if draw_pos is not None:
+            start = (x, y, d0)
+            end = draw_pos
+            show = self.draw_line(show, start, end)
+
         self.pix_show[window_flag] = show
+
+    def draw_line(self, pix, point1, point2):
+        pix_painter = QPainter(pix)
+        pen = QPen(Qt.green, 1, Qt.SolidLine)
+        pix_painter.setPen(pen)
+        pix_painter.drawLine(
+            QPoint(point1[0], point1[1]),
+            QPoint(point2[0], point2[1]),
+        )
+        pix_painter.end()
+
+        date1 = dt.datetime.strptime(point1[2], "%Y-%m-%d").date()
+        date2 = dt.datetime.strptime(point2[2], "%Y-%m-%d").date()
+        days = (date2 - date1).days
+        if days == 0:
+            tip = 'inf'
+        else:
+            b = (point1[1] - point2[1]) / self.data_rect.height() * 10 / days * 365
+            rate = (2 ** b - 1) * 100
+            tip = '%.2f%%' % rate
+
+        self.draw_rate(point1[0], point1[1], tip, pix)
+        return pix
 
     def get_d1_d2(self, x, y):
 
@@ -815,6 +845,32 @@ class DataPix:
         # draw_rect
         brush = QBrush(Qt.SolidPattern)
         brush.setColor(Qt.blue)
+
+        pen = QPen(Qt.red, 1, Qt.SolidLine)
+        pix_painter.setPen(pen)
+
+        pix_painter.setBrush(brush)
+        pix_painter.drawRect(rect)
+
+        # draw_text
+        pix_painter.setPen(QColor(Qt.red))
+        pix_painter.drawText(rect, Qt.AlignCenter, text)
+
+        pix_painter.end()
+
+    @staticmethod
+    def draw_rate(x, y, text, pix):
+        pix_painter = QPainter(pix)
+        pix_painter.setFont(QFont('Consolas', 12))
+
+        metrics = pix_painter.fontMetrics()
+        width = metrics.width(text)
+        height = metrics.height()
+        rect = QRect(x - width - 2, y - height - 2,  width + 2, height + 2)
+
+        # draw_rect
+        brush = QBrush(Qt.SolidPattern)
+        brush.setColor(Qt.black)
 
         pen = QPen(Qt.red, 1, Qt.SolidLine)
         pix_painter.setPen(pen)
