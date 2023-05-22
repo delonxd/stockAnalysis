@@ -5,7 +5,7 @@ from method.sql_update import update_all_data
 from request.requestData import request2mysql
 from method.dataMethod import load_df_from_mysql
 from method.dataMethod import DataAnalysis, DailyDataAnalysis
-from method.showTable import add_bool_column, get_recent_val, sum_value
+from method.showTable import add_bool_column, get_recent_val, sum_value, get_recent_index
 import numpy as np
 import os
 import pandas as pd
@@ -124,6 +124,7 @@ def daily_analysis(dir_name, all_codes):
         # 'id_048_mvs_ta',
         's_044_turnover_volume',
         's_061_total_return_rate',
+        's_066_profit_salary_min',
     ]
 
     index = 0
@@ -224,9 +225,11 @@ def generate_daily_table(dir_name):
     s3 = (s2 / s1).dropna().to_dict()
     write_json_txt('%s\\a007_change_rate.txt' % daily_dir, s3)
 
-    for tmp in res:
+    end = len(res)
+    for index, tmp in enumerate(res):
         code = tmp[0]
         src = tmp[1]
+        MainLog.add_log_accurate('Reading: %s/%s --> %s' % (index, end, code))
 
         val = get_recent_val(src, 's_037_real_pe_return_rate', -np.inf)
         df.loc[code, 'real_pe_return_rate'] = val
@@ -261,6 +264,19 @@ def generate_daily_table(dir_name):
         s1 = src.loc[:, 's_044_turnover_volume'].copy().dropna()
         s1 = s1.rolling(20, min_periods=1).mean().dropna()
         df.loc[code, 'turnover_ttm20'] = s1[-1] if s1.size >= 1 else np.nan
+
+        val = get_recent_index(src, 's_066_profit_salary_min', np.nan)
+        df.loc[code, 'recent_date'] = val
+
+        delta = 0
+        if not pd.isna(val):
+            date1 = dt.datetime.strptime(val, "%Y-%m-%d").date()
+            date2 = dt.date.today()
+            delta = (date2 - date1).days
+        df.loc[code, 'predict_delta'] = delta
+
+        val = get_recent_val(src, 's_066_profit_salary_min', np.nan)
+        df.loc[code, 'profit_salary_adj'] = val
 
     tmp = df.loc[:, 'real_cost'].copy().dropna().to_dict()
     write_json_txt('%s\\a004_real_cost_dict.txt' % daily_dir, tmp)
@@ -354,10 +370,32 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    dir_daily = 'update_20230221221007'
-    generate_daily_table(dir_daily)
-    save_latest_list(dir_daily)
+    dir_name_tmp = 'update_20230519163004'
+
+    dir_tmp = '..\\basicData\\dailyUpdate\\%s' % dir_name_tmp
+    all_codes = load_json_txt('%s\\a001_code_list.txt' % dir_tmp)
+
+    MainLog.add_split('#')
+    generate_log_data(dir_name_tmp)
+    MainLog.add_log('generate_log_data complete')
+
+    daily_analysis(dir_name_tmp, all_codes)
+    MainLog.add_log('data analysis complete')
+
+    MainLog.add_split('#')
+    generate_daily_table(dir_name_tmp)
+    MainLog.add_log('generate_daily_table complete')
+
+    MainLog.add_split('#')
+    save_latest_list(dir_name_tmp)
+    MainLog.add_log('save_latest_list complete')
+
+    MainLog.add_split('#')
     request_mir_y10()
+    MainLog.add_log('request_mir_y10 complete')
+
+    MainLog.write('..\\basicData\\dailyUpdate\\%s\\logs2.txt' % dir_name_tmp)
+    MainLog.init_log()
 
     # test_daily_analysis()
     # generate_log_data('update_20220723153503')
