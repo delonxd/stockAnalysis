@@ -23,6 +23,7 @@ import sys
 import json
 import threading
 import time
+import datetime as dt
 
 import numpy as np
 import pandas as pd
@@ -167,6 +168,10 @@ class MainWidget(QWidget):
         self.market_value = np.nan
         self.liquidation_asset = np.nan
         self.equity = np.nan
+
+        self.profit_salary_min = np.nan
+        self.predict_delta = 0
+
         self.listing_date = None
         self.max_increase_30 = 0
         self.turnover = 0
@@ -182,6 +187,8 @@ class MainWidget(QWidget):
 
         self.cross = False
         self.box = True
+        self.draw_flag = False
+        self.draw_pos = None
         self.ratio_dict = dict()
         self.init_ui()
 
@@ -267,7 +274,7 @@ class MainWidget(QWidget):
         layout2.addWidget(self.button10, 0, Qt.AlignCenter)
         layout2.addWidget(self.button11, 0, Qt.AlignCenter)
         layout2.addWidget(self.button12, 0, Qt.AlignCenter)
-        layout2.addWidget(self.editor1, 0, Qt.AlignCenter)
+        # layout2.addWidget(self.editor1, 0, Qt.AlignCenter)
 
         layout2.addWidget(self.bottom_label2, 1, Qt.AlignRight | Qt.AlignTop)
         # layout2.addStretch(1)
@@ -345,12 +352,35 @@ class MainWidget(QWidget):
         action13 = QAction('添加toc', menu)
         action14 = QAction('删除toc', menu)
 
-        action_mark0 = QAction('取消标记', menu)
-        action_mark1 = QAction('标记1', menu)
-        action_mark2 = QAction('标记2', menu)
-        action_mark3 = QAction('标记3', menu)
+        action_mark0 = QAction('取消评级', menu)
+        action_mark1 = QAction('AAA', menu)
+        action_mark2 = QAction('AA', menu)
+        action_mark3 = QAction('A', menu)
+        action_mark4 = QAction('BBB', menu)
+        action_mark5 = QAction('BB', menu)
+        action_mark6 = QAction('B', menu)
+        action_mark7 = QAction('CCC', menu)
+        action_mark8 = QAction('CC', menu)
+        action_mark9 = QAction('C', menu)
 
         menu.addAction(action1)
+
+        menu.addSeparator()
+        level = menu.addMenu('评级')
+        level.addAction(action_mark1)
+        level.addAction(action_mark2)
+        level.addAction(action_mark3)
+        level.addSeparator()
+        level.addAction(action_mark4)
+        level.addAction(action_mark5)
+        level.addAction(action_mark6)
+        level.addSeparator()
+        level.addAction(action_mark7)
+        level.addAction(action_mark8)
+        level.addAction(action_mark9)
+        level.addSeparator()
+        level.addAction(action_mark0)
+
         menu.addSeparator()
         menu.addAction(action2)
         menu.addAction(action3)
@@ -373,12 +403,6 @@ class MainWidget(QWidget):
         menu.addAction(action6)
         menu.addAction(action7)
 
-        menu.addSeparator()
-        menu.addAction(action_mark1)
-        menu.addAction(action_mark2)
-        menu.addAction(action_mark3)
-        menu.addAction(action_mark0)
-
         action1.triggered.connect(self.request_data)
         action6.triggered.connect(lambda x: self.scale_change(0.5))
         action7.triggered.connect(lambda x: self.scale_change(2))
@@ -395,10 +419,16 @@ class MainWidget(QWidget):
         action13.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_toc.txt"))
         action14.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_toc.txt"))
 
-        action_mark0.triggered.connect(lambda x: self.add_mark(0))
-        action_mark1.triggered.connect(lambda x: self.add_mark(1))
-        action_mark2.triggered.connect(lambda x: self.add_mark(2))
-        action_mark3.triggered.connect(lambda x: self.add_mark(3))
+        action_mark0.triggered.connect(lambda x: self.add_mark(None))
+        action_mark1.triggered.connect(lambda x: self.add_mark('AAA'))
+        action_mark2.triggered.connect(lambda x: self.add_mark('AA'))
+        action_mark3.triggered.connect(lambda x: self.add_mark('A'))
+        action_mark4.triggered.connect(lambda x: self.add_mark('BBB'))
+        action_mark5.triggered.connect(lambda x: self.add_mark('BB'))
+        action_mark6.triggered.connect(lambda x: self.add_mark('B'))
+        action_mark7.triggered.connect(lambda x: self.add_mark('CCC'))
+        action_mark8.triggered.connect(lambda x: self.add_mark('CC'))
+        action_mark9.triggered.connect(lambda x: self.add_mark('C'))
 
         menu.exec_(QCursor.pos())
 
@@ -414,7 +444,7 @@ class MainWidget(QWidget):
         row = self.codes_df.df.iloc[self.code_index]
         code = row['code']
 
-        if mark == 0:
+        if mark is None:
             if code in mark_dict:
                 mark_dict.pop(code)
         else:
@@ -716,6 +746,21 @@ class MainWidget(QWidget):
             if s0.size > 0:
                 self.equity = s0[-1] / 1e8
 
+        self.profit_salary_min = np.nan
+        self.predict_delta = 0
+        tmp_date = np.nan
+
+        if 's_066_profit_salary_min' in df.columns:
+            s0 = self.data_pix.df['s_066_profit_salary_min'].copy().dropna()
+            if s0.size > 0:
+                self.profit_salary_min = s0[-1]
+                tmp_date = s0.index[-1]
+
+        if not pd.isna(tmp_date):
+            date1 = dt.datetime.strptime(tmp_date, "%Y-%m-%d").date()
+            date2 = dt.date.today()
+            self.predict_delta = (date2 - date1).days
+
         path = "../basicData/self_selected/gui_counter.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             res_dict = json.loads(f.read())
@@ -793,7 +838,7 @@ class MainWidget(QWidget):
 
         mark = load_json_txt("../basicData/self_selected/gui_mark.txt", log=False).get(code)
         if mark is not None:
-            txt2 = txt2 + '(%s)' % mark
+            txt2 = txt2 + '-%s' % mark
 
         data = self.counter_info
         if isinstance(data, list):
@@ -801,7 +846,21 @@ class MainWidget(QWidget):
         else:
             txt_counter = '%s次/%.2f%%[%s]' % (data, np.inf, '')
 
-        list0.append('%.2f%%%s' % (self.max_increase_30*100, self.get_sign(self.max_increase_30)))
+        # list0.append('%.2f%%%s' % (self.max_increase_30*100, self.get_sign(self.max_increase_30)))
+
+        rate_tmp = load_json_txt("../basicData/self_selected/gui_rate.txt", log=False).get(code)
+        if rate_tmp is not None:
+            list0.append('%s%%' % rate_tmp)
+            rate_tmp = int(rate_tmp)
+        else:
+            rate_tmp = np.nan
+        rate_adj = 0 if pd.isna(rate_tmp) else rate_tmp
+        rate_adj = 25 if rate_adj > 25 else rate_adj
+        predict_rate = rate_adj * self.predict_delta / 36500 + 1
+
+        predict_profit = self.profit_salary_min * predict_rate
+        predict_discount = predict_profit / self.real_cost / 1e7
+        txt2 = txt2 + '-%.2f' % predict_discount
 
         if self.listing_date is not None:
             list0.insert(0, self.listing_date)
@@ -819,18 +878,26 @@ class MainWidget(QWidget):
                 except Exception as e:
                     print(e)
 
-        if ass is not None:
-            ass2 = ass + self.liquidation_asset
+        predict_ass = None if ass is None else ass * predict_rate
 
-            rate = (self.market_value + self.equity - self.liquidation_asset) / ass
+        if ass is not None:
+            # ass2 = ass + self.liquidation_asset
+            cost = self.equity - self.liquidation_asset
+
+            rate = self.market_value / (predict_ass * 2 - cost) * 2
+            rate1 = (1/((rate/2) ** 0.1)-1) * 100
+
             list0.append('%.2f' % rate)
 
-            rate = self.market_value / ass2
-            txt_bottom1 = '%.0f亿 / %.0f(%.0f+%.0f)' % (
+            rate = self.market_value / (predict_ass * 2 + self.liquidation_asset) * 2
+            rate2 = (1/((rate/2) ** 0.1)-1) * 100
+            txt_bottom1 = '%.0f/%.0f%+.0f%+.0f[%+.1f%%]/[%+.1f%%]' % (
                 self.market_value,
-                ass2,
-                self.liquidation_asset,
-                ass,
+                predict_ass,
+                self.liquidation_asset/2,
+                -self.equity/2,
+                rate2,
+                rate1,
             )
             list0.append('%.2f' % rate)
 
@@ -840,7 +907,7 @@ class MainWidget(QWidget):
             txt_bottom1 = '%s%.2f亿' % ('cost: ', self.real_cost)
 
         if ass is not None:
-            rate = self.turnover / 1e6 / ass
+            rate = self.turnover / 1e6 / predict_ass
             txt2 = txt2 + '-%.2f‰' % rate
 
         txt3 = '/'.join(list0)
@@ -886,6 +953,8 @@ class MainWidget(QWidget):
         else:
             self.data_pix = DataPix(code=code, style_df=pd.DataFrame(), df=pd.DataFrame())
         self.update_window()
+        self.draw_flag = False
+        self.draw_pos = None
 
     @staticmethod
     def get_sign(data):
@@ -905,8 +974,21 @@ class MainWidget(QWidget):
         self.move(qr.topLeft().x() - 11, qr.topLeft().y() - 45)
 
     def draw_cross(self, x, y):
-        self.data_pix.draw_cross(x, y, self.cross, self.box, self.window_flag)
+
+        self.data_pix.draw_cross(x, y, self.cross, self.box, self.window_flag, self.draw_pos)
         self.label.setPixmap(self.data_pix.pix_show[self.window_flag])
+
+    def mouseDoubleClickEvent(self, event):
+        self.draw_flag = not self.draw_flag
+        if self.draw_flag is True:
+            pos = event.pos() - self.label.pos()
+            self.set_draw_pos(pos.x(), pos.y())
+        else:
+            self.draw_pos = None
+
+    def set_draw_pos(self, x, y):
+        x, y, d0, _, _, _ = self.data_pix.get_d1_d2(x, y)
+        self.draw_pos = (x, y, d0)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -1060,7 +1142,7 @@ class MainWidget(QWidget):
         # self.update_window()
 
         x, y = self.mouse_pos
-        self.data_pix.draw_cross(x, y, self.cross, self.box, self.window_flag)
+        self.data_pix.draw_cross(x, y, self.cross, self.box, self.window_flag, self.draw_pos)
         self.show_pix()
 
     def closeEvent(self, event):
@@ -1095,20 +1177,3 @@ class MainWindow(QMainWindow):
         palette1.setColor(self.backgroundRole(), QColor(40, 40, 40, 255))
         self.setPalette(palette1)
         self.setAutoFillBackground(True)
-
-
-if __name__ == '__main__':
-    import warnings
-    from scipy.optimize import OptimizeWarning
-    warnings.simplefilter("ignore", OptimizeWarning)
-
-    # pd.set_option('display.max_columns', None)
-    # pd.set_option('display.max_rows', None)
-    # pd.set_option('display.width', 100000)
-
-    app = QApplication(sys.argv)
-    # main = MainWindow()
-    main = MainWidget()
-    main.showMaximized()
-    # main.showMinimized()
-    sys.exit(app.exec_())
