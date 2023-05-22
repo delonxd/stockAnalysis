@@ -78,3 +78,32 @@ def copy_file(path1, path2):
 
     else:
         MainLog.add_log("CopyError: invalid type for copy_file(): '%s' --> '%s'" % (path1, path2))
+
+
+def file_add_codes(add_list, path, log=False):
+    code_list = load_json_txt(path, log=log)
+    for code in add_list:
+        if code in code_list:
+            continue
+        else:
+            code_list.append(code)
+    write_json_txt(path, code_list, log=log)
+
+    if log:
+        MainLog.add_log('add codes -path  --> %s' % path)
+        MainLog.add_log('add codes -codes --> %s' % add_list)
+
+
+def file_del_codes(del_list, path, log=False):
+    code_list = load_json_txt(path, log=log)
+    for code in del_list:
+        if code in code_list:
+            index = code_list.index(code)
+            code_list.pop(index)
+        else:
+            continue
+    write_json_txt(path, code_list, log=log)
+
+    if log:
+        MainLog.add_log('add codes -path  --> %s' % path)
+        MainLog.add_log('add codes -codes --> %s' % del_list)
