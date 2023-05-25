@@ -53,6 +53,9 @@ def daily_update():
     daily_analysis(dir_name, all_codes)
     MainLog.add_log('data analysis complete')
 
+    MainLog.write('%s\\logs2.txt' % res_dir)
+    MainLog.init_log()
+
     # MainLog.add_split('#')
     # sort_daily_code(dir_name)
     # MainLog.add_log('sort_daily_code complete')
@@ -79,14 +82,14 @@ def daily_update():
     # request_industry_sample()
     # MainLog.add_log('request_industry_sample complete')
 
-    MainLog.write('%s\\logs2.txt' % res_dir)
+    MainLog.write('%s\\logs3.txt' % res_dir)
     MainLog.init_log()
 
     list1 = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
     list2 = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt")
     list3 = list(set(list1 + list2))
     request_eq2mysql(list3)
-    MainLog.write('%s\\logs3.txt' % res_dir)
+    MainLog.write('%s\\logs4.txt' % res_dir)
 
 
 if __name__ == '__main__':
