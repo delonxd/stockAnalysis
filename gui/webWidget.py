@@ -5,6 +5,8 @@ import sys
 
 
 class WebWidget(QMainWindow):
+    close_signal = pyqtSignal(object)
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle('WebWidget ')
@@ -31,6 +33,9 @@ class WebWidget(QMainWindow):
     #     # os.system(path, url)
     #     import webbrowser
     #     webbrowser.open(url)
+
+    def closeEvent(self, event):
+        self.close_signal.emit(self)
 
 
 if __name__ == '__main__':

@@ -8,6 +8,8 @@ import sys
 
 
 class EquityChangeWidget(QWidget):
+    close_signal = pyqtSignal(object)
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle('EquityChangeWidget')
@@ -107,6 +109,9 @@ class EquityChangeWidget(QWidget):
         self.table_widget.setColumnWidth(5, width)
         self.table_widget.setColumnWidth(6, width)
         self.table_widget.setColumnWidth(7, width)
+
+    def closeEvent(self, event):
+        self.close_signal.emit(self)
 
 
 def get_reason_cn(reason):

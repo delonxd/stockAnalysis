@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from method.fileMethod import *
 
@@ -7,6 +8,8 @@ import json
 
 
 class CheckWidget(QWidget):
+    close_signal = pyqtSignal(object)
+
     def __init__(self, main_widget=None, code=None):
         super().__init__()
 
@@ -185,6 +188,9 @@ class CheckWidget(QWidget):
 
             if self._code is not None:
                 self.download()
+
+    def closeEvent(self, event):
+        self.close_signal.emit(self)
 
 
 if __name__ == '__main__':

@@ -7,6 +7,8 @@ import json
 
 
 class RemarkWidget(QWidget):
+    close_signal = pyqtSignal(object)
+
     def __init__(self, main_widget):
         super().__init__()
 
@@ -148,6 +150,9 @@ class RemarkWidget(QWidget):
         self.editor3.setText(value1)
 
         # print(self.textEdit.toHtml())
+
+    def closeEvent(self, event):
+        self.close_signal.emit(self)
 
 
 if __name__ == '__main__':

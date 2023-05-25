@@ -9,6 +9,8 @@ import numpy as np
 
 
 class FsView(QWidget):
+    close_signal = pyqtSignal(object)
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle('FsView')
@@ -65,6 +67,9 @@ class FsView(QWidget):
         self.table_widget.verticalScrollBar().setSliderPosition(303)
 
         self.code = code
+
+    def closeEvent(self, event):
+        self.close_signal.emit(self)
 
 
 def regular_data(data):

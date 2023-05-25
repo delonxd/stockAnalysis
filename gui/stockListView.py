@@ -252,6 +252,8 @@ class QDataFrameTable(QTableWidget):
 
 
 class QStockListView(QWidget):
+    close_signal = pyqtSignal(object)
+
     def __init__(self, code_df):
         super().__init__()
 
@@ -313,7 +315,9 @@ class QStockListView(QWidget):
 
     def get_gui_path(self):
         items = [
-            'gui_test_20230516.txt',
+            'gui_ignore.txt',
+            'gui_cyclical.txt',
+            'gui_covid19.txt',
         ]
         file, _ = QInputDialog.getItem(self, '获取列表中的选项', '文件列表', items, editable=False)
         ret = "../basicData/self_selected/%s" % file
@@ -331,6 +335,7 @@ class QStockListView(QWidget):
 
     def closeEvent(self, event):
         self.generate_widget.close()
+        self.close_signal.emit(self)
 
 
 class GenerateCodeListWidget(QWidget):
@@ -357,6 +362,7 @@ class GenerateCodeListWidget(QWidget):
 
         str_flg = [
             '',
+            'auto_select',
             'old',
             'old_random',
             'toc',
@@ -406,7 +412,7 @@ class GenerateCodeListWidget(QWidget):
             '4_random_w-s',
             '5_random_a-w',
             '6_toc',
-            '7',
+            '7_auto_select',
             '8',
         ]
         obj.addItems(flags)
@@ -647,10 +653,12 @@ class GenerateCodeListWidget(QWidget):
             editor_dict['source'] = 'toc'
             editor_dict['sort'] = 'sort-ass/equity'
 
-        elif mission == '7':
-            editor_dict['source'] = 'whitelist'
-            editor_dict['blacklist'] = 'sort-ass/equity'
-            editor_dict['market'] = 'growth'
+        elif mission == '7_auto_select':
+            editor_dict['source'] = 'auto_select'
+
+            # editor_dict['source'] = 'whitelist'
+            # editor_dict['blacklist'] = 'sort-ass/equity'
+            # editor_dict['market'] = 'growth'
 
         elif mission == '8':
             editor_dict['ids_names'] = '2-光伏设备'

@@ -254,6 +254,7 @@ class StyleTable(QTableWidget):
 class StyleWidget(QWidget):
     signal_all = pyqtSignal(object)
     signal_cur = pyqtSignal(object)
+    close_signal = pyqtSignal(object)
 
     def __init__(self):
         super().__init__()
@@ -392,6 +393,9 @@ class StyleWidget(QWidget):
             return
         new_df = df.drop(index_name)
         self.refresh_style(new_df)
+
+    def closeEvent(self, event):
+        self.close_signal.emit(self)
 
 
 class PriorityTable(QDialog):
