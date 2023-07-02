@@ -1,11 +1,15 @@
 from method.fileMethod import *
 from method.dataMethod import load_df_from_mysql
+from method.recognitionMethod import RecognitionStr
 import json
 import datetime as dt
 import numpy as np
 import pickle
 import os
 import re
+# from PyQt5.QtWidgets import *
+# from PyQt5.QtCore import *
+# from PyQt5.QtGui import *
 
 
 def sort_daily_code(dir_name):
@@ -73,146 +77,6 @@ def get_codes_from_sel():
         f.write(res)
 
 
-def random_code_list(code_list, pick_weight, interval, mode):
-    if pick_weight is None:
-        pick_weight = [1]
-
-    sorted_list = code_list
-
-    set_all = set(code_list)
-    tmp_selected = set(str_recognition('selected'))
-    tmp_whitelist = set(str_recognition('whitelist'))
-
-    set_selected = set_all & tmp_selected
-    set_whitelist = set_all & tmp_whitelist - set_selected
-    set_normal = set_all - set_selected - set_whitelist
-
-    src_list = [set()]
-    if mode == 'normal':
-        src_list = [set_normal, set_selected, set_whitelist]
-    elif mode == 'whitelist+selected':
-        src_list = [set_selected | set_whitelist]
-    elif mode == 'whitelist-selected':
-        src_list = [set_whitelist - set_selected]
-    elif mode == 'selected':
-        src_list = [set_selected]
-    elif mode == 'all-whitelist':
-        src_list = [set_normal]
-
-    set_total = set()
-    for tmp in src_list:
-        set_total = set_total | set(tmp)
-
-    weight_dict = get_weight_dict(set_total)
-
-    total_list = list(map(lambda x: generate_random_list(x, weight_dict), src_list))
-
-    ret = []
-    number_list = []
-    while True:
-        picked_list = []
-        src_number = list(map(lambda x: len(x), total_list))
-        if sum(np.array(src_number) * np.array(pick_weight)) == 0:
-            break
-
-        picked = pick_number(src_number, pick_weight, interval)
-        number_list.insert(0, picked)
-        # MainLog.add_log('pick --> %s' % picked)
-
-        for index, value in enumerate(picked):
-            for _ in range(value):
-                code = total_list[index].pop(0)
-                picked_list.append(code)
-
-        sub_list = sift_codes(source=picked_list, sort=sorted_list)
-        ret.extend(sub_list)
-
-    MainLog.add_log('pick --> %s' % number_list)
-
-    write_json_txt("..\\basicData\\tmp\\code_list_random.txt", ret)
-    MainLog.add_split('#')
-
-    return ret
-
-
-def get_weight_dict(set_all):
-    path = "..\\basicData\\dailyUpdate\\latest\\a003_report_date_dict.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        report_date_dict = json.loads(f.read())
-
-    base_rate = 10000000
-    weight_dict = dict.fromkeys(set_all, base_rate * 3000)
-
-    # date1 = dt.date.today()
-    path = "..\\basicData\\dailyUpdate\\latest\\a000_log_data.txt"
-    date_txt = load_json_txt(path)['update_date']
-    date1 = dt.datetime.strptime(date_txt, '%Y-%m-%d').date()
-
-    with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
-        gui_counter = json.loads(f.read())
-
-    counter = 0
-    counter1 = 0
-    for key, value in gui_counter.items():
-        if key not in set_all:
-            continue
-
-        report_date = report_date_dict.get(key)
-        if report_date is None or report_date == 'Invalid da':
-            report_date = ''
-
-        flag = True if report_date > value[1] else False
-
-        date2 = dt.datetime.strptime(value[1], '%Y-%m-%d').date()
-        margin = (date1 - date2).days
-
-        if flag is True:
-            weight = margin ** 2 * base_rate
-            # MainLog.add_log('%s %s %s margin == 1' % (key, report_date, value[1]))
-            counter1 += 1
-        elif margin > 60:
-            weight = margin ** 2 * 100
-            # MainLog.add_log('%s %s margin > 60' % (key, value[1]))
-            counter += 1
-        else:
-            weight = margin ** 2
-
-        weight_dict[key] = weight
-
-    weight_counter = dict()
-    for weight in weight_dict.values():
-        if weight in weight_counter:
-            weight_counter[weight] += 1
-        else:
-            weight_counter[weight] = 1
-
-    MainLog.add_split('-')
-
-    weight_list = list(weight_counter.keys())
-    weight_list.sort()
-    for weight in weight_list:
-        if weight % base_rate == 0:
-            margin = (weight / base_rate) ** 0.5
-        else:
-            margin = weight ** 0.5
-
-            if margin > 60:
-                margin = margin / 10
-
-        date2 = date1 - dt.timedelta(days=margin)
-        date_str = dt.date.strftime(date2, '%Y-%m-%d')
-
-        weight_str = '%s%18s%8s' % (date_str, weight, weight_counter[weight])
-        MainLog.add_log(weight_str)
-
-    MainLog.add_log('      total:  %10s' % len(set_all))
-    MainLog.add_log('margin > 60:  %10s' % counter)
-    MainLog.add_log('margin < -1:  %10s' % counter1)
-    MainLog.add_split('-')
-
-    return weight_dict
-
-
 def pick_number(src, weight, total):
     if sum(src) == 0:
         return [0] * len(src)
@@ -257,33 +121,6 @@ def allot_weight(weight, total):
         index = random.randint(0, len(tmp)-1)
         ret[tmp[index]] += 1
     return ret
-
-
-def generate_random_list(src, weight_dict: dict):
-    length = len(src)
-    set_all = set(src)
-
-    ret = []
-    for _ in range(length):
-        code = random_by_weight(set_all, weight_dict)
-        set_all -= {code}
-        ret.append(code)
-    return ret
-
-
-def random_by_weight(src, weight_dict: dict):
-    import random
-
-    total = 0
-    for code in src:
-        total += weight_dict.get(code)
-    ra = random.uniform(0, total)
-
-    current = 0
-    for code in src:
-        current += weight_dict.get(code)
-        if ra <= current:
-            return code
 
 
 def sort_discount(path="../basicData/dailyUpdate/latest/a005_equity_dict.txt"):
@@ -357,292 +194,23 @@ def sort_hold():
 
 
 def sift_codes(
-        source=None,
-        ids_names=None,
-        whitelist=None,
-        blacklist=None,
-
+        source='',
         sort=None,
-        reverse=False,
-        insert=None,
-
-        market='all',
-        timestamp=None,
-
+        ascending=None,
         random=False,
-        pick_weight=None,
         interval=100,
-        mode='normal',
+        df_all=None,
 ):
-    if ids_names is not None:
-        source = industry_name2code(ids_names)
+    # print(df_all)
+    str0 = RecognitionStr(source, df_all)
 
-    source = str_recognition(source)
-    whitelist = str_recognition(whitelist)
-    blacklist = str_recognition(blacklist)
+    str0.get_code_list()
+    ret = str0.get_sort_list(sort, ascending)
 
-    if sort is None:
-        sort = source
-    sort = str_recognition(sort)
+    if random is None or random is True:
+        ret = str0.random(interval)
 
-    set_all = list_to_set(source)
-    set_white = list_to_set(whitelist)
-    set_black = list_to_set(blacklist)
-
-    set_time_sift = set()
-
-    if timestamp is not None:
-        with open("..\\basicData\\self_selected\\gui_timestamp.txt", "r", encoding="utf-8", errors="ignore") as f:
-            gui_timestamp = json.loads(f.read())
-
-        for key, value in gui_timestamp.items():
-            if value > timestamp:
-                set_time_sift.add(key)
-                print('sift:', key, value)
-
-    if market == 'all':
-        pass
-
-    elif market == 'main':
-        for code in set_all:
-            if code[:3] == '688':
-                set_black.add(code)
-            elif code[0] in ['2', '3', '9']:
-                set_black.add(code)
-
-    elif market == 'non_main':
-        for code in set_all:
-            if code[0] == '0' or code[0] == '6':
-                if code[:3] != '688':
-                    set_black.add(code)
-
-    elif market == 'growth':
-        for code in set_all:
-            if code[0] != '3':
-                set_black.add(code)
-
-    elif market == 'main+growth':
-        for code in set_all:
-            if code[:3] == '688':
-                set_black.add(code)
-            elif code[0] in ['2', '9']:
-                set_black.add(code)
-
-    elif market == 'bj':
-        for code in set_all:
-            if code[0] not in ['4', '8']:
-                set_black.add(code)
-
-    set_sift = set_all - set_black
-    set_sift = set_sift - set_time_sift
-    set_sift.update(set_white)
-
-    ret = []
-    if reverse is True:
-        sort.reverse()
-    for code in sort:
-        if code in set_sift:
-            ret.append(code)
-
-    if insert is not None:
-        extend = list(set_sift - set(sort))
-        if insert == -1:
-            ret = ret + extend
-        elif insert == 0:
-            ret = extend + ret
-
-    if random is False:
-        return ret
-    else:
-        ret = random_code_list(
-            ret,
-            pick_weight=pick_weight,
-            interval=interval,
-            mode=mode,
-        )
-        return ret
-
-
-def industry_name2code(ids_names):
-    name_dict = load_json_txt('..\\basicData\\industry\\sw_2021_name_dict.txt')
-
-    ids_codes = []
-
-    for ids_code, name in name_dict.items():
-        if ids_code[-4:] == '0000':
-            ids_name = '1-' + name
-        elif ids_code[-2:] == '00':
-            ids_name = '2-' + name
-        else:
-            ids_name = '3-' + name
-
-        if ids_name in ids_names:
-            ids_codes.append(ids_code)
-
-    sw_2021_dict = load_json_txt('..\\basicData\\industry\\sw_2021_dict.txt')
-
-    ret = []
-    for code, ids_code1 in sw_2021_dict.items():
-        if ids_code1 is None:
-            continue
-
-        for ids_code2 in ids_codes:
-            if ids_code2[-4:] == '0000':
-                index = 2
-            elif ids_code2[-2:] == '00':
-                index = 4
-            else:
-                index = 6
-
-            if ids_code1[:index] == ids_code2[:index]:
-                ret.append(code)
     return ret
-
-
-def list_to_set(src):
-    ret = set()
-    if src is None:
-        return ret
-    else:
-        for code in src:
-            # if code[0] == 'C':
-            #     length = len(code)
-            #     for key, value in ind_dict.items():
-            #         if code == key[:length]:
-            #             ret.update(set(value))
-            # else:
-            ret.add(code)
-        return ret
-
-
-def str_recognition(src):
-    if isinstance(src, str):
-        if src == 'all':
-            ret = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
-
-        elif src == 'salary':
-            ret = load_json_txt("..\\test\\salary_code.txt")
-
-        elif src == 'toc':
-            ret = load_json_txt("..\\basicData\\self_selected\\gui_toc.txt")
-
-        elif src == 'pe':
-            ret = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s001_code_sorted_pe.txt")
-
-        elif src == 'real_pe':
-            ret = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s002_code_sorted_real_pe.txt")
-
-        elif src == 'roe_parent':
-            ret = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s003_code_sorted_roe_parent.txt")
-
-        elif src == 'latest_update':
-            ret = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt")
-
-        elif src == 'hold':
-            tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
-            ret = list(zip(*tmp).__next__())
-
-        elif src == 'whitelist':
-            ret = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
-
-        elif src == 'blacklist':
-            ret = load_json_txt("..\\basicData\\self_selected\\gui_blacklist.txt")
-
-        elif src == 'selected':
-            ret = load_json_txt("..\\basicData\\self_selected\\gui_selected.txt")
-
-        elif src == 'old':
-            ret = load_json_txt("..\\basicData\\tmp\\code_list_latest.txt")
-
-        elif src == 'old_random':
-            ret = load_json_txt("..\\basicData\\tmp\\code_list_random.txt")
-
-        elif src == 'sort-report':
-            path = "..\\basicData\\dailyUpdate\\latest\\a003_report_date_dict.txt"
-            dict0 = load_json_txt(path)
-            df = pd.DataFrame.from_dict(dict0, orient='index')
-            df = df.sort_values(0, ascending=False)
-            ret = df.index.to_list()
-
-        elif src == 'sort-ass':
-            path = "..\\basicData\\self_selected\\gui_assessment.txt"
-            dict0 = load_json_txt(path)
-            df = pd.DataFrame.from_dict(dict0, orient='index', dtype='int64')
-            df = df.sort_values(0, ascending=False)
-            ret = df.index.to_list()
-
-        elif src == 'sort-equity':
-            path = "..\\basicData\\dailyUpdate\\latest\\a005_equity_dict.txt"
-            dict0 = load_json_txt(path)
-            df = pd.DataFrame.from_dict(dict0, orient='index')
-            df = df.sort_values(0, ascending=False)
-            ret = df.index.to_list()
-
-        elif src[:4] == 'mark':
-            # mark = int(src.split('-')[1])
-            mark = src.split('-')[1]
-            mark_dict = load_json_txt("..\\basicData\\self_selected\\gui_mark.txt")
-
-            if mark == '0':
-                ret = list(mark_dict.keys())
-            else:
-                ret = []
-                for code, value in mark_dict.items():
-                    if value == mark:
-                        ret.append(code)
-
-        elif src == 'sort-ass/equity':
-            ret = sort_discount()
-
-        elif src == 'sort-ass/real_cost':
-            path = "..\\basicData\\dailyUpdate\\latest\\a004_real_cost_dict.txt"
-            ret = sort_discount(path)
-
-        elif src == 'sort-ass/turnover':
-            path = "..\\basicData\\dailyUpdate\\latest\\a006_turnover_dict.txt"
-            ret = sort_discount(path)
-
-        elif src == 'plate-50':
-            path = "..\\basicData\\self_selected\\板块50.txt"
-            with open(path, "r", encoding="utf-8", errors="ignore") as f:
-                txt = f.read()
-                ret = re.findall(r'([0-9]{6})', txt)
-                ret.reverse()
-
-        elif src == 'industry':
-            ids_dict = load_json_txt("..\\basicData\\industry\\sw_2021_dict.txt")
-
-            tup_list = []
-            for key, value in ids_dict.items():
-                ids = '' if value is None else value
-                tup_list.append((key, ids))
-
-            tup_list.sort(key=lambda x: x[1])
-            ret = list(zip(*tup_list).__next__())
-
-        elif src == 'industry-ass/equity':
-            list1 = sift_codes(source='all', sort='sort-ass/equity', insert=-1)
-            ids_dict = load_json_txt("..\\basicData\\industry\\sw_2021_dict.txt")
-            ids_sort = load_json_txt("..\\basicData\\industry\\industry_sorted.txt")
-
-            tup_list = []
-            for code in list1:
-                ids = ids_dict[code]
-                if ids is None:
-                    index = 100000
-                else:
-                    index = ids_sort[ids]
-
-                tup_list.append((code, index))
-
-            tup_list.sort(key=lambda x: x[1])
-            ret = list(zip(*tup_list).__next__())
-
-        else:
-            raise KeyboardInterrupt('error str_recognition')
-        return ret
-    else:
-        return src
 
 
 def sort_industry(by='ass/equity'):

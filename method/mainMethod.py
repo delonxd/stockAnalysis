@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 from method.fileMethod import *
+from functools import wraps
 
 
 def res2df_fs(res, header_df, prefix='q', postfix='t'):
@@ -133,6 +134,18 @@ def sift_show_table(sort_by, ascending):
 
     ret = df.index.values.tolist()
     print(ret)
+
+
+def deco_show_stock_name(func):
+    @wraps(func)
+    def wrapped_function(*args, **kwargs):
+        res = func(*args, **kwargs)
+
+        self = args[0]
+        self.show_stock_name()
+        return res
+
+    return wrapped_function
 
 
 if __name__ == '__main__':

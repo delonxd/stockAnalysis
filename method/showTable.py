@@ -1,4 +1,3 @@
-
 import pandas as pd
 from method.fileMethod import *
 from method.logMethod import log_it
@@ -21,20 +20,39 @@ def get_recent_index(df, column, default, shift=1):
 def generate_gui_table():
     df = pd.DataFrame()
 
-    path = "..\\basicData\\self_selected\\gui_blacklist.txt"
-    df = add_bool_column(df, path, 'gui_blacklist')
+    path = "..\\basicData\\self_selected\\gui_tags.txt"
+    src = load_json_txt(path)
+    tags_index = [
+        '黑名单',
+        '白名单',
+        '自选',
+        '非周期',
+        '基金',
+        'Toc',
+        '周期',
+        '疫情',
+        '忽略',
+        '国有',
+        '低价',
+        '电池',
+        '光伏',
+        '芯片',
+        '新上市',
+        '未上市',
+    ]
 
-    path = "..\\basicData\\self_selected\\gui_whitelist.txt"
-    df = add_bool_column(df, path, 'gui_whitelist')
+    gui_dict = dict.fromkeys(tags_index, [])
+    for code, kws in src.items():
+        keyword_list = kws.split('#')
+        for key, value in gui_dict.items():
+            tmp = value.copy()
+            if key in keyword_list:
+                tmp.append(code)
+                gui_dict[key] = tmp
 
-    path = "..\\basicData\\self_selected\\gui_selected.txt"
-    df = add_bool_column(df, path, 'gui_selected')
-
-    path = "..\\basicData\\self_selected\\gui_non_cyclical.txt"
-    df = add_bool_column(df, path, 'gui_non_cyclical')
-
-    path = "..\\basicData\\self_selected\\gui_fund.txt"
-    df = add_bool_column(df, path, 'gui_fund')
+    for key, value in gui_dict.items():
+        s0 = pd.Series([True] * len(value), index=value, name=key)
+        df = pd.concat([df, s0], axis=1, sort=False)
 
     ################################################################################################################
 
@@ -56,10 +74,9 @@ def generate_gui_table():
 
     df_tmp = pd.DataFrame.from_dict(
         res,
-        columns=[0, 'key_remark', 'remark'],
+        columns=['remark'],
         orient='index'
     )
-    df_tmp = df_tmp.drop(0, axis=1)
     df = pd.concat([df, df_tmp], axis=1, sort=False)
 
     # print(df_tmp)
@@ -175,6 +192,7 @@ def get_level_name(ids_name_dict, i_code, level):
 
 @log_it(None)
 def generate_show_table():
+    add_new_stock_tag()
     # from method.dailyMethod import generate_daily_table
     # df1 = generate_daily_table('latest')
     df2 = generate_gui_table()
@@ -215,6 +233,7 @@ def generate_show_table():
         'level1',
         'level2',
         'level3',
+        'counter_date',
 
         'predict_adj',
         'profit_salary_adj',
@@ -246,12 +265,24 @@ def generate_show_table():
         'salary',
 
         'update_recently',
-        'gui_blacklist',
-        'gui_whitelist',
-        'gui_selected',
-        'gui_non_cyclical',
-        'gui_fund',
         'gui_hold',
+
+        '黑名单',
+        '白名单',
+        '自选',
+        '非周期',
+        '基金',
+        'Toc',
+        '周期',
+        '疫情',
+        '忽略',
+        '国有',
+        '低价',
+        '电池',
+        '光伏',
+        '芯片',
+        '新上市',
+        '未上市',
 
         # 'key_remark',
         # 'remark',
@@ -259,7 +290,7 @@ def generate_show_table():
         'ipo_date',
         'report_date',
         'counter_last_date',
-        'counter_date',
+        # 'counter_date',
         'counter_number',
         'counter_real_pe',
         'counter_delta',
