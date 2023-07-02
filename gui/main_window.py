@@ -2,6 +2,7 @@ from request.requestData import request2mysql
 from request.requestEquityData import request_eq2mysql
 from method.sortCode import sift_codes
 from method.fileMethod import *
+from method.mainMethod import deco_show_stock_name
 
 from gui.styleWidget import StyleWidget
 from gui.dataPix import DataPix
@@ -95,7 +96,8 @@ class MainWidget(QWidget):
     def __init__(self):
         super().__init__()
 
-        code_list, code_index = self.get_code_list()
+        self.backup_data()
+        code_list, code_index = self.init_code_list()
 
         self.codes_df = CodesDataFrame(code_list, code_index)
 
@@ -117,28 +119,11 @@ class MainWidget(QWidget):
 
         self.label = QLabel(self)
 
-        self.button1 = QPushButton('export')
-        self.button2 = QPushButton('save_codes')
+        # self.button1 = QPushButton('export')
+        # self.button2 = QPushButton('save_codes')
         # self.button3 = QPushButton('comparison')
-        self.button3 = QPushButton('fs_data')
 
-        # self.button2 = QPushButton('x2')
-        # self.button3 = QPushButton('/2')
-        self.button4 = QPushButton('style')
-        self.button5 = QPushButton('request')
-        self.button6 = QPushButton('remark')
-        self.button7 = QPushButton('code list')
-        self.button8 = QPushButton('check')
-        self.button9 = QPushButton('plot')
-        self.button10 = QPushButton('web')
-        self.button11 = QPushButton('equity_change')
         self.button12 = QPushButton('relocate')
-
-        self.button4.setCheckable(True)
-        self.button9.setCheckable(True)
-        self.button10.setCheckable(True)
-        self.button11.setCheckable(True)
-        self.button12.setCheckable(True)
 
         self.editor1 = QLineEdit()
         self.editor1.setValidator(QIntValidator())
@@ -161,6 +146,18 @@ class MainWidget(QWidget):
         self.web_widget = WebWidget()
         self.equity_change_widget = EquityChangeWidget()
         self.fs_view = FsView()
+
+        self.widgets_layer = [self]
+        self.widgets_button = {
+            self.fs_view: QPushButton('fs_data'),
+            self.style_widget:  QPushButton('style'),
+            self.remark_widget: QPushButton('remark'),
+            self.code_widget: QPushButton('code list'),
+            self.check_widget: QPushButton('check'),
+            self.web_widget: QPushButton('web'),
+            self.equity_change_widget: QPushButton('equity_change'),
+        }
+
         # self.window2 = ShowPlot()
 
         self.counter_info = None
@@ -262,19 +259,10 @@ class MainWidget(QWidget):
         # layout2.addStretch(1)
         layout2.addWidget(self.bottom_label1, 1, Qt.AlignLeft | Qt.AlignTop)
 
-        layout2.addWidget(self.button1, 0, Qt.AlignCenter)
-        layout2.addWidget(self.button2, 0, Qt.AlignCenter)
-        layout2.addWidget(self.button3, 0, Qt.AlignCenter)
-        layout2.addWidget(self.button4, 0, Qt.AlignCenter)
-        layout2.addWidget(self.button5, 0, Qt.AlignCenter)
-        layout2.addWidget(self.button6, 0, Qt.AlignCenter)
-        layout2.addWidget(self.button7, 0, Qt.AlignCenter)
-        layout2.addWidget(self.button8, 0, Qt.AlignCenter)
-        layout2.addWidget(self.button9, 0, Qt.AlignCenter)
-        layout2.addWidget(self.button10, 0, Qt.AlignCenter)
-        layout2.addWidget(self.button11, 0, Qt.AlignCenter)
+        for widget, button in self.widgets_button.items():
+            layout2.addWidget(button, 0, Qt.AlignCenter)
+
         layout2.addWidget(self.button12, 0, Qt.AlignCenter)
-        # layout2.addWidget(self.editor1, 0, Qt.AlignCenter)
 
         layout2.addWidget(self.bottom_label2, 1, Qt.AlignRight | Qt.AlignTop)
         # layout2.addStretch(1)
@@ -306,24 +294,18 @@ class MainWidget(QWidget):
         self.label.setMouseTracking(True)
         self.center()
 
-        # self.button1.clicked.connect(self.export_style)
-        self.button2.clicked.connect(self.save_codes)
-        # self.button3.clicked.connect(self.compare_codes)
-        self.button3.clicked.connect(self.show_fs_data)
-        # self.button2.clicked.connect(self.scale_up)
-        # self.button3.clicked.connect(self.scale_down)
+        for widget, button in self.widgets_button.items():
+            button.setCheckable(True)
+            button.clicked.connect(self.get_show_func(widget))
+            widget.close_signal.connect(self.sub_widget_close)
 
-        self.button4.clicked.connect(self.show_style)
-        # self.button5.clicked.connect(self.request_data)
-        self.button5.clicked.connect(self.request_data_quick)
-        self.button6.clicked.connect(self.show_remark)
-        self.button7.clicked.connect(self.show_code_list)
-        self.button8.clicked.connect(self.show_check)
-        # self.button9.clicked.connect(self.show_new_window)
-        self.button9.clicked.connect(self.show_plot)
-        self.button10.clicked.connect(self.show_web)
-        self.button11.clicked.connect(self.show_equity_change)
+        # self.button1.clicked.connect(self.export_style)
+        # self.button2.clicked.connect(self.save_codes)
+        # self.button3.clicked.connect(self.compare_codes)
+
+        self.button12.setCheckable(True)
         self.button12.clicked.connect(self.relocate)
+
         self.editor1.textChanged.connect(self.editor1_changed)
 
         palette1 = QPalette()
@@ -337,20 +319,91 @@ class MainWidget(QWidget):
     def show_menu(self, pos):  # 添加右键菜单
         menu = QMenu(self)
 
-        action1 = QAction('更新数据', menu)
-        action2 = QAction('添加自选', menu)
-        action3 = QAction('删除自选', menu)
-        action4 = QAction('添加黑名单', menu)
-        action5 = QAction('删除黑名单', menu)
-        action6 = QAction('上移', menu)
-        action7 = QAction('下移', menu)
-        action8 = QAction('添加白名单', menu)
-        action9 = QAction('删除白名单', menu)
-        action10 = QAction('添加周期股', menu)
-        action11 = QAction('删除周期股', menu)
-        action12 = QAction('添加周期行业', menu)
-        action13 = QAction('添加toc', menu)
-        action14 = QAction('删除toc', menu)
+        name_list = [
+            '添加列表',
+            '删除列表',
+            '添加自选',
+            '删除自选',
+            '添加白名单',
+            '删除白名单',
+            '添加灰名单',
+            '删除灰名单',
+            '添加周期股',
+            '删除周期股',
+            '添加Toc',
+            '删除Toc',
+            '添加国有',
+            '删除国有',
+            '上移',
+            '下移',
+        ]
+
+        actions = {}
+        for name in name_list:
+            actions[name] = QAction(name, menu)
+
+        sub_menu1 = menu.addMenu('评级')
+
+        menu.addSeparator()
+        sub_menu2 = menu.addMenu('功能')
+
+        menu.addSeparator()
+        menu.addAction(actions['添加列表'])
+        menu.addAction(actions['删除列表'])
+
+        menu.addSeparator()
+        menu.addAction(actions['添加自选'])
+        menu.addAction(actions['删除自选'])
+
+        menu.addSeparator()
+        menu.addAction(actions['添加白名单'])
+        menu.addAction(actions['删除白名单'])
+
+        menu.addSeparator()
+        menu.addAction(actions['添加灰名单'])
+        menu.addAction(actions['删除灰名单'])
+
+        menu.addSeparator()
+        menu.addAction(actions['添加周期股'])
+        menu.addAction(actions['删除周期股'])
+
+        menu.addSeparator()
+        menu.addAction(actions['添加Toc'])
+        menu.addAction(actions['删除Toc'])
+
+        menu.addSeparator()
+        menu.addAction(actions['添加国有'])
+        menu.addAction(actions['删除国有'])
+
+        menu.addSeparator()
+        menu.addAction(actions['上移'])
+        menu.addAction(actions['下移'])
+
+        actions['上移'].triggered.connect(lambda x: self.scale_change(0.5))
+        actions['下移'].triggered.connect(lambda x: self.scale_change(2))
+
+        actions['添加列表'].triggered.connect(lambda x: self.code_operate('add'))
+        actions['删除列表'].triggered.connect(lambda x: self.code_operate('del'))
+
+        actions['添加自选'].triggered.connect(lambda x: self.code_operate('add', '自选'))
+        actions['删除自选'].triggered.connect(lambda x: self.code_operate('del', '自选'))
+
+        actions['添加白名单'].triggered.connect(lambda x: self.code_operate('add', '白名单'))
+        actions['删除白名单'].triggered.connect(lambda x: self.code_operate('del', '白名单'))
+
+        actions['添加灰名单'].triggered.connect(lambda x: self.code_operate('add', '灰名单'))
+        actions['删除灰名单'].triggered.connect(lambda x: self.code_operate('del', '灰名单'))
+
+        actions['添加周期股'].triggered.connect(lambda x: self.code_operate('add', '周期'))
+        actions['删除周期股'].triggered.connect(lambda x: self.code_operate('del', '周期'))
+
+        actions['添加Toc'].triggered.connect(lambda x: self.code_operate('add', 'Toc'))
+        actions['删除Toc'].triggered.connect(lambda x: self.code_operate('del', 'Toc'))
+
+        actions['添加国有'].triggered.connect(lambda x: self.code_operate('add', '国有'))
+        actions['删除国有'].triggered.connect(lambda x: self.code_operate('del', '国有'))
+
+        ################################################
 
         action_mark0 = QAction('取消评级', menu)
         action_mark1 = QAction('AAA', menu)
@@ -363,61 +416,19 @@ class MainWidget(QWidget):
         action_mark8 = QAction('CC', menu)
         action_mark9 = QAction('C', menu)
 
-        menu.addAction(action1)
-
-        menu.addSeparator()
-        level = menu.addMenu('评级')
-        level.addAction(action_mark1)
-        level.addAction(action_mark2)
-        level.addAction(action_mark3)
-        level.addSeparator()
-        level.addAction(action_mark4)
-        level.addAction(action_mark5)
-        level.addAction(action_mark6)
-        level.addSeparator()
-        level.addAction(action_mark7)
-        level.addAction(action_mark8)
-        level.addAction(action_mark9)
-        level.addSeparator()
-        level.addAction(action_mark0)
-
-        menu.addSeparator()
-        menu.addAction(action2)
-        menu.addAction(action3)
-        menu.addSeparator()
-        menu.addAction(action4)
-        menu.addAction(action5)
-        menu.addSeparator()
-        menu.addAction(action8)
-        menu.addAction(action9)
-        menu.addSeparator()
-        menu.addAction(action10)
-        menu.addAction(action11)
-        menu.addAction(action12)
-
-        menu.addSeparator()
-        menu.addAction(action13)
-        menu.addAction(action14)
-
-        menu.addSeparator()
-        menu.addAction(action6)
-        menu.addAction(action7)
-
-        action1.triggered.connect(self.request_data)
-        action6.triggered.connect(lambda x: self.scale_change(0.5))
-        action7.triggered.connect(lambda x: self.scale_change(2))
-
-        action2.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_selected.txt"))
-        action3.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_selected.txt"))
-        action4.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_blacklist.txt"))
-        action5.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_blacklist.txt"))
-        action8.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_whitelist.txt"))
-        action9.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_whitelist.txt"))
-        action10.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_cyclical.txt"))
-        action11.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_cyclical.txt"))
-        action12.triggered.connect(self.add_cyclical_industry)
-        action13.triggered.connect(lambda x: self.add_code("../basicData/self_selected/gui_toc.txt"))
-        action14.triggered.connect(lambda x: self.del_code("../basicData/self_selected/gui_toc.txt"))
+        sub_menu1.addAction(action_mark1)
+        sub_menu1.addAction(action_mark2)
+        sub_menu1.addAction(action_mark3)
+        sub_menu1.addSeparator()
+        sub_menu1.addAction(action_mark4)
+        sub_menu1.addAction(action_mark5)
+        sub_menu1.addAction(action_mark6)
+        sub_menu1.addSeparator()
+        sub_menu1.addAction(action_mark7)
+        sub_menu1.addAction(action_mark8)
+        sub_menu1.addAction(action_mark9)
+        sub_menu1.addSeparator()
+        sub_menu1.addAction(action_mark0)
 
         action_mark0.triggered.connect(lambda x: self.add_mark(None))
         action_mark1.triggered.connect(lambda x: self.add_mark('AAA'))
@@ -430,6 +441,27 @@ class MainWidget(QWidget):
         action_mark8.triggered.connect(lambda x: self.add_mark('CC'))
         action_mark9.triggered.connect(lambda x: self.add_mark('C'))
 
+        ################################################
+
+        sub_menu2_action1 = QAction('保存代码组', menu)
+        sub_menu2_action2 = QAction('显示图像', menu)
+
+        sub_menu2_action3 = QAction('更新数据', menu)
+        sub_menu2_action4 = QAction('快速更新', menu)
+
+        sub_menu2.addAction(sub_menu2_action3)
+        sub_menu2.addAction(sub_menu2_action4)
+        sub_menu2.addSeparator()
+        sub_menu2.addAction(sub_menu2_action1)
+        sub_menu2.addAction(sub_menu2_action2)
+
+        sub_menu2_action1.triggered.connect(self.save_codes)
+        sub_menu2_action2.triggered.connect(self.show_plot)
+        sub_menu2_action3.triggered.connect(self.request_data)
+        sub_menu2_action4.triggered.connect(self.request_data_quick)
+
+        ################################################
+
         menu.exec_(QCursor.pos())
 
     def save_codes(self):
@@ -437,6 +469,7 @@ class MainWidget(QWidget):
         file = 'code_list_%s' % time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
         write_json_txt('..\\basicData\\tmp\\%s' % file, code_list)
 
+    @deco_show_stock_name
     def add_mark(self, mark):
         path = "../basicData/self_selected/gui_mark.txt"
         mark_dict = load_json_txt(path, log=False)
@@ -451,69 +484,20 @@ class MainWidget(QWidget):
             mark_dict[code] = mark
 
         write_json_txt(path, mark_dict, log=False)
-        self.show_stock_name()
 
-    def add_cyclical_industry(self):
+    @deco_show_stock_name
+    def code_operate(self, func, tag=None):
+        if tag is None:
+            items = [
+                '忽略',
+                '电池',
+                '光伏',
+            ]
+            tag, _ = QInputDialog.getItem(self, '获取列表中的选项', '列表', items, editable=False)
+
         row = self.codes_df.df.iloc[self.code_index]
         code = row['code']
-
-        sw_2021 = load_json_txt('..\\basicData\\industry\\sw_2021_dict.txt')
-
-        industry = sw_2021[code]
-
-        if industry is None:
-            return
-
-        path = "../basicData/self_selected/gui_cyclical.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            code_list = json.loads(f.read())
-
-        for key, value in sw_2021.items():
-            if value == industry:
-                if key in code_list:
-                    continue
-                else:
-                    code_list.append(key)
-
-        res = json.dumps(code_list, indent=4, ensure_ascii=False)
-        with open(path, "w", encoding='utf-8') as f:
-            f.write(res)
-        self.show_stock_name()
-
-    def add_code(self, path):
-        row = self.codes_df.df.iloc[self.code_index]
-        code = row['code']
-
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            code_list = json.loads(f.read())
-
-        if code in code_list:
-            return
-
-        code_list.append(code)
-        res = json.dumps(code_list, indent=4, ensure_ascii=False)
-        with open(path, "w", encoding='utf-8') as f:
-            f.write(res)
-        self.show_stock_name()
-
-    def del_code(self, path):
-        row = self.codes_df.df.iloc[self.code_index]
-        code = row['code']
-
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            code_list = json.loads(f.read())
-
-        if code in code_list:
-            index = code_list.index(code)
-            code_list.pop(index)
-        else:
-            return
-
-        res = json.dumps(code_list, indent=4, ensure_ascii=False)
-        with open(path, "w", encoding='utf-8') as f:
-            f.write(res)
-
-        self.show_stock_name()
+        tags_operate([code], tag, func)
 
     def request_data(self):
         code = self.stock_code
@@ -825,16 +809,34 @@ class MainWidget(QWidget):
         list0 = []
         list1 = []
 
-        if code in load_json_txt("../basicData/self_selected/gui_toc.txt", log=False):
-            list0.append('ToC')
-        if code in load_json_txt("../basicData/self_selected/gui_selected.txt", log=False):
-            list0.append('自选')
-        if code in load_json_txt("../basicData/self_selected/gui_whitelist.txt", log=False):
-            list0.append('白')
-        if code in load_json_txt("../basicData/self_selected/gui_blacklist.txt", log=False):
-            list0.append('黑')
-        if code in load_json_txt("../basicData/self_selected/gui_cyclical.txt", log=False):
-            list0.append('周期')
+        path = "..\\basicData\\self_selected\\gui_tags.txt"
+
+        tags_dict = load_json_txt(path, log=False)
+        txt = tags_dict.get(code)
+        txt = '' if txt is None else txt
+        tags_list = txt.split('#')
+
+        tmp = {
+            'ToC': 'Toc',
+            '自选': '自选',
+            '白': '白名单',
+            '黑': '黑名单',
+            '灰': '灰名单',
+            '周期': '周期',
+            '疫': '疫情',
+            '忽略': '忽略',
+            '国': '国有',
+            '低': '低价',
+            '电池': '电池',
+            '光伏': '光伏',
+            '芯片': '芯片',
+            '新上市': '新上市',
+            '未上市': '未上市',
+        }
+
+        for key, value in tmp.items():
+            if value in tags_list:
+                list0.append(key)
 
         mark = load_json_txt("../basicData/self_selected/gui_mark.txt", log=False).get(code)
         if mark is not None:
@@ -863,7 +865,7 @@ class MainWidget(QWidget):
         txt2 = txt2 + '-%.2f' % predict_discount
 
         if self.listing_date is not None:
-            list0.insert(0, self.listing_date)
+            list1.insert(0, self.listing_date)
 
         list1.append(txt_counter)
 
@@ -926,7 +928,7 @@ class MainWidget(QWidget):
             self.show_list = self.show_list[:5]
 
     @staticmethod
-    def get_code_list():
+    def init_code_list():
         # sort_hold()
         code_list = sift_codes(source='hold')
         # code_list = sift_codes(source='old')
@@ -999,6 +1001,12 @@ class MainWidget(QWidget):
             # GuiLog.write(self.log_path)
             self.label.setFocus()
 
+            self.widgets_layer.pop(self.widgets_layer.index(self))
+            self.widgets_layer.insert(0, self)
+            self.activate_by_layer()
+            # self.widgets_layer = [self]
+            # self.close_all()
+            # self.activate_by_layer()
         # elif event.button() == Qt.RightButton:
         #     self.close()
 
@@ -1032,31 +1040,6 @@ class MainWidget(QWidget):
         # widget = ComparisonWidget()
         # widget.show()
 
-    def show_fs_data(self):
-        self.fs_view.show()
-        self.fs_view.load_df(self.stock_code)
-        self.fs_view.activateWindow()
-
-    def show_remark(self):
-        self.remark_widget.show()
-        self.remark_widget.activateWindow()
-
-    def show_check(self):
-        self.check_widget.show()
-        self.check_widget.activateWindow()
-
-    def show_code_list(self):
-        self.code_widget.show()
-        self.code_widget.activateWindow()
-
-    def show_style(self):
-        if self.button4.isChecked():
-            self.style_widget.show()
-            self.style_widget.refresh_style(self.current_style)
-            self.style_widget.activateWindow()
-        else:
-            self.style_widget.close()
-
     def show_plot(self):
         df = self.data_pix.df
         if df.columns.size == 0:
@@ -1067,22 +1050,6 @@ class MainWidget(QWidget):
         df = df.dropna(axis=0, how='all')
 
         show_plt(self.stock_code, df, *self.plt_rect)
-
-    def show_web(self):
-        if self.button10.isChecked():
-            self.web_widget.show()
-            self.web_widget.activateWindow()
-            self.web_widget.load_code(self.stock_code)
-        else:
-            self.web_widget.close()
-
-    def show_equity_change(self):
-        if self.button11.isChecked():
-            self.equity_change_widget.show()
-            self.equity_change_widget.load_code(self.stock_code)
-            self.equity_change_widget.activateWindow()
-        else:
-            self.equity_change_widget.close()
 
     def relocate(self):
 
@@ -1121,6 +1088,55 @@ class MainWidget(QWidget):
                 rect = [10, 32, 1600, 900]
                 plt.get_current_fig_manager().window.setGeometry(*rect)
 
+        self.activate_by_layer()
+
+    def activate_by_layer(self):
+        layers = self.widgets_layer
+        for widget in layers[::-1]:
+            widget.activateWindow()
+
+        for widget, button in self.widgets_button.items():
+            if widget in layers:
+                button.setChecked(True)
+            else:
+                button.setChecked(False)
+
+    def get_show_func(self, widget):
+        return lambda: self.show_sub_widget(widget)
+
+    def show_sub_widget(self, widget):
+        code = self.stock_code
+        refresh_dict = {
+            self.web_widget: [self.web_widget.load_code, code],
+            self.equity_change_widget: [self.equity_change_widget.load_code, code],
+            self.fs_view: [self.fs_view.load_df, code],
+            self.style_widget: [self.style_widget.refresh_style, self.current_style],
+            self.remark_widget: [self.remark_widget.download],
+            self.check_widget: [self.check_widget.download],
+            self.code_widget: [None]
+        }
+
+        arg = refresh_dict[widget].copy()
+        func = arg.pop(0)
+
+        if widget.isMinimized():
+            widget.showNormal()
+            widget.close()
+        if widget.isHidden():
+            self.widgets_layer.insert(0, widget)
+            self.activate_by_layer()
+            widget.show()
+            if func is not None:
+                func(*arg)
+        else:
+            # self.widgets_layer.pop(self.widgets_layer.index(widget))
+            widget.close()
+
+    def sub_widget_close(self, widget):
+        if widget in self.widgets_layer:
+            self.widgets_layer.pop(self.widgets_layer.index(widget))
+        self.activate_by_layer()
+
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_1:
             self.window_flag = 0
@@ -1145,7 +1161,7 @@ class MainWidget(QWidget):
         self.data_pix.draw_cross(x, y, self.cross, self.box, self.window_flag, self.draw_pos)
         self.show_pix()
 
-    def closeEvent(self, event):
+    def close_all(self):
         self.style_widget.close()
         self.code_widget.close()
         self.remark_widget.close()
@@ -1153,8 +1169,29 @@ class MainWidget(QWidget):
         self.web_widget.close()
         self.equity_change_widget.close()
         self.fs_view.close()
-        # self.window2.close()
         plt.close()
+
+    def closeEvent(self, event):
+        self.close_all()
+
+    @staticmethod
+    def backup_data():
+        MainLog.add_log('backup_data start...')
+        today = dt.date.today()
+        for file in os.listdir("..\\gui\\backup"):
+            date = dt.datetime.strptime(file, "%Y%m%d%H%M%S").date()
+            if (today - date).days > 7:
+                shutil.rmtree("..\\gui\\backup\\%s" % file)
+                print(date)
+
+        dir1 = "..\\basicData\\self_selected"
+
+        timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
+        dir2 = "..\\gui\\backup\\%s" % timestamp
+        if not os.path.exists(dir2):
+            os.makedirs(dir2)
+        copy_dir(dir1, dir2)
+        MainLog.add_log('backup_data complete.')
 
 
 class MainWindow(QMainWindow):
