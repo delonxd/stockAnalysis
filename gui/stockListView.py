@@ -8,6 +8,8 @@ from method.showTable import generate_show_table
 
 import pandas as pd
 import numpy as np
+import json
+import re
 
 
 class CodesDataFrame:
@@ -28,6 +30,7 @@ class CodesDataFrame:
 
         self.group_list = [self.df_all.index.tolist()]
         self.index_list = [0]
+        self.sort_list = [[[], []]]
         self.group_flag = 0
         self.current_index = 0
 
@@ -38,41 +41,49 @@ class CodesDataFrame:
             code = self.df.iloc[self.current_index, 0]
             self.index_list[self.group_flag] = code
 
-        self.df = self.df_all.loc[code_list, :].copy()
-        self.df.index = range(self.df.shape[0])
-
         self.group_flag += 1
         if self.group_flag < len(self.group_list):
             self.group_list = self.group_list[:self.group_flag]
             self.index_list = self.index_list[:self.group_flag]
-
-        # if len(self.index_list) > 0:
-        #     code = self.df.iloc[self.current_index, 0]
-        #     self.index_list[-1] = code
+            self.sort_list = self.sort_list[:self.group_flag]
 
         self.group_list.append(code_list)
         self.index_list.append(0)
+        self.sort_list.append([[], []])
 
+        self.init_df()
         self.init_current_index(code_index)
 
-    def sort_df(self, column_num, condition):
+    def init_df(self):
+        columns, conditions = self.sort_list[self.group_flag]
+        code_list = self.group_list[self.group_flag]
 
+        self.df = self.df_all.loc[code_list, :].copy()
+
+        if len(columns) > 0:
+            by_columns = self.df.columns[columns].tolist()
+            self.df = self.df.sort_values(by=by_columns, ascending=conditions)
+
+        self.df.index = range(self.df.shape[0])
+
+    def sort_column(self, column):
+        columns, conditions = self.sort_list[self.group_flag]
         code = self.df.iloc[self.current_index, 0]
-        if condition == 0:
 
-            code_list = self.group_list[self.group_flag]
-            self.df = self.df_all.loc[code_list, :].copy()
-            self.df.index = range(self.df.shape[0])
+        if column in columns:
+            index = columns.index(column)
+            columns.pop(index)
+            condition = conditions.pop(index)
+            condition = False if condition is True else None
         else:
-            column = self.df.columns[column_num]
+            condition = True
 
-            if condition == 1:
-                ascending = False
-            else:
-                ascending = True
-            self.df = self.df.sort_values(by=column, ascending=ascending)
-            self.df.index = range(self.df.shape[0])
+        if condition is not None:
+            columns.insert(0, column)
+            conditions.insert(0, condition)
+        self.sort_list[self.group_flag] = [columns, conditions]
 
+        self.init_df()
         self.init_current_index(code)
 
     def backward(self):
@@ -92,12 +103,9 @@ class CodesDataFrame:
         self.load_flag()
 
     def load_flag(self):
-        code_list = self.group_list[self.group_flag]
         code_index = self.index_list[self.group_flag]
 
-        self.df = self.df_all.loc[code_list, :].copy()
-        self.df.index = range(self.df.shape[0])
-
+        self.init_df()
         self.init_current_index(code_index)
 
     def init_current_index(self, index=0):
@@ -139,7 +147,6 @@ class QDataFrameTable(QTableWidget):
     def __init__(self, code_df: CodesDataFrame):
         super().__init__()
         self.code_df = code_df
-        self.sort_flags = []
 
         self.load_code_df()
 
@@ -171,8 +178,6 @@ class QDataFrameTable(QTableWidget):
         self.setRowCount(row_size)
         self.setColumnCount(column_size)
 
-        self.sort_flags = [0] * column_size
-
         h_header = np.vectorize(lambda x: str(x))(df.columns.values)
         v_header = np.vectorize(lambda x: str(x))(df.index.values)
 
@@ -193,7 +198,20 @@ class QDataFrameTable(QTableWidget):
         for i in range(10):
             self.setColumnWidth(i, width)
 
-        self.verticalScrollBar().setSliderPosition(row)
+        columns, conditions = self.code_df.sort_list[self.code_df.group_flag]
+        for i in range(column_size):
+            if i in columns:
+                condition = conditions[columns.index(i)]
+                if condition is True:
+                    color = Qt.red
+                else:
+                    color = Qt.green
+            else:
+                color = Qt.black
+            self.horizontalHeaderItem(i).setForeground(QBrush(color))
+
+        pos = row - 5 if row > 5 else 0
+        self.verticalScrollBar().setSliderPosition(pos)
         self.selectRow(row)
 
     def on_double_clicked(self, item):
@@ -205,11 +223,11 @@ class QDataFrameTable(QTableWidget):
             name = self.code_df.df.iloc[row, column]
             code = self.code_df.df.iloc[row, 0]
 
-            ids_name = '%s-%s' % (level, name)
-            code_list = sift_codes(ids_names=[ids_name])
+            src = 'ids:%s:%s' % (level, name)
+            code_list = sift_codes(source=src)
 
             if len(code_list) > 0:
-                MainLog.add_log('show industry --> %s' % ids_name)
+                MainLog.add_log('show industry --> %s' % src)
                 self.load_code_list(code_list, code)
                 return
 
@@ -233,13 +251,12 @@ class QDataFrameTable(QTableWidget):
 
     def sort_df(self, column):
         pos = self.horizontalScrollBar().sliderPosition()
-        flag = self.sort_flags[column]
-        flag = (flag + 1) % 3
-        self.code_df.sort_df(column, flag)
+
+        self.code_df.sort_column(column)
         self.load_code_df()
         self.verticalScrollBar().setSliderPosition(0)
         self.horizontalScrollBar().setSliderPosition(pos)
-        self.sort_flags[column] = flag
+
         self.change_signal.emit(self.code_df.current_index)
 
     def selected_codes(self):
@@ -262,7 +279,7 @@ class QStockListView(QWidget):
         self.resize(1600, 900)
 
         self.table_view = QDataFrameTable(code_df)
-        self.generate_widget = GenerateCodeListWidget()
+        self.generate_widget = GenerateCodeListWidget(code_df)
 
         layout0 = QHBoxLayout()
         layout0.addStretch(1)
@@ -313,25 +330,25 @@ class QStockListView(QWidget):
                     self.table_view.load_code_list([key], 0)
                     return
 
-    def get_gui_path(self):
+    def get_tag(self):
         items = [
-            'gui_ignore.txt',
-            'gui_cyclical.txt',
-            'gui_covid19.txt',
+            '忽略',
+            '电池',
+            '光伏',
+            '芯片',
         ]
-        file, _ = QInputDialog.getItem(self, '获取列表中的选项', '文件列表', items, editable=False)
-        ret = "../basicData/self_selected/%s" % file
-        return ret
+        tag, _ = QInputDialog.getItem(self, '获取列表中的选项', '列表', items, editable=False)
+        return tag
 
     def add_codes(self):
         codes = self.table_view.selected_codes()
-        path = self.get_gui_path()
-        file_add_codes(codes, path, log=True)
+        tag = self.get_tag()
+        # tags_operate(codes, tag, 'add')
 
     def del_codes(self):
         codes = self.table_view.selected_codes()
-        path = self.get_gui_path()
-        file_del_codes(codes, path, log=True)
+        tag = self.get_tag()
+        # tags_operate(codes, tag, 'del')
 
     def closeEvent(self, event):
         self.generate_widget.close()
@@ -341,11 +358,12 @@ class QStockListView(QWidget):
 class GenerateCodeListWidget(QWidget):
     generate_signal = pyqtSignal(object, object)
 
-    def __init__(self):
+    def __init__(self, code_df):
         super().__init__()
 
+        self.code_df = code_df
         self.setWindowTitle('GenerateCodeList')
-        self.resize(400, 600)
+        self.resize(600, 250)
 
         h_layout = QHBoxLayout()
         v_layout = QVBoxLayout()
@@ -359,47 +377,7 @@ class GenerateCodeListWidget(QWidget):
         self.values = []
 
         layout = QGridLayout()
-
-        str_flg = [
-            '',
-            'auto_select',
-            'old',
-            'old_random',
-            'toc',
-            'all',
-            'hold',
-
-            'mark-0',
-            'mark-AAA',
-            'mark-AA',
-            'mark-A',
-            'mark-BBB',
-            'mark-BB',
-            'mark-B',
-            'mark-CCC',
-            'mark-CC',
-            'mark-C',
-
-            'selected',
-            'whitelist',
-            'blacklist',
-            'industry',
-
-            'latest_update',
-            'sort-report',
-            'sort-ass',
-            'sort-equity',
-            'sort-ass/equity',
-            'sort-ass/real_cost',
-            'sort-ass/turnover',
-            'industry-ass/equity',
-
-            'salary',
-            'pe',
-            'real_pe',
-            'roe_parent',
-            'plate-50',
-        ]
+        layout.setColumnMinimumWidth(1, 500)
 
         obj = QComboBox()
         # flags = list(map(lambda x: str(x), range(10)))
@@ -419,79 +397,45 @@ class GenerateCodeListWidget(QWidget):
         self.labels.append(QLabel('mission: '))
         self.editor.append(obj)
 
-        obj = QComboBox()
-        obj.addItems(str_flg)
+        src_flg = [
+            '',
+            'auto_select',
+            'old',
+            'old_random',
+            'all',
+            'hold',
+
+            # 'latest_update',
+            # 'salary',
+            # 'pe',
+            # 'real_pe',
+            # 'roe_parent',
+            # 'plate-50',
+        ]
+        obj = QTextEdit()
+        # obj = QComboBox()
+        # obj.addItems(src_flg)
         self.labels.append(QLabel('source: '))
         self.editor.append(obj)
 
-        obj = QLineEdit()
-        self.labels.append(QLabel('ids_names: '))
-        self.editor.append(obj)
-
+        sort_flag = self.code_df.df_all.columns.tolist()
         obj = QComboBox()
-        obj.addItems(str_flg)
-        self.labels.append(QLabel('whitelist: '))
-        self.editor.append(obj)
-
-        obj = QComboBox()
-        obj.addItems(str_flg)
-        self.labels.append(QLabel('blacklist: '))
-        self.editor.append(obj)
-
-        obj = QComboBox()
-        obj.addItems(str_flg)
+        obj.addItems(sort_flag)
         self.labels.append(QLabel('sort: '))
         self.editor.append(obj)
 
         obj = QComboBox()
-        obj.addItems(['', 'True', 'False'])
-        self.labels.append(QLabel('reverse: '))
+        obj.addItems(['', 'true', 'false'])
+        self.labels.append(QLabel('ascending: '))
         self.editor.append(obj)
 
         obj = QComboBox()
-        obj.addItems(['', '0', '-1'])
-        self.labels.append(QLabel('insert: '))
-        self.editor.append(obj)
-
-        obj = QComboBox()
-        market_flag = [
-            'all',
-            'main',
-            'non_main',
-            'growth',
-            'main+growth',
-        ]
-        obj.addItems(market_flag)
-        self.labels.append(QLabel('market: '))
-        self.editor.append(obj)
-
-        obj = QLineEdit()
-        self.labels.append(QLabel('timestamp: '))
-        self.editor.append(obj)
-
-        obj = QComboBox()
-        obj.addItems(['True', 'False'])
+        obj.addItems(['true', 'false'])
         self.labels.append(QLabel('random: '))
         self.editor.append(obj)
 
         obj = QLineEdit()
-        self.labels.append(QLabel('pick_weight: '))
-        self.editor.append(obj)
-
-        obj = QLineEdit()
         self.labels.append(QLabel('interval: '))
-        self.editor.append(obj)
-
-        obj = QComboBox()
-        mode_flag = [
-            'normal',
-            'selected',
-            'whitelist+selected',
-            'whitelist-selected',
-            'all-whitelist',
-        ]
-        obj.addItems(mode_flag)
-        self.labels.append(QLabel('mode: '))
         self.editor.append(obj)
 
         obj = QLineEdit()
@@ -501,8 +445,11 @@ class GenerateCodeListWidget(QWidget):
         for row, label in enumerate(self.labels):
             editor = self.editor[row]
 
-            label.setFont(QFont('Consolas', 14))
-            editor.setFont(QFont('Consolas', 14))
+            label.setFont(QFont('Consolas', 13))
+            editor.setFont(QFont('Consolas', 13))
+
+            if row in [2, 3]:
+                editor.setEditable(True)
 
             layout.addWidget(label, row, 0, alignment=Qt.AlignRight)
             layout.addWidget(editor, row, 1)
@@ -516,38 +463,34 @@ class GenerateCodeListWidget(QWidget):
         layout1.addStretch(1)
 
         v_layout.addStretch(1)
-        v_layout.addLayout(layout, 0)
+        v_layout.addLayout(layout, 1)
         v_layout.addLayout(layout1, 0)
         v_layout.addStretch(1)
 
         self.setLayout(h_layout)
+
         self.editor_dict = dict()
         self.init_editor_dict()
         self.load_editor_dict()
 
         self.button.clicked.connect(self.read_value)
-        self.editor[0].currentIndexChanged.connect(self.mission_change)
+        self.editor[0].activated.connect(self.mission_change)
+        # self.editor[0].currentIndexChanged.connect(self.mission_change)
+
+    def center(self):
+        screen = QDesktopWidget().screenGeometry()
+        size = self.geometry()
+        self.move((screen.width() - size.width()) / 2,
+                  (screen.height() - size.height()) / 2)
 
     def init_editor_dict(self):
         self.editor_dict = {
             'mission': '',
             'source': '',
-            'ids_names': '',
-            'whitelist': '',
-            'blacklist': '',
-
             'sort': '',
-            'reverse': 'False',
-            'insert': '',
-
-            'market': 'all',
-            'timestamp': '',
-
-            'random': 'False',
-            'pick_weight': '',
+            'ascending': '',
+            'random': 'false',
             'interval': '100',
-            'mode': 'normal',
-
             'code_index': '0',
         }
 
@@ -560,48 +503,79 @@ class GenerateCodeListWidget(QWidget):
             else:
                 editor.setText(tmp_list[row])
 
+    def read_text_edit_line(self):
+        obj = self.editor[1]
+
+        start = 0
+        ret = []
+        while True:
+            cursor = obj.textCursor()
+            cursor.setPosition(start)
+            cursor.movePosition(QTextCursor.Down, QTextCursor.KeepAnchor)
+            end = cursor.position()
+
+            if start == end:
+                cursor.setPosition(start)
+                cursor.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
+                string = cursor.selectedText()
+                ret.append(string)
+                break
+            string = cursor.selectedText()
+            ret.append(string)
+            start = end
+
+        return ret
+
     def read_value(self):
         self.values = []
+
         for editor in self.editor:
             if isinstance(editor, QComboBox):
                 val = editor.currentText()
+            elif isinstance(editor, QTextEdit):
+                # val = editor.toPlainText()
+                str_list = self.read_text_edit_line()
+                val = ''
+                for string in str_list:
+                    sub = re.sub(r'\u2029', '', string)
+                    sub = re.sub(r' *$', '', sub)
+                    val = val + sub
             else:
                 val = editor.text()
-
-            if val == '':
-                val = None
-            elif val == 'True':
-                val = True
-            elif val == 'False':
-                val = False
-            elif val.isdecimal():
-                try:
-                    val = int(val)
-                except BaseException as e:
-                    print(e)
+            try:
+                val = json.loads(val)
+            except Exception as e:
+                if val == '':
+                    val = None
 
             self.values.append(val)
 
-        val = self.values[2]
-        if val is not None:
-            val = val.split(',')
-            self.values[2] = val
-        # print(self.values)
-
-        args = self.values[1: -1]
+        MainLog.add_log('condition -> %s' % self.values)
         code_index = self.values[-1]
-        # print(args)
+
+        kw = {
+            'source': self.values[1],
+            'sort': self.values[2],
+            'ascending': self.values[3],
+            'random': self.values[4],
+            'interval': self.values[5],
+            'df_all': self.code_df.df_all,
+        }
 
         try:
-            ret = sift_codes(*args)
+            ret = sift_codes(**kw)
             # print(ret, code_index)
+
+            if len(ret) == 0:
+                MainLog.add_log('generate error: code_list == []')
+                return
 
             self.generate_signal.emit(ret, code_index)
 
             path = '..\\basicData\\tmp\\code_list_latest.txt'
             write_json_txt(path, ret)
 
-            MainLog.add_log('generate code_list')
+            MainLog.add_log('generate code_list complete')
 
         except Exception as e:
             MainLog.add_log(e)
@@ -613,57 +587,58 @@ class GenerateCodeListWidget(QWidget):
         # mission = str(txt)
 
         editor_dict['mission'] = mission
-        print(mission)
+        MainLog.add_log('change mission --> %s' % mission)
 
         if mission == '0_old':
             editor_dict['source'] = 'old'
 
         elif mission == '1_selected':
-            editor_dict['source'] = 'whitelist'
-            editor_dict['sort'] = 'sort-ass/equity'
+            editor_dict['source'] = '白名单'
+            editor_dict['sort'] = '["gui_rate", "predict_discount"]'
+            editor_dict['ascending'] = '[false, false]'
 
         elif mission == '2_hold':
             editor_dict['source'] = 'hold'
 
         elif mission == '3_random_s':
-            editor_dict['source'] = 'selected'
-            editor_dict['sort'] = 'sort-ass/equity'
-            editor_dict['market'] = 'main+growth'
+            editor_dict['source'] = 'mkt:main&自选'
+            editor_dict['sort'] = '["gui_rate", "predict_discount"]'
+            editor_dict['ascending'] = '[false, false]'
 
-            editor_dict['random'] = 'True'
+            editor_dict['random'] = 'true'
             editor_dict['interval'] = '20'
-            editor_dict['mode'] = 'selected'
 
         elif mission == '4_random_w-s':
-            editor_dict['source'] = 'all'
-            editor_dict['sort'] = 'sort-ass/equity'
-            editor_dict['market'] = 'main+growth'
-
-            editor_dict['random'] = 'True'
+            editor_dict['source'] = 'mkt:main&白名单-自选'
+            editor_dict['sort'] = '["gui_rate", "predict_discount"]'
+            editor_dict['ascending'] = '[false, false]'
+            editor_dict['random'] = 'true'
             editor_dict['interval'] = '30'
-            editor_dict['mode'] = 'whitelist-selected'
 
         elif mission == '5_random_a-w':
-            editor_dict['source'] = 'real_pe'
-            editor_dict['random'] = 'True'
+            editor_dict['source'] = 'all-白名单'
+            editor_dict['sort'] = 'real_pe_return_rate'
+            editor_dict['ascending'] = 'false'
+            editor_dict['random'] = 'true'
             editor_dict['interval'] = '80'
-            editor_dict['mode'] = 'all-whitelist'
 
         elif mission == '6_toc':
-            editor_dict['source'] = 'toc'
-            editor_dict['sort'] = 'sort-ass/equity'
+            editor_dict['source'] = 'Toc'
+            editor_dict['sort'] = '["gui_rate", "code"]'
+            editor_dict['ascending'] = '[false, true]'
 
         elif mission == '7_auto_select':
             editor_dict['source'] = 'auto_select'
 
-            # editor_dict['source'] = 'whitelist'
-            # editor_dict['blacklist'] = 'sort-ass/equity'
-            # editor_dict['market'] = 'growth'
+            editor_dict['sort'] = '["gui_rate", "code"]'
+            editor_dict['ascending'] = '[false, true]'
 
         elif mission == '8':
-            editor_dict['ids_names'] = '2-光伏设备'
-            editor_dict['sort'] = 'real_pe'
-            editor_dict['market'] = 'growth'
+            editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate>=14\n' \
+                                    '&cnd:predict_discount>8\n' \
+                                    '-国有-光伏-电池-新上市'
+            editor_dict['sort'] = 'gui_rate'
+            editor_dict['ascending'] = 'false'
 
         self.load_editor_dict()
 
@@ -673,7 +648,7 @@ def test_code_list_view():
 
     app = QApplication(sys.argv)
 
-    code_list = sift_codes(source='all')
+    code_list = sift_codes(source='hold')
     codes_df = CodesDataFrame(code_list, 0)
 
     main = QStockListView(codes_df)
