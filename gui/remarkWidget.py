@@ -1,9 +1,8 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-
+from method.fileMethod import *
 import sys
-import json
 
 
 class RemarkWidget(QWidget):
@@ -76,43 +75,28 @@ class RemarkWidget(QWidget):
         self.button2.clicked.connect(self.download)
 
     def upload(self):
-        txt1 = self.editor1.text()
-        txt2 = self.editor2.toPlainText()
-
-        path = "../basicData/self_selected/gui_remark.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            remark_dict = json.loads(f.read())
-        remark_dict[self.code] = (self.name, txt1, txt2)
-
-        res = json.dumps(remark_dict, indent=4, ensure_ascii=False)
-        with open(path, "w", encoding='utf-8') as f:
-            f.write(res)
-
-        value = self.editor0.text()
-        path = "../basicData/self_selected/gui_assessment.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            value_dict = json.loads(f.read())
-        value_dict[self.code] = value
-        if value == '':
-            value_dict.pop(self.code)
-
-        res = json.dumps(value_dict, indent=4, ensure_ascii=False)
-        with open(path, "w", encoding='utf-8') as f:
-            f.write(res)
-
-        value = self.editor3.text()
-        path = "../basicData/self_selected/gui_rate.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            value_dict = json.loads(f.read())
-        value_dict[self.code] = value
-        if value == '':
-            value_dict.pop(self.code)
-
-        res = json.dumps(value_dict, indent=4, ensure_ascii=False)
-        with open(path, "w", encoding='utf-8') as f:
-            f.write(res)
+        self.write_content(self.editor1.text(), "gui_tags.txt")
+        self.write_content(self.editor2.toPlainText(), "gui_remark.txt")
+        self.write_content(self.editor0.text(), "gui_assessment.txt")
+        self.write_content(self.editor3.text(), "gui_rate.txt")
 
         self.main_widget.show_stock_name()
+
+    def load_tags(self):
+        code = self.main_widget.stock_code
+        path = "../basicData/self_selected/gui_tags.txt"
+        res = load_json_txt(path, log=False)
+        txt = res[code] if code in res else ''
+        self.editor1.setText(txt)
+
+    def write_content(self, val, file):
+        path = "../basicData/self_selected/%s" % file
+        code = self.code
+        res = load_json_txt(path, log=False)
+        res[code] = val
+        if val == '':
+            res.pop(code)
+        write_json_txt(path, res, log=False)
 
     def download(self):
         self.code = code = self.main_widget.stock_code
@@ -120,28 +104,20 @@ class RemarkWidget(QWidget):
         txt1 = '%s: %s' % (code, name)
 
         path = "../basicData/self_selected/gui_remark.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            remark_dict = json.loads(f.read())
-        if code in remark_dict:
-            _, txt2, txt3 = remark_dict[self.code]
-        else:
-            txt2, txt3 = '', ''
+        res = load_json_txt(path, log=False)
+        txt3 = res[code] if code in res else ''
+
+        path = "../basicData/self_selected/gui_tags.txt"
+        res = load_json_txt(path, log=False)
+        txt2 = res[code] if code in res else ''
 
         path = "../basicData/self_selected/gui_assessment.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            value_dict = json.loads(f.read())
-        if code in value_dict:
-            value = str(value_dict[self.code])
-        else:
-            value = ''
+        res = load_json_txt(path, log=False)
+        value = str(res[code]) if code in res else ''
 
         path = "../basicData/self_selected/gui_rate.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            value_dict = json.loads(f.read())
-        if code in value_dict:
-            value1 = str(value_dict[self.code])
-        else:
-            value1 = ''
+        res = load_json_txt(path, log=False)
+        value1 = str(res[code]) if code in res else ''
 
         self.label.setText(txt1)
         self.editor1.setText(txt2)
