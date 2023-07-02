@@ -69,12 +69,12 @@ def log_it(logfile):
 
         @wraps(func)
         def wrapped_function(*args, **kwargs):
-            log_str = func.__name__ + " was called"
+            log_str = func.__name__ + " was called..."
             MainLog.add_log(log_str)
 
             res = func(*args, **kwargs)
 
-            log_str = func.__name__ + " complete"
+            log_str = func.__name__ + " complete."
             MainLog.add_log(log_str)
 
             return res

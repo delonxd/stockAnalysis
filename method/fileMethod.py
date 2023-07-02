@@ -2,6 +2,8 @@ import pickle
 import json
 import os
 import shutil
+import datetime as dt
+import pandas as pd
 from method.logMethod import MainLog
 
 
@@ -107,3 +109,77 @@ def file_del_codes(del_list, path, log=False):
     if log:
         MainLog.add_log('add codes -path  --> %s' % path)
         MainLog.add_log('add codes -codes --> %s' % del_list)
+
+
+def code_list_from_tags(tag):
+    tmp = load_json_txt("..\\basicData\\self_selected\\gui_tags.txt")
+    ret = []
+    for code, txt in tmp.items():
+        list0 = txt.split('#')
+        if tag in list0:
+            ret.append(code)
+    return ret
+
+
+def tags_operate(codes, tag, func):
+    path = "..\\basicData\\self_selected\\gui_tags.txt"
+    tags_dict = load_json_txt(path, log=False)
+
+    if func == 'refresh':
+        for code, txt in tags_dict.items():
+            tags_list = txt.split('#')
+            if tag in tags_list:
+                tags_list.pop(tags_list.index(tag))
+            txt = '#'.join(tags_list)
+            tags_dict[code] = txt
+        for code, txt in tags_dict.copy().items():
+            if txt == '':
+                tags_dict.pop(code)
+
+    for code in codes:
+        txt = tags_dict.get(code)
+        txt = '' if txt is None else txt
+        tags_list = txt.split('#')
+
+        if func == 'add' or func == 'refresh':
+            if tag not in tags_list:
+                tags_list.append(tag)
+        elif func == 'del':
+            if tag in tags_list:
+                tags_list.pop(tags_list.index(tag))
+        txt = '#'.join(tags_list)
+        tags_dict[code] = txt
+
+        if txt == '':
+            tags_dict.pop(code)
+
+    write_json_txt(path, tags_dict, log=False)
+
+
+def add_new_stock_tag():
+    MainLog.add_log('refresh new stocks...')
+    df1 = load_pkl("..\\basicData\\dailyUpdate\\latest\\z001_daily_table.pkl")
+
+    list1 = []
+    list2 = []
+    today = dt.date.today()
+    for code, date in df1['ipo_date'].iteritems():
+        if pd.isna(date):
+            list1.append(code)
+        else:
+            ipo_date = dt.datetime.strptime(date, "%Y-%m-%d").date()
+            day = (today - ipo_date).days
+            if day <= 365 * 3:
+                list2.append(code)
+
+    tags_operate(list1, '未上市', 'refresh')
+    tags_operate(list2, '新上市', 'refresh')
+    MainLog.add_log('refresh new stocks complete.')
+
+
+if __name__ == '__main__':
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.width', 10000)
+
+    add_new_stock_tag()
