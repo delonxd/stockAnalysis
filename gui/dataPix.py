@@ -262,6 +262,8 @@ class DataPix:
             's_064_profit_salary3',
             's_065_profit_salary_adj',
             's_066_profit_salary_min',
+
+            's_067_equity_ratio',
         ]
 
         if index_name in tmp_list:
