@@ -363,7 +363,7 @@ class GenerateCodeListWidget(QWidget):
 
         self.code_df = code_df
         self.setWindowTitle('GenerateCodeList')
-        self.resize(600, 250)
+        self.resize(600, 450)
 
         h_layout = QHBoxLayout()
         v_layout = QVBoxLayout()
@@ -390,8 +390,9 @@ class GenerateCodeListWidget(QWidget):
             '4_random_w-s',
             '5_random_a-w',
             '6_toc',
-            '7_auto_select',
-            '8',
+            '7_ids',
+            '8_new_sifted',
+            '9',
         ]
         obj.addItems(flags)
         self.labels.append(QLabel('mission: '))
@@ -415,6 +416,7 @@ class GenerateCodeListWidget(QWidget):
         obj = QTextEdit()
         # obj = QComboBox()
         # obj.addItems(src_flg)
+        obj.setFixedHeight(200)
         self.labels.append(QLabel('source: '))
         self.editor.append(obj)
 
@@ -427,6 +429,11 @@ class GenerateCodeListWidget(QWidget):
         obj = QComboBox()
         obj.addItems(['', 'true', 'false'])
         self.labels.append(QLabel('ascending: '))
+        self.editor.append(obj)
+
+        obj = QComboBox()
+        obj.addItems(['true', 'false'])
+        self.labels.append(QLabel('sort_ids: '))
         self.editor.append(obj)
 
         obj = QComboBox()
@@ -489,6 +496,7 @@ class GenerateCodeListWidget(QWidget):
             'source': '',
             'sort': '',
             'ascending': '',
+            'sort_ids': 'false',
             'random': 'false',
             'interval': '100',
             'code_index': '0',
@@ -553,12 +561,15 @@ class GenerateCodeListWidget(QWidget):
         MainLog.add_log('condition -> %s' % self.values)
         code_index = self.values[-1]
 
+        source = self.values[1]
+        source = '' if source is None else source
         kw = {
-            'source': self.values[1],
+            'source': source,
             'sort': self.values[2],
             'ascending': self.values[3],
-            'random': self.values[4],
-            'interval': self.values[5],
+            'sort_ids': self.values[4],
+            'random': self.values[5],
+            'interval': self.values[6],
             'df_all': self.code_df.df_all,
         }
 
@@ -577,8 +588,8 @@ class GenerateCodeListWidget(QWidget):
 
             MainLog.add_log('generate code_list complete')
 
-        except Exception as e:
-            MainLog.add_log(e)
+        except BaseException as e:
+            MainLog.add_log(e.__repr__())
 
     def mission_change(self, txt):
         self.init_editor_dict()
@@ -627,18 +638,38 @@ class GenerateCodeListWidget(QWidget):
             editor_dict['sort'] = '["gui_rate", "code"]'
             editor_dict['ascending'] = '[false, true]'
 
-        elif mission == '7_auto_select':
-            editor_dict['source'] = 'auto_select'
-
+        elif mission == '7_ids':
+            editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate>=14\n' \
+                                    '&ids:3:医疗研发外包'
             editor_dict['sort'] = '["gui_rate", "code"]'
             editor_dict['ascending'] = '[false, true]'
 
-        elif mission == '8':
-            editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate>=14\n' \
-                                    '&cnd:predict_discount>8\n' \
-                                    '-国有-光伏-电池-新上市'
-            editor_dict['sort'] = 'gui_rate'
-            editor_dict['ascending'] = 'false'
+        elif mission == '8_new_sifted':
+            editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate>=13\n' \
+                                    '&cnd:predict_discount>7\n' \
+                                    '-光伏-电池-新上市\n' \
+                                    '-backup:20230816:\n' \
+                                    '{白名单&mkt:main&cnd:gui_rate>=13\n' \
+                                    '&cnd:predict_discount>7\n' \
+                                    '-光伏-电池-新上市}'
+
+            editor_dict['sort'] = '["gui_rate", "code"]'
+            editor_dict['ascending'] = '[false, true]'
+            editor_dict['sort_ids'] = 'true'
+
+        elif mission == '9':
+            editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate>=13\n' \
+                                    '&cnd:predict_discount>7\n' \
+                                    '-国有-光伏-电池-新上市\n' \
+                                    '-ids:3:\n' \
+                                    '{消费电子零部件及组装|印制电路板\n' \
+                                    '|医疗研发外包|体外诊断|医疗耗材\n' \
+                                    '|线下药店|化学制剂|中药\n' \
+                                    '|IT服务|垂直应用软件|农药|快递}' \
+
+            editor_dict['sort'] = '["gui_rate", "code"]'
+            editor_dict['ascending'] = '[false, true]'
+            editor_dict['sort_ids'] = 'true'
 
         self.load_editor_dict()
 

@@ -7,6 +7,8 @@ import numpy as np
 import pickle
 import os
 import re
+import time
+
 # from PyQt5.QtWidgets import *
 # from PyQt5.QtCore import *
 # from PyQt5.QtGui import *
@@ -197,6 +199,7 @@ def sift_codes(
         source='',
         sort=None,
         ascending=None,
+        sort_ids=False,
         random=False,
         interval=100,
         df_all=None,
@@ -205,12 +208,25 @@ def sift_codes(
     str0 = RecognitionStr(source, df_all)
 
     str0.get_code_list()
-    ret = str0.get_sort_list(sort, ascending)
+
+    ret = str0.get_sort_list(sort, ascending, sort_ids)
 
     if random is None or random is True:
         ret = str0.random(interval)
 
+    # para = [source, sort, ascending, sort_ids, random, interval, ret]
+    # timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+    # path = "..\\basicData\\self_selected\\backup_sift.txt"
+    # backup_sift_code(para, timestamp, path)
+
     return ret
+
+
+def backup_codes(codes, path, label=''):
+    source = load_json_txt(path)
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+    source[timestamp] = [label, codes]
+    write_json_txt(path, source)
 
 
 def sort_industry(by='ass/equity'):
@@ -264,6 +280,9 @@ if __name__ == '__main__':
     # get_codes_from_sel()
     # get_random_list()
     # save_latest_list(date_dir)
+
+    # sift_codes(source='kk{(m2{zz{白名单}-xx{hold}}-m3{自选})-()|()}')
+    # sift_codes(source='backup:20230816:{hold}')
 
     sort_hold()
     # sort_industry()

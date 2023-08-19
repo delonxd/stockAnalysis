@@ -320,6 +320,8 @@ class MainWidget(QWidget):
         menu = QMenu(self)
 
         name_list = [
+            '选择',
+            '加载',
             '添加列表',
             '删除列表',
             '添加自选',
@@ -342,6 +344,10 @@ class MainWidget(QWidget):
         for name in name_list:
             actions[name] = QAction(name, menu)
 
+        menu.addAction(actions['选择'])
+        menu.addAction(actions['加载'])
+
+        menu.addSeparator()
         sub_menu1 = menu.addMenu('评级')
 
         menu.addSeparator()
@@ -378,6 +384,9 @@ class MainWidget(QWidget):
         menu.addSeparator()
         menu.addAction(actions['上移'])
         menu.addAction(actions['下移'])
+
+        actions['选择'].triggered.connect(self.code_widget.button4.clicked)
+        actions['加载'].triggered.connect(self.code_widget.button3.clicked)
 
         actions['上移'].triggered.connect(lambda x: self.scale_change(0.5))
         actions['下移'].triggered.connect(lambda x: self.scale_change(2))
@@ -734,8 +743,8 @@ class MainWidget(QWidget):
         self.predict_delta = 0
         tmp_date = np.nan
 
-        if 's_066_profit_salary_min' in df.columns:
-            s0 = self.data_pix.df['s_066_profit_salary_min'].copy().dropna()
+        if 's_063_profit_salary2' in df.columns:
+            s0 = self.data_pix.df['s_063_profit_salary2'].copy().dropna()
             if s0.size > 0:
                 self.profit_salary_min = s0[-1]
                 tmp_date = s0.index[-1]
