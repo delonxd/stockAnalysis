@@ -38,10 +38,12 @@ class MainLog:
         print(row)
 
     @classmethod
-    def write(cls, path):
+    def write(cls, path, init=False):
         cls.add_log('save log --> %s' % path)
         with open(path, "w", encoding='utf-8') as f:
             f.write(cls.content)
+        if init is True:
+            cls.init_log()
 
     @classmethod
     def write_add(cls, path):

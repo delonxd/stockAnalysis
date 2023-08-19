@@ -56,6 +56,8 @@ def request_sw_2021_names():
 
 
 def update_sw_2021():
+    MainLog.add_split('#')
+
     code_list = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
 
     ret = dict()
@@ -65,6 +67,9 @@ def update_sw_2021():
         ret[code] = res
 
     write_json_txt("..\\basicData\\industry\\sw_2021_dict.txt", ret)
+
+    MainLog.add_log('update_sw_2021 complete')
+    MainLog.add_split('#')
 
 
 if __name__ == '__main__':

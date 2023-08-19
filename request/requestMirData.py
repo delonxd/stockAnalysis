@@ -2,9 +2,12 @@ import datetime as dt
 import json
 import pandas as pd
 from method.urlMethod import data_request
+from method.fileMethod import *
 
 
 def request_mir_y10():
+    MainLog.add_split('#')
+
     token = "f819be3a-e030-4ff0-affe-764440759b5c"
     url = 'https://open.lixinger.com/api/macro/national-debt'
 
@@ -40,6 +43,9 @@ def request_mir_y10():
     tmp = json.dumps(dict0, indent=4, ensure_ascii=False)
     with open("..\\basicData\\nationalDebt\\mir_y10.txt", "w", encoding="utf-8") as f:
         f.write(tmp)
+
+    MainLog.add_log('request_mir_y10 complete')
+    MainLog.add_split('#')
 
 
 def load_mir_y10():

@@ -6,6 +6,8 @@ from request.requestData import request2mysql
 from method.dataMethod import load_df_from_mysql
 from method.dataMethod import DataAnalysis, DailyDataAnalysis
 from method.showTable import add_bool_column, get_recent_val, sum_value, get_recent_index
+from method.sortCode import sift_codes
+from method.showTable import generate_show_table
 import numpy as np
 import os
 import pandas as pd
@@ -26,6 +28,8 @@ def basic_daily_update(dir_name):
 
 
 def mysql_daily_update(dir_name, all_codes, ipo_dates):
+    MainLog.add_split('#')
+
     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
     ret1 = []
     ret2 = []
@@ -43,7 +47,7 @@ def mysql_daily_update(dir_name, all_codes, ipo_dates):
     for code, date in ipo_dates.items():
         if not date:
             new_codes.append(code)
-        elif date > '2022-07-01':
+        elif date > '2023-01-01':
             new_codes.append(code)
 
     MainLog.add_log('Length of all codes: %s' % len(all_codes))
@@ -79,11 +83,16 @@ def mysql_daily_update(dir_name, all_codes, ipo_dates):
         request2mysql(
             stock_code=code,
             data_type='fs',
-            start_date='2013-01-01',
+            start_date='2014-01-01',
         )
+
+    MainLog.add_log('mysql_daily_update complete')
+    MainLog.add_split('#')
 
 
 def daily_analysis(dir_name, all_codes):
+    MainLog.add_split('#')
+
     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
     sub_dir = '..\\basicData\\dailyUpdate\\%s\\res_daily' % dir_name
     os.makedirs(sub_dir)
@@ -124,7 +133,8 @@ def daily_analysis(dir_name, all_codes):
         # 'id_048_mvs_ta',
         's_044_turnover_volume',
         's_061_total_return_rate',
-        's_066_profit_salary_min',
+        's_063_profit_salary2',
+        # 's_066_profit_salary_min',
     ]
 
     index = 0
@@ -186,10 +196,13 @@ def daily_analysis(dir_name, all_codes):
 
     write_json_txt('%s\\a003_report_date_dict.txt' % res_dir, report_date_dict)
 
+    MainLog.add_split('-')
+    MainLog.add_log('data analysis complete')
     MainLog.add_split('#')
 
 
 def generate_daily_table(dir_name):
+    MainLog.add_split('#')
     df = pd.DataFrame()
 
     daily_dir = "..\\basicData\\dailyUpdate\\%s" % dir_name
@@ -265,7 +278,7 @@ def generate_daily_table(dir_name):
         s1 = s1.rolling(20, min_periods=1).mean().dropna()
         df.loc[code, 'turnover_ttm20'] = s1[-1] if s1.size >= 1 else np.nan
 
-        val = get_recent_index(src, 's_066_profit_salary_min', np.nan)
+        val = get_recent_index(src, 's_063_profit_salary2', np.nan)
         df.loc[code, 'recent_date'] = val
 
         delta = 0
@@ -275,7 +288,7 @@ def generate_daily_table(dir_name):
             delta = (date2 - date1).days
         df.loc[code, 'predict_delta'] = delta
 
-        val = get_recent_val(src, 's_066_profit_salary_min', np.nan)
+        val = get_recent_val(src, 's_063_profit_salary2', np.nan)
         df.loc[code, 'profit_salary_adj'] = val
 
     tmp = df.loc[:, 'real_cost'].copy().dropna().to_dict()
@@ -298,10 +311,15 @@ def generate_daily_table(dir_name):
 
     dump_pkl('%s\\z001_daily_table.pkl' % daily_dir, df)
 
+    MainLog.add_log('generate_daily_table complete')
+    MainLog.add_split('#')
+
     return df
 
 
 def save_latest_list(dir_name):
+    MainLog.add_split('#')
+
     src_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
     target_dir = '..\\basicData\\dailyUpdate\\latest'
 
@@ -332,6 +350,9 @@ def save_latest_list(dir_name):
     clear_dir(dir2)
     copy_dir(dir1, dir2)
 
+    MainLog.add_log('save_latest_list complete')
+    MainLog.add_split('#')
+
 
 def test_daily_analysis():
     import time
@@ -347,6 +368,8 @@ def test_daily_analysis():
 
 
 def generate_log_data(dir_name):
+    MainLog.add_split('#')
+
     daily_dir = "..\\basicData\\dailyUpdate\\%s" % dir_name
 
     path = "%s\\logs1.txt" % daily_dir
@@ -362,40 +385,87 @@ def generate_log_data(dir_name):
     path = "%s\\a000_log_data.txt" % daily_dir
     write_json_txt(path, ret)
 
+    MainLog.add_log('generate_log_data complete')
+    MainLog.add_split('#')
+
+
+def eq_daily_update():
+    MainLog.add_split('#')
+
+    list1 = code_list_from_tags("白名单")
+    list2 = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt")
+    list3 = list(set(list1 + list2))
+    list3.sort()
+    request_eq2mysql(list3)
+
+    MainLog.add_log('eq_daily_update complete')
+    MainLog.add_split('#')
+
+
+def backup_daily_update():
+    MainLog.add_split('#')
+
+    src = '白名单&mkt:main&cnd:gui_rate>=13' \
+          '&cnd:predict_discount>7' \
+          '-光伏-电池-新上市'
+
+    generate_show_table()
+    df_all = load_pkl("..\\basicData\\dailyUpdate\\latest\\show_table.pkl")
+    timestamp = load_json_txt('..\\basicData\\dailyUpdate\\latest\\a000_log_data.txt')["update_date"]
+    key = timestamp.replace('-', '')
+
+    path = "..\\basicData\\backups\\df_all\\df_all_%s.pkl" % key
+    dump_pkl(path, df_all)
+
+    codes = sift_codes(
+        source=src,
+        sort=["gui_rate", "code"],
+        ascending=[False, True],
+        sort_ids=True,
+        df_all=df_all,
+    )
+
+    path = "..\\basicData\\self_selected\\backup_daily_codes.txt"
+    source = load_json_txt(path)
+    source[key] = codes
+    write_json_txt(path, source)
+
+    MainLog.add_log('backup_daily_codes complete')
+    MainLog.add_split('#')
+
+
+def manual_daily_update():
+    dir_name = 'update_20230818163003'
+    res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
+
+    all_codes = load_json_txt('%s\\a001_code_list.txt' % res_dir)
+
+    ################################################################################################################
+
+    generate_log_data(dir_name)
+    daily_analysis(dir_name, all_codes)
+    MainLog.write('%s\\logs2.txt' % res_dir, init=True)
+
+    generate_daily_table(dir_name)
+    save_latest_list(dir_name)
+    request_mir_y10()
+    MainLog.write('%s\\logs3.txt' % res_dir, init=True)
+
+    eq_daily_update()
+    MainLog.write('%s\\logs4.txt' % res_dir, init=True)
+
+    backup_daily_update()
+    MainLog.write('%s\\logs5.txt' % res_dir, init=True)
+
 
 if __name__ == '__main__':
     from request.requestMirData import request_mir_y10
+    from request.requestEquityData import request_eq2mysql
 
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    dir_name_tmp = 'update_20230519163004'
-
-    dir_tmp = '..\\basicData\\dailyUpdate\\%s' % dir_name_tmp
-    all_codes = load_json_txt('%s\\a001_code_list.txt' % dir_tmp)
-
-    MainLog.add_split('#')
-    generate_log_data(dir_name_tmp)
-    MainLog.add_log('generate_log_data complete')
-
-    daily_analysis(dir_name_tmp, all_codes)
-    MainLog.add_log('data analysis complete')
-
-    MainLog.add_split('#')
-    generate_daily_table(dir_name_tmp)
-    MainLog.add_log('generate_daily_table complete')
-
-    MainLog.add_split('#')
-    save_latest_list(dir_name_tmp)
-    MainLog.add_log('save_latest_list complete')
-
-    MainLog.add_split('#')
-    request_mir_y10()
-    MainLog.add_log('request_mir_y10 complete')
-
-    MainLog.write('..\\basicData\\dailyUpdate\\%s\\logs2.txt' % dir_name_tmp)
-    MainLog.init_log()
+    manual_daily_update()
 
     # test_daily_analysis()
-    # generate_log_data('update_20220723153503')
