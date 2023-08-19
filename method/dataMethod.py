@@ -214,7 +214,7 @@ def sql2df(code):
 
     # print(df1)
     # print(df2)
-    data = DataAnalysis(df1, df2)
+    data = DataAnalysis(df1, df2, code=code)
     data.config_widget_data()
     data.add_eq_data(code)
     data.add_dv_data(code)
@@ -239,10 +239,11 @@ def if_column_exist(func):
 
 
 class DataAnalysis:
-    def __init__(self, df_fs: pd.DataFrame, df_mvs: pd.DataFrame):
+    def __init__(self, df_fs: pd.DataFrame, df_mvs: pd.DataFrame, code=''):
         self.df_fs = df_fs
         self.df_mvs = df_mvs
         self.df = pd.DataFrame()
+        self.code = code
 
     def get_sub_date(self):
         df = self.df_fs
@@ -276,7 +277,7 @@ class DataAnalysis:
             s0[sub[-1]] = sub[-1]
 
             sub_df = df.loc[sub, :].copy()
-            sub_data = class_sub(sub_df, None)
+            sub_data = class_sub(sub_df, None, code=self.code)
             sub_data.config_fs_data()
 
             sub_data.df_fs = self.get_df_after_date(sub_data.df_fs, last_date)
@@ -308,6 +309,8 @@ class DataAnalysis:
             's_003_profit',
             # 's_010_main_profit',
             # 's_011_main_profit_rate',
+
+            's_067_equity_ratio',
 
             's_001_roe',
             # 's_006_stocks_rate',
@@ -387,6 +390,8 @@ class DataAnalysis:
             # 's_012_return_year',
             # 's_014_pe2',
             # 's_015_return_year2',
+            's_068_market_value_adj',
+
             's_025_real_cost',
             # 's_026_holder_return_rate',
             's_027_pe_return_rate',
@@ -399,6 +404,7 @@ class DataAnalysis:
             's_036_real_pe2rate',
             's_043_turnover_volume_ttm',
             'market_change_rate',
+
         ]
         for index in index_list2:
             self.mvs_add(self.get_column(df, index))
@@ -816,8 +822,9 @@ class DataAnalysis:
 
         elif column == 's_025_real_cost':
             s1 = self.fs_to_mvs('s_026_liquidation_asset')
-            s2 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
             s3 = self.fs_to_mvs('s_002_equity')
+            s2 = self.get_column(self.df_mvs, 's_068_market_value_adj')
+
             return self.regular_series(column, s2 - s1 + s3)
 
         elif column == 's_026_liquidation_asset':
@@ -1046,11 +1053,13 @@ class DataAnalysis:
             return self.regular_series(column, s1 + s2)
 
         elif column == 's_053_core_profit_salary':
-            d0 = {
-                'id_082_bs_sawp': '应付职工薪酬',
-                'id_105_bs_ltpoe': '长期应付职工薪酬',
-            }
-            s1 = self.sum_columns(self.df_fs, list(d0.keys()))
+            # d0 = {
+            #     'id_082_bs_sawp': '应付职工薪酬',
+            #     'id_105_bs_ltpoe': '长期应付职工薪酬',
+            # }
+            s01 = self.smooth_data('s01', 'id_082_bs_sawp')
+            s02 = self.smooth_data('s02', 'id_105_bs_ltpoe')
+            s1 = s01 + s02
             s1 = self.get_ttm((s1 - s1.shift(1))*4, 4)
             s2 = self.smooth_data(column, 'id_257_cfs_cptofe', delta=True, ttm=True)
             # s3 = self.get_column(df, 's_051_core_profit')
@@ -1138,6 +1147,22 @@ class DataAnalysis:
             s1 = self.get_column(df, 's_063_profit_salary2')
             s2 = self.get_column(df, 's_065_profit_salary_adj')
             s3 = pd.DataFrame([s1, s2]).min(axis=0)
+            return self.regular_series(column, s3)
+
+        elif column == 's_067_equity_ratio':
+            s1 = self.get_column(df, 's_003_profit')
+            s1 = s1.replace(0, np.inf)
+
+            s2 = self.get_column(df, 's_018_profit_parent')
+            s3 = s2 / s1
+            s3[s3 > 1] = 1
+            s3[s3 < 0.25] = 0.25
+            return self.regular_series(column, s3)
+
+        elif column == 's_068_market_value_adj':
+            s1 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
+            s2 = self.fs_to_mvs('s_067_equity_ratio')
+            s3 = s1 / s2
             return self.regular_series(column, s3)
 
     @staticmethod
@@ -1371,8 +1396,8 @@ class StandardFitModel:
 
 
 class DailyDataAnalysis(DataAnalysis):
-    def __init__(self, df_fs: pd.DataFrame, df_mvs: pd.DataFrame):
-        super().__init__(df_fs, df_mvs)
+    def __init__(self, df_fs: pd.DataFrame, df_mvs: pd.DataFrame, code=''):
+        super().__init__(df_fs, df_mvs, code=code)
 
     def config_fs_data(self):
 
@@ -1404,7 +1429,8 @@ class DailyDataAnalysis(DataAnalysis):
             # 's_024_real_liabilities',
             's_026_liquidation_asset',
             's_061_total_return_rate',
-            's_066_profit_salary_min',
+            's_063_profit_salary2',
+            # 's_066_profit_salary_min',
 
             # 's_038_pay_for_long_term_asset',
             # 's_039_profit_adjust',
@@ -1441,24 +1467,24 @@ class DailyDataAnalysis(DataAnalysis):
         self.set_df()
 
 
-def test_analysis():
-    code = '603889'
-    # code = '600519'
-
-    df1 = load_df_from_mysql(code, 'fs')
-    df2 = load_df_from_mysql(code, 'mvs')
-
-    data = DataAnalysis(df1, df2)
-    # data.config_widget_data()
-    data.config_daily_data()
-    # s1 = data.df['s_028_market_value'].copy()
-    # print(s1)
-
-    # s2 = data.df['s_018_profit_parent'].copy().dropna()
-    # s2 = data.df['s_040_profit_adjust2'].copy().dropna()
-    # s2 = data.df['s_038_pay_for_long_term_asset'].copy().dropna()
-    # s2 = data.df['s_039_profit_adjust'].copy().dropna()
-    # print(s2)
+# def test_analysis():
+#     code = '603889'
+#     # code = '600519'
+#
+#     df1 = load_df_from_mysql(code, 'fs')
+#     df2 = load_df_from_mysql(code, 'mvs')
+#
+#     data = DataAnalysis(df1, df2)
+#     # data.config_widget_data()
+#     data.config_daily_data()
+#     # s1 = data.df['s_028_market_value'].copy()
+#     # print(s1)
+#
+#     # s2 = data.df['s_018_profit_parent'].copy().dropna()
+#     # s2 = data.df['s_040_profit_adjust2'].copy().dropna()
+#     # s2 = data.df['s_038_pay_for_long_term_asset'].copy().dropna()
+#     # s2 = data.df['s_039_profit_adjust'].copy().dropna()
+#     # print(s2)
 
 
 if __name__ == '__main__':
