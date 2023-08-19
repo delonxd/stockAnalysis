@@ -1,16 +1,35 @@
-import re
 from method.fileMethod import *
+import re
+import pandas as pd
 
 
 class RecognitionStr:
-    def __init__(self, src: str, df_all):
+    def __init__(self, src: str, df_all, tag_flag=True):
         self.src = src
+        self.tag_flag = tag_flag
+
+        symbol, values = self.config_symbol_values(src)
+        symbol, values = self.replace_brace(symbol, values)
+        self.symbol = symbol
+        self.values = values
+
+        self.df_all = df_all
+        self.df_dict = dict()
+        self.code_all = None
+        self.sw_2021_name_dict = None
+        self.sw_2021_dict = None
+
+        self.code_list = []
+        self.sort_list = []
+
+    @staticmethod
+    def config_symbol_values(src):
         symbol = ''
         values = dict()
 
         counter = 0
         while src != '':
-            match = re.search(r'[()&|-]', src)
+            match = re.search(r'[{}()&|-]', src)
 
             if match is None:
                 values[counter] = src
@@ -25,21 +44,45 @@ class RecognitionStr:
             # print(src)
             symbol = ''.join([symbol, match.group()])
             counter += 1
+        return symbol, values
 
-        self.symbol = symbol
-        self.values = values
+    @staticmethod
+    def replace_brace(symbol, values):
 
-        self.df_all = df_all
-        self.code_all = None
-        self.sw_2021_name_dict = None
-        self.sw_2021_dict = None
+        while True:
+            m1 = re.search(r'}', symbol)
 
-        self.code_list = []
-        self.sort_list = []
+            if m1 is None:
+                if re.search(r'{', symbol) is not None:
+                    raise KeyboardInterrupt('大括号数量不匹配')
+                break
+            else:
+                end = m1.end()
+                m2 = re.search(r'.*{', symbol[:end])
+                if m2 is None:
+                    raise KeyboardInterrupt('大括号数量不匹配')
+                start = m2.end() - 1
+
+                if start in values.keys():
+                    pre = values.pop(start)
+
+                    for key in values.keys():
+                        if start < key < end:
+                            values[key] = ''.join([pre, values[key]])
+
+                symbol1 = symbol[:start]
+                symbol2 = symbol[start + 1: end - 1]
+                symbol3 = symbol[end:]
+                symbol = ''.join([symbol1, '(', symbol2, ')', symbol3])
+
+        return symbol, values
 
     def set_calculate(self, symbol, val_dict):
         if symbol == '':
-            return self.str_to_list(val_dict[0])
+            if len(val_dict) == 0:
+                return []
+            else:
+                return self.str_to_list(val_dict[0])
         values = []
         for index in range(len(symbol) + 1):
             if index not in val_dict.keys():
@@ -114,7 +157,7 @@ class RecognitionStr:
                     if key <= start:
                         values2[key] = value
                     elif key >= end:
-                        values2[key - start + end] = value
+                        values2[key + start - end] = value
                     else:
                         values1[key - start - 1] = value
 
@@ -130,22 +173,43 @@ class RecognitionStr:
         self.code_list = self.values[0]
         return self.code_list
 
+    def get_code_all(self):
+        if self.tag_flag is True:
+            self.code_all = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
+        else:
+            self.code_all = self.df_all.index.tolist()
+        return self.code_all
+
     def str_to_list(self, src):
         ret = []
         if isinstance(src, str):
             src = src.strip('\n ')
             if src == 'all':
-                ret = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
+                ret = self.get_code_all()
 
             elif src == 'hold':
-                tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
-                ret = list(zip(*tmp).__next__())
+                if self.tag_flag is True:
+                    tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
+                    ret = list(zip(*tmp).__next__())
+                else:
+                    ret = self.df_all[self.df_all['gui_hold'].isin([True])].index.tolist()
 
             elif src == 'old':
                 ret = load_json_txt("..\\basicData\\tmp\\code_list_latest.txt")
 
             elif src == 'old_random':
                 ret = load_json_txt("..\\basicData\\tmp\\code_list_random.txt")
+
+            elif src == '持有行业':
+                str0 = 'ids:3:医疗研发外包\n' \
+                       '|ids:3:中药\n' \
+                       '|ids:3:化学制剂\n' \
+                       '|ids:3:农药\n' \
+                       '|ids:3:快递\n' \
+                       '|ids:3:线下药店\n'
+
+                recognition = RecognitionStr(str0, self.df_all)
+                ret = recognition.get_code_list()
 
             # elif src[:4] == 'mark':
             #     # mark = int(src.split('-')[1])
@@ -166,20 +230,6 @@ class RecognitionStr:
                     txt = f.read()
                     ret = re.findall(r'([0-9]{6})', txt)
                     ret.reverse()
-
-            elif src == 'auto_select':
-                df0 = load_pkl("..\\basicData\\dailyUpdate\\latest\\show_table.pkl")
-
-                df1 = df0[df0['gui_rate'] >= 12]
-                df2 = df1[df1['predict_discount'] >= 9]
-
-                # s0 = df2['predict_discount'].apply(lambda x: int(x/3))
-                # s0.name = 'tmp_column'
-                # df2 = pd.concat([df2, s0], axis=1, sort=True)
-
-                df2 = df2.sort_values(by=['gui_rate', 'predict_discount'], ascending=[False, False])
-                # df2 = df2[df2['忽略'] != True]
-                ret = df2['code'].to_list()
 
             elif src[:5] == 'time>':
                 with open("..\\basicData\\self_selected\\gui_timestamp.txt", "r", encoding="utf-8",
@@ -204,8 +254,26 @@ class RecognitionStr:
                 condition = src[4:]
                 ret = self.condition2code(condition)
 
+            elif src[:7] == 'backup:':
+                str1 = src[7:]
+                m1 = re.search(r':', str1)
+                date = str1[:m1.start()]
+                str2 = str1[m1.end():]
+                if date not in self.df_dict.keys():
+                    path = "..\\basicData\\backups\\df_all\\df_all_%s.pkl" % date
+                    tmp_df = load_pkl(path)
+                    self.df_dict[date] = tmp_df
+                tmp_df = self.df_dict[date]
+
+                recognition = RecognitionStr(str2, tmp_df, tag_flag=False)
+                ret = recognition.get_code_list()
+
             else:
-                ret = code_list_from_tags(src)
+                if self.tag_flag is True:
+                    ret = code_list_from_tags(src)
+                else:
+                    ret = self.code_list_from_df(src)
+
         elif isinstance(src, list):
             ret = src
         # elif isinstance(src, set):
@@ -215,11 +283,18 @@ class RecognitionStr:
 
         return ret
 
+    def code_list_from_df(self, column):
+        df = self.df_all
+        ret = []
+        if column in df.columns:
+            ret = df[df[column].isin([True])].index.tolist()
+        return ret
+
     def show(self):
         print(self.symbol)
         print(self.values)
 
-    def get_sort_list(self, sort, ascending):
+    def get_sort_list(self, sort, ascending, ids_sort=False):
 
         self.sort_list = self.code_list
 
@@ -253,6 +328,25 @@ class RecognitionStr:
                 df = df.sort_values(by=df_sort, ascending=df_ascending)
 
             self.sort_list = df.index.tolist()
+
+        if ids_sort is True:
+            if self.df_all is not None:
+                s0 = self.df_all.loc[self.sort_list, 'level3'].copy()
+                s1 = s0.drop_duplicates()
+                new = pd.Series()
+                for level3 in s1.values:
+                    s2 = s0[s0 == level3]
+                    new = new.append(s2)
+                s2 = s0[pd.isna(s0)]
+                new = new.append(s2)
+
+                new_list = new.keys().tolist()
+
+                if len(new_list) == len(self.sort_list):
+                    self.sort_list = new_list
+                else:
+                    print('len(new_list) != len(self.sort_list)')
+                    self.sort_list = []
 
         return self.sort_list
 
@@ -332,7 +426,7 @@ class RecognitionStr:
     def market2code(self, market):
         ret = []
         if self.code_all is None:
-            self.code_all = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
+            self.get_code_all()
         code_all = self.code_all
 
         if market == 'all':
@@ -386,7 +480,7 @@ class RecognitionStr:
         if self.sw_2021_dict is None:
             self.sw_2021_dict = load_json_txt('..\\basicData\\industry\\sw_2021_dict.txt')
 
-        ids_code = ''
+        ids_codes = []
         index = -1
         for key, name in self.sw_2021_name_dict.items():
             if key[-4:] == '0000':
@@ -399,17 +493,17 @@ class RecognitionStr:
             tmp_name = '%s:%s' % (flag, name)
 
             if tmp_name == ids_name:
-                ids_code = key
+                ids_codes.append(key)
                 index = flag * 2
-                break
 
         ret = []
         for key, value in self.sw_2021_dict.items():
             if value is None:
                 continue
 
-            if value[:index] == ids_code[:index]:
-                ret.append(key)
+            for ids_code in ids_codes:
+                if value[:index] == ids_code[:index]:
+                    ret.append(key)
         return ret
 
 
@@ -556,7 +650,8 @@ def industry_name2code(ids_names):
 
 if __name__ == '__main__':
 
-    l0 = RecognitionStr('hold')
-    code2 = l0.get_code_list()
-    print(code2)
+    # l0 = RecognitionStr('hold')
+    # code2 = l0.get_code_list()
+    # print(code2)
     # l0.show()
+    pass
