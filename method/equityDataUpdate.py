@@ -6,12 +6,15 @@ def eq_update():
     os.chdir("D:\\PycharmProjects\\stockAnalysis\\method")
 
     from method.fileMethod import load_json_txt
+    from method.logMethod import MainLog
     from request.requestEquityData import request_eq2mysql
     from request.requestDividendData import request_dv2mysql
 
     code_list = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
     request_eq2mysql(code_list)
-    # request_dv2mysql(code_list)
+    request_dv2mysql(code_list)
+
+    MainLog.write('..\\basicData\\dailyUpdate\\eq_update_log.txt', init=True)
 
 
 if __name__ == '__main__':
