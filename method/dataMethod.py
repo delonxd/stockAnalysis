@@ -121,7 +121,7 @@ def get_month_data(series: pd.Series, new_name):
     indexes = list()
     values = list()
 
-    for tup in series.iteritems():
+    for tup in series.items():
         date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
 
         if date0:
@@ -178,7 +178,7 @@ def get_month_delta(series: pd.Series, new_name, mode='QUARTERLY'):
     indexes = list()
     values = list()
 
-    for tup in series.iteritems():
+    for tup in series.items():
         date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
         if not year == date.year:
             month0 = 0
@@ -215,9 +215,10 @@ def sql2df(code):
     # print(df1)
     # print(df2)
     data = DataAnalysis(df1, df2, code=code)
+    data.add_dv_data(code)
     data.config_widget_data()
     data.add_eq_data(code)
-    data.add_dv_data(code)
+    # data.add_dv_data(code)
 
     # print(data.df.columns.values)
     # print(data.df['s_012_return_year'])
@@ -252,7 +253,7 @@ class DataAnalysis:
         res = list()
         sub = list()
         val = np.inf
-        for index, value in dt_fs.iteritems():
+        for index, value in dt_fs.items():
             if value > 2 * val:
                 res.append(sub)
                 sub = list()
@@ -405,6 +406,8 @@ class DataAnalysis:
             's_043_turnover_volume_ttm',
             'market_change_rate',
 
+            's_069_dividend_rate',
+
         ]
         for index in index_list2:
             self.mvs_add(self.get_column(df, index))
@@ -556,15 +559,16 @@ class DataAnalysis:
         self.add_df(df)
 
     def add_dv_data(self, code):
-        df = load_df_from_mysql(code, 'dv')
-        s1 = df.loc[:, 'originalValue'].dropna().copy()
+        df = load_df_from_mysql(code, 'dv', fields=['id', 'originalValue'])
+        s1 = df.loc[:, 'originalValue'].copy()
+        s1 = s1.replace(0, np.nan).dropna()
         s1 = s1.sort_index(ascending=False)
         s1.index = self.report_date2standard(s1.index)
         s1 = s1.drop('None', errors='ignore').dropna()
 
         if s1.index.is_unique is False:
             d0 = dict()
-            for index, value in s1.iteritems():
+            for index, value in s1.items():
                 if index in d0:
                     d0[index] = d0[index] + value
                 else:
@@ -577,7 +581,8 @@ class DataAnalysis:
         s3.name = 'dv_001_dividend_value'
 
         new_df = pd.DataFrame(s3)
-        self.add_df(new_df)
+        self.fs_add(new_df)
+        # self.add_df(new_df)
 
     def report_date2standard(self, s1):
         report_date = self.df_fs['reportDate'].copy().dropna()
@@ -586,7 +591,7 @@ class DataAnalysis:
         res = list()
         for date1 in s1:
             tmp = 'None'
-            for index, value in report_date.iteritems():
+            for index, value in report_date.items():
                 date2 = value[:10]
                 if date1 > date2:
                     break
@@ -604,7 +609,7 @@ class DataAnalysis:
         if column == 'dt_fs':
             dt_fs = df['reportDate'].copy().dropna()
             dict0 = dict()
-            for index, value in dt_fs.iteritems():
+            for index, value in dt_fs.items():
                 dict0[value[:10]] = index
 
             dt_fs = pd.Series(dict0, name=column)
@@ -828,15 +833,18 @@ class DataAnalysis:
             return self.regular_series(column, s2 - s1 + s3)
 
         elif column == 's_026_liquidation_asset':
+            s0 = self.smooth_data(column, 'id_011_bs_nraar')  # 应收票据及应收账款
+
             tmp = list()
             tmp.append(self.get_column(df, 's_010_cash_asset'))
             tmp.append(self.get_column(df, 's_011_insurance_asset'))
             tmp.append(self.get_column(df, 's_012_financial_asset'))
             tmp.append(self.get_column(df, 's_013_invest_asset') * 0.5)
-            tmp.append(self.get_column(df, 's_014_turnover_asset') * 0.3)
+            tmp.append(self.get_column(df, 's_014_turnover_asset') * 0.2)
             tmp.append(self.get_column(df, 's_015_inventory_asset') * 0.2)
             tmp.append(self.get_column(df, 's_021_fixed_asset') * 0.1)
             tmp.append(self.get_column(df, 's_023_liabilities') * -1)
+            tmp.append(s0 * 0.6)
 
             df1 = pd.concat(tmp, axis=1, sort=True)
             s1 = df1.apply(lambda x: x.sum(), axis=1)
@@ -1165,6 +1173,12 @@ class DataAnalysis:
             s3 = s1 / s2
             return self.regular_series(column, s3)
 
+        elif column == 's_069_dividend_rate':
+            s1 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
+            s2 = self.fs_to_mvs('dv_001_dividend_value')
+            s3 = s2 / s1
+            return self.regular_series(column, s3)
+
     @staticmethod
     def get_return_year(pe, rate):
         a = 1 + rate
@@ -1317,7 +1331,7 @@ class StandardFitModel:
         return s4
 
     @classmethod
-    def window_method2(cls, src, error):
+    def window_method2(cls, src, _):
         error = np.log(1.02) / 4
         arr_y = src
         val_nan = np.where(np.isnan(src))[0]
@@ -1428,7 +1442,7 @@ class DailyDataAnalysis(DataAnalysis):
             # 's_023_liabilities',
             # 's_024_real_liabilities',
             's_026_liquidation_asset',
-            's_061_total_return_rate',
+            # 's_061_total_return_rate',
             's_063_profit_salary2',
             # 's_066_profit_salary_min',
 
@@ -1438,6 +1452,8 @@ class DailyDataAnalysis(DataAnalysis):
             # 's_041_profit_adjust_ttm',
             # 's_045_main_cost_adjust',
             # 's_046_profit_adjust3',
+
+            # 'dv_001_dividend_value',
         ]
 
         df = self.df_fs
@@ -1456,10 +1472,10 @@ class DailyDataAnalysis(DataAnalysis):
             # 's_004_pe',
             's_025_real_cost',
             # 's_026_holder_return_rate',
-            's_027_pe_return_rate',
+            # 's_027_pe_return_rate',
             's_028_market_value',
-            's_037_real_pe_return_rate',
-            's_044_turnover_volume',
+            # 's_037_real_pe_return_rate',
+            # 's_044_turnover_volume',
         ]
         for index in index_list1:
             self.mvs_add(self.get_column(df, index))
