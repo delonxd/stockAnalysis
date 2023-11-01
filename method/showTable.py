@@ -17,12 +17,10 @@ def get_recent_index(df, column, default, shift=1):
     return val
 
 
-def generate_gui_table():
-    df = pd.DataFrame()
-
+def get_tags_index():
     path = "..\\basicData\\self_selected\\gui_tags.txt"
     src = load_json_txt(path)
-    tags_index = [
+    index_list = [
         '黑名单',
         '白名单',
         '自选',
@@ -40,6 +38,21 @@ def generate_gui_table():
         '新上市',
         '未上市',
     ]
+    for code, kws in src.items():
+        keyword_list = kws.split('#')
+        for key in keyword_list:
+            if key not in index_list:
+                if key != '':
+                    index_list.append(key)
+    return index_list
+
+
+def generate_gui_table():
+    df = pd.DataFrame()
+
+    path = "..\\basicData\\self_selected\\gui_tags.txt"
+    src = load_json_txt(path)
+    tags_index = get_tags_index()
 
     gui_dict = dict.fromkeys(tags_index, [])
     for code, kws in src.items():
@@ -206,27 +219,6 @@ def generate_show_table():
     s0 = pd.Series(df.index, index=df.index, name='code')
     df = pd.concat([s0, df], axis=1, sort=False)
 
-    rate_adj = df['gui_rate'].copy()
-    rate_adj[rate_adj > 25] = 25
-    s_predict = rate_adj * df['predict_delta'] / 36500 + 1
-    df['predict_adj'] = s_predict.fillna(value=1)
-    df['predict_ass'] = df['gui_assessment'] * df['predict_adj']
-
-    df['ass/equity'] = df['gui_assessment'] / df['equity']
-    df['real_c/ass'] = df['real_cost'] / df['predict_ass']
-    real_ass = df['predict_ass'] + df['predict_ass'] - (df['equity'] - df['liquidation'])
-    df['market_v/ass'] = df['market_value_1'] / real_ass * 2
-
-    df['tov/market_value'] = df['turnover_ttm20'] / df['market_value_1']
-    df['tov/ass'] = df['turnover_ttm20'] / df['predict_ass']
-
-    # df['r_discount'] = (df['market_value_1'] + df['equity']) / df['predict_ass']
-    df['r_discount1'] = df['market_value_1'] / (df['predict_ass'] + df['predict_ass'] + df['liquidation']) * 2
-    df['r_discount2'] = df['market_value_1'] / real_ass * 2
-
-    df['predict_profit'] = df['profit_salary_adj'] * df['predict_adj']
-    df['predict_discount'] = df['predict_profit'] / df['real_cost'] * 10
-
     order = [
         'code',
         'name',
@@ -239,6 +231,9 @@ def generate_show_table():
         'profit_salary_adj',
         'predict_profit',
         'predict_discount',
+
+        'dividend_value',
+        'dividend_return',
 
         'gui_rate',
         'r_discount1',
@@ -267,23 +262,6 @@ def generate_show_table():
         'update_recently',
         'gui_hold',
 
-        '黑名单',
-        '白名单',
-        '自选',
-        '非周期',
-        '基金',
-        'Toc',
-        '周期',
-        '疫情',
-        '忽略',
-        '国有',
-        '低价',
-        '电池',
-        '光伏',
-        '芯片',
-        '新上市',
-        '未上市',
-
         # 'key_remark',
         # 'remark',
 
@@ -300,7 +278,35 @@ def generate_show_table():
         'real_pe_return_rate',
     ]
 
-    df = df[order]
+    tags_index = get_tags_index()
+    pos = order.index('gui_hold') + 1
+    for tag in tags_index[::-1]:
+        order.insert(pos, tag)
+
+    df = df.reindex(columns=order)
+
+    rate_adj = df['gui_rate'].copy()
+    rate_adj[rate_adj > 25] = 25
+    s_predict = rate_adj * df['predict_delta'] / 36500 + 1
+    df['predict_adj'] = s_predict.fillna(value=1)
+    df['predict_ass'] = df['gui_assessment'] * df['predict_adj']
+
+    df['ass/equity'] = df['gui_assessment'] / df['equity']
+    df['real_c/ass'] = df['real_cost'] / df['predict_ass']
+    real_ass = df['predict_ass'] + df['predict_ass'] - (df['equity'] - df['liquidation'])
+    df['market_v/ass'] = df['market_value_1'] / real_ass * 2
+
+    df['tov/market_value'] = df['turnover_ttm20'] / df['market_value_1']
+    df['tov/ass'] = df['turnover_ttm20'] / df['predict_ass']
+
+    # df['r_discount'] = (df['market_value_1'] + df['equity']) / df['predict_ass']
+    df['r_discount1'] = df['market_value_1'] / (df['predict_ass'] + df['predict_ass'] + df['liquidation']) * 2
+    df['r_discount2'] = df['market_value_1'] / real_ass * 2
+
+    df['predict_profit'] = df['profit_salary_adj'] * df['predict_adj']
+    df['predict_discount'] = df['predict_profit'] / df['real_cost'] * 10
+
+    df['dividend_return'] = df['dividend_value'] / df['market_value_1']
 
     ################################################################################################################
 
@@ -334,6 +340,8 @@ def generate_show_table_mask(df):
         'real_pe_return_rate',
         'counter_delta',
         'total_return_rate',
+
+        'dividend_return',
     ]:
         df[column] = df[column].apply(lambda x: '%.2f%%' % (x * 100))
 
@@ -353,6 +361,7 @@ def generate_show_table_mask(df):
         'liquidation',
         # 'salary',
         'predict_delta',
+        'dividend_value',
     ]:
         df[column] = df[column].apply(lambda x: format(x, '0,.0f'))
 
