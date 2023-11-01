@@ -158,6 +158,8 @@ class MainWidget(QWidget):
             self.equity_change_widget: QPushButton('equity_change'),
         }
 
+        self.page_button1 = QPushButton('<<')
+        self.page_button2 = QPushButton('>>')
         # self.window2 = ShowPlot()
 
         self.counter_info = None
@@ -259,10 +261,12 @@ class MainWidget(QWidget):
         # layout2.addStretch(1)
         layout2.addWidget(self.bottom_label1, 1, Qt.AlignLeft | Qt.AlignTop)
 
+        layout2.addWidget(self.page_button1, 0, Qt.AlignCenter)
         for widget, button in self.widgets_button.items():
             layout2.addWidget(button, 0, Qt.AlignCenter)
 
         layout2.addWidget(self.button12, 0, Qt.AlignCenter)
+        layout2.addWidget(self.page_button2, 0, Qt.AlignCenter)
 
         layout2.addWidget(self.bottom_label2, 1, Qt.AlignRight | Qt.AlignTop)
         # layout2.addStretch(1)
@@ -299,6 +303,8 @@ class MainWidget(QWidget):
             button.clicked.connect(self.get_show_func(widget))
             widget.close_signal.connect(self.sub_widget_close)
 
+        self.page_button1.clicked.connect(self.code_widget.table_view.backward)
+        self.page_button2.clicked.connect(self.code_widget.table_view.forward)
         # self.button1.clicked.connect(self.export_style)
         # self.button2.clicked.connect(self.save_codes)
         # self.button3.clicked.connect(self.compare_codes)
@@ -841,6 +847,7 @@ class MainWidget(QWidget):
             '芯片': '芯片',
             '新上市': '新上市',
             '未上市': '未上市',
+            '买入': '买入',
         }
 
         for key, value in tmp.items():
