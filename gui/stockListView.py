@@ -395,6 +395,7 @@ class GenerateCodeListWidget(QWidget):
             '9',
         ]
         obj.addItems(flags)
+        obj.setMaxVisibleItems(20)
         self.labels.append(QLabel('mission: '))
         self.editor.append(obj)
 
@@ -645,12 +646,12 @@ class GenerateCodeListWidget(QWidget):
             editor_dict['ascending'] = '[false, true]'
 
         elif mission == '8_new_sifted':
-            editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate>=13\n' \
-                                    '&cnd:predict_discount>7\n' \
+            editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate>=12\n' \
+                                    '&cnd:predict_discount>9\n' \
                                     '-光伏-电池-新上市\n' \
                                     '-backup:20230816:\n' \
                                     '{白名单&mkt:main&cnd:gui_rate>=13\n' \
-                                    '&cnd:predict_discount>7\n' \
+                                    '&cnd:predict_discount>9\n' \
                                     '-光伏-电池-新上市}'
 
             editor_dict['sort'] = '["gui_rate", "code"]'
