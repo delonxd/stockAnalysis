@@ -416,7 +416,23 @@ class RecognitionStr:
         if column not in df.columns:
             return ret
 
-        string = "df['%s'] %s %s" % (column, symbol, split[1])
+        date_columns = [
+            'counter_date',
+            'recent_date',
+            'ipo_date',
+            'report_date',
+            'counter_last_date',
+        ]
+
+        value = split[1]
+        if column in date_columns:
+            if len(value) != 8:
+                return ret
+
+            value = '%s-%s-%s' % (value[:4], value[4:6], value[6:8])
+            string = "df['%s'] %s '%s'" % (column, symbol, value)
+        else:
+            string = "df['%s'] %s %s" % (column, symbol, value)
         tmp = eval(string)
 
         df1 = df[tmp].copy()
