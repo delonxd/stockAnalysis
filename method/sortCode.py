@@ -181,7 +181,7 @@ def sort_hold():
         name = name_dict[code]
 
         tmp = [code, name, number, value, i_value, price, mkt, ass]
-        print(tmp)
+        MainLog.add_log(repr(tmp))
         ret.append(tmp)
     ret.sort(key=lambda x: x[3], reverse=True)
 
