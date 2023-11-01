@@ -9,7 +9,7 @@ import pandas as pd
 @try_request(None)
 def request_dividend(code, ipo_date=None):
     token = "f819be3a-e030-4ff0-affe-764440759b5c"
-    url = 'https://open.lixinger.com/api/cn/company/dividend-and-alloment'
+    url = 'https://open.lixinger.com/api/cn/company/dividend'
 
     ret = []
 
@@ -54,6 +54,8 @@ def config_dv_res(data):
     check_field = 'id'
 
     res_df = pd.DataFrame().from_dict(data, orient='columns')
+    if 'dividendAmount' in res_df.columns:
+        res_df['originalValue'] = res_df['dividendAmount']
     res_df = res_df.reindex(header_df.columns[2:], axis=1)
 
     s1 = res_df['date'].map(lambda x: x[:10])
@@ -120,7 +122,7 @@ def request_dv2mysql(stock_codes):
 
 if __name__ == '__main__':
     # pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', 3)
+    # pd.set_option('display.max_rows', 3)
     # pd.set_option('display.width', 10000)
 
     # list1 = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
