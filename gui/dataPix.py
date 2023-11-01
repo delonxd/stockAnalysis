@@ -18,6 +18,8 @@ import pandas as pd
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from method.fileMethod import load_pkl
 
 
 class DataPix:
@@ -390,7 +392,7 @@ class DataPix:
 
             width = pix_painter.fontMetrics().width(txt) + 2
             height = pix_painter.fontMetrics().height() + 2
-            rect = QRect(
+            rect = QRectF(
                 x - width / 2, self.data_rect.bottom() + 1,
                 width, height)
 
@@ -401,7 +403,7 @@ class DataPix:
             x = self.x_data2px(datetime.date())
 
             pix_painter.setPen(pen2)
-            pix_painter.drawLine(QPoint(x, d_top), QPoint(x, d_bottom))
+            pix_painter.drawLine(QPointF(x, d_top), QPointF(x, d_bottom))
 
         pix_painter.end()
 
@@ -426,7 +428,7 @@ class DataPix:
 
             width = pix_painter.fontMetrics().width(txt) + 2
             height = pix_painter.fontMetrics().height() + 2
-            rect = QRect(
+            rect = QRectF(
                 self.data_rect.right() + 1, y - height / 2,
                 width, height)
 
@@ -437,7 +439,7 @@ class DataPix:
                 pix_painter.setPen(pen3)
             else:
                 pix_painter.setPen(pen2)
-            pix_painter.drawLine(QPoint(d_left, y), QPoint(d_right, y))
+            pix_painter.drawLine(QPointF(d_left, y), QPointF(d_right, y))
 
             counter += 1
 
@@ -464,7 +466,7 @@ class DataPix:
 
         pen = QPen(Qt.red, 1, Qt.DotLine)
         pix_painter.setPen(pen)
-        pix_painter.drawLine(QPoint(d_left, y1), QPoint(d_right, y2))
+        pix_painter.drawLine(QPointF(d_left, y1), QPointF(d_right, y2))
 
         # 20% 辅助线
         ratio_year = 1.2
@@ -475,7 +477,7 @@ class DataPix:
 
         pen = QPen(Qt.red, 1, Qt.DotLine)
         pix_painter.setPen(pen)
-        pix_painter.drawLine(QPoint(d_left, y1), QPoint(d_right, y2))
+        pix_painter.drawLine(QPointF(d_left, y1), QPointF(d_right, y2))
 
         # 10% 辅助线
         ratio_year = 1.1
@@ -486,7 +488,7 @@ class DataPix:
 
         pen = QPen(Qt.blue, 1, Qt.DotLine)
         pix_painter.setPen(pen)
-        pix_painter.drawLine(QPoint(d_left, y1), QPoint(d_right, y2))
+        pix_painter.drawLine(QPointF(d_left, y1), QPointF(d_right, y2))
 
         pix_painter.end()
 
@@ -506,7 +508,7 @@ class DataPix:
             x = self.x_data2px(dt.datetime.strptime(date_str, "%Y-%m-%d").date())
 
             pix_painter.setPen(pen1)
-            pix_painter.drawLine(QPoint(x, d_top), QPoint(x, d_bottom))
+            pix_painter.drawLine(QPointF(x, d_top), QPointF(x, d_bottom))
 
         pix_painter.end()
 
@@ -556,7 +558,7 @@ class DataPix:
         px_x = self.x_value2px_vector(val_x)
 
         top = self.data_rect.top()
-        p_list1 = [QPoint(x, top) for x in px_x]
+        p_list1 = [QPointF(x, top) for x in px_x]
         total = np.zeros(df0.index.size)
 
         c_list = df0.columns.to_list()
@@ -569,7 +571,7 @@ class DataPix:
             df_point['px_x'] = px_x
             df_point['px_y'] = percent * self.data_rect.height() + self.data_rect.top()
 
-            p_list2 = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
+            p_list2 = [QPointF(tup[1], tup[2]) for tup in df_point.itertuples()]
 
             p_list1.reverse()
             p_list = p_list1 + p_list2
@@ -585,7 +587,7 @@ class DataPix:
             pix_painter.setBrush(brush)
             pix_painter.setPen(pen)
 
-            polygon = QPolygon(p_list)
+            polygon = QPolygonF(p_list)
             pix_painter.drawPolygon(polygon)
             pix_painter.end()
             p_list1 = p_list2
@@ -619,7 +621,7 @@ class DataPix:
             df_point.dropna(inplace=True)
 
             try:
-                point_list = [QPoint(tup[1], tup[2]) for tup in df_point.itertuples()]
+                point_list = [QPointF(tup[1], tup[2]) for tup in df_point.itertuples()]
             except Exception as e:
                 print(df_point)
                 print(e)
@@ -628,7 +630,7 @@ class DataPix:
                 if point_list:
                     x = point_list[-1].x() + 30
                     y = point_list[-1].y()
-                    point_list.append(QPoint(x, y))
+                    point_list.append(QPointF(x, y))
 
             # draw line
             pix_painter = QPainter(pix)
@@ -643,7 +645,7 @@ class DataPix:
                 for point in point_list:
                     point2 = point
                     if point1:
-                        point3 = QPoint(point1.x(), point2.y())
+                        point3 = QPointF(point1.x(), point2.y())
                         pix_painter.drawLine(point1, point3)
                         pix_painter.drawLine(point3, point2)
                     point1 = point2
@@ -702,8 +704,8 @@ class DataPix:
         pen = QPen(Qt.green, 1, Qt.SolidLine)
         pix_painter.setPen(pen)
         pix_painter.drawLine(
-            QPoint(point1[0], point1[1]),
-            QPoint(point2[0], point2[1]),
+            QPointF(point1[0], point1[1]),
+            QPointF(point2[0], point2[1]),
         )
         pix_painter.end()
 
@@ -776,8 +778,8 @@ class DataPix:
         pen = QPen(Qt.gray, thick, Qt.SolidLine)
         pix_painter.setPen(pen)
 
-        pix_painter.drawLine(QPoint(x, d_top), QPoint(x, d_bottom))
-        pix_painter.drawLine(QPoint(d_left, y), QPoint(d_right, y))
+        pix_painter.drawLine(QPointF(x, d_top), QPointF(x, d_bottom))
+        pix_painter.drawLine(QPointF(d_left, y), QPointF(d_right, y))
         pix_painter.end()
 
         self.draw_tooltip(px_x0, self.data_rect.bottom() + 1, d0, pix_show)
@@ -842,7 +844,7 @@ class DataPix:
         pix_painter.setFont(QFont('Consolas', 10))
 
         metrics = pix_painter.fontMetrics()
-        rect = QRect(x, y, metrics.width(text) + 2, metrics.height() + 2)
+        rect = QRectF(x, y, metrics.width(text) + 2, metrics.height() + 2)
 
         # draw_rect
         brush = QBrush(Qt.SolidPattern)
@@ -868,7 +870,7 @@ class DataPix:
         metrics = pix_painter.fontMetrics()
         width = metrics.width(text)
         height = metrics.height()
-        rect = QRect(x - width - 2, y - height - 2,  width + 2, height + 2)
+        rect = QRectF(x - width - 2, y - height - 2,  width + 2, height + 2)
 
         # draw_rect
         brush = QBrush(Qt.SolidPattern)
@@ -1029,3 +1031,32 @@ class DataPix:
                 data.scale_max / data.scale_min)) * self.data_rect.height() / data.val_delta + self.data_rect.top()
         return res
 
+
+class TestDataPixWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+        style_df = load_pkl('..\\gui\\styles\\style_default.pkl')
+        data_pix = DataPix(code='600438', style_df=style_df)
+        self.label = QLabel(self)
+
+        self.setWindowTitle('main_window')
+        self.resize(1600, 900)
+
+        layout1 = QHBoxLayout()
+        layout1.addStretch(1)
+        # layout.addWidget(self.tree, 0, Qt.AlignCenter)
+        layout1.addWidget(self.label, 0, Qt.AlignCenter)
+        layout1.addStretch(1)
+
+        self.setLayout(layout1)
+        self.label.setPixmap(data_pix.pix_show[0])
+
+
+if __name__ == '__main__':
+    import sys
+    app = QApplication(sys.argv)
+    # main = MainWindow()
+    main = TestDataPixWidget()
+    main.showMaximized()
+    # main.showMinimized()
+    sys.exit(app.exec_())
