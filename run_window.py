@@ -12,8 +12,6 @@ if __name__ == '__main__':
     import warnings
     from scipy.optimize import OptimizeWarning
     warnings.simplefilter("ignore", OptimizeWarning)
-
-    import warnings
     warnings.simplefilter(action='ignore', category=FutureWarning)
 
     # pd.set_option('display.max_columns', None)
