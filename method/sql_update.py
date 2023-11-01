@@ -1,7 +1,7 @@
 from method.logMethod import MainLog
 
 
-def update_latest_data(code_list, mvs_flag=True):
+def update_latest_data(code_list, fs_flag=True, mvs_flag=True):
     from request.requestData import request2mysql_daily
 
     list0 = []
@@ -32,13 +32,14 @@ def update_latest_data(code_list, mvs_flag=True):
         MainLog.add_log('group %s/%s' % (index, end))
         MainLog.add_split('-')
 
-        new_data = request2mysql_daily(
-            stock_codes=stock_codes,
-            date='latest',
-            data_type='fs',
-        )
+        if fs_flag is True:
+            new_data = request2mysql_daily(
+                stock_codes=stock_codes,
+                date='latest',
+                data_type='fs',
+            )
 
-        ret.extend(new_data)
+            ret.extend(new_data)
 
         if mvs_flag is True:
             MainLog.add_split('-')
@@ -53,7 +54,7 @@ def update_latest_data(code_list, mvs_flag=True):
     return ret
 
 
-def update_all_data(code_list, start_date, mvs_flag=True):
+def update_all_data(code_list, start_date, fs_flag=True, mvs_flag=True):
     from request.requestData import request2mysql
 
     index = 0
@@ -67,13 +68,17 @@ def update_all_data(code_list, start_date, mvs_flag=True):
         MainLog.add_split('#')
         MainLog.add_log('%s/%s --> %s' % (index, end, code))
 
-        new_data = request2mysql(
-            stock_code=code,
-            data_type='fs',
-            start_date=start_date,
-        )
+        if fs_flag is True:
+            new_data = request2mysql(
+                stock_code=code,
+                data_type='fs',
+                start_date=start_date,
+            )
 
-        MainLog.add_split('-')
+            if new_data is not None:
+                ret.append(code)
+
+            MainLog.add_split('-')
 
         if mvs_flag is True:
             request2mysql(
@@ -83,9 +88,6 @@ def update_all_data(code_list, start_date, mvs_flag=True):
             )
 
         index += 1
-
-        if new_data is not None:
-            ret.append(code)
 
     return ret
 
