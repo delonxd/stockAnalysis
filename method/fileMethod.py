@@ -163,7 +163,7 @@ def add_new_stock_tag():
     list1 = []
     list2 = []
     today = dt.date.today()
-    for code, date in df1['ipo_date'].iteritems():
+    for code, date in df1['ipo_date'].items():
         if pd.isna(date):
             list1.append(code)
         else:
