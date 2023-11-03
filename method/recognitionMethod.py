@@ -333,14 +333,12 @@ class RecognitionStr:
             if self.df_all is not None:
                 s0 = self.df_all.loc[self.sort_list, 'level3'].copy()
                 s1 = s0.drop_duplicates()
-                new = pd.Series()
+                new_list = []
                 for level3 in s1.values:
                     s2 = s0[s0 == level3]
-                    new = new.append(s2)
+                    new_list.extend(s2.keys().tolist())
                 s2 = s0[pd.isna(s0)]
-                new = new.append(s2)
-
-                new_list = new.keys().tolist()
+                new_list.extend(s2.keys().tolist())
 
                 if len(new_list) == len(self.sort_list):
                     self.sort_list = new_list
