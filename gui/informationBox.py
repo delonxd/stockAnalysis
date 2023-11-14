@@ -12,7 +12,7 @@ class InformationBox:
         self.parent = parent
         self.background = None
 
-    def load_value(self, d1, d2, d_report, window_flag):
+    def load_value(self, d1, d2, d_report, window_flag, page):
         df = self.parent.ds_df
         s1 = df.loc[d1, :].copy() if d1 in df.index else pd.Series()
         s2 = df.loc[d2, :].copy() if d2 in df.index else pd.Series()
@@ -47,6 +47,15 @@ class InformationBox:
         box.sort(key=lambda x: x[0])
 
         res = list()
+
+        if page == 0:
+            return res
+
+        max_row = 52
+        start = (page-1) * max_row
+        end = page * max_row
+        box = box[start:end]
+
         res.append(('公布日期: %s' % d_report, QPen(Qt.red, 1, Qt.SolidLine)))
         res.append(('报告日期: %s' % d2, QPen(Qt.white, 1, Qt.SolidLine)))
         res.append(('当前日期: %s' % d1, QPen(Qt.white, 1, Qt.SolidLine)))
@@ -84,6 +93,10 @@ class InformationBox:
 
     @staticmethod
     def draw_text(text_list):
+        if len(text_list) == 0:
+            pix = QPixmap(900, 1000)
+            pix.fill(QColor(0, 0, 0, 0))
+            return pix
 
         pix = QPixmap(900, 1000)
         pix.fill(QColor(0, 0, 0, 255))

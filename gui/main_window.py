@@ -185,7 +185,7 @@ class MainWidget(QWidget):
         self.style_widget.signal_cur.connect(self.change_style_current)
 
         self.cross = False
-        self.box = True
+        self.box = 1
         self.draw_flag = False
         self.draw_pos = None
         self.ratio_dict = dict()
@@ -1165,7 +1165,7 @@ class MainWidget(QWidget):
         elif e.key() == Qt.Key_Space:
             self.cross = not self.cross
         elif e.key() == Qt.Key_B:
-            self.box = not self.box
+            self.box = (self.box + 1) % 3
         elif e.key() == Qt.Key_S:
             GuiLog.write(self.log_path)
             return

@@ -665,8 +665,8 @@ class DataPix:
             y = self.y_data2px(data_y, ds)
             if np.isnan(y):
                 return
-        self.draw_cross(x, y, False, True, 2, None)
-        self.draw_cross(x, y, False, True, 3, None)
+        self.draw_cross(x, y, False, 1, 2, None)
+        self.draw_cross(x, y, False, 1, 3, None)
 
     def draw_cross(self, x, y, cross_flag, box_flag, window_flag, draw_pos):
         if x is None and y is None:
@@ -680,7 +680,7 @@ class DataPix:
 
         x, y, d0, d1, d2, d_report = self.get_d1_d2(x, y)
         info_box = InformationBox(parent=self)
-        box = info_box.draw_pix(d1, d2, d_report, window_flag)
+        box = info_box.draw_pix(d1, d2, d_report, window_flag, box_flag)
 
         thick = 1
         show = self.draw_sub_cross(
@@ -688,7 +688,7 @@ class DataPix:
             d0, d1, d2,
             cross_flag,
             thick,
-            box_flag,
+            # box_flag,
             box,
             window_flag,
         )
@@ -752,7 +752,7 @@ class DataPix:
             d0, d1, d2,
             state,
             thick,
-            box_flag,
+            # box_flag,
             box,
             window_flag,
     ):
@@ -788,10 +788,9 @@ class DataPix:
 
         # self.draw_information(d1, d2, pix_show)
 
-        if box_flag is True:
-            pix_painter = QPainter(pix_show)
-            pix_painter.drawPixmap(10, 10, box)
-            pix_painter.end()
+        pix_painter = QPainter(pix_show)
+        pix_painter.drawPixmap(10, 10, box)
+        pix_painter.end()
 
         return pix_show
 
