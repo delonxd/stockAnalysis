@@ -7,16 +7,18 @@ import pandas as pd
 from method.logMethod import MainLog
 
 
-def dump_pkl(path, data):
+def dump_pkl(path, data, log=True):
     with open(path, "wb") as f:
         pickle.dump(data, f)
-    MainLog.add_log('dump pkl --> %s' % path)
+    if log:
+        MainLog.add_log('dump pkl --> %s' % path)
 
 
-def load_pkl(path):
+def load_pkl(path, log=True):
     with open(path, "rb") as f:
         ret = pickle.load(f)
-    MainLog.add_log('load pkl --> %s' % path)
+    if log:
+        MainLog.add_log('load pkl --> %s' % path)
     return ret
 
 
