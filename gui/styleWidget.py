@@ -382,7 +382,7 @@ class StyleWidget(QWidget):
 
         row.index = [index_name]
 
-        new_df = df.append(row)
+        new_df = pd.concat([df, row])
         self.refresh_style(new_df)
 
     def drop_row(self):
@@ -612,11 +612,68 @@ def save_default_style(df):
         pickle.dump(df, pk_f)
 
 
+# def add_futures_style_df():
+#
+#     from method.fileMethod import load_pkl
+#     path = "..\\basicData\\futures\\futures_prices_history.pkl"
+#     df = load_pkl(path, log=False)
+#     df = df.dropna(axis=0, how='all')
+#     columns = []
+#
+#     for index, val in enumerate(df.columns.tolist()):
+#         str1 = str(index + 1).rjust(2, '0')
+#         str2 = val.split('_')[0]
+#         str3 = val.split('_')[1]
+#         column = 'futures_%s_%s' % (str1, str2)
+#         columns.append((str1, str2, str3))
+#
+#     df = load_default_style()
+#
+#     index_list = []
+#     for str1, str2, str3 in columns:
+#         index_name = 'futures_%s_%s' % (str1, str2)
+#         index_list.append(index_name)
+#
+#         show_name = 'f_%s_%s' % (str1, str3)
+#         if index_name in df.index:
+#             continue
+#
+#         src = 'futures_51_AU0'
+#         row = df.loc[[src], :].copy()
+#
+#         row['default_ds'] = False
+#         row['selected'] = False
+#
+#         row['show_name'] = show_name
+#         row['index_name'] = index_name
+#
+#         row['txt_CN'] = index_name
+#         row['sql_type'] = ''
+#         row['sheet_name'] = ''
+#         row['api'] = ''
+#
+#         row.index = [index_name]
+#
+#         df = pd.concat([df, row])
+#
+#     reindex_list = []
+#     for index in df.index.tolist():
+#         if index not in index_list:
+#             reindex_list.append(index)
+#
+#         if index == 'eq_002_rate':
+#             reindex_list.extend(index_list)
+#
+#     df = df.reindex(index=reindex_list)
+#
+#     save_default_style(df)
+
+
 if __name__ == '__main__':
     import sys
-    # pd.set_option('display.max_columns', None)
-    # pd.set_option('display.max_rows', None)
-    # pd.set_option('display.width', 100000)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.width', 100000)
 
     app = QApplication(sys.argv)
     main = StyleWidget()
@@ -625,4 +682,5 @@ if __name__ == '__main__':
     main.load_default()
     sys.exit(app.exec_())
 
+    # add_futures_style_df()
     pass
