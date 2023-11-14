@@ -2,6 +2,7 @@ from method.sqlMethod import get_data_frame, sql_if_table_exists
 from request.requestData import get_cursor
 from request.requestData import get_header_df
 from discount.discountModel import ValueModel
+from method.fileMethod import load_pkl
 
 import pandas as pd
 import numpy as np
@@ -218,6 +219,8 @@ def sql2df(code):
     data.add_dv_data(code)
     data.config_widget_data()
     data.add_eq_data(code)
+    data.add_mir_data()
+    data.add_futures_data()
     # data.add_dv_data(code)
 
     # print(data.df.columns.values)
@@ -399,7 +402,7 @@ class DataAnalysis:
             's_028_market_value',
             # 's_029_return_predict',
 
-            'mir_y10',
+            # 'mir_y10',
             's_034_real_pe',
             's_035_pe2rate',
             's_036_real_pe2rate',
@@ -584,6 +587,30 @@ class DataAnalysis:
         self.fs_add(new_df)
         # self.add_df(new_df)
 
+    def add_mir_data(self):
+        # path = "..\\basicData\\nationalDebt\\mir_y10.txt"
+        path = "..\\basicData\\nationalDebt\\mir_y10_akshare.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            res = json.loads(f.read())
+
+        s0 = self.regular_series('mir_y10', pd.Series(res))
+        df = pd.DataFrame(s0)
+        self.add_df(df)
+
+    def add_futures_data(self):
+        path = "..\\basicData\\futures\\futures_prices_history.pkl"
+        df = load_pkl(path, log=False)
+        df = df.dropna(axis=0, how='all')
+        columns = []
+
+        for index, val in enumerate(df.columns.tolist()):
+            str1 = str(index+1).rjust(2, '0')
+            str2 = val.split('_')[0]
+            column = 'futures_%s_%s' % (str1, str2)
+            columns.append(column)
+        df.columns = columns
+        self.add_df(df)
+
     def report_date2standard(self, s1):
         report_date = self.df_fs['reportDate'].copy().dropna()
         report_date = report_date.sort_index(ascending=False)
@@ -621,11 +648,12 @@ class DataAnalysis:
             dt_mvs = pd.Series(index, index=index, name=column)
             return dt_mvs
 
-        elif column == 'mir_y10':
-            path = "..\\basicData\\nationalDebt\\mir_y10.txt"
-            with open(path, "r", encoding="utf-8", errors="ignore") as f:
-                res = json.loads(f.read())
-            return self.regular_series(column, pd.Series(res))
+        # elif column == 'mir_y10':
+        #     # path = "..\\basicData\\nationalDebt\\mir_y10.txt"
+        #     path = "..\\basicData\\nationalDebt\\mir_y10_akshare.txt"
+        #     with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        #         res = json.loads(f.read())
+        #     return self.regular_series(column, pd.Series(res))
 
         elif column == 'market_change_rate':
             path = "..\\basicData\\dailyUpdate\\latest\\a007_change_rate.txt"
