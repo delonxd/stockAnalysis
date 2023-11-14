@@ -106,7 +106,8 @@ def sql_format_df(df):
         if df.dtypes[column] == 'int64':
             df[column] = df[column].astype('float64')
 
-    result = df.where(df.notnull(), None)
+    # result = df.where(df.notnull(), None)
+    result = df.replace(np.nan, None)
     return result
 
 
