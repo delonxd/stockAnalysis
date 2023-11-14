@@ -1,4 +1,7 @@
 from request.requestBasicData import request_basic
+from request.requestEquityData import request_eq2mysql
+from request.requestDividendData import request_dv2mysql
+from request.requestMirData import request_mir_y10
 from method.fileMethod import *
 from method.sql_update import update_latest_data
 from method.sql_update import update_all_data
@@ -12,6 +15,7 @@ import numpy as np
 import os
 import pandas as pd
 import datetime as dt
+import time
 
 
 def basic_daily_update(dir_name):
@@ -27,20 +31,76 @@ def basic_daily_update(dir_name):
     return all_codes, name_dict, ipo_dates
 
 
-def mysql_daily_update(dir_name, all_codes, ipo_dates):
+# def mysql_daily_update(dir_name, all_codes, ipo_dates):
+#     MainLog.add_split('#')
+#
+#     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
+#     ret1 = []
+#     ret2 = []
+#
+#     # industry_dict = request_industry_sample()
+#     # res = json.dumps(industry_dict, indent=4, ensure_ascii=False)
+#     # file = '%s\\industry_dict.txt' % res_dir
+#     # with open(file, "w", encoding='utf-8') as f:
+#     #     f.write(res)
+#
+#     # code_list = get_part_codes(code_list)
+#
+#     ################################################################################################################
+#     new_codes = []
+#     for code, date in ipo_dates.items():
+#         if not date:
+#             new_codes.append(code)
+#         elif date > '2023-01-01':
+#             new_codes.append(code)
+#
+#     MainLog.add_log('Length of all codes: %s' % len(all_codes))
+#     MainLog.add_log('Length of new codes: %s' % len(new_codes))
+#
+#     weekday = dt.date.today().weekday()
+#     mvs_flag = True
+#     if weekday in [5, 6]:
+#         mvs_flag = False
+#
+#     ret1 = update_all_data(new_codes, start_date='2014-01-01', mvs_flag=mvs_flag)
+#     ret2 = update_latest_data(all_codes, mvs_flag=mvs_flag)
+#     updated_code = list(set(ret1 + ret2))
+#     updated_code.sort()
+#
+#     ################################################################################################################
+#
+#     MainLog.add_split('#')
+#     MainLog.add_log('new updated: %s' % len(updated_code))
+#     MainLog.add_log('generate code_latest_update.txt')
+#
+#     # res = json.dumps(updated_code, indent=4, ensure_ascii=False)
+#     # file = '%s\\code_latest_update.txt' % res_dir
+#     # with open(file, "w", encoding='utf-8') as f:
+#     #     f.write(res)
+#
+#     write_json_txt('%s\\s004_code_latest_update.txt' % res_dir, updated_code)
+#
+#     ################################################################################################################
+#
+#     for code in updated_code:
+#         MainLog.add_split('#')
+#         request2mysql(
+#             stock_code=code,
+#             data_type='fs',
+#             start_date='2014-01-01',
+#         )
+#
+#     MainLog.add_log('mysql_daily_update complete')
+#     MainLog.add_split('#')
+
+
+def mysql_daily_update2(dir_name, all_codes, ipo_dates):
     MainLog.add_split('#')
 
     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
+
     ret1 = []
     ret2 = []
-
-    # industry_dict = request_industry_sample()
-    # res = json.dumps(industry_dict, indent=4, ensure_ascii=False)
-    # file = '%s\\industry_dict.txt' % res_dir
-    # with open(file, "w", encoding='utf-8') as f:
-    #     f.write(res)
-
-    # code_list = get_part_codes(code_list)
 
     ################################################################################################################
     new_codes = []
@@ -53,38 +113,40 @@ def mysql_daily_update(dir_name, all_codes, ipo_dates):
     MainLog.add_log('Length of all codes: %s' % len(all_codes))
     MainLog.add_log('Length of new codes: %s' % len(new_codes))
 
-    weekday = dt.date.today().weekday()
-    mvs_flag = True
-    if weekday in [5, 6]:
-        mvs_flag = False
-
-    ret1 = update_all_data(new_codes, start_date='2014-01-01', mvs_flag=mvs_flag)
-    ret2 = update_latest_data(all_codes, mvs_flag=mvs_flag)
-    updated_code = list(set(ret1 + ret2))
-    updated_code.sort()
+    ret1 = update_latest_data(all_codes, mvs_flag=False)
+    MainLog.add_log('update latest data complete')
 
     ################################################################################################################
+
+    refresh = list(set(new_codes + ret1))
+    refresh.sort()
 
     MainLog.add_split('#')
-    MainLog.add_log('new updated: %s' % len(updated_code))
-    MainLog.add_log('generate code_latest_update.txt')
+    MainLog.add_log('refresh codes: %s' % len(refresh))
 
-    # res = json.dumps(updated_code, indent=4, ensure_ascii=False)
-    # file = '%s\\code_latest_update.txt' % res_dir
-    # with open(file, "w", encoding='utf-8') as f:
-    #     f.write(res)
+    ret2 = update_all_data(refresh, start_date='2014-01-01', mvs_flag=False)
+    ret = list(set(ret1 + ret2))
 
-    write_json_txt('%s\\s004_code_latest_update.txt' % res_dir, updated_code)
+    MainLog.add_log('refresh complete')
 
     ################################################################################################################
 
-    for code in updated_code:
+    write_json_txt('%s\\s004_code_latest_update.txt' % res_dir, ret)
+    MainLog.add_log('fs data complete')
+    MainLog.add_split('#')
+
+    ################################################################################################################
+
+    weekday = dt.date.today().weekday()
+    if weekday not in [5, 6]:
+
+        update_latest_data(all_codes, fs_flag=False)
+        update_all_data(new_codes, start_date='2014-01-01', fs_flag=False)
+
+        MainLog.add_log('mvs data complete')
         MainLog.add_split('#')
-        request2mysql(
-            stock_code=code,
-            data_type='fs',
-            start_date='2014-01-01',
-        )
+
+    ################################################################################################################
 
     MainLog.add_log('mysql_daily_update complete')
     MainLog.add_split('#')
@@ -127,14 +189,15 @@ def daily_analysis(dir_name, all_codes):
         's_025_real_cost',
         's_026_liquidation_asset',
         # 's_026_holder_return_rate',
-        's_027_pe_return_rate',
+        # 's_027_pe_return_rate',
         's_028_market_value',
-        's_037_real_pe_return_rate',
+        # 's_037_real_pe_return_rate',
         # 'id_048_mvs_ta',
-        's_044_turnover_volume',
-        's_061_total_return_rate',
+        # 's_044_turnover_volume',
+        # 's_061_total_return_rate',
         's_063_profit_salary2',
         # 's_066_profit_salary_min',
+        'dv_001_dividend_value',
     ]
 
     index = 0
@@ -166,6 +229,7 @@ def daily_analysis(dir_name, all_codes):
             df2 = load_df_from_mysql(code, 'mvs', fields=fields)
 
             data = DailyDataAnalysis(df1, df2)
+            data.add_dv_data(code)
             data.config_daily_data()
 
             df = data.df[columns].copy()
@@ -231,33 +295,34 @@ def generate_daily_table(dir_name):
     for file in os.listdir(sub_dir):
         res.extend(load_pkl('%s\\%s' % (sub_dir, file)))
 
-    s1 = sum_value(res, ['s_028_market_value'])
-    s2 = sum_value(res, ['s_044_turnover_volume'])
-    s2 = s2.rolling(20, min_periods=1).mean()
-
-    s3 = (s2 / s1).dropna().to_dict()
-    write_json_txt('%s\\a007_change_rate.txt' % daily_dir, s3)
+    # s1 = sum_value(res, ['s_028_market_value'])
+    # s2 = sum_value(res, ['s_044_turnover_volume'])
+    # s2 = s2.rolling(20, min_periods=1).mean()
+    #
+    # s3 = (s2 / s1).dropna().to_dict()
+    # write_json_txt('%s\\a007_change_rate.txt' % daily_dir, s3)
 
     end = len(res)
     for index, tmp in enumerate(res):
         code = tmp[0]
         src = tmp[1]
+
         MainLog.add_log_accurate('Reading: %s/%s --> %s' % (index, end, code))
 
-        val = get_recent_val(src, 's_037_real_pe_return_rate', -np.inf)
-        df.loc[code, 'real_pe_return_rate'] = val
+        # val = get_recent_val(src, 's_037_real_pe_return_rate', -np.inf)
+        # df.loc[code, 'real_pe_return_rate'] = val
 
         val = get_recent_val(src, 's_016_roe_parent', -np.inf)
         df.loc[code, 'roe_parent'] = val
 
-        val = get_recent_val(src, 's_027_pe_return_rate', -np.inf)
-        df.loc[code, 'pe_return_rate'] = val
+        # val = get_recent_val(src, 's_027_pe_return_rate', -np.inf)
+        # df.loc[code, 'pe_return_rate'] = val
 
         val = get_recent_val(src, 's_025_real_cost', np.inf)
         df.loc[code, 'real_cost'] = val
 
-        val = get_recent_val(src, 's_061_total_return_rate', -np.inf)
-        df.loc[code, 'total_return_rate'] = val
+        # val = get_recent_val(src, 's_061_total_return_rate', -np.inf)
+        # df.loc[code, 'total_return_rate'] = val
 
         val = get_recent_val(src, 's_028_market_value', np.inf)
         df.loc[code, 'market_value_1'] = val
@@ -274,9 +339,9 @@ def generate_daily_table(dir_name):
         s0 = src.loc[:, 's_028_market_value'].copy().dropna()
         df.loc[code, 'ipo_date'] = s0.index[0] if s0.size > 0 else np.nan
 
-        s1 = src.loc[:, 's_044_turnover_volume'].copy().dropna()
-        s1 = s1.rolling(20, min_periods=1).mean().dropna()
-        df.loc[code, 'turnover_ttm20'] = s1[-1] if s1.size >= 1 else np.nan
+        # s1 = src.loc[:, 's_044_turnover_volume'].copy().dropna()
+        # s1 = s1.rolling(20, min_periods=1).mean().dropna()
+        # df.loc[code, 'turnover_ttm20'] = s1[-1] if s1.size >= 1 else np.nan
 
         val = get_recent_index(src, 's_063_profit_salary2', np.nan)
         df.loc[code, 'recent_date'] = val
@@ -291,23 +356,26 @@ def generate_daily_table(dir_name):
         val = get_recent_val(src, 's_063_profit_salary2', np.nan)
         df.loc[code, 'profit_salary_adj'] = val
 
-    tmp = df.loc[:, 'real_cost'].copy().dropna().to_dict()
-    write_json_txt('%s\\a004_real_cost_dict.txt' % daily_dir, tmp)
+        val = get_recent_val(src, 'dv_001_dividend_value', 0)
+        df.loc[code, 'dividend_value'] = val
 
-    tmp = df.loc[:, 'equity'].copy().dropna().to_dict()
-    write_json_txt('%s\\a005_equity_dict.txt' % daily_dir, tmp)
+    # tmp = df.loc[:, 'real_cost'].copy().dropna().to_dict()
+    # write_json_txt('%s\\a004_real_cost_dict.txt' % daily_dir, tmp)
 
-    tmp = df.loc[:, 'turnover_ttm20'].copy().dropna().to_dict()
-    write_json_txt('%s\\a006_turnover_dict.txt' % daily_dir, tmp)
+    # tmp = df.loc[:, 'equity'].copy().dropna().to_dict()
+    # write_json_txt('%s\\a005_equity_dict.txt' % daily_dir, tmp)
 
-    tmp = df.sort_values('pe_return_rate', ascending=False).index.to_list()
-    write_json_txt('%s\\s001_code_sorted_pe.txt' % daily_dir, tmp)
+    # tmp = df.loc[:, 'turnover_ttm20'].copy().dropna().to_dict()
+    # write_json_txt('%s\\a006_turnover_dict.txt' % daily_dir, tmp)
 
-    tmp = df.sort_values('real_pe_return_rate', ascending=False).index.to_list()
-    write_json_txt('%s\\s002_code_sorted_real_pe.txt' % daily_dir, tmp)
+    # tmp = df.sort_values('pe_return_rate', ascending=False).index.to_list()
+    # write_json_txt('%s\\s001_code_sorted_pe.txt' % daily_dir, tmp)
 
-    tmp = df.sort_values('roe_parent', ascending=False).index.to_list()
-    write_json_txt('%s\\s003_code_sorted_roe_parent.txt' % daily_dir, tmp)
+    # tmp = df.sort_values('real_pe_return_rate', ascending=False).index.to_list()
+    # write_json_txt('%s\\s002_code_sorted_real_pe.txt' % daily_dir, tmp)
+
+    # tmp = df.sort_values('roe_parent', ascending=False).index.to_list()
+    # write_json_txt('%s\\s003_code_sorted_roe_parent.txt' % daily_dir, tmp)
 
     dump_pkl('%s\\z001_daily_table.pkl' % daily_dir, df)
 
@@ -343,7 +411,9 @@ def save_latest_list(dir_name):
         # path1 = '%s\\%s' % (src_dir, file[5:])
         path1 = '%s\\%s' % (src_dir, file)
         path2 = '%s\\%s' % (target_dir, file)
-        copy_file(path1, path2)
+
+        if os.path.exists(path1):
+            copy_file(path1, path2)
 
     dir1 = '..\\basicData\\dailyUpdate\\%s\\res_daily' % dir_name
     dir2 = '..\\basicData\\dailyUpdate\\latest\\res_daily'
@@ -395,8 +465,8 @@ def eq_daily_update():
     list1 = code_list_from_tags("白名单")
     list2 = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt")
     list3 = list(set(list1 + list2))
-    list3.sort()
-    request_eq2mysql(list3)
+    list4 = sorted(list3)
+    request_eq2mysql(list4)
 
     MainLog.add_log('eq_daily_update complete')
     MainLog.add_split('#')
@@ -435,37 +505,51 @@ def backup_daily_update():
 
 
 def manual_daily_update():
-    dir_name = 'update_20230818163003'
+    # timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
+    # dir_name = 'update_%s' % timestamp
+    # res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
+    #
+    # if not os.path.exists(res_dir):
+    #     os.makedirs(res_dir)
+
+    dir_name = 'update_20231031155003'
     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
 
+    # all_codes, name_dict, ipo_dates = basic_daily_update(dir_name)
     all_codes = load_json_txt('%s\\a001_code_list.txt' % res_dir)
 
-    ################################################################################################################
-
-    generate_log_data(dir_name)
-    daily_analysis(dir_name, all_codes)
-    MainLog.write('%s\\logs2.txt' % res_dir, init=True)
-
+    # ################################################################################################################
+    #
+    # MainLog.write('%s\\logs1.txt' % res_dir, init=True)
+    #
+    # tmp_path = '%s\\logs1.txt' % res_dir
+    # if os.path.exists(res_dir):
+    #     print('adadsadsad')
+    #
+    # generate_log_data(dir_name)
+    # daily_analysis(dir_name, all_codes)
+    # MainLog.write('%s\\logs2.txt' % res_dir, init=True)
+    #
     generate_daily_table(dir_name)
     save_latest_list(dir_name)
-    request_mir_y10()
+    # request_mir_y10()
     MainLog.write('%s\\logs3.txt' % res_dir, init=True)
 
-    eq_daily_update()
-    MainLog.write('%s\\logs4.txt' % res_dir, init=True)
+    # eq_daily_update()
+    # MainLog.write('%s\\logs4.txt' % res_dir, init=True)
 
     backup_daily_update()
     MainLog.write('%s\\logs5.txt' % res_dir, init=True)
 
 
 if __name__ == '__main__':
-    from request.requestMirData import request_mir_y10
-    from request.requestEquityData import request_eq2mysql
 
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    manual_daily_update()
+    update_latest_data(['600000'], fs_flag=False)
+    # manual_daily_update()
+    # eq_daily_update()
 
     # test_daily_analysis()
