@@ -336,7 +336,9 @@ def res2df(res, data_type):
     for subRes in res:
         sub_list = json.loads(subRes.decode())['data']
         for tmp in sub_list:
-            date = tmp[check]
+            date = tmp.get(check)
+            if date is None:
+                continue
             if date == 'Invalid date':
                 continue
             if date not in data_dict.keys():
