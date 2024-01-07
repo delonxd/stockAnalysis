@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from method.fileMethod import *
 from method.logMethod import log_it
@@ -15,6 +16,22 @@ def get_recent_index(df, column, default, shift=1):
     series = series.index
     val = series[-shift] if series.size >= shift else default
     return val
+
+
+def get_hold_position(src):
+    src = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
+
+    s0 = pd.Series(
+        map(lambda x: x[3], src),
+        index=map(lambda x: x[0], src),
+        name='position')
+    total = sum(s0)
+
+    s0 = s0 / total
+    s0.replace(0, np.NaN, inplace=True)
+    s0.dropna(inplace=True)
+
+    return s0
 
 
 def get_tags_index():
@@ -76,6 +93,10 @@ def generate_gui_table():
         index=map(lambda x: x[0], res),
         name='gui_hold')
     df = pd.concat([df, s0], axis=1, sort=False)
+
+    s0 = get_hold_position(res)
+    df = pd.concat([df, s0], axis=1, sort=False)
+
     # print(s0)
     # for value in res:
     #     code = value[0]
@@ -227,15 +248,17 @@ def generate_show_table():
         'level3',
         'counter_date',
 
+        'gui_rate',
+        'predict_discount',
+        'position',
+        'dividend_return',
+
         'predict_adj',
         'profit_salary_adj',
         'predict_profit',
-        'predict_discount',
 
         'dividend_value',
-        'dividend_return',
 
-        'gui_rate',
         'r_discount1',
         'r_discount2',
         'real_c/ass',
@@ -342,14 +365,15 @@ def generate_show_table_mask(df):
         'total_return_rate',
 
         'dividend_return',
+        'position',
     ]:
-        df[column] = df[column].apply(lambda x: '%.2f%%' % (x * 100))
+        df[column] = df[column].apply(lambda x: '-%' if np.isnan(x) else '%.2f%%' % (x * 100))
 
     for column in [
         'tov/ass',
         'tov/market_value',
     ]:
-        df[column] = df[column].apply(lambda x: '%.2f‰' % (x * 1000))
+        df[column] = df[column].apply(lambda x:  '-‰' if np.isnan(x) else '%.2f‰' % (x * 1000))
 
     for column in [
         # 'gui_assessment',
