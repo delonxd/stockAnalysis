@@ -194,6 +194,14 @@ class RecognitionStr:
                 else:
                     ret = self.df_all[self.df_all['gui_hold'].isin([True])].index.tolist()
 
+            elif src == '持仓':
+                tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
+                new = []
+                for val in tmp:
+                    if val[2] != 0:
+                        new.append(val)
+                ret = list(zip(*new).__next__())
+
             elif src == 'old':
                 ret = load_json_txt("..\\basicData\\tmp\\code_list_latest.txt")
 
@@ -485,6 +493,12 @@ class RecognitionStr:
             for code in code_all:
                 if code[0] in ['4', '8']:
                     ret.append(code)
+
+        elif market == '北交所':
+            for code in code_all:
+                if code[:2] in ['43', '82', '83', '87', '88']:
+                    ret.append(code)
+
         return ret
 
     def industry_name2code(self, ids_name):
