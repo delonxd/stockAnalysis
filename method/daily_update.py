@@ -1,4 +1,9 @@
 def daily_update():
+    import warnings
+    from scipy.optimize import OptimizeWarning
+    warnings.simplefilter("ignore", OptimizeWarning)
+    warnings.simplefilter(action='ignore', category=FutureWarning)
+
     import sys
     sys.path.append('D:\\PycharmProjects\\stockAnalysis')
 
@@ -7,7 +12,7 @@ def daily_update():
 
     from method.logMethod import MainLog
     from method.dailyMethod import basic_daily_update
-    from method.dailyMethod import mysql_daily_update
+    from method.dailyMethod import mysql_daily_update2
     from method.dailyMethod import daily_analysis
     from method.dailyMethod import generate_daily_table
     from method.dailyMethod import save_latest_list
@@ -16,6 +21,8 @@ def daily_update():
     from method.dailyMethod import backup_daily_update
     from request.requestMirData import request_mir_y10
     from request.requestSwData import update_sw_2021
+    # from request.requestAkshareData import request_mir_y10_ak
+    # from request.requestAkshareData import request_futures_data
 
     import time
 
@@ -29,7 +36,7 @@ def daily_update():
     ################################################################################################################
 
     all_codes, name_dict, ipo_dates = basic_daily_update(dir_name)
-    mysql_daily_update(dir_name, all_codes, ipo_dates)
+    mysql_daily_update2(dir_name, all_codes, ipo_dates)
 
     update_sw_2021()
     MainLog.write('%s\\logs1.txt' % res_dir, init=True)
@@ -40,11 +47,12 @@ def daily_update():
 
     generate_daily_table(dir_name)
     save_latest_list(dir_name)
-    request_mir_y10()
     MainLog.write('%s\\logs3.txt' % res_dir, init=True)
 
-    eq_daily_update()
-    MainLog.write('%s\\logs4.txt' % res_dir, init=True)
+    # eq_daily_update()
+    # request_mir_y10_ak()
+    # request_futures_data()
+    # MainLog.write('%s\\logs4.txt' % res_dir, init=True)
 
     backup_daily_update()
     MainLog.write('%s\\logs5.txt' % res_dir, init=True)
