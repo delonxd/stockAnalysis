@@ -174,7 +174,7 @@ class StyleTable(QTableWidget):
 
             elif column == 'default_ds':
                 if flag:
-                    if row['selected'] is True:
+                    if row['selected']:
                         df0 = df.loc[df['default_ds'] == True]
                         for index0 in df0.index:
                             df.loc[index0, 'default_ds'] = False

@@ -304,7 +304,7 @@ class DefaultDataSource(DataSource):
 
         index = dt.datetime.now().date().strftime("%Y-%m-%d")
 
-        self.data_max = 256 * 1e8
+        self.data_max = 1024 * 1e8
         self.df.loc[index] = [self.data_max]
 
         self.ds_type = 'digit'

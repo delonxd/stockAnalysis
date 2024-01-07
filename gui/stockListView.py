@@ -194,9 +194,11 @@ class QDataFrameTable(QTableWidget):
         row = self.code_df.current_index
         self.resizeColumnsToContents()
 
-        width = 100
-        for i in range(10):
-            self.setColumnWidth(i, width)
+        for i in range(6):
+            self.setColumnWidth(i, 100)
+
+        for i in range(6, 11):
+            self.setColumnWidth(i, 70)
 
         columns, conditions = self.code_df.sort_list[self.code_df.group_flag]
         for i in range(column_size):
