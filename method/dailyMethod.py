@@ -102,12 +102,19 @@ def mysql_daily_update2(dir_name, all_codes, ipo_dates):
     ret1 = []
     ret2 = []
 
+    date1 = dt.date.today() - dt.timedelta(days=365)
+    date2 = dt.date(dt.date.today().year - 9, 1, 1)
+
+    date1_str = date1.strftime("%Y-%m-%d")
+    date2_str = date2.strftime("%Y-%m-%d")
+
     ################################################################################################################
+
     new_codes = []
     for code, date in ipo_dates.items():
         if not date:
             new_codes.append(code)
-        elif date > '2023-01-01':
+        elif date > date1_str:
             new_codes.append(code)
 
     MainLog.add_log('Length of all codes: %s' % len(all_codes))
@@ -124,7 +131,7 @@ def mysql_daily_update2(dir_name, all_codes, ipo_dates):
     MainLog.add_split('#')
     MainLog.add_log('refresh codes: %s' % len(refresh))
 
-    ret2 = update_all_data(refresh, start_date='2014-01-01', mvs_flag=False)
+    ret2 = update_all_data(refresh, start_date=date2_str, mvs_flag=False)
     ret = list(set(ret1 + ret2))
 
     MainLog.add_log('refresh complete')
@@ -139,9 +146,8 @@ def mysql_daily_update2(dir_name, all_codes, ipo_dates):
 
     weekday = dt.date.today().weekday()
     if weekday not in [5, 6]:
-
         update_latest_data(all_codes, fs_flag=False)
-        update_all_data(new_codes, start_date='2014-01-01', fs_flag=False)
+        update_all_data(new_codes, start_date=date2_str, fs_flag=False)
 
         MainLog.add_log('mvs data complete')
         MainLog.add_split('#')
