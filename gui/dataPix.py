@@ -62,8 +62,8 @@ class DataPix:
             self.pix_list_daily.append(QPixmap(self.pix_daily))
 
         # date metrics
-        self.date_max = dt.date(2024, 3, 20)
-        self.date_min = dt.date(1998, 3, 20)
+        self.date_max = dt.date(2024, 5, 20)
+        self.date_min = dt.date(1998, 5, 20)
         self.d_date = (self.date_max - self.date_min).days
 
         self.date_metrics1 = self.get_date_list('INTERIM')
@@ -305,7 +305,7 @@ class DataPix:
         if np.isnan(max0):
             max0 = self.default_ds.data_max
 
-        scale_max = max0 * self.scale_ratio / ratio
+        scale_max = max0 * self.scale_ratio / ratio / 4
         scale_min = scale_max / 1024
 
         return scale_min, scale_max
@@ -808,7 +808,7 @@ class DataPix:
         if px_x2:
             self.draw_mask_pix(
                 pix=pix,
-                x=px_x2-1,
+                x=int(px_x2-1),
             )
 
         pix_daily = self.pix_list_daily[window_flag]
