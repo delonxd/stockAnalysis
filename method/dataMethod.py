@@ -368,10 +368,11 @@ class DataAnalysis:
             's_066_profit_salary_min',
         ]
 
-        df = self.df_fs
+        # df = self.df_fs
 
         for index in index_list:
-            self.fs_add(self.get_column(df, index))
+            self.fs_add(self.get_column(self.df_fs, index))
+            # self.fs_add(self.get_column(df, index))
 
     def config_widget_data(self):
         self.config_sub_fs(DataAnalysis)
@@ -1089,17 +1090,26 @@ class DataAnalysis:
             return self.regular_series(column, s1 + s2)
 
         elif column == 's_053_core_profit_salary':
-            # d0 = {
-            #     'id_082_bs_sawp': '应付职工薪酬',
-            #     'id_105_bs_ltpoe': '长期应付职工薪酬',
-            # }
-            s01 = self.smooth_data('s01', 'id_082_bs_sawp')
-            s02 = self.smooth_data('s02', 'id_105_bs_ltpoe')
-            s1 = s01 + s02
+            d0 = {
+                'id_082_bs_sawp': '应付职工薪酬',
+                'id_105_bs_ltpoe': '长期应付职工薪酬',
+            }
+
+            s1 = self.sum_columns(df, list(d0.keys()))
+            s1 = get_month_data(s1, column)
+
+            # s01 = self.smooth_data('s01', 'id_082_bs_sawp')
+            # s02 = self.smooth_data('s02', 'id_105_bs_ltpoe')
+            # s1 = s01 + s02
+
             s1 = self.get_ttm((s1 - s1.shift(1))*4, 4)
             s2 = self.smooth_data(column, 'id_257_cfs_cptofe', delta=True, ttm=True)
             # s3 = self.get_column(df, 's_051_core_profit')
-            return self.regular_series(column, s1 + s2)
+
+            res_df = pd.DataFrame([s1, s2])
+            s3 = res_df.apply(lambda x: x.sum(), axis=0)
+
+            return self.regular_series(column, s3)
 
         elif column == 's_054_gross_profit_rate':
             s1 = self.get_column(df, 's_051_core_profit')
