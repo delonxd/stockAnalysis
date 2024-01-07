@@ -1169,6 +1169,18 @@ class MainWidget(QWidget):
         elif e.key() == Qt.Key_S:
             GuiLog.write(self.log_path)
             return
+        elif e.key() == Qt.Key_R:
+            button = self.widgets_button[self.remark_widget]
+            button.click()
+            return
+        elif e.key() == Qt.Key_C:
+            button = self.widgets_button[self.code_widget]
+            button.click()
+            return
+        elif e.key() == Qt.Key_W:
+            button = self.widgets_button[self.web_widget]
+            button.click()
+            return
         else:
             return
         # self.update_window()
