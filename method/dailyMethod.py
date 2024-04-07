@@ -6,6 +6,7 @@ from method.fileMethod import *
 from method.sql_update import update_latest_data
 from method.sql_update import update_all_data
 from request.requestData import request2mysql
+from request.requestSwData import update_sw_2021
 from method.dataMethod import load_df_from_mysql
 from method.dataMethod import DataAnalysis, DailyDataAnalysis
 from method.showTable import add_bool_column, get_recent_val, sum_value, get_recent_index
@@ -102,7 +103,10 @@ def mysql_daily_update2(dir_name, all_codes, ipo_dates):
     ret1 = []
     ret2 = []
 
-    date1 = dt.date.today() - dt.timedelta(days=365)
+    timestamp = dir_name.split('_')[1]
+    dir_date = dt.datetime.strptime(timestamp, "%Y%m%d%H%M%S").date()
+
+    date1 = dir_date - dt.timedelta(days=365)
     date2 = dt.date(dt.date.today().year - 9, 1, 1)
 
     date1_str = date1.strftime("%Y-%m-%d")
@@ -144,7 +148,7 @@ def mysql_daily_update2(dir_name, all_codes, ipo_dates):
 
     ################################################################################################################
 
-    weekday = dt.date.today().weekday()
+    weekday = dir_date.weekday()
     if weekday not in [5, 6]:
         update_latest_data(all_codes, fs_flag=False)
         update_all_data(new_codes, start_date=date2_str, fs_flag=False)
@@ -448,13 +452,17 @@ def generate_log_data(dir_name):
 
     daily_dir = "..\\basicData\\dailyUpdate\\%s" % dir_name
 
-    path = "%s\\logs1.txt" % daily_dir
+    # path = "%s\\logs1.txt" % daily_dir
+    # with open(path, 'r') as f:
+    #     for num, line in enumerate(f):
+    #         if num == 1:
+    #             date = line[:10]
+    #             break
 
-    with open(path, 'r') as f:
-        for num, line in enumerate(f):
-            if num == 1:
-                date = line[:10]
-                break
+    timestamp = dir_name.split('_')[1]
+    dt_date = dt.datetime.strptime(timestamp, "%Y%m%d%H%M%S").date()
+    date = dt_date.strftime("%Y-%m-%d")
+
     ret = dict()
     ret['update_date'] = date
 
