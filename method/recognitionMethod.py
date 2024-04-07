@@ -469,6 +469,11 @@ class RecognitionStr:
                 if code[0] == '0':
                     ret.append(code)
 
+        elif market == 'B股':
+            for code in code_all:
+                if code[0] in ['2', '9']:
+                    ret.append(code)
+
         elif market == '上证B股':
             for code in code_all:
                 if code[0] == '9':
@@ -553,6 +558,7 @@ def get_weight_dict(set_all):
 
     counter = 0
     counter1 = 0
+    counter_new = len(weight_dict)
     for key, value in gui_counter.items():
         if key not in set_all:
             continue
@@ -578,6 +584,7 @@ def get_weight_dict(set_all):
             weight = margin ** 2
 
         weight_dict[key] = weight
+        counter_new -= 1
 
     weight_counter = dict()
     for weight in weight_dict.values():
@@ -606,8 +613,9 @@ def get_weight_dict(set_all):
         MainLog.add_log(weight_str)
 
     MainLog.add_log('      total:  %10s' % len(set_all))
-    MainLog.add_log('margin > 60:  %10s' % counter)
+    MainLog.add_log('        new:  %10s' % counter_new)
     MainLog.add_log('margin < -1:  %10s' % counter1)
+    MainLog.add_log('margin > 60:  %10s' % counter)
     MainLog.add_split('-')
 
     return weight_dict
