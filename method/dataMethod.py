@@ -580,8 +580,15 @@ class DataAnalysis:
             s1 = pd.Series(d0)
 
         s2 = self.get_column(self.df_fs, 's_003_profit')
-        s3 = s1.reindex_like(s2).fillna(0)
+        s2 = s1.reindex_like(s2)
+
+        s_tmp = s2.loc[s2.last_valid_index():]
+        if s_tmp.size > 4:
+            index_tmp = 4 - s_tmp.size
+            s2 = s2.iloc[:index_tmp]
+        s3 = s2.fillna(0)
         s3 = self.get_ttm(s3, 4) * 4
+
         s3.name = 'dv_001_dividend_value'
 
         new_df = pd.DataFrame(s3)
@@ -1214,6 +1221,7 @@ class DataAnalysis:
         elif column == 's_069_dividend_rate':
             s1 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
             s2 = self.fs_to_mvs('dv_001_dividend_value')
+            s2.fillna(method='ffill', inplace=True)
             s3 = s2 / s1
             return self.regular_series(column, s3)
 
