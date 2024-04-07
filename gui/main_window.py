@@ -880,6 +880,16 @@ class MainWidget(QWidget):
         predict_discount = predict_profit / self.real_cost / 1e7
         txt2 = txt2 + '-%.2f' % predict_discount
 
+        discount_index = np.log(predict_discount / 9) / np.log(1.2)
+        if not pd.isna(discount_index):
+            tmp0 = '-' if discount_index < 0 else ''
+            tmp1 = int(abs(discount_index))
+            tmp2 = int((abs(discount_index) % 1) * 12)
+
+            tmp2 = '%s个月' % tmp2 if tmp1 == 0 or tmp2 != 0 else ''
+            tmp1 = '%s年' % tmp1 if tmp1 != 0 else ''
+            txt2 = txt2 + '(%s%s%s)' % (tmp0, tmp1, tmp2)
+
         if self.listing_date is not None:
             list1.insert(0, self.listing_date)
 
@@ -926,7 +936,8 @@ class MainWidget(QWidget):
 
         if ass is not None:
             rate = self.turnover / 1e6 / predict_ass
-            txt2 = txt2 + '-%.2f‰' % rate
+            # txt2 = txt2 + '-%.2f‰' % rate
+            list0.insert(0, '%.2f‰' % rate)
 
         txt3 = '/'.join(list0)
         txt_bottom2 = '/'.join(list1)
@@ -1180,6 +1191,14 @@ class MainWidget(QWidget):
         elif e.key() == Qt.Key_W:
             button = self.widgets_button[self.web_widget]
             button.click()
+            return
+        elif e.key() == Qt.Key_Down:
+            new_index = (self.code_index + 1) % self.len_list
+            self.change_stock(new_index)
+            return
+        elif e.key() == Qt.Key_Up:
+            new_index = (self.code_index - 1) % self.len_list
+            self.change_stock(new_index)
             return
         else:
             return
