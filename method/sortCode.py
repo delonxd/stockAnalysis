@@ -195,6 +195,25 @@ def sort_hold():
         f.write(res)
 
 
+def refresh_gui_counter():
+    path = '..\\basicData\\self_selected\\gui_counter.txt'
+    counter_dict = load_json_txt(path)
+
+    path = '..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt'
+    all_code = load_json_txt(path)
+
+    new_code = []
+    for code in all_code:
+        if code not in counter_dict:
+            new_code.append(code)
+
+    print(new_code)
+    # res = json.dumps(res_dict, indent=4, ensure_ascii=False)
+    # path = "../basicData/self_selected/gui_counter.txt"
+    # with open(path, "w", encoding='utf-8') as f:
+    #     f.write(res)
+
+
 def sift_codes(
         source='',
         sort=None,
@@ -285,4 +304,5 @@ if __name__ == '__main__':
     # sift_codes(source='backup:20230816:{hold}')
 
     sort_hold()
+    # refresh_gui_counter()
     # sort_industry()
