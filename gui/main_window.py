@@ -3,6 +3,7 @@ from request.requestEquityData import request_eq2mysql
 from method.sortCode import sift_codes
 from method.fileMethod import *
 from method.mainMethod import deco_show_stock_name
+from method.recognitionMethod import get_except_list
 
 from gui.styleWidget import StyleWidget
 from gui.dataPix import DataPix
@@ -20,7 +21,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-import sys
+# import sys
 import json
 import threading
 import time
@@ -119,6 +120,15 @@ class MainWidget(QWidget):
 
         self.label = QLabel(self)
 
+        self.pad_l = QLabel()
+        self.pad_r = QLabel()
+
+        self.pad_l_pix = QPixmap(130, 900)
+        self.pad_r_pix = QPixmap(130, 900)
+
+        self.pad_l_pix.fill(QColor(40, 40, 40, 255))
+        self.pad_r_pix.fill(QColor(40, 40, 40, 255))
+
         # self.button1 = QPushButton('export')
         # self.button2 = QPushButton('save_codes')
         # self.button3 = QPushButton('comparison')
@@ -173,7 +183,9 @@ class MainWidget(QWidget):
 
         self.listing_date = None
         self.max_increase_30 = 0
+        self.yesterday_rise = np.nan
         self.turnover = 0
+        self.dividend_return = 0
 
         self.plt_rect = [10, 32, 1600, 900]
         self.mouse_pos = [None, None]
@@ -229,7 +241,7 @@ class MainWidget(QWidget):
         self.resize(1600, 900)
 
         p = QPalette()
-        p.setColor(QPalette.WindowText, Qt.red)
+        p.setColor(QPalette.WindowText, Qt.GlobalColor.red)
         self.head_label1.setFont(QFont('Consolas', 20))
         self.head_label1.setPalette(p)
         self.head_label2.setFont(QFont('Consolas', 16))
@@ -245,36 +257,37 @@ class MainWidget(QWidget):
         self.bottom_label2.setFont(QFont('Consolas', 12))
         self.bottom_label2.setPalette(p)
 
+        ali = Qt.AlignmentFlag
         layout0 = QHBoxLayout()
-        layout0.addWidget(self.head_label2, 1, Qt.AlignLeft | Qt.AlignBottom)
-        layout0.addWidget(self.head_label1, 0, Qt.AlignCenter)
-        layout0.addWidget(self.head_label3, 1, Qt.AlignRight | Qt.AlignBottom)
+        layout0.addWidget(self.head_label2, 1, ali.AlignLeft | ali.AlignBottom)
+        layout0.addWidget(self.head_label1, 0, ali.AlignCenter)
+        layout0.addWidget(self.head_label3, 1, ali.AlignRight | ali.AlignBottom)
         # layout0.addStretch(1)
 
         layout1 = QHBoxLayout()
         layout1.addStretch(1)
-        # layout.addWidget(self.tree, 0, Qt.AlignCenter)
-        layout1.addWidget(self.label, 0, Qt.AlignCenter)
+        # layout.addWidget(self.tree, 0, ali.AlignCenter)
+        layout1.addWidget(self.label, 0, ali.AlignCenter)
         layout1.addStretch(1)
 
         layout2 = QHBoxLayout()
         # layout2.addStretch(1)
-        layout2.addWidget(self.bottom_label1, 1, Qt.AlignLeft | Qt.AlignTop)
+        layout2.addWidget(self.bottom_label1, 1, ali.AlignLeft | ali.AlignTop)
 
-        layout2.addWidget(self.page_button1, 0, Qt.AlignCenter)
+        layout2.addWidget(self.page_button1, 0, ali.AlignCenter)
         for widget, button in self.widgets_button.items():
-            layout2.addWidget(button, 0, Qt.AlignCenter)
+            layout2.addWidget(button, 0, ali.AlignCenter)
 
-        layout2.addWidget(self.button12, 0, Qt.AlignCenter)
-        layout2.addWidget(self.page_button2, 0, Qt.AlignCenter)
+        layout2.addWidget(self.button12, 0, ali.AlignCenter)
+        layout2.addWidget(self.page_button2, 0, ali.AlignCenter)
 
-        layout2.addWidget(self.bottom_label2, 1, Qt.AlignRight | Qt.AlignTop)
+        layout2.addWidget(self.bottom_label2, 1, ali.AlignRight | ali.AlignTop)
         # layout2.addStretch(1)
         # layout2.addWidget(button1, 0, Qt.AlignCenter)
 
         layout3 = QHBoxLayout()
-        layout3.addWidget(self.bottom_label1, 1, Qt.AlignLeft | Qt.AlignTop)
-        layout3.addWidget(self.bottom_label2, 1, Qt.AlignRight | Qt.AlignTop)
+        layout3.addWidget(self.bottom_label1, 1, ali.AlignLeft | ali.AlignTop)
+        layout3.addWidget(self.bottom_label2, 1, ali.AlignRight | ali.AlignTop)
         # layout0.addStretch(1)
 
         layout = QVBoxLayout()
@@ -286,9 +299,21 @@ class MainWidget(QWidget):
         # layout.addLayout(layout3, 0)
         layout.addStretch(1)
 
+        layout_l = QVBoxLayout()
+        layout_l.addStretch(1)
+        layout_l.addWidget(self.pad_l, 0, ali.AlignCenter)
+        layout_l.addStretch(1)
+
+        layout_r = QVBoxLayout()
+        layout_r.addStretch(1)
+        layout_r.addWidget(self.pad_r, 0, ali.AlignCenter)
+        layout_r.addStretch(1)
+
         m_layout = QHBoxLayout()
         m_layout.addStretch(1)
+        m_layout.addLayout(layout_l, 0)
         m_layout.addLayout(layout, 0)
+        m_layout.addLayout(layout_r, 0)
         m_layout.addStretch(1)
 
         self.setLayout(m_layout)
@@ -297,6 +322,9 @@ class MainWidget(QWidget):
         self.setMouseTracking(True)
         self.label.setMouseTracking(True)
         self.center()
+
+        self.pad_l.setPixmap(self.pad_l_pix)
+        self.pad_r.setPixmap(self.pad_r_pix)
 
         for widget, button in self.widgets_button.items():
             button.setCheckable(True)
@@ -319,10 +347,10 @@ class MainWidget(QWidget):
         self.setPalette(palette1)
         self.setAutoFillBackground(True)
 
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_menu)  # 开放右键策略
 
-    def show_menu(self, pos):  # 添加右键菜单
+    def show_menu(self, _):  # 添加右键菜单
         menu = QMenu(self)
 
         name_list = [
@@ -336,8 +364,8 @@ class MainWidget(QWidget):
             '删除白名单',
             '添加灰名单',
             '删除灰名单',
-            '添加周期股',
-            '删除周期股',
+            '添加Src',
+            '删除Src',
             '添加Toc',
             '删除Toc',
             '添加国有',
@@ -360,6 +388,9 @@ class MainWidget(QWidget):
         sub_menu2 = menu.addMenu('功能')
 
         menu.addSeparator()
+        # sub_menu3 = menu.addMenu('添加备注')
+
+        menu.addSeparator()
         menu.addAction(actions['添加列表'])
         menu.addAction(actions['删除列表'])
 
@@ -376,8 +407,8 @@ class MainWidget(QWidget):
         menu.addAction(actions['删除灰名单'])
 
         menu.addSeparator()
-        menu.addAction(actions['添加周期股'])
-        menu.addAction(actions['删除周期股'])
+        menu.addAction(actions['添加Src'])
+        menu.addAction(actions['删除Src'])
 
         menu.addSeparator()
         menu.addAction(actions['添加Toc'])
@@ -409,8 +440,8 @@ class MainWidget(QWidget):
         actions['添加灰名单'].triggered.connect(lambda x: self.code_operate('add', '灰名单'))
         actions['删除灰名单'].triggered.connect(lambda x: self.code_operate('del', '灰名单'))
 
-        actions['添加周期股'].triggered.connect(lambda x: self.code_operate('add', '周期'))
-        actions['删除周期股'].triggered.connect(lambda x: self.code_operate('del', '周期'))
+        actions['添加Src'].triggered.connect(lambda x: self.code_operate('add', 'Src'))
+        actions['删除Src'].triggered.connect(lambda x: self.code_operate('del', 'Src'))
 
         actions['添加Toc'].triggered.connect(lambda x: self.code_operate('add', 'Toc'))
         actions['删除Toc'].triggered.connect(lambda x: self.code_operate('del', 'Toc'))
@@ -686,7 +717,6 @@ class MainWidget(QWidget):
         number = 0
 
         if df.columns.size > 0:
-            # date = (dt.date.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d')
             date = self.date_ini
         else:
             date = ''
@@ -710,6 +740,7 @@ class MainWidget(QWidget):
         self.max_increase_30 = np.inf
         self.listing_date = None
         self.market_value = np.nan
+        self.yesterday_rise = np.nan
         if 's_028_market_value' in df.columns:
             s0 = self.data_pix.df['s_028_market_value'].copy().dropna()
             if s0.size > 0:
@@ -720,6 +751,8 @@ class MainWidget(QWidget):
                 minimum = min(s0[-size0:])
                 self.max_increase_30 = recent / minimum - 1
                 self.listing_date = s0.index[0]
+            if s0.size > 1:
+                self.yesterday_rise = s0[-1] / s0[-2] - 1
 
         self.liquidation_asset = np.nan
         if 's_026_liquidation_asset' in df.columns:
@@ -760,6 +793,12 @@ class MainWidget(QWidget):
             date2 = dt.date.today()
             self.predict_delta = (date2 - date1).days
 
+        self.dividend_return = 0
+        if 's_069_dividend_rate' in df.columns:
+            s0 = self.data_pix.df['s_069_dividend_rate'].copy().dropna()
+            if s0.size > 0:
+                self.dividend_return = s0[-1] * 100
+
         path = "../basicData/self_selected/gui_counter.txt"
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             res_dict = json.loads(f.read())
@@ -776,16 +815,16 @@ class MainWidget(QWidget):
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             report_date = json.loads(f.read()).get(code)
 
-        color = Qt.red
+        color = Qt.GlobalColor.red
 
         if report_date is not None:
             if data is None:
-                color = Qt.white
+                color = Qt.GlobalColor.white
             elif data[1] < report_date:
-                color = Qt.white
+                color = Qt.GlobalColor.white
             elif self.date_ini == data[1]:
                 if data[0] < report_date:
-                    color = Qt.white
+                    color = Qt.GlobalColor.white
 
         p = QPalette()
         p.setColor(QPalette.WindowText, color)
@@ -830,29 +869,37 @@ class MainWidget(QWidget):
         txt = tags_dict.get(code)
         txt = '' if txt is None else txt
         tags_list = txt.split('#')
+        tags_list.pop(tags_list.index(''))
 
         tmp = {
-            'ToC': 'Toc',
+            'Src': 'Src',
+            'Toc': 'ToC',
+            'Mid': 'Mid',
+            '排除': '排',
             '自选': '自选',
-            '白': '白名单',
-            '黑': '黑名单',
-            '灰': '灰名单',
+            '白名单': '白',
+            '黑名单': '黑',
+            '灰名单': '灰',
             '周期': '周期',
-            '疫': '疫情',
+            '疫情': '疫',
             '忽略': '忽略',
-            '国': '国有',
-            '低': '低价',
-            '电池': '电池',
-            '光伏': '光伏',
-            '芯片': '芯片',
+            '国有': '国',
+            '低价': '低',
             '新上市': '新上市',
             '未上市': '未上市',
             '买入': '买入',
+            '自选202307': None,
+            '测试20230516': None,
         }
 
         for key, value in tmp.items():
-            if value in tags_list:
-                list0.append(key)
+            if key in tags_list:
+                if value is not None:
+                    list0.append(value)
+                tags_list.pop(tags_list.index(key))
+
+        for value in tags_list:
+            list0.append(value)
 
         mark = load_json_txt("../basicData/self_selected/gui_mark.txt", log=False).get(code)
         if mark is not None:
@@ -868,7 +915,7 @@ class MainWidget(QWidget):
 
         rate_tmp = load_json_txt("../basicData/self_selected/gui_rate.txt", log=False).get(code)
         if rate_tmp is not None:
-            list0.append('%s%%' % rate_tmp)
+            list0.append('%s%%+%.1f' % (rate_tmp, self.dividend_return))
             rate_tmp = int(rate_tmp)
         else:
             rate_tmp = np.nan
@@ -894,6 +941,7 @@ class MainWidget(QWidget):
             list1.insert(0, self.listing_date)
 
         list1.append(txt_counter)
+        list1.append('%.2f%%' % (self.yesterday_rise * 100))
 
         ass = None
         path = "../basicData/self_selected/gui_assessment.txt"
@@ -934,10 +982,10 @@ class MainWidget(QWidget):
         else:
             txt_bottom1 = '%s%.2f亿' % ('cost: ', self.real_cost)
 
-        if ass is not None:
-            rate = self.turnover / 1e6 / predict_ass
-            # txt2 = txt2 + '-%.2f‰' % rate
-            list0.insert(0, '%.2f‰' % rate)
+        # if ass is not None:
+        #     rate = self.turnover / 1e6 / predict_ass
+        #     # txt2 = txt2 + '-%.2f‰' % rate
+        #     list0.insert(0, '%.2f‰' % rate)
 
         txt3 = '/'.join(list0)
         txt_bottom2 = '/'.join(list1)
@@ -953,6 +1001,43 @@ class MainWidget(QWidget):
         if code not in self.show_list:
             self.show_list.insert(0, code)
             self.show_list = self.show_list[:5]
+
+        self.draw_left_pad()
+        self.pad_l.setPixmap(self.pad_l_pix)
+        # self.pad_r.setPixmap(self.pad_r_pix)
+
+    def draw_left_pad(self):
+        pix = self.pad_l_pix
+        pix.fill(QColor(40, 40, 40, 255))
+        # pix.fill(QColor(40, 255, 40, 255))
+        except_list = get_except_list(self.stock_code, self.codes_df.df_all, log=False)
+
+        pix_painter = QPainter(pix)
+        pix_painter.setFont(QFont('Consolas', 13))
+        metrics = pix_painter.fontMetrics()
+
+        blank = 10
+        y = 20
+        row_height = metrics.height() + blank * 2
+
+        pen_dict = {
+            'red': QPen(Qt.GlobalColor.red),
+            'gray': QPen(Qt.GlobalColor.gray),
+            'yellow': QPen(Qt.GlobalColor.yellow),
+        }
+
+        for val, color, flag in except_list:
+            if flag is True:
+                pen = pen_dict[color]
+            else:
+                pen = pen_dict['gray']
+            pix_painter.setPen(pen)
+
+            rect = QRect(10, y, 110, row_height)
+            pix_painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, '%s' % val)
+
+            y += row_height
+        pix_painter.end()
 
     @staticmethod
     def init_code_list():
@@ -1003,7 +1088,6 @@ class MainWidget(QWidget):
         self.move(qr.topLeft().x() - 11, qr.topLeft().y() - 45)
 
     def draw_cross(self, x, y):
-
         self.data_pix.draw_cross(x, y, self.cross, self.box, self.window_flag, self.draw_pos)
         self.label.setPixmap(self.data_pix.pix_show[self.window_flag])
 
@@ -1020,7 +1104,7 @@ class MainWidget(QWidget):
         self.draw_pos = (x, y, d0)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             # self.cross = not self.cross
 
             pos = event.pos() - self.label.pos()
@@ -1165,38 +1249,38 @@ class MainWidget(QWidget):
         self.activate_by_layer()
 
     def keyPressEvent(self, e):
-        if e.key() == Qt.Key_1:
+        if e.key() == Qt.Key.Key_1:
             self.window_flag = 0
-        elif e.key() == Qt.Key_2:
+        elif e.key() == Qt.Key.Key_2:
             self.window_flag = 1
-        elif e.key() == Qt.Key_3:
+        elif e.key() == Qt.Key.Key_3:
             self.window_flag = 2
-        elif e.key() == Qt.Key_4:
+        elif e.key() == Qt.Key.Key_4:
             self.window_flag = 3
-        elif e.key() == Qt.Key_Space:
+        elif e.key() == Qt.Key.Key_Space:
             self.cross = not self.cross
-        elif e.key() == Qt.Key_B:
+        elif e.key() == Qt.Key.Key_B:
             self.box = (self.box + 1) % 3
-        elif e.key() == Qt.Key_S:
+        elif e.key() == Qt.Key.Key_S:
             GuiLog.write(self.log_path)
             return
-        elif e.key() == Qt.Key_R:
+        elif e.key() == Qt.Key.Key_R:
             button = self.widgets_button[self.remark_widget]
             button.click()
             return
-        elif e.key() == Qt.Key_C:
+        elif e.key() == Qt.Key.Key_C:
             button = self.widgets_button[self.code_widget]
             button.click()
             return
-        elif e.key() == Qt.Key_W:
+        elif e.key() == Qt.Key.Key_W:
             button = self.widgets_button[self.web_widget]
             button.click()
             return
-        elif e.key() == Qt.Key_Down:
+        elif e.key() == Qt.Key.Key_Down:
             new_index = (self.code_index + 1) % self.len_list
             self.change_stock(new_index)
             return
-        elif e.key() == Qt.Key_Up:
+        elif e.key() == Qt.Key.Key_Up:
             new_index = (self.code_index - 1) % self.len_list
             self.change_stock(new_index)
             return
