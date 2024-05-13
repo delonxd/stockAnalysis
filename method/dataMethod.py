@@ -220,6 +220,7 @@ def sql2df(code):
     data.config_widget_data()
     data.add_eq_data(code)
     data.add_mir_data()
+    data.add_position_data()
     data.add_futures_data()
     # data.add_dv_data(code)
 
@@ -602,6 +603,16 @@ class DataAnalysis:
             res = json.loads(f.read())
 
         s0 = self.regular_series('mir_y10', pd.Series(res))
+        df = pd.DataFrame(s0)
+        self.add_df(df)
+
+    def add_position_data(self):
+        # path = "..\\basicData\\nationalDebt\\mir_y10.txt"
+        path = "..\\basicData\\daily_position.txt"
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            res = json.loads(f.read())
+
+        s0 = self.regular_series('daily_position', pd.Series(res))
         df = pd.DataFrame(s0)
         self.add_df(df)
 
