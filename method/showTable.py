@@ -248,10 +248,13 @@ def generate_show_table():
         'level3',
         'counter_date',
 
+        'market_value_rise',
+        'market_value_fall',
         'gui_rate',
+        'dividend_return',
+        'gui_rate_dv',
         'predict_discount',
         'position',
-        'dividend_return',
 
         'predict_adj',
         'profit_salary_adj',
@@ -331,6 +334,11 @@ def generate_show_table():
 
     df['dividend_return'] = df['dividend_value'] / df['market_value_1']
 
+    df['gui_rate_dv'] = df['gui_rate'] + df['dividend_return'] * 100
+
+    df['market_value_rise'] = df['market_value_1'] / df['market_value_2'] - 1
+    df['market_value_fall'] = 0 - df['market_value_rise']
+
     ################################################################################################################
 
     dump_pkl("..\\basicData\\dailyUpdate\\latest\\show_table.pkl", df)
@@ -366,6 +374,8 @@ def generate_show_table_mask(df):
 
         'dividend_return',
         'position',
+        'market_value_rise',
+        'market_value_fall',
     ]:
         df[column] = df[column].apply(lambda x: '-%' if np.isnan(x) else '%.2f%%' % (x * 100))
 
@@ -397,6 +407,9 @@ def generate_show_table_mask(df):
 
     column = 'gui_rate'
     df[column] = df[column].apply(lambda x: format(x, '0,.0f'))
+
+    column = 'gui_rate_dv'
+    df[column] = df[column].apply(lambda x: format(x, '.1f'))
 
     column = 'salary'
     df[column] = df[column].apply(lambda x: format(x/1e4, '.2f'))
@@ -494,4 +507,3 @@ if __name__ == '__main__':
     generate_show_table()
     # generate_show_table_mask()
     # generate_code_df_src()
-
