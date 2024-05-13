@@ -62,8 +62,8 @@ class DataPix:
             self.pix_list_daily.append(QPixmap(self.pix_daily))
 
         # date metrics
-        self.date_max = dt.date(2024, 5, 20)
-        self.date_min = dt.date(1998, 5, 20)
+        self.date_max = dt.date(2024, 10, 20)
+        self.date_min = dt.date(1998, 10, 20)
         self.d_date = (self.date_max - self.date_min).days
 
         self.date_metrics1 = self.get_date_list('INTERIM')
