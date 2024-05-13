@@ -83,11 +83,21 @@ def request_futures_data():
     MainLog.add_log('request_futures_data complete.')
 
 
+def request_sz000001():
+    MainLog.add_log('request_sz000001 was called...')
+    ret = ak.stock_zh_index_daily(symbol="sz000001")
+    ret = ret['date'].tolist()
+    ret = list(map(lambda x: x.strftime("%Y-%m-%d"), ret))
+    write_json_txt("../basicData/akshare_sz_date.txt", ret)
+    MainLog.add_log('request_sz000001 complete.')
+
+
 if __name__ == '__main__':
     import warnings
     from scipy.optimize import OptimizeWarning
     warnings.simplefilter("ignore", OptimizeWarning)
     warnings.simplefilter(action='ignore', category=FutureWarning)
 
-    request_mir_y10_ak()
-    request_futures_data()
+    # request_mir_y10_ak()
+    # request_futures_data()
+    request_sz000001()
