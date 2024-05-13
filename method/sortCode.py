@@ -285,6 +285,129 @@ def sort_industry(by='ass/equity'):
     # return ids_list
 
 
+def get_hold_position():
+    path = '..\\basicData\\self_selected\\gui_hold_detail.txt'
+    operation_list = load_json_txt(path)
+
+    name_dict = load_json_txt('..\\basicData\\code_names_dict.txt')
+    sz_date = load_json_txt('..\\basicData\\akshare_sz_date.txt')
+    s0 = pd.Series(index=sz_date)
+
+    operation_dict = dict()
+    refresh_list = []
+    for val in operation_list:
+        date = val[0]
+        code = val[1]
+        operation = val[3]
+        number = val[4]
+
+        tmp_val = val.copy()
+        tmp_val[2] = name_dict[code]
+        refresh_list.append(tmp_val)
+
+        tag = [date, operation, number]
+        if code in operation_dict:
+            tmp_list = operation_dict[code]
+            tmp_list.append(tag)
+            tmp_list.sort()
+
+            operation_dict[code] = tmp_list
+        else:
+            operation_dict[code] = [tag]
+
+    position_list = []
+    date = '2024-05-09'
+
+    s_sum = pd.Series(0, index=sz_date)
+    for code, value in operation_dict.items():
+        number, s2, = detail_to_position(value, date, sz_date)
+        name = name_dict.get(code)
+        MainLog.add_log('load_df_from_mysql mvs code --> %s %s' % (code, name))
+        df = load_df_from_mysql(code, 'mvs')
+
+        s1 = df['id_035_mvs_sp'].copy()
+        s1 = s1.reindex_like(s0).ffill().fillna(0)
+
+        s2 = s2.reindex_like(s1).ffill()
+        s2 = s2.fillna(0)
+        s3 = s1 * s2
+        s_sum = s_sum + s3
+
+        index = None
+        if date in s1.index:
+            index = date
+        else:
+            index_list = s1.index.tolist()
+            index_list.sort(reverse=True)
+            for tmp_date in index_list:
+                if tmp_date < date:
+                    index = tmp_date
+                    break
+
+        if index is None:
+            raise KeyboardInterrupt('index error')
+
+        price = s1.loc[index]
+
+        tmp_list = [code, name_dict[code], number, int(round(price * number))]
+        position_list.append(tmp_list)
+
+    position_list.sort(key=lambda x: x[3], reverse=True)
+
+    for val in position_list:
+        MainLog.add_log(val.__repr__())
+
+    list0 = []
+    for row in refresh_list:
+        tmp_txt = json.dumps(row, ensure_ascii=False)
+        list0.append(tmp_txt)
+    res = '[\n\t' + ',\n\t'.join(list0) + '\n]'
+
+    with open(path, "w", encoding='utf-8') as f:
+        f.write(res)
+
+    sum_value = s_sum.iloc[-1]
+    date1 = dt.date(2023, 11, 24)
+    date2 = dt.datetime.today().date()
+    target_value = 188100 * (1.4 ** ((date2 - date1).days / 365))
+    delta = target_value - sum_value
+
+    MainLog.add_log('target_value --> %.0f' % target_value)
+    MainLog.add_log('   sum_value --> %.0f' % sum_value)
+    MainLog.add_log('       delta --> %.0f' % delta)
+
+    s_sum = s_sum.replace(0, pd.NA).dropna().to_dict()
+
+    write_json_txt('..\\basicData\\daily_position.txt', s_sum)
+
+
+def detail_to_position(op_detail, date, sz_date):
+    ret = 0
+    dict0 = dict()
+    for val in op_detail:
+
+        op_date = val[0]
+        if op_date not in sz_date:
+            print(op_date)
+            raise KeyboardInterrupt('op_date not in sz_date')
+
+        if op_date > date:
+            continue
+        op_key = val[1]
+        op_number = val[2]
+
+        if op_key in ['buy', 'split']:
+            ret += op_number
+        elif op_key == 'sell':
+            ret -= op_number
+        dict0[op_date] = ret
+
+        if ret < 0:
+            raise KeyboardInterrupt('op_detail error')
+    s1 = pd.Series(dict0)
+    return ret, s1
+
+
 if __name__ == '__main__':
     import pandas as pd
     pd.set_option('display.max_columns', None)
@@ -304,5 +427,6 @@ if __name__ == '__main__':
     # sift_codes(source='backup:20230816:{hold}')
 
     sort_hold()
+    get_hold_position()
     # refresh_gui_counter()
     # sort_industry()
