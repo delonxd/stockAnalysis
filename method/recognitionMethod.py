@@ -4,9 +4,10 @@ import pandas as pd
 
 
 class RecognitionStr:
-    def __init__(self, src: str, df_all, tag_flag=True):
+    def __init__(self, src: str, df_all, tag_flag=True, log=True):
         self.src = src
         self.tag_flag = tag_flag
+        self.log = log
 
         symbol, values = self.config_symbol_values(src)
         symbol, values = self.replace_brace(symbol, values)
@@ -175,7 +176,7 @@ class RecognitionStr:
 
     def get_code_all(self):
         if self.tag_flag is True:
-            self.code_all = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
+            self.code_all = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt", self.log)
         else:
             self.code_all = self.df_all.index.tolist()
         return self.code_all
@@ -189,13 +190,13 @@ class RecognitionStr:
 
             elif src == 'hold':
                 if self.tag_flag is True:
-                    tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
+                    tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt", self.log)
                     ret = list(zip(*tmp).__next__())
                 else:
                     ret = self.df_all[self.df_all['gui_hold'].isin([True])].index.tolist()
 
             elif src == '持仓':
-                tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
+                tmp = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt", self.log)
                 new = []
                 for val in tmp:
                     if val[2] != 0:
@@ -203,10 +204,10 @@ class RecognitionStr:
                 ret = list(zip(*new).__next__())
 
             elif src == 'old':
-                ret = load_json_txt("..\\basicData\\tmp\\code_list_latest.txt")
+                ret = load_json_txt("..\\basicData\\tmp\\code_list_latest.txt", self.log)
 
             elif src == 'old_random':
-                ret = load_json_txt("..\\basicData\\tmp\\code_list_random.txt")
+                ret = load_json_txt("..\\basicData\\tmp\\code_list_random.txt", self.log)
 
             elif src == '持有行业':
                 str0 = 'ids:3:医疗研发外包\n' \
@@ -216,6 +217,25 @@ class RecognitionStr:
                        '|ids:3:快递\n' \
                        '|ids:3:线下药店\n'
 
+                recognition = RecognitionStr(str0, self.df_all)
+                ret = recognition.get_code_list()
+
+            elif src[:6] == 'except':
+                except_list = json.loads(src[6:])
+                except_rec = load_json_txt("..\\basicData\\except_recognition.txt", self.log)
+
+                str_list = []
+                for index in except_list:
+                    if index != except_rec[index][0]:
+                        except_rec = refresh_except_recognition()
+                    if except_rec[index][1] is False:
+                        continue
+                    if index == 0:
+                        str_list.append('(except%s)' % list(range(1, len(except_rec))))
+                    else:
+                        str_list.append('(%s)' % except_rec[index][3])
+
+                str0 = '|'.join(str_list)
                 recognition = RecognitionStr(str0, self.df_all)
                 ret = recognition.get_code_list()
 
@@ -278,7 +298,7 @@ class RecognitionStr:
 
             else:
                 if self.tag_flag is True:
-                    ret = code_list_from_tags(src)
+                    ret = code_list_from_tags(src, log=self.log)
                 else:
                     ret = self.code_list_from_df(src)
 
@@ -508,10 +528,10 @@ class RecognitionStr:
 
     def industry_name2code(self, ids_name):
         if self.sw_2021_name_dict is None:
-            self.sw_2021_name_dict = load_json_txt('..\\basicData\\industry\\sw_2021_name_dict.txt')
+            self.sw_2021_name_dict = load_json_txt('..\\basicData\\industry\\sw_2021_name_dict.txt', self.log)
 
         if self.sw_2021_dict is None:
-            self.sw_2021_dict = load_json_txt('..\\basicData\\industry\\sw_2021_dict.txt')
+            self.sw_2021_dict = load_json_txt('..\\basicData\\industry\\sw_2021_dict.txt', self.log)
 
         ids_codes = []
         index = -1
@@ -684,10 +704,47 @@ def industry_name2code(ids_names):
     return ret
 
 
-if __name__ == '__main__':
+def refresh_except_recognition():
+    path = "..\\basicData\\except_recognition.txt"
+    except_recognition = load_json_txt(path)
+    ret = []
+    for index, row in enumerate(except_recognition):
+        row[0] = index
+        ret.append(row)
 
-    # l0 = RecognitionStr('hold')
+    list0 = []
+    for row in ret:
+        tmp_txt = json.dumps(row, ensure_ascii=False)
+        list0.append(tmp_txt)
+    res = '[\n\t' + ',\n\t'.join(list0) + '\n]'
+
+    with open(path, "w", encoding='utf-8') as f:
+        f.write(res)
+    return ret
+
+
+def get_except_list(code, df_all, log=True):
+    except_rec = load_json_txt("..\\basicData\\except_recognition.txt", log)
+    ret = []
+    for index, val in enumerate(except_rec):
+        if index == 0:
+            continue
+
+        rec_str = val[3]
+        code_list = RecognitionStr(rec_str, df_all, log=log).get_code_list()
+        if code in code_list:
+            ret.append([val[2], val[4], True])
+        else:
+            ret.append([val[2], val[4], False])
+    return ret
+
+
+if __name__ == '__main__':
+    # refresh_except_recognition()
+    df0 = load_pkl("..\\basicData\\dailyUpdate\\latest\\show_table.pkl", log=False)
+    # l0 = RecognitionStr('all-except[0]', df0)
     # code2 = l0.get_code_list()
-    # print(code2)
+    # print(len(code2))
     # l0.show()
+    print(get_except_list('600438', df0, log=False))
     pass
