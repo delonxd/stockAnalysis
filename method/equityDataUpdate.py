@@ -17,8 +17,10 @@ def eq_update():
 
     from request.requestAkshareData import request_mir_y10_ak
     from request.requestAkshareData import request_futures_data
+    from request.requestAkshareData import request_sz000001
 
     from method.sortCode import sort_hold
+    from method.sortCode import get_hold_position
 
     code_list = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
     request_eq2mysql(code_list)
@@ -28,7 +30,9 @@ def eq_update():
 
     request_mir_y10_ak()
     request_futures_data()
+    request_sz000001()
     sort_hold()
+    get_hold_position()
 
     MainLog.write('..\\basicData\\dailyUpdate\\eq_update_log2.txt', init=True)
 
