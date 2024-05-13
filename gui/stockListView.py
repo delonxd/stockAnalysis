@@ -395,6 +395,7 @@ class GenerateCodeListWidget(QWidget):
             '7_ids',
             '8_new_sifted',
             '9',
+            '10_gui_rate_dv',
         ]
         obj.addItems(flags)
         obj.setMaxVisibleItems(20)
@@ -604,7 +605,11 @@ class GenerateCodeListWidget(QWidget):
         MainLog.add_log('change mission --> %s' % mission)
 
         if mission == '0_old':
-            editor_dict['source'] = 'old'
+            # editor_dict['source'] = 'old'
+
+            editor_dict['source'] = 'all-except[0]'
+            editor_dict['sort'] = '["gui_rate_dv", "code"]'
+            editor_dict['ascending'] = '[false, true]'
 
         elif mission == '1_selected':
             editor_dict['source'] = '白名单'
@@ -673,6 +678,14 @@ class GenerateCodeListWidget(QWidget):
             editor_dict['sort'] = '["gui_rate", "code"]'
             editor_dict['ascending'] = '[false, true]'
             editor_dict['sort_ids'] = 'true'
+
+        elif mission == '10_gui_rate_dv':
+            editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate_dv>=12\n' \
+                                    '&cnd:predict_discount>7\n' \
+                                    '-光伏-电池-CRO-新上市\n' \
+
+            editor_dict['sort'] = '["gui_rate_dv", "code"]'
+            editor_dict['ascending'] = '[false, true]'
 
         self.load_editor_dict()
 
