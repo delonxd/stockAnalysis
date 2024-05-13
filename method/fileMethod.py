@@ -113,8 +113,8 @@ def file_del_codes(del_list, path, log=False):
         MainLog.add_log('add codes -codes --> %s' % del_list)
 
 
-def code_list_from_tags(tag):
-    tmp = load_json_txt("..\\basicData\\self_selected\\gui_tags.txt")
+def code_list_from_tags(tag, log=True):
+    tmp = load_json_txt("..\\basicData\\self_selected\\gui_tags.txt", log)
     ret = []
     for code, txt in tmp.items():
         list0 = txt.split('#')
