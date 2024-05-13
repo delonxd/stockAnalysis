@@ -13,7 +13,7 @@ import datetime as dt
 import pandas as pd
 
 
-def try_request(time0):
+def try_request(skip_error):
     def logging_decorator(func):
         @wraps(func)
         def wrapped_function(*args, **kwargs):
@@ -25,7 +25,10 @@ def try_request(time0):
                     return res
 
                 except BaseException as e:
-                    print(e)
+                    # print(e)
+                    MainLog.add_log(str(e))
+                    if str(e) == skip_error:
+                        flag = False
                     time.sleep(1)
         return wrapped_function
     return logging_decorator
