@@ -4,7 +4,7 @@ from method.fileMethod import *
 import json
 
 
-@try_request(None)
+@try_request("HTTP Error 500: Internal Server Error")
 def request_industry_sw_2021(code):
     token = "f819be3a-e030-4ff0-affe-764440759b5c"
     url = 'https://open.lixinger.com/api/cn/company/industries'
