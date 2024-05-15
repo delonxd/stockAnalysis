@@ -1232,7 +1232,8 @@ class DataAnalysis:
         elif column == 's_069_dividend_rate':
             s1 = self.get_column(self.df_mvs, 'id_041_mvs_mc')
             s2 = self.fs_to_mvs('dv_001_dividend_value')
-            s2.fillna(method='ffill', inplace=True)
+            # s2.fillna(method='ffill', inplace=True)
+            s2.ffill(inplace=True)
             s3 = s2 / s1
             return self.regular_series(column, s3)
 
@@ -1289,8 +1290,8 @@ class DataAnalysis:
         data = data.reindex_like(pd.Series(index=dt_fs.values))
 
         if data.size > 1:
-            if pd.isna(data[-1]):
-                data[-1] = data[-2]
+            if pd.isna(data.iloc[-1]):
+                data.iloc[-1] = data.iloc[-2]
 
         data.fillna(np.inf, inplace=True)
         data.index = dt_fs.index
@@ -1298,7 +1299,8 @@ class DataAnalysis:
         index = pd.concat([dt_mvs, data], axis=1, sort=True).index
         data = data.reindex_like(pd.Series(index=index))
 
-        data.fillna(method='ffill', inplace=True)
+        # data.fillna(method='ffill', inplace=True)
+        data.ffill(inplace=True)
         data[data == np.inf] = np.nan
         data = data[dt_mvs.values]
         data.name = name
