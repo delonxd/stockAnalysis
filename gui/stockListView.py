@@ -277,9 +277,7 @@ class QStockListView(QWidget):
         super().__init__()
 
         self.setWindowTitle('QTestWidget')
-        # self.resize(800, 900)
-        self.resize(1600, 860)
-        self.move(159, 88)
+        self.setGeometry(160, 120, 1600, 860)
 
         self.table_view = QDataFrameTable(code_df)
         self.generate_widget = GenerateCodeListWidget(code_df)

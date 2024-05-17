@@ -14,8 +14,7 @@ class FsView(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('FsView')
-        self.resize(1600, 860)
-        self.move(159, 88)
+        self.setGeometry(160, 120, 1600, 860)
 
         self.table_widget = QTableWidget()
         self.table_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)

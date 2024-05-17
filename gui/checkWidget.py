@@ -15,7 +15,7 @@ class CheckWidget(QWidget):
 
         self.setWindowTitle('检查事项')
 
-        self.resize(600, 850)
+        self.setGeometry(660, 120, 600, 850)
         self.main_widget = main_widget
         self._code = code
 

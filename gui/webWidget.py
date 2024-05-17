@@ -10,7 +10,7 @@ class WebWidget(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('WebWidget ')
-        self.resize(960, 800)
+        self.setGeometry(480, 120, 960, 860)
 
         self.browser = QWebEngineView()
         self.setCentralWidget(self.browser)

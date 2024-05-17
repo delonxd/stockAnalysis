@@ -12,7 +12,6 @@ import time
 class StyleTable(QTableWidget):
     def __init__(self):
         super().__init__()
-        self.setMinimumSize(1200, 800)
 
         self.column_type = {
             'index_name': 'str',
@@ -268,7 +267,7 @@ class StyleWidget(QWidget):
         self.button7 = QPushButton('添加行')
         self.button8 = QPushButton('删除行')
 
-        # self.resize(1600, 900)
+        self.setGeometry(380, 120, 1200, 800)
 
         layout1 = QHBoxLayout()
         layout1.addStretch(1)
@@ -290,7 +289,6 @@ class StyleWidget(QWidget):
         layout2.addWidget(self.style_table)
         self.setLayout(layout2)
 
-        self.move(360, 80)
         self.button1.clicked.connect(self.refresh_all_pix)
         self.button2.clicked.connect(self.refresh_current_pix)
         self.button3.clicked.connect(self.load_default)

@@ -13,7 +13,7 @@ class EquityChangeWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('EquityChangeWidget')
-        self.resize(940, 800)
+        self.setGeometry(490, 120, 940, 860)
 
         self.table_widget = QTableWidget()
         self.table_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
