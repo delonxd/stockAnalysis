@@ -24,6 +24,10 @@ def daily_update():
     # from request.requestAkshareData import request_mir_y10_ak
     # from request.requestAkshareData import request_futures_data
 
+    from request.requestAkshareData import request_sz000001
+    from method.sortCode import sort_hold
+    from method.sortCode import get_hold_position
+
     import time
 
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
@@ -55,6 +59,9 @@ def daily_update():
     # MainLog.write('%s\\logs4.txt' % res_dir, init=True)
 
     backup_daily_update()
+    request_sz000001()
+    sort_hold()
+    get_hold_position()
     MainLog.write('%s\\logs5.txt' % res_dir, init=True)
 
 
