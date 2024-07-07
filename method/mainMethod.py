@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import numpy as np
 from method.fileMethod import *
 from functools import wraps
 
@@ -146,6 +147,105 @@ def deco_show_stock_name(func):
         return res
 
     return wrapped_function
+
+
+def discount_to_date(src, rate):
+    val = np.log(src) / np.log(rate)
+    if not pd.isna(val):
+        val_year = int(abs(val))
+        val_month = int((abs(val) % 1) * 12)
+
+        str_pre = '-' if val < 0 else ''
+        str_year = '%s年' % val_year if val_year != 0 else ''
+        str_month = '%s个月' % val_month if val_year == 0 or val_month != 0 else ''
+        ret = '%s%s%s' % (str_pre, str_year, str_month)
+    else:
+        ret = None
+    return ret
+
+
+def try_decorator(func):
+    @wraps(func)
+    def wrapped_function(*args, **kwargs):
+        try:
+            res = func(*args, **kwargs)
+            return res
+        except BaseException as e:
+            print(e)
+            raise KeyboardInterrupt
+    return wrapped_function
+
+
+def sort_tags(src: list):
+    src = src.copy()
+    ret1 = []
+    ret2 = []
+    # tmp = {
+    #     'Src': 'Src',
+    #     'Toc': 'ToC',
+    #     'Mid': 'Mid',
+    #     '排除': '排',
+    #     '自选': '自选',
+    #     '白名单': '白',
+    #     '黑名单': '黑',
+    #     '灰名单': '灰',
+    #     '周期': '周期',
+    #     '疫情': '疫',
+    #     '忽略': '忽略',
+    #     '国有': '国',
+    #     '低价': '低',
+    #     '新上市': '新上市',
+    #     '未上市': '未上市',
+    #     '买入': '买入',
+    #     '自选202307': None,
+    #     '测试20230516': None,
+    # }
+
+    tmp = {
+        '买入': '买入',
+        '关注': '关注',
+        '自选': '自选',
+        '白名单': '白',
+    }
+
+    for key, value in tmp.items():
+        if key in src:
+            ret1.append(value)
+            src.pop(src.index(key))
+
+    tmp = {
+        'Src': 'green',
+        'Toc': 'green',
+        # '买入': 'green',
+        # '关注': 'green',
+        # '自选': 'green',
+        # '白名单': 'green',
+        '灰名单': 'yellow',
+        '国有': 'yellow',
+        '周期': 'yellow',
+        '低价': 'yellow',
+        'Mid': 'red',
+        '排除': 'red',
+        '黑名单': 'red',
+        '忽略': 'red',
+        '疫情': 'red',
+        '新上市': 'red',
+        '未上市': 'red',
+    }
+
+    for key, value in tmp.items():
+        if key in src:
+            ret2.append([key, value])
+            # if value is not None:
+            #     ret.append(value)
+            src.pop(src.index(key))
+
+    src.sort()
+    for value in src:
+        # ret.append(value)
+        ret2.append([value, 'yellow'])
+
+    return ret1, ret2
 
 
 if __name__ == '__main__':
