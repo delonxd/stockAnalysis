@@ -2,8 +2,10 @@ from request.requestData import request2mysql
 from request.requestEquityData import request_eq2mysql
 from method.sortCode import sift_codes
 from method.fileMethod import *
-from method.mainMethod import deco_show_stock_name
+from method.mainMethod import deco_show_stock_name, discount_to_date, sort_tags
+from method.mainMethod import try_decorator
 from method.recognitionMethod import get_except_list
+from method.showTable import get_recent_val, get_recent_index
 
 from gui.styleWidget import StyleWidget
 from gui.dataPix import DataPix
@@ -22,7 +24,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 # import sys
-import json
+# import json
 import threading
 import time
 import datetime as dt
@@ -172,20 +174,7 @@ class MainWidget(QWidget):
         self.page_button2 = QPushButton('>>')
         # self.window2 = ShowPlot()
 
-        self.counter_info = None
-        self.real_cost = np.nan
-        self.market_value = np.nan
-        self.liquidation_asset = np.nan
-        self.equity = np.nan
-
-        self.profit_salary_min = np.nan
-        self.predict_delta = 0
-
-        self.listing_date = None
-        self.max_increase_30 = 0
-        self.yesterday_rise = np.nan
-        self.turnover = 0
-        self.dividend_return = 0
+        self.data = dict()
 
         self.plt_rect = [10, 32, 1600, 900]
         self.mouse_pos = [None, None]
@@ -709,286 +698,186 @@ class MainWidget(QWidget):
         if plt.fignum_exists(1):
             self.show_plot()
 
-    def update_counter(self, code):
-        df = self.data_pix.df
+    def generate_sql_data_dict(self, code, sql_df):
+        data = dict()
 
-        last_date = ''
-        last_real_pe = np.inf
-        number = 0
+        # 处理sql_df数据
+        data['real_pe'] = get_recent_val(sql_df, 's_034_real_pe', np.inf)
+        data['market_value'] = get_recent_val(sql_df, 's_028_market_value', np.nan)
+        data['market_value2'] = get_recent_val(sql_df, 's_028_market_value', np.nan, 2)
+        data['listing_date'] = get_recent_index(sql_df, 's_028_market_value', None, 0)
+        data['yesterday_rise'] = (data['market_value'] / data['market_value2']) - 1
+        data['liquidation_asset'] = get_recent_val(sql_df, 's_026_liquidation_asset', np.nan)
+        data['real_cost'] = get_recent_val(sql_df, 's_025_real_cost', np.nan)
+        data['turnover'] = get_recent_val(sql_df, 's_043_turnover_volume_ttm', 0)
+        data['equity'] = get_recent_val(sql_df, 's_002_equity', np.nan)
+        data['equity_ratio'] = get_recent_val(sql_df, 's_067_equity_ratio', np.nan)
 
-        if df.columns.size > 0:
-            date = self.date_ini
-        else:
-            date = ''
-
-        real_pe = np.inf
-        # tmp_date = ''
-        if 's_034_real_pe' in df.columns:
-            s0 = self.data_pix.df['s_034_real_pe'].copy().dropna()
-            if s0.size > 0:
-                # tmp_date = max(s0.index[-1], tmp_date)
-                real_pe = s0[-1]
-
-        # if 'dt_fs' in df.columns:
-        #     s0 = self.data_pix.df['dt_fs'].copy().dropna()
-        #     if s0.size > 0:
-        #         tmp_date = max(s0.index[-1], tmp_date)
-        #
-        # if tmp_date != '' and tmp_date != 'Invalid da':
-        #     date = tmp_date
-
-        self.max_increase_30 = np.inf
-        self.listing_date = None
-        self.market_value = np.nan
-        self.yesterday_rise = np.nan
-        if 's_028_market_value' in df.columns:
-            s0 = self.data_pix.df['s_028_market_value'].copy().dropna()
-            if s0.size > 0:
-                recent = s0[-1]
-                self.market_value = recent / 1e8
-
-                size0 = min(s0.size, 90)
-                minimum = min(s0[-size0:])
-                self.max_increase_30 = recent / minimum - 1
-                self.listing_date = s0.index[0]
-            if s0.size > 1:
-                self.yesterday_rise = s0[-1] / s0[-2] - 1
-
-        self.liquidation_asset = np.nan
-        if 's_026_liquidation_asset' in df.columns:
-            s0 = self.data_pix.df['s_026_liquidation_asset'].copy().dropna()
-            if s0.size > 0:
-                self.liquidation_asset = s0[-1] / 1e8
-
-        self.real_cost = np.nan
-        if 's_025_real_cost' in df.columns:
-            s0 = self.data_pix.df['s_025_real_cost'].copy().dropna()
-            if s0.size > 0:
-                self.real_cost = s0[-1] / 1e8
-
-        self.turnover = 0
-        if 's_043_turnover_volume_ttm' in df.columns:
-            s0 = self.data_pix.df['s_043_turnover_volume_ttm'].copy().dropna()
-            if s0.size > 0:
-                self.turnover = s0[-1]
-
-        self.equity = np.nan
-        if 's_002_equity' in df.columns:
-            s0 = self.data_pix.df['s_002_equity'].copy().dropna()
-            if s0.size > 0:
-                self.equity = s0[-1] / 1e8
-
-        self.profit_salary_min = np.nan
-        self.predict_delta = 0
-        tmp_date = np.nan
-
-        if 's_063_profit_salary2' in df.columns:
-            s0 = self.data_pix.df['s_063_profit_salary2'].copy().dropna()
-            if s0.size > 0:
-                self.profit_salary_min = s0[-1]
-                tmp_date = s0.index[-1]
-
+        data['salary_cost'] = get_recent_val(sql_df, 's_053_core_profit_salary', np.nan)
+        data['profit_salary_min'] = get_recent_val(sql_df, 's_063_profit_salary2', np.nan)
+        tmp_date = get_recent_index(sql_df, 's_063_profit_salary2', np.nan)
+        # data['profit_salary_date'] = tmp_date
+        data['predict_delta'] = 0
         if not pd.isna(tmp_date):
             date1 = dt.datetime.strptime(tmp_date, "%Y-%m-%d").date()
             date2 = dt.date.today()
-            self.predict_delta = (date2 - date1).days
+            data['predict_delta'] = (date2 - date1).days
 
-        self.dividend_return = 0
-        if 's_069_dividend_rate' in df.columns:
-            s0 = self.data_pix.df['s_069_dividend_rate'].copy().dropna()
-            if s0.size > 0:
-                self.dividend_return = s0[-1] * 100
+        data['dividend_return'] = get_recent_val(sql_df, 's_069_dividend_rate', 0)
+        data['dividend_return'] = data['dividend_return'] * 100
 
+        # 处理counter_data
         path = "../basicData/self_selected/gui_counter.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            res_dict = json.loads(f.read())
-            data = res_dict.get(code)
+        counter_dict = load_json_txt(path, False)
+        counter_data = counter_dict.get(code)
 
-        if isinstance(data, list):
-            last_date = data[1]
-            number = data[2]
-            last_real_pe = data[3]
-        elif data is not None:
-            number = data
+        present_date = self.date_ini if sql_df.columns.size > 0 else None
+        last_date = counter_data[1] if isinstance(counter_data, list) else None
 
+        if present_date is None:
+            data['counter_data'] = counter_data
+        elif last_date is None:
+            data['counter_data'] = ["", present_date, 1, data['real_pe'], np.nan]
+            counter_dict[code] = data['counter_data']
+            write_json_txt(path, counter_dict, False)
+        elif present_date > last_date:
+            number = counter_data[2] + 1
+            last_real_pe = counter_data[3]
+            delta = (1/data['real_pe'] - 1/last_real_pe) * abs(last_real_pe)
+            data['counter_data'] = [last_date, present_date, number, data['real_pe'], delta]
+            counter_dict[code] = data['counter_data']
+            write_json_txt(path, counter_dict, False)
+        else:
+            data['counter_data'] = counter_data
+
+        # 处理标题颜色
         path = "..\\basicData\\dailyUpdate\\latest\\a003_report_date_dict.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            report_date = json.loads(f.read()).get(code)
+        report_date = load_json_txt(path, False).get(code)
 
         color = Qt.GlobalColor.red
-
+        color_white = Qt.GlobalColor.white
         if report_date is not None:
-            if data is None:
-                color = Qt.GlobalColor.white
-            elif data[1] < report_date:
-                color = Qt.GlobalColor.white
-            elif self.date_ini == data[1]:
-                if data[0] < report_date:
+            if counter_data is None:
+                color = color_white
+            elif counter_data[1] < report_date:
+                color = color_white
+            elif self.date_ini == counter_data[1]:
+                if counter_data[0] < report_date:
                     color = Qt.GlobalColor.white
+        data['name_color'] = color
 
-        p = QPalette()
-        p.setColor(QPalette.WindowText, color)
-        self.head_label1.setPalette(p)
-
-        if date > last_date:
-            number += 1
-            delta = (1/real_pe - 1/last_real_pe) * abs(last_real_pe)
-            self.counter_info = [last_date, date, number, real_pe, delta]
-            res_dict[code] = self.counter_info
-            res = json.dumps(res_dict, indent=4, ensure_ascii=False)
-            path = "../basicData/self_selected/gui_counter.txt"
-            with open(path, "w", encoding='utf-8') as f:
-                f.write(res)
-        else:
-            self.counter_info = res_dict.get(code)
-
+        # 处理时间戳
         path = "../basicData/self_selected/gui_timestamp.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            timestamps = json.loads(f.read())
-
+        timestamps = load_json_txt(path, False)
         timestamps[code] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        write_json_txt(path, timestamps, False)
 
-        res = json.dumps(timestamps, indent=4, ensure_ascii=False)
-        with open(path, "w", encoding='utf-8') as f:
-            f.write(res)
+        self.data = data
 
-    def show_stock_name(self):
-        row = self.codes_df.df.iloc[self.code_index]
-        len_df = self.codes_df.df.shape[0]
-
-        txt1 = '%s: %s(%s/%s)' % (row['code'], row['name'], self.code_index, len_df)
-        txt2 = '行业: %s-%s-%s' % (row['level1'], row['level2'], row['level3'])
-
-        code = row['code']
-        list0 = []
-        list1 = []
+    def generate_gui_data_dict(self, code):
+        data = self.data
 
         path = "..\\basicData\\self_selected\\gui_tags.txt"
+        data['gui_tags'] = gui_tags = load_json_txt(path, False).get(code)
+        path = "..\\basicData\\self_selected\\gui_rate.txt"
+        data['gui_rate'] = gui_rate = load_json_txt(path, False).get(code)
+        path = "..\\basicData\\self_selected\\gui_assessment.txt"
+        data['gui_ass'] = gui_ass = load_json_txt(path, False).get(code)
+        path = "..\\basicData\\self_selected\\gui_mark.txt"
+        data['gui_mark'] = load_json_txt(path, False).get(code)
 
-        tags_dict = load_json_txt(path, log=False)
-        txt = tags_dict.get(code)
-        txt = '' if txt is None else txt
-        tags_list = txt.split('#')
-        tags_list.pop(tags_list.index(''))
-
-        tmp = {
-            'Src': 'Src',
-            'Toc': 'ToC',
-            'Mid': 'Mid',
-            '排除': '排',
-            '自选': '自选',
-            '白名单': '白',
-            '黑名单': '黑',
-            '灰名单': '灰',
-            '周期': '周期',
-            '疫情': '疫',
-            '忽略': '忽略',
-            '国有': '国',
-            '低价': '低',
-            '新上市': '新上市',
-            '未上市': '未上市',
-            '买入': '买入',
-            '自选202307': None,
-            '测试20230516': None,
-        }
-
-        for key, value in tmp.items():
-            if key in tags_list:
-                if value is not None:
-                    list0.append(value)
-                tags_list.pop(tags_list.index(key))
-
-        for value in tags_list:
-            list0.append(value)
-
-        mark = load_json_txt("../basicData/self_selected/gui_mark.txt", log=False).get(code)
-        if mark is not None:
-            txt2 = txt2 + '-%s' % mark
-
-        data = self.counter_info
-        if isinstance(data, list):
-            txt_counter = '%s次/%.2f%%[%s]' % (data[2], data[4]*100, data[0])
+        # gui_tags
+        if gui_tags is not None:
+            tags_list = gui_tags.split('#')
+            tags_list.pop(tags_list.index(''))
         else:
-            txt_counter = '%s次/%.2f%%[%s]' % (data, np.inf, '')
+            tags_list = []
+        data['gui_tags_list'] = sort_tags(tags_list)
 
-        # list0.append('%.2f%%%s' % (self.max_increase_30*100, self.get_sign(self.max_increase_30)))
-
-        rate_tmp = load_json_txt("../basicData/self_selected/gui_rate.txt", log=False).get(code)
-        if rate_tmp is not None:
-            list0.append('%s%%+%.1f' % (rate_tmp, self.dividend_return))
-            rate_tmp = int(rate_tmp)
-        else:
-            rate_tmp = np.nan
-        rate_adj = 0 if pd.isna(rate_tmp) else rate_tmp
+        # gui_rate
+        gui_rate = int(gui_rate) if gui_rate is not None else np.nan
+        rate_adj = 0 if pd.isna(gui_rate) else gui_rate
         rate_adj = 25 if rate_adj > 25 else rate_adj
-        predict_rate = rate_adj * self.predict_delta / 36500 + 1
+        data['predict_rate'] = rate_adj * data['predict_delta'] / 36500 + 1
+        data['predict_profit'] = data['predict_rate'] * data['profit_salary_min']
+        data['predict_discount'] = data['predict_profit'] / data['real_cost'] / 0.1
+        data['discount_date'] = discount_to_date(data['predict_discount'] / 9, 1.2)
 
-        predict_profit = self.profit_salary_min * predict_rate
-        predict_discount = predict_profit / self.real_cost / 1e7
-        txt2 = txt2 + '-%.2f' % predict_discount
+        # gui_ass
+        gui_ass = int(gui_ass) if gui_ass is not None else np.nan
+        data['liq_cost'] = data['equity'] - data['liquidation_asset']
+        data['predict_ass'] = gui_ass * data['predict_rate'] * 1e8
 
-        discount_index = np.log(predict_discount / 9) / np.log(1.2)
-        if not pd.isna(discount_index):
-            tmp0 = '-' if discount_index < 0 else ''
-            tmp1 = int(abs(discount_index))
-            tmp2 = int((abs(discount_index) % 1) * 12)
+        data['ass_rate1'] = data['market_value'] / (data['predict_ass'] - data['liq_cost'] / 2)
+        data['ass_rate1_convert'] = (1 / ((data['ass_rate1'] / 2) ** 0.1) - 1) * 100
 
-            tmp2 = '%s个月' % tmp2 if tmp1 == 0 or tmp2 != 0 else ''
-            tmp1 = '%s年' % tmp1 if tmp1 != 0 else ''
-            txt2 = txt2 + '(%s%s%s)' % (tmp0, tmp1, tmp2)
+        data['ass_rate2'] = data['market_value'] / (data['predict_ass'] + data['liquidation_asset'] / 2)
+        data['ass_rate2_convert'] = (1 / ((data['ass_rate2'] / 2) ** 0.1) - 1) * 100
 
-        if self.listing_date is not None:
-            list1.insert(0, self.listing_date)
+        data['ass_rate3'] = gui_ass / data['equity'] * 1e8
 
-        list1.append(txt_counter)
-        list1.append('%.2f%%' % (self.yesterday_rise * 100))
+        data['liq_cost_rate'] = data['liq_cost'] / data['profit_salary_min']
+        data['salary_cost_rate'] = data['salary_cost'] / data['profit_salary_min'] / 0.1
 
-        ass = None
-        path = "../basicData/self_selected/gui_assessment.txt"
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
-            value_dict = json.loads(f.read())
-            ass_str = value_dict.get(code)
-            if ass_str is not None:
-                try:
-                    ass = int(ass_str)
-                except Exception as e:
-                    print(e)
+        self.data = data
 
-        predict_ass = None if ass is None else ass * predict_rate
+    def update_counter(self, code):
+        self.generate_sql_data_dict(code, self.data_pix.df)
 
-        if ass is not None:
-            # ass2 = ass + self.liquidation_asset
-            cost = self.equity - self.liquidation_asset
+        p = QPalette()
+        p.setColor(QPalette.WindowText, self.data['name_color'])
+        self.head_label1.setPalette(p)
 
-            rate = self.market_value / (predict_ass * 2 - cost) * 2
-            rate1 = (1/((rate/2) ** 0.1)-1) * 100
+    @try_decorator
+    def show_stock_name(self):
 
-            list0.append('%.2f' % rate)
+        row = self.codes_df.df.iloc[self.code_index]
+        total = self.codes_df.df.shape[0]
 
-            rate = self.market_value / (predict_ass * 2 + self.liquidation_asset) * 2
-            rate2 = (1/((rate/2) ** 0.1)-1) * 100
+        code = row['code']
+        name = row['name']
+
+        self.generate_gui_data_dict(code)
+        data = self.data
+
+        # 标题
+        txt1 = '%s: %s(%s/%s)' % (code, name, self.code_index + 1, total)
+
+        # 左上
+        txt2 = '行业: %s-%s-%s' % (row['level1'], row['level2'], row['level3'])
+
+        if data['gui_mark'] is not None:
+            txt2 = '-'.join([txt2, data['gui_mark']])
+        txt2 = '-'.join([txt2, '%.2f' % data['predict_discount']])
+
+        if data['discount_date'] is not None:
+            txt2 = '%s(%s)' % (txt2, data['discount_date'])
+
+        # 右上
+        tmp_txt1 = '%s%%+%.1f' % (data['gui_rate'], data['dividend_return'])
+        tmp_txt2 = '%.2f/%.2f/%.2f' % (data['ass_rate1'], data['ass_rate2'], data['ass_rate3'])
+        txt3 = '/'.join([*data['gui_tags_list'][0], tmp_txt1, tmp_txt2])
+
+        # 左下
+        if data['gui_ass'] is not None:
             txt_bottom1 = '%.0f/%.0f%+.0f%+.0f[%+.1f%%]/[%+.1f%%]' % (
-                self.market_value,
-                predict_ass,
-                self.liquidation_asset/2,
-                -self.equity/2,
-                rate2,
-                rate1,
+                data['market_value'] / 1e8,
+                data['predict_ass'] / 1e8,
+                data['liquidation_asset'] / 2e8,
+                -data['equity'] / 2e8,
+                data['ass_rate2_convert'],
+                data['ass_rate1_convert'],
             )
-            list0.append('%.2f' % rate)
-
-            rate = ass / self.equity
-            list0.append('%.2f' % rate)
         else:
-            txt_bottom1 = '%s%.2f亿' % ('cost: ', self.real_cost)
+            txt_bottom1 = 'cost: %.2f亿' % (data['real_cost'] / 1e8)
 
-        # if ass is not None:
-        #     rate = self.turnover / 1e6 / predict_ass
-        #     # txt2 = txt2 + '-%.2f‰' % rate
-        #     list0.insert(0, '%.2f‰' % rate)
+        # 右下
+        counter = data['counter_data']
+        txt_bottom2 = '%s次/%.2f%%[%s]' % (counter[2], counter[4] * 100, counter[0])
+        txt_bottom2 = '%s/%.2f' % (txt_bottom2, data['yesterday_rise'] * 100)
 
-        txt3 = '/'.join(list0)
-        txt_bottom2 = '/'.join(list1)
+        if data['listing_date'] is not None:
+            txt_bottom2 = '/'.join([data['listing_date'], txt_bottom2])
 
         GuiLog.add_log('show stock --> ' + txt1)
         self.head_label1.setText(txt1)
@@ -1003,8 +892,9 @@ class MainWidget(QWidget):
             self.show_list = self.show_list[:5]
 
         self.draw_left_pad()
+        self.draw_right_pad()
         self.pad_l.setPixmap(self.pad_l_pix)
-        # self.pad_r.setPixmap(self.pad_r_pix)
+        self.pad_r.setPixmap(self.pad_r_pix)
 
     def draw_left_pad(self):
         pix = self.pad_l_pix
@@ -1016,7 +906,7 @@ class MainWidget(QWidget):
         pix_painter.setFont(QFont('Consolas', 13))
         metrics = pix_painter.fontMetrics()
 
-        blank = 10
+        blank = 6
         y = 20
         row_height = metrics.height() + blank * 2
 
@@ -1035,6 +925,43 @@ class MainWidget(QWidget):
 
             rect = QRect(10, y, 110, row_height)
             pix_painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, '%s' % val)
+
+            y += row_height
+        pix_painter.end()
+
+    def draw_right_pad(self):
+        pix = self.pad_r_pix
+        pix.fill(QColor(40, 40, 40, 255))
+        show_list = self.data['gui_tags_list'][1]
+
+        show_list.insert(0, ['  %.2f%%' % (self.data['salary_cost_rate'] * 100), 'gray'])
+        show_list.insert(0, ['薪酬支出占比：', 'red'])
+        show_list.insert(0, ['  %.2f%%' % (self.data['equity_ratio']*100), 'gray'])
+        show_list.insert(0, ['股权占比：', 'red'])
+        show_list.insert(0, ['  %.2f%%' % (self.data['liq_cost_rate']*100), 'gray'])
+        show_list.insert(0, ['清算差值比：', 'red'])
+
+        pix_painter = QPainter(pix)
+        pix_painter.setFont(QFont('Consolas', 13))
+        metrics = pix_painter.fontMetrics()
+
+        blank = 6
+        y = 20
+        row_height = metrics.height() + blank * 2
+
+        pen_dict = {
+            'red': QPen(Qt.GlobalColor.red),
+            'green': QPen(Qt.GlobalColor.green),
+            'yellow': QPen(Qt.GlobalColor.yellow),
+            'gray': QPen(Qt.GlobalColor.gray),
+        }
+
+        for val, color in show_list:
+            pen = pen_dict[color]
+            pix_painter.setPen(pen)
+
+            rect = QRect(10, y, 110, row_height)
+            pix_painter.drawText(rect, Qt.AlignmentFlag.AlignLeft, '%s' % val)
 
             y += row_height
         pix_painter.end()
@@ -1175,7 +1102,9 @@ class MainWidget(QWidget):
 
             # self.window2.move(-1906, 10)
 
-            self.fs_view.move(152-1920, 60)
+            # self.fs_view.move(152-1920, 60)
+            self.fs_view.resize(1600, 860)
+            self.fs_view.move(159 - 1920, 88)
 
             if plt.fignum_exists(1):
                 plt.figure(1, figsize=(16, 9), dpi=100)
@@ -1185,14 +1114,9 @@ class MainWidget(QWidget):
         else:
             self.showMaximized()
 
-            self.web_widget.resize(960, 500)
-            self.web_widget.move(0, 0)
-
-            self.equity_change_widget.resize(940, 800)
-            self.equity_change_widget.move(0, 0)
-
-            # self.window2.move(10, 10)
-            self.fs_view.move(152, 60)
+            self.web_widget.setGeometry(480, 120, 960, 860)
+            self.equity_change_widget.setGeometry(490, 120, 940, 860)
+            self.fs_view.setGeometry(160, 120, 1600, 860)
 
             if plt.fignum_exists(1):
                 plt.figure(1, figsize=(16, 9), dpi=100)
@@ -1313,7 +1237,8 @@ class MainWidget(QWidget):
             date = dt.datetime.strptime(file, "%Y%m%d%H%M%S").date()
             if (today - date).days > 7:
                 shutil.rmtree("..\\gui\\backup\\%s" % file)
-                print(date)
+                # print(date)
+                MainLog.add_log('remove file %s complete.' % file)
 
         dir1 = "..\\basicData\\self_selected"
 
