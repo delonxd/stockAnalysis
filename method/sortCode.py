@@ -289,8 +289,14 @@ def get_hold_position():
     path = '..\\basicData\\self_selected\\gui_hold_detail.txt'
     operation_list = load_json_txt(path)
 
+    today = dt.datetime.today().date()
+
     name_dict = load_json_txt('..\\basicData\\code_names_dict.txt')
     sz_date = load_json_txt('..\\basicData\\akshare_sz_date.txt')
+
+    today_str = today.strftime("%Y-%m-%d")
+    if today_str not in sz_date:
+        sz_date.append(today_str)
     s0 = pd.Series(index=sz_date)
 
     operation_dict = dict()
@@ -316,7 +322,8 @@ def get_hold_position():
             operation_dict[code] = [tag]
 
     position_list = []
-    date = '2024-05-09'
+    # date = '2024-05-09'
+    date = today_str
 
     s_sum = pd.Series(0, index=sz_date)
     for code, value in operation_dict.items():
@@ -368,16 +375,21 @@ def get_hold_position():
 
     sum_value = s_sum.iloc[-1]
     date1 = dt.date(2023, 11, 24)
-    date2 = dt.datetime.today().date()
+    date2 = today
     target_value = 188100 * (1.4 ** ((date2 - date1).days / 365))
     delta = target_value - sum_value
 
-    MainLog.add_log('target_value --> %.0f' % target_value)
-    MainLog.add_log('   sum_value --> %.0f' % sum_value)
-    MainLog.add_log('       delta --> %.0f' % delta)
+    str1 = 'target_value --> %.0f' % target_value
+    str2 = '   sum_value --> %.0f' % sum_value
+    str3 = '       delta --> %.0f' % delta
+
+    MainLog.add_log(str1)
+    MainLog.add_log(str2)
+    MainLog.add_log(str3)
+
+    write_json_txt('..\\basicData\\dailyUpdate\\daily_target.txt', [str1, str2, str3])
 
     s_sum = s_sum.replace(0, pd.NA).dropna().to_dict()
-
     write_json_txt('..\\basicData\\daily_position.txt', s_sum)
 
 
@@ -425,6 +437,9 @@ if __name__ == '__main__':
 
     # sift_codes(source='kk{(m2{zz{白名单}-xx{hold}}-m3{自选})-()|()}')
     # sift_codes(source='backup:20230816:{hold}')
+
+    # from request.requestAkshareData import request_sz000001
+    # request_sz000001()
 
     sort_hold()
     get_hold_position()
