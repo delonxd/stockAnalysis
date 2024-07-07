@@ -1,5 +1,6 @@
 from request.requestData import *
 from method.fileMethod import *
+from method.sqlMethod import sql_format_drop_table
 
 import datetime as dt
 import json
@@ -79,7 +80,7 @@ def config_dv_res(data):
     return res_df, check_field, header_df
 
 
-def dv_res2mysql(res, code):
+def dv_res2mysql(res, code, ini=False):
 
     df, check_field, header_df = config_dv_res(res)
     db, cursor = get_cursor('dv')
@@ -87,6 +88,9 @@ def dv_res2mysql(res, code):
     table = '%s_%s' % ('dv', code)
 
     MainLog.add_log('    table --> %s' % table)
+
+    if ini is True:
+        cursor.execute(sql_format_drop_table(table))
 
     header_str = sql_format_header_df(header_df)
     cursor.execute(sql_format_create_table(table, header_str))
@@ -97,26 +101,26 @@ def dv_res2mysql(res, code):
         table=table,
         df_data=df,
         check_field=check_field,
-        # ini=True,
-        ini=False,
+        ini=ini,
+        # ini=False,
     )
 
-    if len(new_data.index) == 0:
-        MainLog.add_log('    new data: None')
-        return
-    else:
-        MainLog.add_log('    new data:\n%s' % repr(new_data))
+    # if len(new_data.index) == 0:
+    #     MainLog.add_log('    new data: None')
+    #     return
+    # else:
+    #     MainLog.add_log('    new data:\n%s' % repr(new_data))
 
     db.close()
 
     return new_data
 
 
-def request_dv2mysql(stock_codes):
+def request_dv2mysql(stock_codes, ini=True):
     ipo_dates = load_json_txt('..\\basicData\\ipo_date.txt')
     for code in stock_codes:
         res = request_dividend(code, ipo_date=ipo_dates.get(code))
-        dv_res2mysql(res, code)
+        dv_res2mysql(res, code, ini)
         MainLog.add_split('-')
 
 
