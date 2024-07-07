@@ -22,7 +22,9 @@ class WebWidget(QMainWindow):
         if code == self.code:
             return
         self.code = code
-        url = 'https://basic.10jqka.com.cn/%s/operate.html###' % code
+        url = 'http://basic.10jqka.com.cn/%s/operate.html' % code
+        # url = 'https://basic.10jqka.com.cn/%s/operate.html###' % code
+        # url = 'https://stockpage.10jqka.com.cn/%s/operate/' % code
         self.browser.load(QUrl(url))
 
     # def load_url(self, url):
@@ -41,8 +43,8 @@ class WebWidget(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main = WebWidget()
+    main.show()
     main.load_code('600004')
     # main.load_url('http://stockpage.10jqka.com.cn/600000/')
-    main.show()
 
     sys.exit(app.exec_())
