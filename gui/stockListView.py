@@ -189,7 +189,8 @@ class QDataFrameTable(QTableWidget):
             for j in range(column_size):
                 item = QTableWidgetItem(str(arr[i, j]))
                 self.setItem(i, j, item)
-                item.setTextAlignment(Qt.AlignRight | Qt.AlignCenter)
+                ali = Qt.AlignmentFlag
+                item.setTextAlignment(ali.AlignRight | ali.AlignCenter)
 
         row = self.code_df.current_index
         self.resizeColumnsToContents()
@@ -205,11 +206,11 @@ class QDataFrameTable(QTableWidget):
             if i in columns:
                 condition = conditions[columns.index(i)]
                 if condition is True:
-                    color = Qt.red
+                    color = Qt.GlobalColor.red
                 else:
-                    color = Qt.green
+                    color = Qt.GlobalColor.green
             else:
-                color = Qt.black
+                color = Qt.GlobalColor.black
             self.horizontalHeaderItem(i).setForeground(QBrush(color))
 
         pos = row - 5 if row > 5 else 0
@@ -342,14 +343,16 @@ class QStockListView(QWidget):
         return tag
 
     def add_codes(self):
-        codes = self.table_view.selected_codes()
-        tag = self.get_tag()
+        # codes = self.table_view.selected_codes()
+        # tag = self.get_tag()
         # tags_operate(codes, tag, 'add')
+        return
 
     def del_codes(self):
-        codes = self.table_view.selected_codes()
-        tag = self.get_tag()
+        # codes = self.table_view.selected_codes()
+        # tag = self.get_tag()
         # tags_operate(codes, tag, 'del')
+        return
 
     def closeEvent(self, event):
         self.generate_widget.close()
@@ -384,9 +387,9 @@ class GenerateCodeListWidget(QWidget):
         # flags = list(map(lambda x: str(x), range(10)))
         flags = [
             '',
-            '0_old',
-            '1_selected',
-            '2_hold',
+            '0_default',
+            '1_buy_in',
+            '2_mkt_non_main',
             '3_random_s',
             '4_random_w-s',
             '5_random_a-w',
@@ -401,21 +404,22 @@ class GenerateCodeListWidget(QWidget):
         self.labels.append(QLabel('mission: '))
         self.editor.append(obj)
 
-        src_flg = [
-            '',
-            'auto_select',
-            'old',
-            'old_random',
-            'all',
-            'hold',
+        # src_flg = [
+        #     '',
+        #     'auto_select',
+        #     'old',
+        #     'old_random',
+        #     'all',
+        #     'hold',
+        #
+        #     # 'latest_update',
+        #     # 'salary',
+        #     # 'pe',
+        #     # 'real_pe',
+        #     # 'roe_parent',
+        #     # 'plate-50',
+        # ]
 
-            # 'latest_update',
-            # 'salary',
-            # 'pe',
-            # 'real_pe',
-            # 'roe_parent',
-            # 'plate-50',
-        ]
         obj = QTextEdit()
         # obj = QComboBox()
         # obj.addItems(src_flg)
@@ -461,15 +465,19 @@ class GenerateCodeListWidget(QWidget):
             if row in [2, 3]:
                 editor.setEditable(True)
 
-            layout.addWidget(label, row, 0, alignment=Qt.AlignRight)
+            layout.addWidget(label, row, 0, alignment=Qt.AlignmentFlag.AlignRight)
             layout.addWidget(editor, row, 1)
 
         self.button = QPushButton('Generate')
         self.button.setFont(QFont('Consolas', 14))
 
+        self.button2 = QPushButton('Select')
+        self.button2.setFont(QFont('Consolas', 14))
+
         layout1 = QHBoxLayout()
         layout1.addStretch(1)
         layout1.addWidget(self.button)
+        # layout1.addWidget(self.button2)
         layout1.addStretch(1)
 
         v_layout.addStretch(1)
@@ -558,6 +566,8 @@ class GenerateCodeListWidget(QWidget):
             except Exception as e:
                 if val == '':
                     val = None
+                else:
+                    print(e)
 
             self.values.append(val)
 
@@ -594,44 +604,36 @@ class GenerateCodeListWidget(QWidget):
         except BaseException as e:
             MainLog.add_log(e.__repr__())
 
-    def mission_change(self, txt):
+    def mission_change(self, _):
         self.init_editor_dict()
         editor_dict = self.editor_dict
         mission = self.editor[0].currentText()
         # mission = str(txt)
 
         editor_dict['mission'] = mission
+        editor_dict['sort'] = '["gui_rate_dv", "code"]'
+        editor_dict['ascending'] = '[false, true]'
+
         MainLog.add_log('change mission --> %s' % mission)
 
-        if mission == '0_old':
-            # editor_dict['source'] = 'old'
-
+        if mission == '0_default':
             editor_dict['source'] = 'all-except[0]'
-            editor_dict['sort'] = '["gui_rate_dv", "code"]'
-            editor_dict['ascending'] = '[false, true]'
 
-        elif mission == '1_selected':
-            editor_dict['source'] = '白名单'
-            editor_dict['sort'] = '["gui_rate", "predict_discount"]'
-            editor_dict['ascending'] = '[false, false]'
+        elif mission == '1_buy_in':
+            editor_dict['source'] = '买入|关注-cnd:predict_discount<8.5'
 
-        elif mission == '2_hold':
-            editor_dict['source'] = 'hold'
+        elif mission == '2_mkt_non_main':
+            editor_dict['source'] = '白名单-mkt:main'
 
         elif mission == '3_random_s':
             editor_dict['source'] = 'mkt:main&自选'
-            editor_dict['sort'] = '["gui_rate", "predict_discount"]'
-            editor_dict['ascending'] = '[false, false]'
-
             editor_dict['random'] = 'true'
-            editor_dict['interval'] = '20'
+            editor_dict['interval'] = '80'
 
         elif mission == '4_random_w-s':
             editor_dict['source'] = 'mkt:main&白名单-自选'
-            editor_dict['sort'] = '["gui_rate", "predict_discount"]'
-            editor_dict['ascending'] = '[false, false]'
             editor_dict['random'] = 'true'
-            editor_dict['interval'] = '30'
+            editor_dict['interval'] = '80'
 
         elif mission == '5_random_a-w':
             editor_dict['source'] = 'all-白名单'
@@ -642,14 +644,10 @@ class GenerateCodeListWidget(QWidget):
 
         elif mission == '6_toc':
             editor_dict['source'] = 'Toc'
-            editor_dict['sort'] = '["gui_rate", "code"]'
-            editor_dict['ascending'] = '[false, true]'
 
         elif mission == '7_ids':
             editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate>=14\n' \
                                     '&ids:3:医疗研发外包'
-            editor_dict['sort'] = '["gui_rate", "code"]'
-            editor_dict['ascending'] = '[false, true]'
 
         elif mission == '8_new_sifted':
             editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate>=12\n' \
@@ -660,8 +658,6 @@ class GenerateCodeListWidget(QWidget):
                                     '&cnd:predict_discount>9\n' \
                                     '-光伏-电池-新上市}'
 
-            editor_dict['sort'] = '["gui_rate", "code"]'
-            editor_dict['ascending'] = '[false, true]'
             editor_dict['sort_ids'] = 'true'
 
         elif mission == '9':
@@ -674,8 +670,6 @@ class GenerateCodeListWidget(QWidget):
                                     '|线下药店|化学制剂|中药\n' \
                                     '|IT服务|垂直应用软件|农药|快递}' \
 
-            editor_dict['sort'] = '["gui_rate", "code"]'
-            editor_dict['ascending'] = '[false, true]'
             editor_dict['sort_ids'] = 'true'
 
         elif mission == '10_gui_rate_dv':
@@ -683,10 +677,18 @@ class GenerateCodeListWidget(QWidget):
                                     '&cnd:predict_discount>7\n' \
                                     '-光伏-电池-CRO-新上市\n' \
 
-            editor_dict['sort'] = '["gui_rate_dv", "code"]'
-            editor_dict['ascending'] = '[false, true]'
-
         self.load_editor_dict()
+
+    # def select_mission(self):
+    #     self.init_editor_dict()
+    #     editor_dict = self.editor_dict
+    #
+    #     path = ""
+    #     items = load_json_txt()
+    #     mission, _ = QInputDialog.getItem(self, '获取mission', '列表', items, editable=False)
+    #
+    #     editor_dict['mission'] = mission
+    #     MainLog.add_log('change mission --> %s' % mission)
 
 
 def test_code_list_view():
