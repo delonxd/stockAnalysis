@@ -1,3 +1,19 @@
+# 变量初始化
+# self.counter_info = None
+# self.real_cost = np.nan
+# self.market_value = np.nan
+# self.liquidation_asset = np.nan
+# self.equity = np.nan
+#
+# self.profit_salary_min = np.nan
+# self.predict_delta = 0
+#
+# self.listing_date = None
+# self.max_increase_30 = 0
+# self.yesterday_rise = np.nan
+# self.turnover = 0
+# self.dividend_return = 0
+
 # def update_counter_old(self, code):
 #     df = self.data_pix.df
 #
