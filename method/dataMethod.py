@@ -412,6 +412,7 @@ class DataAnalysis:
             'market_change_rate',
 
             's_069_dividend_rate',
+            's_070_turnover_rate',
 
         ]
         for index in index_list2:
@@ -564,7 +565,22 @@ class DataAnalysis:
         self.add_df(df)
 
     def add_dv_data(self, code):
-        df = load_df_from_mysql(code, 'dv', fields=['id', 'originalValue'])
+        df = load_df_from_mysql(code, 'dv', fields=[
+            'id', 'dividend', 'originalValue', 'status'
+        ])
+
+        df = df[df['dividend'] != 0]
+        s0 = self.get_column(self.df_fs, 'id_142_bs_tsc')
+        tmp_dict = dict()
+        for date, row in df.iterrows():
+            if pd.isna(row['originalValue']):
+                date_r = self.report_date2standard([date]).iloc[0]
+                if date_r != 'None':
+                    if date_r in s0.index:
+                        tmp_dict[date] = s0[date_r] * row['dividend']
+        for date, value in tmp_dict.items():
+            df.loc[date, 'originalValue'] = value
+
         s1 = df.loc[:, 'originalValue'].copy()
         s1 = s1.replace(0, np.nan).dropna()
         s1 = s1.sort_index(ascending=False)
@@ -1236,6 +1252,13 @@ class DataAnalysis:
             s2.ffill(inplace=True)
             s3 = s2 / s1
             return self.regular_series(column, s3)
+
+        elif column == 's_070_turnover_rate':
+            s1 = self.get_column(self.df_mvs, 's_043_turnover_volume_ttm')
+            s2 = self.fs_to_mvs('s_063_profit_salary2')
+            s3 = self.fs_to_mvs('s_067_equity_ratio')
+            s4 = s1 / s2 / s3
+            return self.regular_series(column, s4)
 
     @staticmethod
     def get_return_year(pe, rate):
