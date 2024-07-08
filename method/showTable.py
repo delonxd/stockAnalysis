@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+# import pandas as pd
 from method.fileMethod import *
 from method.logMethod import log_it
 import matplotlib.pyplot as plt
@@ -30,7 +30,7 @@ def get_recent_index(df: pd.DataFrame, column, default, shift=1):
 
 
 def get_hold_position(src):
-    src = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
+    # src = load_json_txt("..\\basicData\\self_selected\\gui_hold.txt")
 
     s0 = pd.Series(
         map(lambda x: x[3], src),
@@ -181,7 +181,7 @@ def sum_value(res, column):
     ret = pd.Series()
 
     for tmp in res:
-        code = tmp[0]
+        # code = tmp[0]
         src = tmp[1]
         s1 = src.loc[:, column].copy().dropna()
 
@@ -465,7 +465,7 @@ def test_strategy():
     value = s1[0]
     date = s1.index[0]
     print(status, value, profit)
-    for index, val in s1.iteritems():
+    for index, val in s1.items():
         if status is True:
             if val > value:
                 profit += val - value
