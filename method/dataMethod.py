@@ -123,7 +123,7 @@ def get_month_data(series: pd.Series, new_name):
     values = list()
 
     for tup in series.items():
-        date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
+        date = dt.datetime.strptime(str(tup[0]), "%Y-%m-%d")
 
         if date0:
             year1 = date.year
@@ -180,7 +180,7 @@ def get_month_delta(series: pd.Series, new_name, mode='QUARTERLY'):
     values = list()
 
     for tup in series.items():
-        date = dt.datetime.strptime(tup[0], "%Y-%m-%d")
+        date = dt.datetime.strptime(str(tup[0]), "%Y-%m-%d")
         if not year == date.year:
             month0 = 0
             value0 = 0
@@ -638,7 +638,8 @@ class DataAnalysis:
         df = df.dropna(axis=0, how='all')
         columns = []
 
-        for index, val in enumerate(df.columns.tolist()):
+        df_columns = list(df.columns)
+        for index, val in enumerate(df_columns):
             str1 = str(index+1).rjust(2, '0')
             str2 = val.split('_')[0]
             column = 'futures_%s_%s' % (str1, str2)
@@ -718,7 +719,8 @@ class DataAnalysis:
             s2 = self.get_column(self.df_fs, 'id_012_bs_nr')
             s3 = self.get_column(self.df_fs, 'id_013_bs_ar')
             s4 = s1 - (s2 + s3)
-            return self.regular_series(column, s4)
+            s5 = get_month_data(s4, column)
+            return self.regular_series(column, s5)
 
         # 待删除
         # elif column == 's_006_stocks_rate':
@@ -1480,11 +1482,11 @@ class StandardFitModel:
     def curve_fit(cls, arr_y):
         arr_x = np.arange(0, arr_y.size, 1)
         try:
-            popt, pcov = curve_fit(cls.curve_func, arr_x, arr_y)
+            res = curve_fit(cls.curve_func, arr_x, arr_y)
         except Exception as e:
             print(e)
             return 0
-        return popt[0]
+        return res[0][0]
 
     @staticmethod
     def curve_func(x, a, b):
