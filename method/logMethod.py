@@ -66,7 +66,7 @@ def get_log_time_accurate():
     return '%s  ' % dt.datetime.now()
 
 
-def log_it(logfile):
+def log_it(_):
     def logging_decorator(func):
 
         @wraps(func)
@@ -92,7 +92,7 @@ def exception_req(func):
         while flag is True:
             try:
                 res = func(*args, **kwargs)
-                flag = False
+                # flag = False
                 return res
 
             except BaseException as e:
@@ -102,16 +102,15 @@ def exception_req(func):
     return wrapped_function
 
 
-@log_it('')
-@exception_req
-def test(s):
-    print('1' + 1)
-    return "res"
+# @log_it('')
+# @exception_req
+# def test(s):
+#     print('1' + 1)
+#     return "res"
 
 
 if __name__ == '__main__':
-    a = test('1111')
-
-    print(a)
-
-    print(MainLog.content)
+    # a = test('1111')
+    # print(a)
+    # print(MainLog.content)
+    pass
