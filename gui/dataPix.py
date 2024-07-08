@@ -208,71 +208,21 @@ class DataPix:
             data = data.loc[data.iloc[:, 0].values != 0, :]
             return data
 
-        if index_name == 'id_211_ps_np':
-            data = self.df.loc[:, ['s_003_profit']].copy()
-            data.dropna(inplace=True)
+        mapping_table = {
+            'id_211_ps_np': 's_003_profit',
+            'id_217_ps_npatoshopc': 's_018_profit_parent',
+            'id_200_ps_op': 's_010_main_profit',
+            'id_157_ps_toi': 's_008_revenue',
+        }
+
+        if index_name in mapping_table.keys():
+            data = self.df.loc[:, [mapping_table[index_name]]].copy()
             data.columns = [index_name]
-            return data
+            return data.dropna()
 
-        if index_name == 'id_217_ps_npatoshopc':
-            data = self.df.loc[:, ['s_018_profit_parent']].copy()
-            data.dropna(inplace=True)
-            data.columns = [index_name]
-            return data
-
-        if index_name == 'id_200_ps_op':
-            data = self.df.loc[:, ['s_010_main_profit']].copy()
-            data.dropna(inplace=True)
-            data.columns = [index_name]
-            return data
-
-        if index_name == 'id_157_ps_toi':
-            data = self.df.loc[:, ['s_008_revenue']].copy()
-            data.dropna(inplace=True)
-            data.columns = [index_name]
-            return data
-
-        tmp_list = [
-            's_010_cash_asset',
-            's_011_insurance_asset',
-            's_012_financial_asset',
-            's_013_invest_asset',
-            's_014_turnover_asset',
-            's_015_inventory_asset',
-            's_021_fixed_asset',
-            's_022_capitalized_asset',
-            's_026_liquidation_asset',
-
-            's_022_profit_no_expenditure',
-            's_038_pay_for_long_term_asset',
-            's_039_profit_adjust',
-            's_040_profit_adjust2',
-            's_041_profit_adjust_ttm',
-            's_045_main_cost_adjust',
-            's_046_profit_adjust3',
-            's_047_gross_cost',
-
-            's_048_profit_tax',
-            's_049_pf_tx_invest',
-            's_050_pf_tx_iv_outer',
-            's_051_core_profit',
-            's_052_core_profit_asset',
-            's_053_core_profit_salary',
-            's_055_gross_cost',
-            'dv_001_dividend_value',
-            's_063_profit_salary2',
-            's_064_profit_salary3',
-            's_065_profit_salary_adj',
-            's_066_profit_salary_min',
-
-            's_067_equity_ratio',
-        ]
-
-        if index_name in tmp_list:
+        if index_name[:2] == 's_' or index_name[:3] == 'dv_':
             data = self.df.loc[:, [index_name]].copy()
-            data.dropna(inplace=True)
-            data.columns = [index_name]
-            return data
+            return data.dropna()
 
         if row['ds_type'] == 'digit':
             if row['frequency'] == 'DAILY':
@@ -353,7 +303,7 @@ class DataPix:
     def draw_struct(self):
         pix_painter = QPainter(self.pix)
 
-        pen = QPen(Qt.red, 1, Qt.SolidLine)
+        pen = QPen(Qt.GlobalColor.red, 1, Qt.PenStyle.SolidLine)
         pix_painter.setPen(pen)
 
         pix_painter.drawRect(
@@ -379,9 +329,9 @@ class DataPix:
         pix_painter = QPainter(self.pix)
 
         pix_painter.setFont(QFont('Consolas', 10))
-        pen1 = QPen(Qt.red, 1, Qt.SolidLine)
+        pen1 = QPen(Qt.GlobalColor.red, 1, Qt.PenStyle.SolidLine)
         # pen2 = QPen(Qt.gray, 1, Qt.DotLine)
-        pen2 = QPen(QColor(80, 80, 80, 255), 1, Qt.DotLine)
+        pen2 = QPen(QColor(80, 80, 80, 255), 1, Qt.PenStyle.DotLine)
 
         d_top = self.data_rect.top()
         d_bottom = self.data_rect.bottom() + 1
@@ -397,7 +347,7 @@ class DataPix:
                 width, height)
 
             pix_painter.setPen(pen1)
-            pix_painter.drawText(rect, Qt.AlignCenter, txt)
+            pix_painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, txt)
 
         for datetime in self.date_metrics2:
             x = self.x_data2px(datetime.date())
@@ -411,9 +361,9 @@ class DataPix:
         pix_painter = QPainter(self.pix)
 
         pix_painter.setFont(QFont('Consolas', 10))
-        pen1 = QPen(Qt.red, 1, Qt.SolidLine)
-        pen2 = QPen(Qt.red, 1, Qt.DotLine)
-        pen3 = QPen(Qt.red, 1, Qt.SolidLine)
+        pen1 = QPen(Qt.GlobalColor.red, 1, Qt.PenStyle.SolidLine)
+        pen2 = QPen(Qt.GlobalColor.red, 1, Qt.PenStyle.DotLine)
+        pen3 = QPen(Qt.GlobalColor.red, 1, Qt.PenStyle.SolidLine)
 
         d_left = self.data_rect.left()
         d_right = self.data_rect.right()
@@ -433,7 +383,7 @@ class DataPix:
                 width, height)
 
             pix_painter.setPen(pen1)
-            pix_painter.drawText(rect, Qt.AlignCenter, txt)
+            pix_painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, txt)
 
             if counter == 7:
                 pix_painter.setPen(pen3)
@@ -464,7 +414,7 @@ class DataPix:
         y1 = self.y_data2px(value1, self.default_ds)
         y2 = self.y_data2px(value2, self.default_ds)
 
-        pen = QPen(Qt.red, 1, Qt.DotLine)
+        pen = QPen(Qt.GlobalColor.red, 1, Qt.PenStyle.DotLine)
         pix_painter.setPen(pen)
         pix_painter.drawLine(QPointF(d_left, y1), QPointF(d_right, y2))
 
@@ -475,7 +425,7 @@ class DataPix:
         y1 = self.y_data2px(value1, self.default_ds)
         y2 = self.y_data2px(value2, self.default_ds)
 
-        pen = QPen(Qt.red, 1, Qt.DotLine)
+        pen = QPen(Qt.GlobalColor.red, 1, Qt.PenStyle.DotLine)
         pix_painter.setPen(pen)
         pix_painter.drawLine(QPointF(d_left, y1), QPointF(d_right, y2))
 
@@ -486,7 +436,7 @@ class DataPix:
         y1 = self.y_data2px(value1, self.default_ds)
         y2 = self.y_data2px(value2, self.default_ds)
 
-        pen = QPen(Qt.blue, 1, Qt.DotLine)
+        pen = QPen(Qt.GlobalColor.blue, 1, Qt.PenStyle.DotLine)
         pix_painter.setPen(pen)
         pix_painter.drawLine(QPointF(d_left, y1), QPointF(d_right, y2))
 
@@ -498,7 +448,7 @@ class DataPix:
 
         s0 = self.df['split_date'].copy().dropna()
         pix_painter = QPainter(pix)
-        pen1 = QPen(Qt.yellow, 1, Qt.DotLine)
+        pen1 = QPen(Qt.GlobalColor.yellow, 1, Qt.PenStyle.DotLine)
 
         d_top = self.data_rect.top()
         d_bottom = self.data_rect.bottom() + 1
@@ -580,9 +530,9 @@ class DataPix:
             pix_painter = QPainter(pix)
 
             ds = p_dict[column]
-            brush = QBrush(Qt.SolidPattern)
+            brush = QBrush(Qt.BrushStyle.SolidPattern)
             brush.setColor(ds.color)
-            pen = QPen(Qt.red, 0, Qt.NoPen)
+            pen = QPen(Qt.GlobalColor.red, 0, Qt.PenStyle.NoPen)
 
             pix_painter.setBrush(brush)
             pix_painter.setPen(pen)
@@ -625,6 +575,7 @@ class DataPix:
             except Exception as e:
                 print(df_point)
                 print(e)
+                point_list = None
 
             if ds.frequency == 'DAILY':
                 if point_list:
@@ -701,7 +652,7 @@ class DataPix:
 
     def draw_line(self, pix, point1, point2):
         pix_painter = QPainter(pix)
-        pen = QPen(Qt.green, 1, Qt.SolidLine)
+        pen = QPen(Qt.GlobalColor.green, 1, Qt.PenStyle.SolidLine)
         pix_painter.setPen(pen)
         pix_painter.drawLine(
             QPointF(point1[0], point1[1]),
@@ -749,7 +700,7 @@ class DataPix:
     def draw_sub_cross(
             self,
             x, y,
-            d0, d1, d2,
+            d0, _, d2,
             state,
             thick,
             # box_flag,
@@ -775,7 +726,7 @@ class DataPix:
 
         # draw cross
         pix_painter = QPainter(pix_show)
-        pen = QPen(Qt.gray, thick, Qt.SolidLine)
+        pen = QPen(Qt.GlobalColor.gray, thick, Qt.PenStyle.SolidLine)
         pix_painter.setPen(pen)
 
         pix_painter.drawLine(QPointF(x, d_top), QPointF(x, d_bottom))
@@ -846,18 +797,18 @@ class DataPix:
         rect = QRectF(x, y, metrics.width(text) + 2, metrics.height() + 2)
 
         # draw_rect
-        brush = QBrush(Qt.SolidPattern)
-        brush.setColor(Qt.blue)
+        brush = QBrush(Qt.BrushStyle.SolidPattern)
+        brush.setColor(Qt.GlobalColor.blue)
 
-        pen = QPen(Qt.red, 1, Qt.SolidLine)
+        pen = QPen(Qt.GlobalColor.red, 1, Qt.PenStyle.SolidLine)
         pix_painter.setPen(pen)
 
         pix_painter.setBrush(brush)
         pix_painter.drawRect(rect)
 
         # draw_text
-        pix_painter.setPen(QColor(Qt.red))
-        pix_painter.drawText(rect, Qt.AlignCenter, text)
+        pix_painter.setPen(QColor(Qt.GlobalColor.red))
+        pix_painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, text)
 
         pix_painter.end()
 
@@ -872,18 +823,18 @@ class DataPix:
         rect = QRectF(x - width - 2, y - height - 2,  width + 2, height + 2)
 
         # draw_rect
-        brush = QBrush(Qt.SolidPattern)
-        brush.setColor(Qt.black)
+        brush = QBrush(Qt.BrushStyle.SolidPattern)
+        brush.setColor(Qt.GlobalColor.black)
 
-        pen = QPen(Qt.red, 1, Qt.SolidLine)
+        pen = QPen(Qt.GlobalColor.red, 1, Qt.PenStyle.SolidLine)
         pix_painter.setPen(pen)
 
         pix_painter.setBrush(brush)
         pix_painter.drawRect(rect)
 
         # draw_text
-        pix_painter.setPen(QColor(Qt.red))
-        pix_painter.drawText(rect, Qt.AlignCenter, text)
+        pix_painter.setPen(QColor(Qt.GlobalColor.red))
+        pix_painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, text)
 
         pix_painter.end()
 
@@ -1043,8 +994,8 @@ class TestDataPixWidget(QWidget):
 
         layout1 = QHBoxLayout()
         layout1.addStretch(1)
-        # layout.addWidget(self.tree, 0, Qt.AlignCenter)
-        layout1.addWidget(self.label, 0, Qt.AlignCenter)
+        # layout.addWidget(self.tree, 0, Qt.AlignmentFlag.AlignCenter)
+        layout1.addWidget(self.label, 0, Qt.AlignmentFlag.AlignCenter)
         layout1.addStretch(1)
 
         self.setLayout(layout1)
