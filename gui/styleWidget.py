@@ -39,17 +39,18 @@ class StyleTable(QTableWidget):
             'info2': 'bool',
             'info3': 'bool',
             'info4': 'bool',
+            'frequency': 'str',
         }
 
         self.pen_dict = {
-            Qt.NoPen: 'NoPen',
-            Qt.SolidLine: 'SolidLine',
-            Qt.DashLine: 'DashLine',
-            Qt.DotLine: 'DotLine',
-            # Qt.DashDotLine: 'DashDotLine',
-            # Qt.DashDotDotLine: 'DashDotDotLine',
-            # Qt.CustomDashLine: 'CustomDashLine',
-            # Qt.MPenStyle: 'MPenStyle',
+            Qt.PenStyle.NoPen: 'NoPen',
+            Qt.PenStyle.SolidLine: 'SolidLine',
+            Qt.PenStyle.DashLine: 'DashLine',
+            Qt.PenStyle.DotLine: 'DotLine',
+            # Qt.PenStyle.DashDotLine: 'DashDotLine',
+            # Qt.PenStyle.DashDotDotLine: 'DashDotDotLine',
+            # Qt.PenStyle.CustomDashLine: 'CustomDashLine',
+            # Qt.PenStyle.MPenStyle: 'MPenStyle',
         }
 
         self.bool_dict = {
@@ -57,9 +58,9 @@ class StyleTable(QTableWidget):
             False: '',
         }
 
-        self.index_pos = dict()
-        for i, value in enumerate(self.column_type):
-            self.index_pos[value] = i
+        # self.index_pos = dict()
+        # for i, value in enumerate(self.column_type):
+        #     self.index_pos[value] = i
 
         # self.column_names = self.column_type.keys()
         self.setColumnCount(len(self.column_type))
@@ -174,7 +175,7 @@ class StyleTable(QTableWidget):
             elif column == 'default_ds':
                 if flag:
                     if row['selected']:
-                        df0 = df.loc[df['default_ds'] == True]
+                        df0 = df.loc[df['default_ds'].isin([True])]
                         for index0 in df0.index:
                             df.loc[index0, 'default_ds'] = False
                             self.show_data(index0, 'default_ds')
@@ -271,14 +272,15 @@ class StyleWidget(QWidget):
 
         layout1 = QHBoxLayout()
         layout1.addStretch(1)
-        layout1.addWidget(self.button1, 0, Qt.AlignCenter)
-        layout1.addWidget(self.button2, 0, Qt.AlignCenter)
-        layout1.addWidget(self.button3, 0, Qt.AlignCenter)
-        layout1.addWidget(self.button4, 0, Qt.AlignCenter)
-        layout1.addWidget(self.button5, 0, Qt.AlignCenter)
-        layout1.addWidget(self.button6, 0, Qt.AlignCenter)
-        layout1.addWidget(self.button7, 0, Qt.AlignCenter)
-        layout1.addWidget(self.button8, 0, Qt.AlignCenter)
+        ali = Qt.AlignmentFlag.AlignCenter
+        layout1.addWidget(self.button1, 0, ali)
+        layout1.addWidget(self.button2, 0, ali)
+        layout1.addWidget(self.button3, 0, ali)
+        layout1.addWidget(self.button4, 0, ali)
+        layout1.addWidget(self.button5, 0, ali)
+        layout1.addWidget(self.button6, 0, ali)
+        layout1.addWidget(self.button7, 0, ali)
+        layout1.addWidget(self.button8, 0, ali)
         layout1.addStretch(1)
 
         self.style_df = pd.DataFrame()
@@ -403,7 +405,7 @@ class PriorityTable(QDialog):
         super().__init__()
 
         df = style_df.copy()
-        df = df.loc[df['selected'] == True, :].copy()
+        df = df.loc[df['selected'].isin([True]), :].copy()
 
         self.columns = ['index_name', 'show_name', 'info_priority']
         self.df = df.loc[:, self.columns].copy()
@@ -454,7 +456,6 @@ class PriorityTable(QDialog):
 
         for i in range(self.df.shape[0]):
             for j in range(self.df.shape[1]):
-
                 value = self.df.iloc[i, j]
 
                 item = QStandardItem(str(value))
@@ -550,7 +551,6 @@ class IndexTable(QDialog):
 
         for i in range(self.df.shape[0]):
             for j in range(self.df.shape[1]):
-
                 value = self.df.iloc[i, j]
                 item = QStandardItem(str(value))
                 self.model.setItem(i, j, item)
@@ -669,6 +669,7 @@ def save_default_style(df):
 
 if __name__ == '__main__':
     import sys
+
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 100000)
