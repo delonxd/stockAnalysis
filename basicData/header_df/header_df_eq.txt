@@ -54,5 +54,9 @@
     "id_011_deltaOtherShares": {
         "txt_CN": "Δ其他",
         "sql_type": "DOUBLE"
+    },
+    "id_012_dilution_rate": {
+        "txt_CN": "稀释率",
+        "sql_type": "DOUBLE"
     }
 }
