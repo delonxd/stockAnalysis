@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from method.dataMethod import load_df_from_mysql
 from request.requestData import get_header_df
-from request.requestEquityData import request_eq2mysql
+# from request.requestEquityData import request_eq2mysql
 import sys
 
 
@@ -13,7 +13,7 @@ class EquityChangeWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('EquityChangeWidget')
-        self.setGeometry(490, 120, 940, 860)
+        self.setGeometry(460, 120, 1000, 860)
 
         self.table_widget = QTableWidget()
         self.table_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -49,16 +49,16 @@ class EquityChangeWidget(QWidget):
         df = df.drop(drop_index)
 
         self.table_widget.setRowCount(df.index.size)
-        self.table_widget.setColumnCount(12)
+        self.table_widget.setColumnCount(13)
         self.table_widget.setHorizontalHeaderLabels(df.columns)
 
         for i, tup in enumerate(df.iterrows()):
             row = tup[1].tolist()
 
             if abs(row[3]-1) > 0.03:
-                brush = QBrush(Qt.red)
+                brush = QBrush(Qt.GlobalColor.red)
             else:
-                brush = QBrush(Qt.black)
+                brush = QBrush(Qt.GlobalColor.black)
 
             row[1] = get_reason_cn(row[1])
             row[5] = row[5] / row[4]
@@ -83,6 +83,11 @@ class EquityChangeWidget(QWidget):
                         txt = '-'
                     else:
                         txt = format(value*100-100, '.2f') + '%'
+                elif j == 12:
+                    if value == 0:
+                        txt = '-'
+                    else:
+                        txt = format(value, '.2f') + '%'
                 else:
                     txt = str(value)
                 item = QTableWidgetItem(txt)
@@ -97,7 +102,7 @@ class EquityChangeWidget(QWidget):
                     item.setFont(font)
 
                 if j > 2:
-                    item.setTextAlignment(Qt.AlignRight | Qt.AlignCenter)
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignCenter)
                 self.table_widget.setItem(i, j, item)
 
         self.table_widget.resizeColumnsToContents()
@@ -148,7 +153,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     main = EquityChangeWidget()
     main.show()
-    main.load_code('000001')
+    main.load_code('002594')
     sys.exit(app.exec_())
 
     # a = request_equity_change('600004')
