@@ -465,6 +465,28 @@ class RecognitionStr:
         ret = df1['code'].to_list()
         return ret
 
+    # pattern = r'>=|<=|==|!=|<|>'
+    # split = re.split(pattern, condition)
+    # if len(split) == 2:
+    #     symbol = re.search(pattern, condition).group(0)
+    #     tmp1, tmp2 = split
+    #     date_index = [
+    #         'counter_date',
+    #         'recent_date',
+    #         'ipo_date',
+    #         'report_date',
+    #         'counter_last_date',
+    #     ]
+    #     if tmp1 in date_index:
+    #         if len(tmp2) == 8:
+    #             tmp2 = "'%s-%s-%s'" % (tmp2[:4], tmp2[4:6], tmp2[6:8])
+    #
+    #     string = "bool(self.data['%s'] %s %s)" % (tmp1, symbol, tmp2)
+    #     try:
+    #         flag = eval(string)
+    #     finally:
+    #         pass
+
     def market2code(self, market):
         ret = []
         if self.code_all is None:
@@ -732,10 +754,16 @@ def get_except_list(code, df_all, log=True):
 
         rec_str = val[3]
         code_list = RecognitionStr(rec_str, df_all, log=log).get_code_list()
-        if code in code_list:
-            ret.append([val[2], val[4], True])
+
+        condition = val[5]
+        if condition == '':
+            if code in code_list:
+                ret.append([val[2], val[4], True])
+            else:
+                ret.append([val[2], val[4], False])
         else:
-            ret.append([val[2], val[4], False])
+            ret.append([val[2], val[4], condition])
+
     return ret
 
 
@@ -746,5 +774,6 @@ if __name__ == '__main__':
     # code2 = l0.get_code_list()
     # print(len(code2))
     # l0.show()
-    print(get_except_list('600438', df0, log=False))
+    # print(get_except_list('600438', df0, log=False))
+    refresh_except_recognition()
     pass
