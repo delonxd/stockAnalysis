@@ -557,11 +557,11 @@ class DataAnalysis:
         self.df = pd.concat([self.df, new_df], axis=1, sort=True)
 
     def add_eq_data(self, code):
-        df = load_df_from_mysql(code, 'eq')
-        df = df.loc[:, ['id_002_rate']]
+        df_src = load_df_from_mysql(code, 'eq')
+        df = df_src.loc[:, ['id_002_rate', 'id_012_dilution_rate']]
+        df.columns = ['eq_002_rate', 'eq_012_dilution_rate']
         if df.size > 0:
-            df = df / df.iloc[-1, 0]
-        df.columns = ['eq_002_rate']
+            df['eq_002_rate'] = df['eq_002_rate'] / df.iloc[-1, 0]
         self.add_df(df)
 
     def add_dv_data(self, code):
