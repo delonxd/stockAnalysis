@@ -3,6 +3,8 @@ import json
 import pickle
 
 from collections import defaultdict
+from request.requestData import split_metrics
+from method.logMethod import log_it, MainLog
 
 
 def request_basic():
@@ -92,6 +94,53 @@ def update_basic_data():
         f.write(txt)
 
 
+@log_it(None)
+def request_company_profile(stock_codes):
+    url = 'https://open.lixinger.com/api/cn/company/profile'
+
+    stock_codes_list = split_metrics(stock_codes, 100)
+    data_list = []
+    for index, sub_codes in enumerate(stock_codes_list):
+        data = dict()
+        data["token"] = "f819be3a-e030-4ff0-affe-764440759b5c"
+        data["stockCodes"] = sub_codes
+
+        post_data = json.dumps(data)
+        header_dict = {'Content-Type': 'application/json'}
+
+        MainLog.add_log('    index --> %s/%s' % (index+1, len(stock_codes_list)))
+        MainLog.add_log('    stock_codes --> %s' % sub_codes)
+
+        req = urllib.request.Request(url, data=bytes(post_data, 'gbk'), headers=header_dict)
+        res_txt = urllib.request.urlopen(req).read().decode()
+        data_list.extend(json.loads(res_txt)['data'])
+
+    res_dict = dict()
+    for data in data_list:
+        code = data["stockCode"]
+        if "actualControllerTypes" in data:
+            res_dict[code] = data["actualControllerTypes"]
+        else:
+            res_dict[code] = []
+
+    type_dict = {
+        'natural_person': '私有',
+        'collective': '集体',
+        'foreign_company': '外资',
+        'state_owned': '国有',
+    }
+
+    res = dict()
+    for code, value in res_dict.items():
+        tmp = []
+        for key in value:
+            tmp.append(type_dict[key])
+        txt = '&'.join(tmp)
+        res[code] = txt
+
+    return res
+
+
 if __name__ == '__main__':
     #
     # dict0 = request_basic()
@@ -113,6 +162,10 @@ if __name__ == '__main__':
 
     # print(a)
 
-    from method.fileMethod import write_json_txt
-    _, _, ipo_dates = request_basic()
-    write_json_txt('..\\basicData\\ipo_date.txt', ipo_dates)
+    # from method.fileMethod import write_json_txt
+    # _, _, ipo_dates = request_basic()
+    # write_json_txt('..\\basicData\\ipo_date.txt', ipo_dates)
+
+    from method.fileMethod import load_json_txt, write_json_txt
+    code_list = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
+    write_json_txt("../basicData/actual_controller.txt", request_company_profile(code_list))

@@ -1,4 +1,4 @@
-from request.requestBasicData import request_basic
+from request.requestBasicData import request_basic, request_company_profile
 from request.requestEquityData import request_eq2mysql
 from request.requestDividendData import request_dv2mysql
 from request.requestMirData import request_mir_y10
@@ -22,6 +22,10 @@ import time
 def basic_daily_update(dir_name):
     all_codes, name_dict, ipo_dates = request_basic()
     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
+
+    MainLog.add_split('#')
+    actual_controller = request_company_profile(all_codes)
+    write_json_txt("..\\basicData\\actual_controller.txt", actual_controller)
 
     MainLog.add_split('#')
     write_json_txt('%s\\a002_name_dict.txt' % res_dir, name_dict)
