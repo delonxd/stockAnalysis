@@ -981,7 +981,7 @@
         "txt_CN": "分红率",
         "sql_type": "DOUBLE",
         "sheet_name": "bs",
-        "api": "d_np_r"
+        "api": null
     },
     "id_157_ps_toi": {
         "txt_CN": "一、 营业总收入",
