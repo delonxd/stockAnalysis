@@ -5,23 +5,31 @@ from method.logMethod import log_it
 import matplotlib.pyplot as plt
 
 
-def get_recent_val(df: pd.DataFrame, column, default, shift=1):
+def get_recent_val(df: pd.DataFrame, column, default, shift=1, reverse=True):
     if column in df.columns:
         series = df.loc[:, column].copy().dropna()
-        if series.size >= shift:
-            return series.iloc[-shift]
+        if reverse is True:
+            if series.size >= shift:
+                return series.iloc[-shift]
+        elif reverse is False:
+            if series.size > shift:
+                return series.iloc[shift]
     return default
     # series = df.loc[:, column].copy().dropna()
     # val = series[-shift] if series.size >= shift else default
     # return val
 
 
-def get_recent_index(df: pd.DataFrame, column, default, shift=1):
+def get_recent_index(df: pd.DataFrame, column, default, shift=1, reverse=True):
     if column in df.columns:
         series = df.loc[:, column].copy().dropna()
         series = series.index
-        if series.size >= shift:
-            return series[-shift]
+        if reverse is True:
+            if series.size >= shift:
+                return series[-shift]
+        elif reverse is False:
+            if series.size > shift:
+                return series[shift]
     return default
     # series = df.loc[:, column].copy().dropna()
     # series = series.index
