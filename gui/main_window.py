@@ -25,6 +25,7 @@ from PyQt5.QtGui import *
 
 # import sys
 # import json
+# import re
 import threading
 import time
 import datetime as dt
@@ -705,7 +706,7 @@ class MainWidget(QWidget):
         data['real_pe'] = get_recent_val(sql_df, 's_034_real_pe', np.inf)
         data['market_value'] = get_recent_val(sql_df, 's_028_market_value', np.nan)
         data['market_value2'] = get_recent_val(sql_df, 's_028_market_value', np.nan, 2)
-        data['listing_date'] = get_recent_index(sql_df, 's_028_market_value', None, 0)
+        data['listing_date'] = get_recent_index(sql_df, 's_028_market_value', None, 0, False)
         data['yesterday_rise'] = (data['market_value'] / data['market_value2']) - 1
         data['liquidation_asset'] = get_recent_val(sql_df, 's_026_liquidation_asset', np.nan)
         data['real_cost'] = get_recent_val(sql_df, 's_025_real_cost', np.nan)
@@ -725,6 +726,12 @@ class MainWidget(QWidget):
 
         data['dividend_return'] = get_recent_val(sql_df, 's_069_dividend_rate', 0)
         data['dividend_return'] = data['dividend_return'] * 100
+        data['dilution_rate'] = get_recent_val(sql_df, 'eq_012_dilution_rate', 0)
+
+        # 处理actual_controller
+        path = "..\\basicData\\actual_controller.txt"
+        tmp_res = load_json_txt(path, False).get(code)
+        data['actual_controller'] = tmp_res if tmp_res is not None else ''
 
         # 处理counter_data
         path = "../basicData/self_selected/gui_counter.txt"
@@ -786,6 +793,12 @@ class MainWidget(QWidget):
         path = "..\\basicData\\self_selected\\gui_mark.txt"
         data['gui_mark'] = load_json_txt(path, False).get(code)
 
+        # gui_export
+        path = "..\\basicData\\self_selected\\gui_export.txt"
+        gui_export = load_json_txt(path, False).get(code)
+        gui_export = int(gui_export) if gui_export is not None else np.nan
+        data['gui_export'] = gui_export
+
         # gui_tags
         if gui_tags is not None:
             tags_list = gui_tags.split('#')
@@ -819,7 +832,66 @@ class MainWidget(QWidget):
         data['liq_cost_rate'] = data['liq_cost'] / data['profit_salary_min']
         data['salary_cost_rate'] = data['salary_cost'] / data['profit_salary_min'] / 0.1
 
+        data['gui_rate_dv'] = np.nan
+        try:
+            data['gui_rate_dv'] = gui_rate + data['dividend_return']
+        finally:
+            pass
         self.data = data
+        self.generate_pad_data()
+
+    def generate_pad_data(self):
+        data = self.data
+        left_pad_list = []
+        except_list = get_except_list(self.stock_code, self.codes_df.df_all, log=False)
+        for val, color, condition in except_list:
+            flag = False
+            if isinstance(condition, bool):
+                flag = condition
+            elif isinstance(condition, str):
+                try:
+                    flag = eval("bool(%s)" % condition)
+                finally:
+                    pass
+
+            if flag is True:
+                show_color = color
+            else:
+                show_color = 'gray'
+            left_pad_list.append([val, show_color, flag])
+
+        data['left_pad_list'] = left_pad_list
+
+        tmp_dict = dict()
+        for val, _, flag in left_pad_list:
+            tmp_dict[val] = flag
+
+        color1 = {True: 'yellow', False: 'red'}
+        color2 = {True: 'yellow', False: 'gray'}
+
+        right_pad_list = list()
+
+        flag = tmp_dict['清算差值大']
+        right_pad_list.append(['清算差值比：', color1[flag]])
+        right_pad_list.append(['  %.2f%%' % (self.data['liq_cost_rate']*100), color2[flag]])
+        flag = tmp_dict['人力成本高']
+        right_pad_list.append(['薪酬支出占比：', color1[flag]])
+        right_pad_list.append(['  %.2f%%' % (self.data['salary_cost_rate']*100), color2[flag]])
+        flag = tmp_dict['股权稀释']
+        right_pad_list.append(['股权稀释率：', color1[flag]])
+        right_pad_list.append(['  %.2f%%' % (self.data['dilution_rate']), color2[flag]])
+        flag = tmp_dict['股权占比低']
+        right_pad_list.append(['股权占比：', color1[flag]])
+        right_pad_list.append(['  %.2f%%' % (self.data['equity_ratio']*100), color2[flag]])
+        flag = tmp_dict['出口外汇风险']
+        right_pad_list.append(['境外占比：', color1[flag]])
+        right_pad_list.append(['  %s%%' % (self.data['gui_export']), color2[flag]])
+        flag = tmp_dict['国有']
+        right_pad_list.append(['企业性质：', color1[flag]])
+        right_pad_list.append(['  %s' % (self.data['actual_controller']), color2[flag]])
+
+        right_pad_list.extend(self.data['gui_tags_list'][1])
+        data['right_pad_list'] = right_pad_list
 
     def update_counter(self, code):
         self.generate_sql_data_dict(code, self.data_pix.df)
@@ -900,13 +972,12 @@ class MainWidget(QWidget):
         pix = self.pad_l_pix
         pix.fill(QColor(40, 40, 40, 255))
         # pix.fill(QColor(40, 255, 40, 255))
-        except_list = get_except_list(self.stock_code, self.codes_df.df_all, log=False)
 
         pix_painter = QPainter(pix)
         pix_painter.setFont(QFont('Consolas', 13))
         metrics = pix_painter.fontMetrics()
 
-        blank = 6
+        blank = 4
         y = 20
         row_height = metrics.height() + blank * 2
 
@@ -916,11 +987,8 @@ class MainWidget(QWidget):
             'yellow': QPen(Qt.GlobalColor.yellow),
         }
 
-        for val, color, flag in except_list:
-            if flag is True:
-                pen = pen_dict[color]
-            else:
-                pen = pen_dict['gray']
+        for val, color, _ in self.data['left_pad_list']:
+            pen = pen_dict[color]
             pix_painter.setPen(pen)
 
             rect = QRect(10, y, 110, row_height)
@@ -932,20 +1000,12 @@ class MainWidget(QWidget):
     def draw_right_pad(self):
         pix = self.pad_r_pix
         pix.fill(QColor(40, 40, 40, 255))
-        show_list = self.data['gui_tags_list'][1]
-
-        show_list.insert(0, ['  %.2f%%' % (self.data['salary_cost_rate'] * 100), 'gray'])
-        show_list.insert(0, ['薪酬支出占比：', 'red'])
-        show_list.insert(0, ['  %.2f%%' % (self.data['equity_ratio']*100), 'gray'])
-        show_list.insert(0, ['股权占比：', 'red'])
-        show_list.insert(0, ['  %.2f%%' % (self.data['liq_cost_rate']*100), 'gray'])
-        show_list.insert(0, ['清算差值比：', 'red'])
 
         pix_painter = QPainter(pix)
         pix_painter.setFont(QFont('Consolas', 13))
         metrics = pix_painter.fontMetrics()
 
-        blank = 6
+        blank = 4
         y = 20
         row_height = metrics.height() + blank * 2
 
@@ -956,7 +1016,7 @@ class MainWidget(QWidget):
             'gray': QPen(Qt.GlobalColor.gray),
         }
 
-        for val, color in show_list:
+        for val, color in self.data['right_pad_list']:
             pen = pen_dict[color]
             pix_painter.setPen(pen)
 
@@ -1115,7 +1175,7 @@ class MainWidget(QWidget):
             self.showMaximized()
 
             self.web_widget.setGeometry(480, 120, 960, 860)
-            self.equity_change_widget.setGeometry(490, 120, 940, 860)
+            self.equity_change_widget.setGeometry(460, 120, 1000, 860)
             self.fs_view.setGeometry(160, 120, 1600, 860)
 
             if plt.fignum_exists(1):
