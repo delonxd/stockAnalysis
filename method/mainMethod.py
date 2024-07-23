@@ -1,5 +1,5 @@
-import json
-import pandas as pd
+# import json
+# import pandas as pd
 import numpy as np
 from method.fileMethod import *
 from functools import wraps
@@ -248,6 +248,46 @@ def sort_tags(src: list):
     return ret1, ret2
 
 
+def copy_export_ratio():
+    import re
+    path = "../basicData/self_selected/gui_remark.txt"
+    res = load_json_txt(path, log=False)
+
+    # export_ratio = dict()
+    remark_dict = dict()
+    for code, txt in res.items():
+        print(code, txt)
+        value = re.search(r'#出口占比(.*)%\n*', txt)
+        if value is not None:
+            # value = value.group(1)
+            # print(code, value)
+            # export_ratio[code] = value
+            span = value.span()
+            txt2 = '%s%s' % (txt[:span[0]], txt[span[1]:])
+            print(txt2)
+            if txt2 != '':
+                remark_dict[code] = txt2
+        else:
+            remark_dict[code] = txt
+
+    print(remark_dict)
+    write_json_txt(path, remark_dict, log=False)
+
+    # print(export_ratio)
+
+    # path = "../basicData/self_selected/gui_export.txt"
+    # res = load_json_txt(path, log=False)
+    #
+    # for code, txt in res.items():
+    #     export_ratio[code] = txt
+    #     print(code, txt)
+    #
+    # print(export_ratio)
+    # print(len(export_ratio))
+    # write_json_txt(path, export_ratio, log=False)
+
+
 if __name__ == '__main__':
-    sift_show_table('real_pe_return_rate', False)
+    # sift_show_table('real_pe_return_rate', False)
+    # copy_export_ratio()
     pass

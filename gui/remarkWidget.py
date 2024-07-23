@@ -20,11 +20,14 @@ class RemarkWidget(QWidget):
         self.label1 = QLabel('  复合增长率：')
         self.label2 = QLabel('%     估值：')
         self.label3 = QLabel('亿')
+        self.label4 = QLabel('境外占比：')
+        self.label5 = QLabel('% ')
 
         self.editor0 = QLineEdit()
         self.editor1 = QLineEdit()
         self.editor2 = QTextEdit()
         self.editor3 = QLineEdit()
+        self.editor4 = QLineEdit()
         self.button1 = QPushButton('上传备注')
         self.button2 = QPushButton('下载备注')
 
@@ -32,14 +35,20 @@ class RemarkWidget(QWidget):
         self.label1.setFont(QFont('Consolas', 15))
         self.label2.setFont(QFont('Consolas', 15))
         self.label3.setFont(QFont('Consolas', 15))
+        self.label4.setFont(QFont('Consolas', 15))
+        self.label5.setFont(QFont('Consolas', 15))
 
         self.editor0.setFont(QFont('Consolas', 15))
         self.editor1.setFont(QFont('Consolas', 18))
         self.editor2.setFont(QFont('Consolas', 18))
         self.editor3.setFont(QFont('Consolas', 15))
+        self.editor4.setFont(QFont('Consolas', 15))
 
-        self.editor0.setAlignment(Qt.AlignRight)
-        self.editor3.setAlignment(Qt.AlignRight)
+        self.editor0.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.editor3.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.editor4.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.label2.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.label4.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         validator = QIntValidator(self)
         validator.setRange(1, 1000000)
@@ -49,19 +58,24 @@ class RemarkWidget(QWidget):
         validator.setRange(0, 200)
         self.editor3.setValidator(validator)
 
+        validator = QIntValidator(self)
+        validator.setRange(0, 100)
+        self.editor4.setValidator(validator)
+
         self.code = None
         self.name = None
 
         layout = QVBoxLayout()
 
-        layout1 = QHBoxLayout()
-        layout1.addStretch(0)
-        layout1.addWidget(self.label1)
-        layout1.addWidget(self.editor3, 1)
-        layout1.addWidget(self.label2)
-        layout1.addWidget(self.editor0, 1)
-        layout1.addWidget(self.label3)
-        layout1.addStretch(0)
+        layout1 = QGridLayout()
+        layout1.addWidget(self.label1, 0, 0)
+        layout1.addWidget(self.editor3, 0, 1)
+        layout1.addWidget(self.label2, 0, 2)
+        layout1.addWidget(self.editor0, 0, 3)
+        layout1.addWidget(self.label3, 0, 4)
+        layout1.addWidget(self.label4, 1, 2)
+        layout1.addWidget(self.editor4, 1, 3)
+        layout1.addWidget(self.label5, 1, 4)
 
         layout.addWidget(self.label)
         layout.addLayout(layout1)
@@ -79,6 +93,7 @@ class RemarkWidget(QWidget):
         self.write_content(self.editor2.toPlainText(), "gui_remark.txt")
         self.write_content(self.editor0.text(), "gui_assessment.txt")
         self.write_content(self.editor3.text(), "gui_rate.txt")
+        self.write_content(self.editor4.text(), "gui_export.txt")
 
         self.main_widget.show_stock_name()
 
@@ -119,11 +134,16 @@ class RemarkWidget(QWidget):
         res = load_json_txt(path, log=False)
         value1 = str(res[code]) if code in res else ''
 
+        path = "../basicData/self_selected/gui_export.txt"
+        res = load_json_txt(path, log=False)
+        value2 = str(res[code]) if code in res else ''
+
         self.label.setText(txt1)
         self.editor1.setText(txt2)
         self.editor2.setText(txt3)
         self.editor0.setText(value)
         self.editor3.setText(value1)
+        self.editor4.setText(value2)
 
         # print(self.textEdit.toHtml())
 
