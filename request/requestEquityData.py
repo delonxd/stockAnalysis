@@ -103,6 +103,7 @@ def config_eq_res(data):
     #     last = res2[-1]
 
     ipo_rate = 1
+    ipo_date = ''
     for row in res:
         if last:
             d1 = row[1] - last[1]
@@ -117,6 +118,7 @@ def config_eq_res(data):
             tmp = last[10]*rate
             if row[5] == 'IPO':
                 ipo_rate = tmp
+                ipo_date = row[0]
 
             new = [*row, d1, d2, d3, d4, tmp, round(rate, 4)]
             if new[0] == last[0]:
@@ -130,6 +132,10 @@ def config_eq_res(data):
             else:
                 res2.append(new)
         else:
+            if row[5] == 'IPO':
+                ipo_rate = 1
+                ipo_date = row[0]
+
             d1 = row[1]
             d2 = row[2]
             d3 = row[3]
@@ -140,10 +146,25 @@ def config_eq_res(data):
 
     data_list = []
     for row in res2:
+        date = row[0]
+        dilution_val = row[10] / ipo_rate
+
+        if ipo_date != '':
+            date1 = dt.datetime.strptime(date, "%Y-%m-%d").date()
+            date2 = dt.datetime.strptime(ipo_date, "%Y-%m-%d").date()
+            delta = (date1 - date2).days
+            if delta <= 0:
+                dilution_rate = 1
+            else:
+                dilution_rate = dilution_val ** (365 / delta)
+            dilution_rate = (dilution_rate - 1) * 100
+        else:
+            dilution_rate = 0
+
         data_list.append([
-            row[0], row[5], round(row[10] / ipo_rate, 4), row[11],
+            row[0], row[5], round(dilution_val, 4), row[11],
             row[1], row[2], row[3], row[4],
-            row[6], row[7], row[8], row[9],
+            row[6], row[7], row[8], row[9], round(dilution_rate, 4)
         ])
 
     header_df = get_header_df('eq')
@@ -209,4 +230,5 @@ if __name__ == '__main__':
     # request_eq2mysql(list3)
     code_list = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
     request_eq2mysql(code_list)
+    # request_eq2mysql(['002594'])
     pass
