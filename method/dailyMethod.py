@@ -1,38 +1,35 @@
 from request.requestBasicData import request_basic, request_company_profile
 from request.requestEquityData import request_eq2mysql
-from request.requestDividendData import request_dv2mysql
-from request.requestMirData import request_mir_y10
 from method.fileMethod import *
 from method.sql_update import update_latest_data
 from method.sql_update import update_all_data
-from request.requestData import request2mysql
-from request.requestSwData import update_sw_2021
 from method.dataMethod import load_df_from_mysql
-from method.dataMethod import DataAnalysis, DailyDataAnalysis
-from method.showTable import add_bool_column, get_recent_val, sum_value, get_recent_index
+from method.dataMethod import DailyDataAnalysis
+from method.showTable import add_bool_column, get_recent_val, get_recent_index
 from method.sortCode import sift_codes
 from method.showTable import generate_show_table
 import numpy as np
 import os
 import pandas as pd
 import datetime as dt
-import time
 
 
 def basic_daily_update(dir_name):
-    all_codes, name_dict, ipo_dates = request_basic()
+    all_codes, name_dict, ipo_dates, type_dict = request_basic()
     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
+
+    MainLog.add_split('#')
+    write_json_txt('%s\\a002_name_dict.txt' % res_dir, name_dict)
+    write_json_txt('..\\basicData\\code_names_dict.txt', name_dict)
+    write_json_txt('..\\basicData\\code_types_dict.txt', type_dict)
+    write_json_txt('%s\\a001_code_list.txt' % res_dir, all_codes)
+    write_json_txt('..\\basicData\\ipo_date.txt', ipo_dates)
+    write_json_txt('%s\\s004_code_latest_update.txt' % res_dir, [])
 
     MainLog.add_split('#')
     actual_controller = request_company_profile(all_codes)
     write_json_txt("..\\basicData\\actual_controller.txt", actual_controller)
 
-    MainLog.add_split('#')
-    write_json_txt('%s\\a002_name_dict.txt' % res_dir, name_dict)
-    write_json_txt('..\\basicData\\code_names_dict.txt', name_dict)
-    write_json_txt('%s\\a001_code_list.txt' % res_dir, all_codes)
-    write_json_txt('..\\basicData\\ipo_date.txt', ipo_dates)
-    write_json_txt('%s\\s004_code_latest_update.txt' % res_dir, [])
     return all_codes, name_dict, ipo_dates
 
 
@@ -104,8 +101,8 @@ def mysql_daily_update2(dir_name, all_codes, ipo_dates):
 
     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
 
-    ret1 = []
-    ret2 = []
+    # ret1 = []
+    # ret2 = []
 
     timestamp = dir_name.split('_')[1]
     dir_date = dt.datetime.strptime(timestamp, "%Y%m%d%H%M%S").date()
@@ -534,7 +531,7 @@ def manual_daily_update():
     res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
 
     # all_codes, name_dict, ipo_dates = basic_daily_update(dir_name)
-    all_codes = load_json_txt('%s\\a001_code_list.txt' % res_dir)
+    # all_codes = load_json_txt('%s\\a001_code_list.txt' % res_dir)
 
     # ################################################################################################################
     #
@@ -566,7 +563,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    update_latest_data(['600000'], fs_flag=False)
+    update_latest_data(['600438'], mvs_flag=False)
     # manual_daily_update()
     # eq_daily_update()
 
