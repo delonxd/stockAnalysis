@@ -1,6 +1,6 @@
 import urllib.request
 import json
-import pickle
+# import pickle
 
 from collections import defaultdict
 from request.requestData import split_metrics
@@ -19,22 +19,23 @@ def request_basic():
     res_txt = urllib.request.urlopen(req).read().decode()
     data_list = json.loads(res_txt)['data']
 
-    name_dict = defaultdict(str)
-    date_dict = defaultdict(str)
+    name_dict = dict()
+    date_dict = dict()
+    type_dict = dict()
     for data in data_list:
         code = data["stockCode"]
         if "name" in data:
-            name = data["name"]
-            name_dict[code] = name
+            name_dict[code] = data["name"]
         if "ipoDate" in data:
-            ipo_date = data["ipoDate"]
-            date_dict[code] = ipo_date
+            date_dict[code] = data["ipoDate"]
         else:
             date_dict[code] = None
+        if "fsTableType" in data:
+            type_dict[code] = data["fsTableType"]
 
     code_list = list(name_dict.keys())
 
-    return code_list, name_dict, date_dict
+    return code_list, name_dict, date_dict, type_dict
 
 
 def request_industry_sample():
@@ -87,7 +88,7 @@ def request_industry_sample():
 
 
 def update_basic_data():
-    _, name_dict, _ = request_basic()
+    _, name_dict, _, _ = request_basic()
 
     txt = json.dumps(name_dict, indent=4, ensure_ascii=False)
     with open("../basicData/code_names_dict.txt", "w", encoding='utf-8') as f:
@@ -142,30 +143,4 @@ def request_company_profile(stock_codes):
 
 
 if __name__ == '__main__':
-    #
-    # dict0 = request_basic()
-    # res = json.dumps(dict0, indent=4, ensure_ascii=False)
-    #
-    # # print(res)
-    # with open("../basicData/res_basicData.txt", "w", encoding='utf-8') as f:
-    #     f.write(res)
-
-    # res = request_basic()
-    # print(res[0])
-    # print(res[1])
-    # update_basic_data()
-
-    # a = request_industry_sample()
-    # txt = json.dumps(a, indent=4, ensure_ascii=False)
-    # with open("../basicData/industry/code_industry_dict.txt", "w", encoding='utf-8') as f:
-    #     f.write(txt)
-
-    # print(a)
-
-    # from method.fileMethod import write_json_txt
-    # _, _, ipo_dates = request_basic()
-    # write_json_txt('..\\basicData\\ipo_date.txt', ipo_dates)
-
-    from method.fileMethod import load_json_txt, write_json_txt
-    code_list = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
-    write_json_txt("../basicData/actual_controller.txt", request_company_profile(code_list))
+    pass
