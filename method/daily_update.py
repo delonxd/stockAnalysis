@@ -17,9 +17,9 @@ def daily_update():
     from method.dailyMethod import generate_daily_table
     from method.dailyMethod import save_latest_list
     from method.dailyMethod import generate_log_data
-    from method.dailyMethod import eq_daily_update
+    # from method.dailyMethod import eq_daily_update
     from method.dailyMethod import backup_daily_update
-    from request.requestMirData import request_mir_y10
+    # from request.requestMirData import request_mir_y10
     from request.requestSwData import update_sw_2021
     # from request.requestAkshareData import request_mir_y10_ak
     # from request.requestAkshareData import request_futures_data
