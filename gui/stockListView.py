@@ -628,19 +628,19 @@ class GenerateCodeListWidget(QWidget):
         elif mission == '3_random_s':
             editor_dict['source'] = 'mkt:main&自选'
             editor_dict['random'] = 'true'
-            editor_dict['interval'] = '80'
+            editor_dict['interval'] = '40'
 
         elif mission == '4_random_w-s':
             editor_dict['source'] = 'mkt:main&白名单-自选'
             editor_dict['random'] = 'true'
-            editor_dict['interval'] = '80'
+            editor_dict['interval'] = '40'
 
         elif mission == '5_random_a-w':
             editor_dict['source'] = 'all-白名单'
             editor_dict['sort'] = 'real_pe_return_rate'
             editor_dict['ascending'] = 'false'
             editor_dict['random'] = 'true'
-            editor_dict['interval'] = '80'
+            editor_dict['interval'] = '40'
 
         elif mission == '6_toc':
             editor_dict['source'] = 'Toc'
