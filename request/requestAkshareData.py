@@ -31,6 +31,41 @@ def request_mir_y10_ak():
     MainLog.add_log('request_mir_y10_ak complete.')
 
 
+def request_mir_ak():
+    MainLog.add_log('request_mir_ak was called...')
+    df = pd.DataFrame()
+    flag = True
+    while flag:
+        try:
+            df = ak.bond_zh_us_rate(start_date="19901219")
+            flag = False
+        except BaseException as e:
+            MainLog.add_log(e.__repr__())
+            sec = 120
+            MainLog.add_log('sleep %ss...' % sec)
+            time.sleep(sec)
+
+    df['date'] = df['日期'].apply(lambda x: x.strftime("%Y-%m-%d"))
+    df['mir_y2'] = df['中国国债收益率2年'].apply(lambda x: round(x/100, 15))
+    df['mir_y5'] = df['中国国债收益率5年'].apply(lambda x: round(x/100, 15))
+    df['mir_y10'] = df['中国国债收益率10年'].apply(lambda x: round(x/100, 15))
+    df['mir_y30'] = df['中国国债收益率30年'].apply(lambda x: round(x/100, 15))
+    df = df.set_index('date')
+    df.sort_index(ascending=False, inplace=True)
+    print(df)
+
+    d1 = df['mir_y2'].dropna().to_dict()
+    d2 = df['mir_y5'].dropna().to_dict()
+    d3 = df['mir_y10'].dropna().to_dict()
+    d4 = df['mir_y30'].dropna().to_dict()
+
+    write_json_txt("..\\basicData\\nationalDebt\\mir_y2_akshare.txt", d1)
+    write_json_txt("..\\basicData\\nationalDebt\\mir_y5_akshare.txt", d2)
+    write_json_txt("..\\basicData\\nationalDebt\\mir_y10_akshare.txt", d3)
+    write_json_txt("..\\basicData\\nationalDebt\\mir_y30_akshare.txt", d4)
+    MainLog.add_log('request_mir_ak complete.')
+
+
 def request_futures_data():
     MainLog.add_log('request_futures_data was called...')
     path = "..\\basicData\\futures\\futures_code.xlsx"
@@ -99,5 +134,6 @@ if __name__ == '__main__':
     warnings.simplefilter(action='ignore', category=FutureWarning)
 
     # request_mir_y10_ak()
+    request_mir_ak()
     # request_futures_data()
-    request_sz000001()
+    # request_sz000001()

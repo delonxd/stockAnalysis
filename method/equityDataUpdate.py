@@ -15,7 +15,7 @@ def eq_update():
     from request.requestEquityData import request_eq2mysql
     from request.requestDividendData import request_dv2mysql
 
-    from request.requestAkshareData import request_mir_y10_ak
+    from request.requestAkshareData import request_mir_ak
     from request.requestAkshareData import request_futures_data
     from request.requestAkshareData import request_sz000001
 
@@ -28,7 +28,7 @@ def eq_update():
 
     MainLog.write('..\\basicData\\dailyUpdate\\eq_update_log1.txt', init=True)
 
-    request_mir_y10_ak()
+    request_mir_ak()
     request_futures_data()
     request_sz000001()
     sort_hold()
