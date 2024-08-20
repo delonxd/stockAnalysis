@@ -341,6 +341,7 @@ class DataAnalysis:
             's_023_liabilities',
             's_024_real_liabilities',
             's_026_liquidation_asset',
+            's_071_additional_cost',
 
             # 's_038_pay_for_long_term_asset',
             # 's_039_profit_adjust',
@@ -1261,6 +1262,12 @@ class DataAnalysis:
             s3 = self.fs_to_mvs('s_067_equity_ratio')
             s4 = s1 / s2 / s3
             return self.regular_series(column, s4)
+
+        elif column == 's_071_additional_cost':
+            s1 = self.get_column(df, 's_026_liquidation_asset')
+            s2 = self.get_column(df, 's_002_equity')
+            s3 = s2 - s1
+            return self.regular_series(column, s3)
 
     @staticmethod
     def get_return_year(pe, rate):
