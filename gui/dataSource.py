@@ -305,6 +305,14 @@ class DefaultDataSource(DataSource):
         index = dt.datetime.now().date().strftime("%Y-%m-%d")
 
         self.data_max = 1024 * 1e8
+
+        parent_df = parent.df
+        if 'id_211_ps_np' in parent_df.columns:
+            max0 = parent_df['id_211_ps_np'].max()
+
+            if not np.isnan(max0):
+                self.data_max = max0 * 10
+
         self.df.loc[index] = [self.data_max]
 
         self.ds_type = 'digit'
@@ -314,7 +322,7 @@ class DefaultDataSource(DataSource):
         self.pix_show = [False, False, False, False]
         self.info_show = [False, False, False, False]
 
-        self.format_data_source()
+        # self.format_data_source()
 
         self.color = None
         self.line_thick = None
@@ -323,7 +331,7 @@ class DefaultDataSource(DataSource):
         self.units = '亿'
         self.ratio = get_units_dict()[self.units]
 
-        self.scale_max = self.data_max * parent.scale_ratio
+        self.scale_max = self.data_max * parent.scale_ratio / 4
         self.scale_min = self.scale_max / 1024
 
         self.scale_div = 10
@@ -336,9 +344,9 @@ class DefaultDataSource(DataSource):
         self.val_delta = None
         self.metrics = None
 
-        self.set_val_scale()
-
         self.format_fun = lambda x: '%.2f%s' % (x / self.ratio, self.units)
 
+        self.set_val_scale()
         self.df.columns = [self.index_name]
+
         self.offsets = None
