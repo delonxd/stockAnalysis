@@ -4,25 +4,17 @@ from PyQt5.QtGui import *
 
 import sys
 import datetime as dt
-import time
 
 
-class BgThread(QThread):
-    signal1 = pyqtSignal()
-
+class AbnormalWin(QMainWindow):
     def __init__(self):
         super().__init__()
 
-    def run(self):
-        time.sleep(1)
-        self.signal1.emit()
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.slot1)
 
-
-class AbnormalWin(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.bg = BgThread()
-        self.bg.signal1.connect(self.slot1)
+        self.close_timer = QTimer(self)
+        self.close_timer.timeout.connect(self.close)
 
         # self.label1 = QLabel(self)
         # p = QPalette()
@@ -38,19 +30,30 @@ class AbnormalWin(QWidget):
         # self.setLayout(m_layout)
 
         self.pix = QPixmap()
-        self.status = 0
-        self.refresh_status1()
-
-        self.bg.start()
+        self.status = -1
+        self.timer.start(1000)
+        # self.close_timer.start(8*3600000)
 
     def paintEvent(self, event):
         print('painting...')
         painter = QPainter(self)
         painter.drawPixmap(0, 0, self.pix.width(), self.pix.height(), self.pix)
 
-        # painter = QPainter(self)
-        # painter.drawPixmap(0, 0, self.pix.width(), self.pix.height(),
-        #                    QPixmap('D:\\PycharmProjects\\stockAnalysis\\test\\sleeping\\welcome.jpg'))
+    def refresh_status0(self):
+        if self.status != 0:
+            pix_path = 'D:\\PycharmProjects\\stockAnalysis\\test\\sleeping\\测试112.png'
+            self.pix = QPixmap(pix_path)
+            self.resize(self.pix.size())
+            self.move(0, 0)
+            self.setMask(self.pix.mask())
+
+            self.setWindowFlags(
+                Qt.WindowType.FramelessWindowHint |
+                Qt.WindowType.SubWindow
+            )
+            self.status = 0
+            if not self.isHidden():
+                self.hide()
 
     def refresh_status1(self):
         if self.status != 1:
@@ -65,6 +68,8 @@ class AbnormalWin(QWidget):
                 Qt.WindowType.SubWindow
             )
             self.status = 1
+            if self.isHidden():
+                self.show()
 
     def refresh_status2(self):
         if self.status != 2:
@@ -80,7 +85,8 @@ class AbnormalWin(QWidget):
                 Qt.WindowType.SubWindow
             )
             self.status = 2
-            self.show()
+            if self.isHidden():
+                self.show()
 
     def refresh_status3(self):
         if self.status != 3:
@@ -96,39 +102,56 @@ class AbnormalWin(QWidget):
                 Qt.WindowType.FramelessWindowHint |
                 Qt.WindowType.SubWindow
             )
+            self.close_timer.start(7*3600*1000)
             self.status = 3
-            self.show()
+            if self.isHidden():
+                self.show()
 
     def slot1(self):
-        dt_now = dt.datetime.now()
-        hour = dt_now.hour
-        minute = dt_now.minute
-        second = dt_now.second
+        self.timer.stop()
 
-        val = hour * 60 + minute
-        print(dt_now)
+        time0 = '22:30:00'
+        time1 = '22:45:00'
+        time2 = '23:00:00'
+        time3 = '07:00:00'
+
+        val = dt.datetime.now().strftime("%H:%M:%S")
         print(val)
-
-        # if 420 < val < 1410:
-
-        time1 = 420
-        time2 = 1390
-        time3 = 1410
-
-        if time1 < val < time2:
+        if self.is_in_duration(val, time0, time1):
             self.refresh_status1()
-        elif time2 <= time3:
+        elif self.is_in_duration(val, time1, time2):
             self.refresh_status2()
-        else:
+        elif self.is_in_duration(val, time2, time3):
             self.refresh_status3()
+        else:
+            self.refresh_status0()
+        print(self.status)
 
-        self.bg.start()
+        self.timer.start(1000)
+
+    @staticmethod
+    def is_in_duration(val, start, end):
+        if start <= end:
+            if start <= val < end:
+                return True
+            else:
+                return False
+        else:
+            if start <= val or val < end:
+                return True
+            else:
+                return False
+
+    def closeEvent(self, event):
+        self.timer.stop()
+        self.close_timer.stop()
+        super().closeEvent(event)
+        QApplication.instance().quit()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main = AbnormalWin()
-    main.show()
     sys.exit(app.exec_())
 
 
