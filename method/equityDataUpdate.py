@@ -18,6 +18,7 @@ def eq_update():
     from request.requestAkshareData import request_mir_ak
     from request.requestAkshareData import request_futures_data
     from request.requestAkshareData import request_sz000001
+    from request.requestCryptoData import request_crypto_data
 
     from method.sortCode import sort_hold
     from method.sortCode import get_hold_position
@@ -31,6 +32,7 @@ def eq_update():
     request_mir_ak()
     request_futures_data()
     request_sz000001()
+    request_crypto_data()
     sort_hold()
     get_hold_position()
 
