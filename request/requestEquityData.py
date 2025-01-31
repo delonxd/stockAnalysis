@@ -112,11 +112,12 @@ def config_eq_res(data):
             d4 = row[4] - last[4]
 
             rate = row[1] / last[1]
-            if row[5] == 'dividend' or row[5] == 'split':
+            # if row[5] == 'dividend' or row[5] == 'split':
+            if row[5] == '送、转股' or row[5] == '拆分':
                 rate = 1.0
 
             tmp = last[10]*rate
-            if row[5] == 'IPO':
+            if row[5] == 'IPO' and ipo_date == '':
                 ipo_rate = tmp
                 ipo_date = row[0]
 
@@ -132,7 +133,7 @@ def config_eq_res(data):
             else:
                 res2.append(new)
         else:
-            if row[5] == 'IPO':
+            if row[5] == 'IPO' and ipo_date == '':
                 ipo_rate = 1
                 ipo_date = row[0]
 
