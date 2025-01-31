@@ -44,7 +44,8 @@ class EquityChangeWidget(QWidget):
         drop_index = []
         for index, series in df.iterrows():
             row = series.tolist()
-            if row[8] == row[9] == row[10] == row[11] == 0 and row[1] == 'periodicReport':
+            # if row[8] == row[9] == row[10] == row[11] == 0 and row[1] == 'periodicReport':
+            if row[8] == row[9] == row[10] == row[11] == 0 and row[1] == '定期报告':
                 drop_index.append(index)
         df = df.drop(drop_index)
 
@@ -60,7 +61,7 @@ class EquityChangeWidget(QWidget):
             else:
                 brush = QBrush(Qt.GlobalColor.black)
 
-            row[1] = get_reason_cn(row[1])
+            # row[1] = get_reason_cn(row[1])
             row[5] = row[5] / row[4]
             row[6] = row[6] / row[4]
             row[7] = row[7] / row[4]
@@ -143,8 +144,8 @@ def get_reason_cn(reason):
         'reorganize': '资产重组',
         'overAllotment': '超额配售',
         'nonOperatingAssetStripping': '非经营资产剥离',
-        'split': '拆细',
-        'unknown': '未知',
+        'split': '拆分',
+        'unknown': '未知原因',
     }
     return dict0.get(reason)
 
