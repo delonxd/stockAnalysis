@@ -120,7 +120,7 @@ def request_futures_data():
 
 def request_sz000001():
     MainLog.add_log('request_sz000001 was called...')
-    ret = ak.stock_zh_index_daily(symbol="sz000001")
+    ret = ak.stock_zh_index_daily(symbol="sh000001")
     ret = ret['date'].tolist()
     ret = list(map(lambda x: x.strftime("%Y-%m-%d"), ret))
     write_json_txt("../basicData/akshare_sz_date.txt", ret)
@@ -134,6 +134,6 @@ if __name__ == '__main__':
     warnings.simplefilter(action='ignore', category=FutureWarning)
 
     # request_mir_y10_ak()
-    request_mir_ak()
+    # request_mir_ak()
     # request_futures_data()
-    # request_sz000001()
+    request_sz000001()
