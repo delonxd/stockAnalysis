@@ -168,6 +168,12 @@ def generate_gui_table():
     s0 = s0.apply(lambda x: int(x))
     df = pd.concat([df, s0], axis=1, sort=False)
 
+    res = load_json_txt("..\\basicData\\self_selected\\gui_export.txt")
+
+    s0 = pd.Series(res, name='gui_export')
+    s0 = s0.apply(lambda x: int(x))
+    df = pd.concat([df, s0], axis=1, sort=False)
+
     # for key, value in res.items():
     #     df.loc[key, 'gui_assessment'] = int(value) * 1e8
 
@@ -266,6 +272,7 @@ def generate_show_table():
         'level2',
         'level3',
         'counter_date',
+        'gui_export',
 
         'market_value_rise',
         'market_value_fall',
