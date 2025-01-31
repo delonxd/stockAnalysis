@@ -610,61 +610,67 @@ def save_default_style(df):
         pickle.dump(df, pk_f)
 
 
-# def add_futures_style_df():
-#
-#     from method.fileMethod import load_pkl
-#     path = "..\\basicData\\futures\\futures_prices_history.pkl"
-#     df = load_pkl(path, log=False)
-#     df = df.dropna(axis=0, how='all')
-#     columns = []
-#
-#     for index, val in enumerate(df.columns.tolist()):
-#         str1 = str(index + 1).rjust(2, '0')
-#         str2 = val.split('_')[0]
-#         str3 = val.split('_')[1]
-#         column = 'futures_%s_%s' % (str1, str2)
-#         columns.append((str1, str2, str3))
-#
-#     df = load_default_style()
-#
-#     index_list = []
-#     for str1, str2, str3 in columns:
-#         index_name = 'futures_%s_%s' % (str1, str2)
-#         index_list.append(index_name)
-#
-#         show_name = 'f_%s_%s' % (str1, str3)
-#         if index_name in df.index:
-#             continue
-#
-#         src = 'futures_51_AU0'
-#         row = df.loc[[src], :].copy()
-#
-#         row['default_ds'] = False
-#         row['selected'] = False
-#
-#         row['show_name'] = show_name
-#         row['index_name'] = index_name
-#
-#         row['txt_CN'] = index_name
-#         row['sql_type'] = ''
-#         row['sheet_name'] = ''
-#         row['api'] = ''
-#
-#         row.index = [index_name]
-#
-#         df = pd.concat([df, row])
-#
-#     reindex_list = []
-#     for index in df.index.tolist():
-#         if index not in index_list:
-#             reindex_list.append(index)
-#
-#         if index == 'eq_002_rate':
-#             reindex_list.extend(index_list)
-#
-#     df = df.reindex(index=reindex_list)
-#
-#     save_default_style(df)
+def add_futures_style_df():
+
+    from method.fileMethod import load_pkl
+    path = "..\\basicData\\futures\\futures_prices_history.pkl"
+    df = load_pkl(path, log=False)
+    df = df.dropna(axis=0, how='all')
+    columns = []
+
+    for index, val in enumerate(df.columns.tolist()):
+        str1 = str(index + 1).rjust(2, '0')
+        str2 = val.split('_')[0]
+        str3 = val.split('_')[1]
+        # column = 'futures_%s_%s' % (str1, str2)
+        columns.append((str1, str2, str3))
+
+    df = load_default_style()
+
+    key_list = df.index.tolist()
+
+    futures_style = dict()
+    for index in df.index.tolist():
+        if index[:7] == 'futures':
+            row = df.loc[[index], :].copy()
+            key = index.split('_')[2]
+            futures_style[key] = row
+            key_list.pop(key_list.index(index))
+
+    df = df.reindex(index=key_list)
+
+    index_list = []
+    for str1, str2, str3 in columns:
+        index_name = 'futures_%s_%s' % (str1, str2)
+        index_list.append(index_name)
+
+        show_name = 'f_0%s (期货) %s' % (str1, str3)
+
+        if str2 in futures_style.keys():
+            row = futures_style[str2]
+        else:
+            row = futures_style['V0']
+            row['default_ds'] = False
+            row['selected'] = False
+            row['info_priority'] = 0
+
+        row['show_name'] = show_name
+        row['index_name'] = index_name
+        row['txt_CN'] = index_name
+
+        row.index = [index_name]
+        df = pd.concat([df, row])
+
+    reindex_list = []
+    for index in key_list:
+        reindex_list.append(index)
+
+        if index == 'eq_002_rate':
+            reindex_list.extend(index_list)
+
+    df = df.reindex(index=reindex_list)
+
+    save_default_style(df)
 
 
 if __name__ == '__main__':
