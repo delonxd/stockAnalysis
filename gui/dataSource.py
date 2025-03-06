@@ -100,6 +100,12 @@ class DataSource:
         else:
             self.format_fun = lambda x: '%s' % x
 
+        tmp_dict = [
+            's_074_profit_growth_rate',
+        ]
+        if self.index_name in tmp_dict:
+            self.format_fun = lambda x: '%.2f %s' % (x / self.ratio, units)
+
         self.set_val_scale()
         self.df.columns = [index_name]
 
