@@ -376,7 +376,7 @@ def get_hold_position():
     sum_value = s_sum.iloc[-1]
     date1 = dt.date(2023, 11, 24)
     date2 = today
-    target_value = 188100 * (1.4 ** ((date2 - date1).days / 365))
+    target_value = 188100 * (1.5 ** ((date2 - date1).days / 365))
     delta = target_value - sum_value
 
     str1 = 'target_value --> %.0f' % target_value
