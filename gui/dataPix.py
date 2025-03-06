@@ -398,6 +398,14 @@ class DataPix:
 
             counter += 1
 
+        pix_painter.setPen(pen3)
+        y = self.y_value2px(1.1, data)
+        pix_painter.drawLine(QPointF(d_left, y), QPointF(d_right, y))
+
+        pix_painter.setPen(pen2)
+        y = self.y_value2px(1.05, data)
+        pix_painter.drawLine(QPointF(d_left, y), QPointF(d_right, y))
+
         pix_painter.end()
 
     def draw_auxiliary_line(self, data: DataSource):
