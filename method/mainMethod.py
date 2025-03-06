@@ -287,6 +287,59 @@ def copy_export_ratio():
     # write_json_txt(path, export_ratio, log=False)
 
 
+def get_rating_dict():
+    ret = {
+        100: 'AAA',
+        90: 'AA',
+        80: 'A',
+        70: 'BBB',
+        60: 'BB',
+        50: 'B',
+        40: 'CCC',
+        30: 'CC',
+        20: 'C',
+        10: 'D',
+        0: 'E',
+    }
+
+    return ret
+
+
+def credit_rating2value(rating):
+    dict0 = get_rating_dict()
+    ret = None
+    for key, value in dict0.items():
+        if rating == value:
+            ret = key
+            break
+    return ret
+
+
+def value2credit_rating(src, color_flag=False, default=''):
+    dict0 = get_rating_dict()
+    ret = default
+    if src is None:
+        src = -1
+    else:
+        for key, value in dict0.items():
+            if src >= key:
+                ret = value
+                break
+
+    if color_flag:
+        if src >= 80:
+            color = 'green'
+        elif src >= 50:
+            color = 'yellow'
+        elif src >= 20:
+            color = 'red'
+        else:
+            color = 'gray'
+        return ret, color
+    else:
+        return ret
+
+
 if __name__ == '__main__':
     # sift_show_table('real_pe_return_rate', False)
     # copy_export_ratio()
