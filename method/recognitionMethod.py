@@ -1,6 +1,7 @@
 from method.fileMethod import *
 import re
 import pandas as pd
+import datetime as dt
 
 
 class RecognitionStr:
@@ -452,10 +453,19 @@ class RecognitionStr:
 
         value = split[1]
         if column in date_columns:
-            if len(value) != 8:
+            if value[:1] == 'd':
+                value = value[1:]
+                try:
+                    value = int(value)
+                except ValueError:
+                    return ret
+                date_tmp = dt.date.today() - dt.timedelta(days=value)
+                value = date_tmp.strftime("%Y-%m-%d")
+            elif len(value) != 8:
                 return ret
+            else:
+                value = '%s-%s-%s' % (value[:4], value[4:6], value[6:8])
 
-            value = '%s-%s-%s' % (value[:4], value[4:6], value[6:8])
             string = "df['%s'] %s '%s'" % (column, symbol, value)
         else:
             string = "df['%s'] %s %s" % (column, symbol, value)
