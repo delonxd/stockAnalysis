@@ -134,8 +134,10 @@ def request_company_profile(stock_codes):
     res = dict()
     for code, value in res_dict.items():
         tmp = []
-        for key in value:
-            tmp.append(type_dict[key])
+        if isinstance(value, list):
+            for key in value:
+                tmp.append(type_dict[key])
+
         txt = '&'.join(tmp)
         res[code] = txt
 
