@@ -384,41 +384,13 @@ class GenerateCodeListWidget(QWidget):
         layout.setColumnMinimumWidth(1, 500)
 
         obj = QComboBox()
-        # flags = list(map(lambda x: str(x), range(10)))
-        flags = [
-            '',
-            '0_default',
-            '1_buy_in',
-            '2_mkt_non_main',
-            '3_random_s',
-            '4_random_w-s',
-            '5_random_a-w',
-            '6_toc',
-            '7_ids',
-            '8_new_sifted',
-            '9',
-            '10_gui_rate_dv',
-        ]
+        self.default_dict = load_json_txt("../basicData/mission_dict.txt")
+        flags = list(self.default_dict.keys())
+
         obj.addItems(flags)
         obj.setMaxVisibleItems(20)
         self.labels.append(QLabel('mission: '))
         self.editor.append(obj)
-
-        # src_flg = [
-        #     '',
-        #     'auto_select',
-        #     'old',
-        #     'old_random',
-        #     'all',
-        #     'hold',
-        #
-        #     # 'latest_update',
-        #     # 'salary',
-        #     # 'pe',
-        #     # 'real_pe',
-        #     # 'roe_parent',
-        #     # 'plate-50',
-        # ]
 
         obj = QTextEdit()
         # obj = QComboBox()
@@ -616,66 +588,13 @@ class GenerateCodeListWidget(QWidget):
 
         MainLog.add_log('change mission --> %s' % mission)
 
-        if mission == '0_default':
-            editor_dict['source'] = 'all-except[0]'
-
-        elif mission == '1_buy_in':
-            editor_dict['source'] = '买入|关注-cnd:predict_discount<8.5'
-
-        elif mission == '2_mkt_non_main':
-            editor_dict['source'] = '白名单-mkt:main'
-
-        elif mission == '3_random_s':
-            editor_dict['source'] = 'mkt:main&自选'
-            editor_dict['random'] = 'true'
-            editor_dict['interval'] = '40'
-
-        elif mission == '4_random_w-s':
-            editor_dict['source'] = 'mkt:main&白名单-自选'
-            editor_dict['random'] = 'true'
-            editor_dict['interval'] = '40'
-
-        elif mission == '5_random_a-w':
-            editor_dict['source'] = 'all-白名单'
-            editor_dict['sort'] = 'real_pe_return_rate'
-            editor_dict['ascending'] = 'false'
-            editor_dict['random'] = 'true'
-            editor_dict['interval'] = '40'
-
-        elif mission == '6_toc':
-            editor_dict['source'] = 'Toc'
-
-        elif mission == '7_ids':
-            editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate>=14\n' \
-                                    '&ids:3:医疗研发外包'
-
-        elif mission == '8_new_sifted':
-            editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate>=12\n' \
-                                    '&cnd:predict_discount>9\n' \
-                                    '-光伏-电池-新上市\n' \
-                                    '-backup:20230816:\n' \
-                                    '{白名单&mkt:main&cnd:gui_rate>=13\n' \
-                                    '&cnd:predict_discount>9\n' \
-                                    '-光伏-电池-新上市}'
-
-            editor_dict['sort_ids'] = 'true'
-
-        elif mission == '9':
-            editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate>=13\n' \
-                                    '&cnd:predict_discount>7\n' \
-                                    '-国有-光伏-电池-新上市\n' \
-                                    '-ids:3:\n' \
-                                    '{消费电子零部件及组装|印制电路板\n' \
-                                    '|医疗研发外包|体外诊断|医疗耗材\n' \
-                                    '|线下药店|化学制剂|中药\n' \
-                                    '|IT服务|垂直应用软件|农药|快递}' \
-
-            editor_dict['sort_ids'] = 'true'
-
-        elif mission == '10_gui_rate_dv':
-            editor_dict['source'] = '白名单&mkt:main&cnd:gui_rate_dv>=12\n' \
-                                    '&cnd:predict_discount>7\n' \
-                                    '-光伏-电池-CRO-新上市\n' \
+        mission_dict = self.default_dict.get(mission)
+        if mission_dict is not None:
+            for key, value in mission_dict.items():
+                if key == 'source':
+                    editor_dict[key] = '\n'.join(value)
+                else:
+                    editor_dict[key] = value
 
         self.load_editor_dict()
 
