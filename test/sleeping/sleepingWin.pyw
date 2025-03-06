@@ -110,9 +110,9 @@ class AbnormalWin(QMainWindow):
     def slot1(self):
         self.timer.stop()
 
-        time0 = '22:30:00'
-        time1 = '22:45:00'
-        time2 = '23:00:00'
+        time0 = '22:20:00'
+        time1 = '22:35:00'
+        time2 = '22:50:00'
         time3 = '07:00:00'
 
         val = dt.datetime.now().strftime("%H:%M:%S")
