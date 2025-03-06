@@ -174,6 +174,19 @@ def generate_gui_table():
     s0 = s0.apply(lambda x: int(x))
     df = pd.concat([df, s0], axis=1, sort=False)
 
+    res = load_json_txt("..\\basicData\\self_selected\\gui_ud.txt")
+
+    df_tmp = pd.DataFrame.from_dict(
+        res,
+        columns=[
+            'gui_ud1',
+            'gui_ud2',
+            'gui_ud3',
+        ],
+        orient='index'
+    )
+    df = pd.concat([df, df_tmp], axis=1, sort=False)
+
     # for key, value in res.items():
     #     df.loc[key, 'gui_assessment'] = int(value) * 1e8
 
@@ -273,6 +286,9 @@ def generate_show_table():
         'level3',
         'counter_date',
         'gui_export',
+        'gui_ud1',
+        'gui_ud2',
+        'gui_ud3',
 
         'market_value_rise',
         'market_value_fall',
@@ -338,7 +354,7 @@ def generate_show_table():
     df = df.reindex(columns=order)
 
     rate_adj = df['gui_rate'].copy()
-    rate_adj[rate_adj > 25] = 25
+    # rate_adj[rate_adj > 25] = 25
     s_predict = rate_adj * df['predict_delta'] / 36500 + 1
     df['predict_adj'] = s_predict.fillna(value=1)
     df['predict_ass'] = df['gui_assessment'] * df['predict_adj']
