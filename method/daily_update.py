@@ -12,6 +12,7 @@ def daily_update():
 
     from method.logMethod import MainLog
     from method.dailyMethod import basic_daily_update
+    from method.dailyMethod import actual_controller_update
     from method.dailyMethod import mysql_daily_update2
     from method.dailyMethod import daily_analysis
     from method.dailyMethod import generate_daily_table
@@ -40,6 +41,8 @@ def daily_update():
     ################################################################################################################
 
     all_codes, name_dict, ipo_dates = basic_daily_update(dir_name)
+
+    actual_controller_update(all_codes)
     mysql_daily_update2(dir_name, all_codes, ipo_dates)
 
     update_sw_2021()
