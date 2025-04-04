@@ -178,11 +178,12 @@ class QDataFrameTable(QTableWidget):
         self.setRowCount(row_size)
         self.setColumnCount(column_size)
 
-        h_header = np.vectorize(lambda x: str(x))(df.columns.values)
+        h_header = np.vectorize(lambda x: str(x).replace("_", "\n-"))(df.columns.values)
         v_header = np.vectorize(lambda x: str(x))(df.index.values)
 
         self.setHorizontalHeaderLabels(h_header)
         self.setVerticalHeaderLabels(v_header)
+        self.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignCenter)
 
         # arr = df.values
         for i in range(row_size):
@@ -198,8 +199,8 @@ class QDataFrameTable(QTableWidget):
         for i in range(6):
             self.setColumnWidth(i, 100)
 
-        for i in range(6, 11):
-            self.setColumnWidth(i, 70)
+        for i in range(6, 12):
+            self.setColumnWidth(i, 60)
 
         columns, conditions = self.code_df.sort_list[self.code_df.group_flag]
         for i in range(column_size):
