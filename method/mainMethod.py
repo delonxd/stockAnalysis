@@ -496,7 +496,7 @@ def predict_cap_return(pack):
         tl.append(regular_value_with_color(anchor, val_r18[i][2], color_flag))
         tl.append(regular_value_with_color(anchor, val_r20[i][0], False))
         tl.append(regular_value_with_color(anchor, val_r20[i][1], False))
-        tl.append(regular_value_with_color(anchor, val_r20[i][0], color_flag) + "\n")
+        tl.append(regular_value_with_color(anchor, val_r20[i][2], color_flag) + "\n")
         # break
 
     tl.append("</span>")
