@@ -1,6 +1,5 @@
 from request.requestData import *
 from method.fileMethod import *
-from method.sqlMethod import sql_format_drop_table
 
 import datetime as dt
 import json
@@ -49,18 +48,19 @@ def request_dividend(code, ipo_date=None):
     return ret
 
 
-def config_dv_res(data):
+def dv_res2dataframe(data):
 
-    header_df = get_header_df('dv')
-    check_field = 'id'
+    path = '../basicData/chineseComparison/zh_cmp_table_dv_cn.txt'
+    src = load_json_txt(path, log=False)
+    columns = list(src.values())
 
-    res_df = pd.DataFrame().from_dict(data, orient='columns')
-    if 'dividendAmount' in res_df.columns:
-        res_df['originalValue'] = res_df['dividendAmount']
-    res_df = res_df.reindex(header_df.columns[2:], axis=1)
+    df = pd.DataFrame().from_dict(data, orient='columns')
 
-    s1 = res_df['date'].map(lambda x: x[:10])
+    if 'dividendAmount' in df.columns:
+        df['originalValue'] = df['dividendAmount']
+    df = df.reindex(columns, axis=1)
 
+    s1 = df['date'].map(lambda x: x[:10])
     if s1.is_unique is False:
         tmp = dict()
         s2 = list()
@@ -73,67 +73,35 @@ def config_dv_res(data):
                 tmp[date] = 0
                 s2.append(date)
         s1 = pd.Series(s2)
-
-    res_df['id'] = s1
-    res_df.set_index(check_field, drop=False, inplace=True)
-
-    return res_df, check_field, header_df
+    df['id'] = s1
+    return df
 
 
-def dv_res2mysql(res, code, ini=False):
-
-    df, check_field, header_df = config_dv_res(res)
-    db, cursor = get_cursor('dv')
-
-    table = '%s_%s' % ('dv', code)
-
-    MainLog.add_log('    table --> %s' % table)
-
-    if ini is True:
-        cursor.execute(sql_format_drop_table(table))
-
-    header_str = sql_format_header_df(header_df)
-    cursor.execute(sql_format_create_table(table, header_str))
-    db.commit()
-
-    new_data = update_df2sql(
-        cursor=cursor,
-        table=table,
-        df_data=df,
-        check_field=check_field,
-        ini=ini,
-        # ini=False,
-    )
-
-    # if len(new_data.index) == 0:
-    #     MainLog.add_log('    new data: None')
-    #     return
-    # else:
-    #     MainLog.add_log('    new data:\n%s' % repr(new_data))
-
-    db.close()
-
-    return new_data
-
-
-def request_dv2mysql(stock_codes, ini=True):
+def request_dv2mysql(stock_codes, ini=False):
     ipo_dates = load_json_txt('..\\basicData\\ipo_date.txt')
     for code in stock_codes:
         res = request_dividend(code, ipo_date=ipo_dates.get(code))
-        dv_res2mysql(res, code, ini)
+        df = dv_res2dataframe(res)
+        table = 'dv_%s' % code
+        df2mysql(
+            df=df,
+            database='dvData',
+            table=table,
+            ini=ini,
+        )
         MainLog.add_split('-')
 
 
 if __name__ == '__main__':
-    # pd.set_option('display.max_columns', None)
-    # pd.set_option('display.max_rows', 3)
-    # pd.set_option('display.width', 10000)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', 3)
+    pd.set_option('display.width', 10000)
 
     # list1 = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
     # list2 = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt")
     # list3 = list(set(list1 + list2))
     list1 = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
     request_dv2mysql(list1)
-    # request_dv2mysql(['600015'])
+    # request_dv2mysql(['600007'])
     # request_dv2mysql(['600071'])
     pass
