@@ -1,6 +1,5 @@
 from request.requestData import *
 from method.fileMethod import *
-from method.sqlMethod import sql_format_drop_table
 
 import datetime as dt
 import json
@@ -38,9 +37,8 @@ def request_equity_change(code):
     return ret
 
 
-def config_eq_res(data):
+def eq_res2dataframe(data):
     res = []
-
     for row in data:
         date = row['date'][:10]
 
@@ -60,47 +58,6 @@ def config_eq_res(data):
     res.reverse()
     last = None
     res2 = []
-
-    # func = lambda x: '-' if x == 0 else x
-
-    # ipo_rate = 1
-    # for row in res:
-    #     if last:
-    #         d1 = row[1] - last[1]
-    #         d2 = row[2] - last[2]
-    #         d3 = row[3] - last[3]
-    #         d4 = row[4] - last[4]
-    #
-    #         # if d1 == d2 == d3 == d4 == 0 and row[5] == '定期报告':
-    #         if d1 == d2 == d3 == d4 == 0 and row[5] == 'periodicReport':
-    #             new = [*row, d1, d2, d3, d4, last[10], 1]
-    #             res2.append(new)
-    #
-    #         else:
-    #             rate = row[1] / last[1]
-    #             # if row[5] == '送、转股' or row[5] == '拆细':
-    #             if row[5] == 'dividend' or row[5] == 'split':
-    #                 # if abs(row[2] - last[2] * rate) <= 50:
-    #                 #     if abs(row[3] - last[3] * rate) <= 50:
-    #                 #         if abs(row[4] - last[4] * rate) <= 50:
-    #                 rate = 1.0
-    #
-    #             tmp = last[10]*rate
-    #             if row[5] == 'IPO':
-    #                 ipo_rate = tmp
-    #             # new = [*row, func(d1), func(d2), func(d3), func(d4), tmp, round(rate, 4)]
-    #             new = [*row, d1, d2, d3, d4, tmp, round(rate, 4)]
-    #             res2.append(new)
-    #     else:
-    #         d1 = row[1]
-    #         d2 = row[2]
-    #         d3 = row[3]
-    #         d4 = row[4]
-    #
-    #         # new = [*row, func(d1), func(d2), func(d3), func(d4), 1, 1]
-    #         new = [*row, d1, d2, d3, d4, 1, 1]
-    #         res2.append(new)
-    #     last = res2[-1]
 
     ipo_rate = 1
     ipo_date = ''
@@ -168,55 +125,26 @@ def config_eq_res(data):
             row[6], row[7], row[8], row[9], round(dilution_rate, 4)
         ])
 
-    header_df = get_header_df('eq')
-    check_field = 'date'
+    path = '../basicData/chineseComparison/zh_cmp_table_eq_cn.txt'
+    src = load_json_txt(path, log=False)
+    columns = list(src.values())
 
-    res_df = pd.DataFrame(data_list, columns=header_df.columns[2:])
-    res_df.set_index(check_field, drop=False, inplace=True)
-
-    return res_df, check_field, header_df
-
-
-def eq_res2mysql(res, code, ini=False):
-
-    df, check_field, header_df = config_eq_res(res)
-    db, cursor = get_cursor('eq')
-
-    table = '%s_%s' % ('eq', code)
-
-    MainLog.add_log('    table --> %s' % table)
-
-    if ini is True:
-        cursor.execute(sql_format_drop_table(table))
-
-    header_str = sql_format_header_df(header_df)
-    cursor.execute(sql_format_create_table(table, header_str))
-    db.commit()
-
-    new_data = update_df2sql(
-        cursor=cursor,
-        table=table,
-        df_data=df,
-        check_field=check_field,
-        ini=ini,
-        # ini=False,
-    )
-
-    # if len(new_data.index) == 0:
-    #     MainLog.add_log('    new data: None')
-    #     return
-    # else:
-    #     MainLog.add_log('    new data:\n%s' % repr(new_data))
-
-    db.close()
-
-    return new_data
+    df = pd.DataFrame(data_list, columns=columns[2:])
+    df = df.reindex(columns, axis=1)
+    return df
 
 
-def request_eq2mysql(stock_codes, ini=True):
+def request_eq2mysql(stock_codes, ini=False):
     for code in stock_codes:
         res = request_equity_change(code)
-        eq_res2mysql(res, code, ini)
+        df = eq_res2dataframe(res)
+        table = 'eq_%s' % code
+        df2mysql(
+            df=df,
+            database='eqData',
+            table=table,
+            ini=ini,
+        )
         MainLog.add_split('-')
 
 
