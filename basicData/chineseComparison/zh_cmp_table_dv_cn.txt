@@ -1,0 +1,16 @@
+{
+    "首次上传日期": "first_update",
+    "最近上传日期": "last_update",
+    "日期": "date",
+    "索引": "id",
+    "送股(股)": "bonusSharesFromProfit",
+    "转增(股)": "bonusSharesFromCapitalReserve",
+    "分红": "dividend",
+    "内容": "content",
+    "股权登记日": "registerDate",
+    "除权除息日": "exDate",
+    "分红到账日": "paymentDate",
+    "状态": "status",
+    "总分红": "originalValue",
+    "拆分折算比例": "splitRatio"
+}

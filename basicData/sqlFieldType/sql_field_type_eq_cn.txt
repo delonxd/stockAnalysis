@@ -1,0 +1,17 @@
+{
+    "first_update": "VARCHAR(30)",
+    "last_update": "VARCHAR(30)",
+    "date": "VARCHAR(30)",
+    "id_001_reason": "VARCHAR(30)",
+    "id_002_rate": "DOUBLE",
+    "id_003_changeRate": "DOUBLE",
+    "id_004_capitalization": "DOUBLE",
+    "id_005_outstandingSharesA": "DOUBLE",
+    "id_006_limitedSharesA": "DOUBLE",
+    "id_007_otherShares": "DOUBLE",
+    "id_008_deltaCapitalization": "DOUBLE",
+    "id_009_deltaOutstandingSharesA": "DOUBLE",
+    "id_010_deltaLimitedSharesA": "DOUBLE",
+    "id_011_deltaOtherShares": "DOUBLE",
+    "id_012_dilution_rate": "DOUBLE"
+}

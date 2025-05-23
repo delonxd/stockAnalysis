@@ -1,0 +1,12 @@
+{
+    "first_update": "VARCHAR(30)",
+    "last_update": "VARCHAR(30)",
+    "SECURITY_CODE": "VARCHAR(30)",
+    "SECUCODE": "VARCHAR(30)",
+    "SECURITY_NAME_ABBR": "VARCHAR(30)",
+    "STD_REPORT_DATE": "VARCHAR(30) PRIMARY KEY",
+    "REPORT_DATE": "VARCHAR(30)",
+    "FISCAL_YEAR": "VARCHAR(30)",
+    "START_DATE": "VARCHAR(30)",
+    "DATE_TYPE_CODE": "VARCHAR(30)"
+}

@@ -1,0 +1,10 @@
+{
+    "first_update": "VARCHAR(30)",
+    "last_update": "VARCHAR(30)",
+    "stockCode": "VARCHAR(6)",
+    "currency": "VARCHAR(10)",
+    "standardDate": "VARCHAR(30) PRIMARY KEY",
+    "reportDate": "VARCHAR(30)",
+    "reportType": "VARCHAR(30)",
+    "date": "VARCHAR(30)"
+}

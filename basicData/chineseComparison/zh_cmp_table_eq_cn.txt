@@ -1,0 +1,17 @@
+{
+    "首次上传日期": "first_update",
+    "最近上传日期": "last_update",
+    "日期": "date",
+    "原因": "id_001_reason",
+    "稀释": "id_002_rate",
+    "变动": "id_003_changeRate",
+    "总股本": "id_004_capitalization",
+    "流通": "id_005_outstandingSharesA",
+    "限售": "id_006_limitedSharesA",
+    "其他": "id_007_otherShares",
+    "Δ总股本": "id_008_deltaCapitalization",
+    "Δ流通": "id_009_deltaOutstandingSharesA",
+    "Δ限售": "id_010_deltaLimitedSharesA",
+    "Δ其他": "id_011_deltaOtherShares",
+    "稀释率": "id_012_dilution_rate"
+}

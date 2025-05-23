@@ -1,0 +1,16 @@
+{
+    "first_update": "VARCHAR(30)",
+    "last_update": "VARCHAR(30)",
+    "date": "VARCHAR(30)",
+    "id": "VARCHAR(30)",
+    "bonusSharesFromProfit": "DOUBLE",
+    "bonusSharesFromCapitalReserve": "DOUBLE",
+    "dividend": "DOUBLE",
+    "content": "VARCHAR(30)",
+    "registerDate": "VARCHAR(30)",
+    "exDate": "VARCHAR(30)",
+    "paymentDate": "VARCHAR(30)",
+    "status": "VARCHAR(30)",
+    "originalValue": "DOUBLE",
+    "splitRatio": "DOUBLE"
+}
