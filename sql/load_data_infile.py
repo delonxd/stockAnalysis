@@ -2,11 +2,21 @@ import mysql.connector
 import time
 import os
 import shutil
-from request.requestData import get_header_df
+import pandas as pd
 from method.sqlMethod import sql_format_create_table
 from method.sqlMethod import sql_format_drop_table
 from method.sqlMethod import sql_format_header_df
 from method.logMethod import MainLog
+
+
+def get_header_df(data_type, fs_type='non_financial'):
+    path = "../basicData/header_df/header_df_%s.txt" % data_type
+    if data_type == 'fs':
+        if fs_type == 'bank':
+            path = "../basicData/header_df/header_df_%s_%s.txt" % (data_type, fs_type)
+
+    with open(path, "r", encoding='utf-8') as f:
+        return pd.read_json(f.read(), orient="columns")
 
 
 def output_database(database, target_dir):
