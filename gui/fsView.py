@@ -1,11 +1,10 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from method.fileMethod import *
 from method.dataMethod import load_df_from_mysql
+from method.mainMethod import get_comparison_table
 
 import pandas as pd
 import sys
-import numpy as np
 
 
 class FsView(QWidget):
@@ -27,8 +26,6 @@ class FsView(QWidget):
 
         self.setLayout(layout)
 
-        self.header_dict = load_json_txt("..\\basicData\\header_df\\header_df_fs.txt")
-
     def load_df(self, code):
         if self.isHidden():
             return
@@ -36,8 +33,13 @@ class FsView(QWidget):
             return
 
         df = load_df_from_mysql(code, 'fs')
-
         df = df.sort_index(ascending=False)
+
+        mapping_table = get_comparison_table(code, 'fs')
+        columns = list(mapping_table.values())
+        columns_cn = list(mapping_table.keys())
+
+        df = df.reindex(columns, axis=1)
         df = df.T
 
         self.setWindowTitle(code)
@@ -45,9 +47,9 @@ class FsView(QWidget):
         self.table_widget.setColumnCount(df.shape[1])
 
         index = pd.Series(map(lambda x: x[3:6] if x[:2] == 'id' else '', df.index.values))
-        header = pd.Series(map(lambda x: self.header_dict[x]['txt_CN'], df.index.values))
+        header = pd.Series(map(lambda x: x.split('-')[-1], columns_cn))
 
-        h_header = np.vectorize(lambda x: str(x))(df.columns.values)
+        h_header = list(map(lambda x: str(x), df.columns.values))
         v_header = header + ' ' + index
 
         self.table_widget.setHorizontalHeaderLabels(h_header)
@@ -57,12 +59,12 @@ class FsView(QWidget):
         for i in range(df.shape[0]):
             for j in range(df.shape[1]):
                 item = QTableWidgetItem(regular_data(arr[i, j]))
-                item.setTextAlignment(Qt.AlignRight | Qt.AlignCenter)
+                item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignCenter)
                 self.table_widget.setItem(i, j, item)
 
         self.table_widget.resizeColumnsToContents()
 
-        self.table_widget.verticalHeader().setDefaultAlignment(Qt.AlignRight)
+        self.table_widget.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignRight)
         self.table_widget.verticalScrollBar().setSliderPosition(303)
 
         self.code = code
@@ -88,4 +90,6 @@ if __name__ == '__main__':
     main = FsView()
     main.show()
     main.load_df('002594')
+    # main.load_df('601288')
+    # main.load_df('601398')
     sys.exit(app.exec_())
