@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from method.dataMethod import load_df_from_mysql
-from request.requestData import get_header_df
+from method.fileMethod import load_json_txt
 # from request.requestEquityData import request_eq2mysql
 import sys
 
@@ -36,9 +36,11 @@ class EquityChangeWidget(QWidget):
         # request_eq2mysql([code])
         df = load_df_from_mysql(code, 'eq')
 
-        header_df = get_header_df('eq')
+        path = '../basicData/chineseComparison/zh_cmp_table_eq_cn.txt'
+        src = load_json_txt(path, log=False)
+        columns = list(src.keys())
 
-        df.columns = header_df.loc['txt_CN', :]
+        df.columns = columns
         df = df.drop(['首次上传日期', '最近上传日期'], axis=1)
 
         drop_index = []
