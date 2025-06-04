@@ -1,0 +1,27 @@
+{
+    "first_update": "VARCHAR(30)",
+    "last_update": "VARCHAR(30)",
+
+    "SECUCODE": "VARCHAR(30) PRIMARY KEY",
+    "SECURITY_CODE": "VARCHAR(30)",
+    "SECURITY_INNER_CODE": "VARCHAR(30)",
+    "SECURITY_NAME_ABBR": "VARCHAR(100)",
+
+    "ORG_CODE": "VARCHAR(30)",
+    "ORG_NAME": "VARCHAR(100)",
+    "ORG_EN_ABBR": "VARCHAR(100)",
+
+    "BELONG_INDUSTRY": "VARCHAR(100)",
+    "FOUND_DATE": "VARCHAR(30)",
+    "CHAIRMAN": "VARCHAR(100)",
+
+    "EMP_NUM": "DOUBLE",
+    "ORG_TEL": "VARCHAR(255)",
+    "ORG_FAX": "VARCHAR(255)",
+    "ORG_EMAIL": "VARCHAR(255)",
+    "ORG_WEB": "VARCHAR(255)",
+
+    "REG_PLACE": "VARCHAR(255)",
+    "ADDRESS": "VARCHAR(255)",
+    "ORG_PROFILE": "TEXT"
+}
