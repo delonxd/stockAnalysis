@@ -1,10 +1,9 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 import pandas as pd
-import datetime as dt
-from dateutil.relativedelta import relativedelta
-
-from gui.dataSource import DataSource
+# import datetime as dt
+# from dateutil.relativedelta import relativedelta
+# from gui.dataSource import DataSource
 
 
 class InformationBox:
@@ -13,9 +12,10 @@ class InformationBox:
         self.background = None
 
     def load_value(self, d1, d2, d_report, window_flag, page):
-        df = self.parent.ds_df
-        s1 = df.loc[d1, :].copy() if d1 in df.index else pd.Series()
-        s2 = df.loc[d2, :].copy() if d2 in df.index else pd.Series()
+        df_mvs = self.parent.df_mvs
+        df_fs = self.parent.df_fs
+        s1 = df_mvs.loc[d1, :].copy() if d1 in df_mvs.index else pd.Series()
+        s2 = df_fs.loc[d2, :].copy() if d2 in df_fs.index else pd.Series()
 
         box = list()
         for ds in self.parent.data_dict.values():
@@ -29,16 +29,16 @@ class InformationBox:
             if ds.frequency == 'DAILY':
                 row[4] = d1
                 value = s1[index_name] if index_name in s1.index else None
-                if pd.isna(value):
+                if pd.isna(value) and ds:
                     sub = ds.df.iloc[:, 0].copy().dropna()
-                    value = sub[-1] if sub.size > 0 else None
+                    value = sub.values[-1] if sub.size > 0 else None
                 row[3] = value
             else:
                 value = s2[index_name] if index_name in s2.index else None
                 if pd.isna(value):
                     sub = ds.df.iloc[:, 0].copy().dropna()
                     if sub.size > 0:
-                        value = sub[-1]
+                        value = sub.values[-1]
                         row[4] = sub.index[-1]
                 row[3] = value
 
@@ -56,9 +56,9 @@ class InformationBox:
         end = page * max_row
         box = box[start:end]
 
-        res.append(('公布日期: %s' % d_report, QPen(Qt.red, 1, Qt.SolidLine)))
-        res.append(('报告日期: %s' % d2, QPen(Qt.white, 1, Qt.SolidLine)))
-        res.append(('当前日期: %s' % d1, QPen(Qt.white, 1, Qt.SolidLine)))
+        res.append(('公布日期: %s' % d_report, QPen(Qt.GlobalColor.red, 1, Qt.PenStyle.SolidLine)))
+        res.append(('报告日期: %s' % d2, QPen(Qt.GlobalColor.white, 1, Qt.PenStyle.SolidLine)))
+        res.append(('当前日期: %s' % d1, QPen(Qt.GlobalColor.white, 1, Qt.PenStyle.SolidLine)))
 
         for _, ds, name, value, real_date in box:
             txt = ds.format(value)
@@ -123,11 +123,11 @@ class InformationBox:
 
             width1 = metrics.width(txt1)
             rect = QRect(x + max_width1 - width1, y, width1, row_height)
-            pix_painter.drawText(rect, Qt.AlignCenter, txt1)
+            pix_painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, txt1)
 
             width2 = metrics.width(txt2)
             rect = QRect(x + max_width1, y, width2, row_height)
-            pix_painter.drawText(rect, Qt.AlignCenter, txt2)
+            pix_painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, txt2)
 
             y += row_height
         pix_painter.end()
