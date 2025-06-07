@@ -1,4 +1,13 @@
 {
+    "首次上传日期": "first_update",
+    "最近上传日期": "last_update",
+    "代码": "SECUCODE",
+    "简化代码": "SECURITY_CODE",
+    "证券名称": "SECURITY_NAME_ABBR",
+    "标准日期": "STD_REPORT_DATE",
+    "报告日期": "REPORT_DATE",
+    "年结日": "FISCAL_YEAR",
+    "报告类型": "DATE_TYPE_CODE",
     "bs-固定资产": "bs_004001001",
     "bs-物业厂房及设备": "bs_004001002",
     "bs-投资物业": "bs_004001003",
