@@ -1,0 +1,37 @@
+{
+    "first_update": "VARCHAR(30)",
+    "last_update": "VARCHAR(30)",
+
+    "stockCode": "VARCHAR(30) PRIMARY KEY",
+    "companyName": "VARCHAR(100)",
+    "historyStockNames": "VARCHAR(255)",
+
+    "mainBusiness": "VARCHAR(1000)",
+    "establishDate": "VARCHAR(30)",
+
+    "legalRepresentative": "VARCHAR(255)",
+    "chairman": "VARCHAR(255)",
+    "generalManager": "VARCHAR(255)",
+    "boardSecretory": "VARCHAR(255)",
+    "independentDirectors": "VARCHAR(255)",
+
+    "actualControllerTypes": "VARCHAR(100)",
+    "actualControllerName": "VARCHAR(1000)",
+
+    "registeredCapital": "DOUBLE",
+
+    "city": "VARCHAR(30)",
+    "province": "VARCHAR(30)",
+    "postalCode": "VARCHAR(30)",
+
+    "province": "VARCHAR(30)",
+    "contactNumber": "VARCHAR(255)",
+    "fax": "VARCHAR(255)",
+    "email": "VARCHAR(255)",
+    "website": "VARCHAR(255)",
+
+    "registeredAddress": "VARCHAR(255)",
+    "officeAddress": "VARCHAR(255)",
+    "businessScope": "TEXT",
+    "profile": "TEXT"
+}

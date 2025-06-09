@@ -1,0 +1,16 @@
+{
+    "first_update": "VARCHAR(30)",
+    "last_update": "VARCHAR(30)",
+
+    "stockCode": "VARCHAR(30) PRIMARY KEY",
+    "name": "VARCHAR(30)",
+
+    "exchange": "VARCHAR(30)",
+    "market": "VARCHAR(30)",
+    "areaCode": "VARCHAR(30)",
+
+    "fsTableType": "VARCHAR(30)",
+    "ipoDate": "VARCHAR(30)",
+    "listingStatus": "VARCHAR(30)",
+    "mutualMarkets": "VARCHAR(30)"
+}
