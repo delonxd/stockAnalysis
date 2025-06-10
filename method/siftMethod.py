@@ -24,7 +24,7 @@ class SiftCode:
         else:
             self.df_all = df_all
 
-        self._code_list = RecognitionStr(source, df_all).get_code_list()
+        self._code_list = RecognitionStr(source, self.df_all).get_code_list()
 
         self.sort_codes(sort, ascending, sort_ids)
 
@@ -223,4 +223,5 @@ if __name__ == '__main__':
 
     # sift_codes(source='kk{(m2{zz{白名单}-xx{hold}}-m3{自选})-()|()}')
     # sift_codes(source='backup:20230816:{hold}')
-    print(SiftCode(source='ids:1:综合企业').code_list)
+    # print(SiftCode(source='ids:1:综合企业').code_list)
+    print(SiftCode(source='ctrl:国有').code_list)
