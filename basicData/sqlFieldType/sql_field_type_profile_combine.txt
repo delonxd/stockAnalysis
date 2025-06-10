@@ -1,0 +1,29 @@
+{
+    "first_update": "VARCHAR(30)",
+    "last_update": "VARCHAR(30)",
+
+    "code": "VARCHAR(30) PRIMARY KEY",
+    "name": "VARCHAR(100)",
+
+    "reg_place": "VARCHAR(255)",
+    "found_date": "VARCHAR(30)",
+    "chairman": "VARCHAR(100)",
+
+    "area": "VARCHAR(30)",
+    "exchange": "VARCHAR(100)",
+    "board": "VARCHAR(30)",
+    "mutual_markets": "VARCHAR(30)",
+    "security_type": "VARCHAR(30)",
+    "ipo_date": "VARCHAR(30)",
+
+    "fs_type": "VARCHAR(30)",
+
+    "industry_lv1": "VARCHAR(100)",
+    "industry_lv2": "VARCHAR(100)",
+    "industry_lv3": "VARCHAR(100)",
+
+    "controller_type": "VARCHAR(30)",
+    "controller_name": "VARCHAR(255)",
+
+    "website": "VARCHAR(100)"
+}
