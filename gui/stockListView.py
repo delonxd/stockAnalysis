@@ -3,8 +3,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from method.fileMethod import *
 from method.logMethod import MainLog
-from method.sortCode import sift_codes
 from method.showTable import generate_show_table
+from method.siftMethod import SiftCode
 
 import pandas as pd
 import numpy as np
@@ -14,13 +14,16 @@ import re
 
 class CodesDataFrame:
 
-    def __init__(self, code_list, current_index):
+    def __init__(self, code_list, current_code):
         # self.df_all = load_pkl("..\\basicData\\code_df_src.pkl")
 
-        generate_show_table()
+        df_all, df_mask = generate_show_table()
 
-        self.df_all = load_pkl("..\\basicData\\dailyUpdate\\latest\\show_table.pkl")
-        self.df_mask = load_pkl("..\\basicData\\dailyUpdate\\latest\\show_table_mask.pkl")
+        self.df_all = df_all
+        self.df_mask = df_mask
+
+        # self.df_all = load_pkl("..\\basicData\\dailyUpdate\\latest\\show_table.pkl")
+        # self.df_mask = load_pkl("..\\basicData\\dailyUpdate\\latest\\show_table_mask.pkl")
 
         # drop_columns = ['cn_name', 'key_remark', 'remark']
         # self.df_all = self.df_all.drop(drop_columns, axis=1)
@@ -28,47 +31,62 @@ class CodesDataFrame:
 
         self.df = pd.DataFrame()
 
-        self.group_list = [self.df_all.index.tolist()]
-        self.index_list = [0]
-        self.sort_list = [[[], []]]
-        self.group_flag = 0
+        self.groups = []
+        self.group_flag = -1
+        self.page = 0
+
+        self.current_code = ''
         self.current_index = 0
 
-        self.load_code_list(code_list, current_index)
+        self.add_code_group(self.df_all.index.tolist(), '')
+        self.add_code_group(code_list, current_code)
+        self.load_flag()
 
-    def load_code_list(self, code_list, code_index):
+    def add_code_group(self, code_list, current_code):
+        if len(code_list) == 0:
+            return False
+
         if self.df.size != 0:
-            code = self.df.iloc[self.current_index, 0]
-            self.index_list[self.group_flag] = code
+            self.groups[self.group_flag]['default_code'] = self.current_code
 
         self.group_flag += 1
-        if self.group_flag < len(self.group_list):
-            self.group_list = self.group_list[:self.group_flag]
-            self.index_list = self.index_list[:self.group_flag]
-            self.sort_list = self.sort_list[:self.group_flag]
+        if self.group_flag < len(self.groups):
+            self.groups = self.groups[:self.group_flag]
 
-        self.group_list.append(code_list)
-        self.index_list.append(0)
-        self.sort_list.append([[], []])
+        code_list = pd.Series(code_list).drop_duplicates().values.tolist()
+        df = self.df_all.reindex(code_list, axis=0)
+        df['idx'] = range(df.shape[0])
 
-        self.init_df()
-        self.init_current_index(code_index)
+        table = dict()
+        table['code_list'] = code_list
+        table['default_code'] = current_code
+        table['sort_cnd'] = [[], []]
+        table['org_df'] = df.copy()
+        self.groups.append(table)
+        return True
 
-    def init_df(self):
-        columns, conditions = self.sort_list[self.group_flag]
-        code_list = self.group_list[self.group_flag]
+    def load_flag(self):
+        table = self.groups[self.group_flag]
+        columns, conditions = table['sort_cnd']
+        org_df = table['org_df']
+        code = table['default_code']
 
-        self.df = self.df_all.loc[code_list, :].copy()
+        self.df = org_df.copy()
+        self.df = self.df.sort_values(by=columns, ascending=conditions)
+        self.df['idx'] = range(self.df.shape[0])
 
-        if len(columns) > 0:
-            by_columns = self.df.columns[columns].tolist()
-            self.df = self.df.sort_values(by=by_columns, ascending=conditions)
+        if code in self.df.index:
+            self.current_code = code
+        else:
+            self.current_code = self.df.index.values[0]
 
-        self.df.index = range(self.df.shape[0])
+        self.current_index = self.df.loc[self.current_code, 'idx']
 
-    def sort_column(self, column):
-        columns, conditions = self.sort_list[self.group_flag]
-        code = self.df.iloc[self.current_index, 0]
+    def sort_column(self, col_num):
+        table = self.groups[self.group_flag]
+        columns, conditions = table['sort_cnd']
+        org_df = table['org_df']
+        column = self.df.columns.values[col_num]
 
         if column in columns:
             index = columns.index(column)
@@ -81,61 +99,48 @@ class CodesDataFrame:
         if condition is not None:
             columns.insert(0, column)
             conditions.insert(0, condition)
-        self.sort_list[self.group_flag] = [columns, conditions]
 
-        self.init_df()
-        self.init_current_index(code)
+        table['sort_cnd'] = [columns, conditions]
+        self.df = org_df.copy()
+        self.df = self.df.sort_values(by=columns, ascending=conditions)
+        self.df['idx'] = range(self.df.shape[0])
+        self.current_index = self.df.loc[self.current_code, 'idx']
 
     def backward(self):
         if self.group_flag < 1:
-            return
-        self.index_list[self.group_flag] = self.current_index
-
+            return False
+        self.groups[self.group_flag]['default_code'] = self.current_code
         self.group_flag -= 1
         self.load_flag()
+        return True
 
     def forward(self):
-        if self.group_flag >= len(self.group_list)-1:
-            return
-        self.index_list[self.group_flag] = self.current_index
-
+        if self.group_flag >= len(self.groups) - 1:
+            return False
+        self.groups[self.group_flag]['default_code'] = self.current_code
         self.group_flag += 1
         self.load_flag()
+        return True
 
-    def load_flag(self):
-        code_index = self.index_list[self.group_flag]
-
-        self.init_df()
-        self.init_current_index(code_index)
-
-    def init_current_index(self, index=0):
-        if isinstance(index, str):
-            code = index
-            code_list = self.df['code'].tolist()
-            if code in code_list:
-                self.current_index = code_list.index(code)
-        else:
-            try:
-                tmp = int(index)
-                self.current_index = tmp
-            except Exception as e:
-                print(e)
+    def change_current_index(self, new_index):
+        self.current_index = new_index
+        self.current_code = self.df.index.values[new_index]
 
     def generate_buffer_list(self, forward, backward):
         # forward = 20
         # backward = 2
 
-        buffer = list(range(forward+1))
+        buffer = list(range(forward + 1))
 
-        for i in range(1, backward+1):
-            buffer.insert(i*2, -i)
+        for i in range(1, backward + 1):
+            buffer.insert(i * 2, -i)
 
         arr = np.array(buffer, dtype='int32')
         arr = (arr + self.current_index) % self.df.shape[0]
 
         ret = []
         for index in arr:
-            code = self.df.iloc[index]['code']
+            code = self.df.index.values[index]
             if code not in ret:
                 ret.append(code)
         return ret
@@ -167,8 +172,11 @@ class QDataFrameTable(QTableWidget):
 
     def load_code_df(self):
         df = self.code_df.df
-        code_list = self.code_df.df['code'].tolist()
+        # code_list = self.code_df.df['code'].tolist()
+        code_list = self.code_df.df.index.tolist()
         mask = self.code_df.df_mask.reindex(code_list)
+
+        mask['idx'] = self.code_df.df['idx']
         # mask = self.code_df.df_mask.loc[code_list, :].copy()
         # mask.index = range(mask.shape[0])
         arr = mask.values
@@ -179,7 +187,7 @@ class QDataFrameTable(QTableWidget):
         self.setColumnCount(column_size)
 
         h_header = np.vectorize(lambda x: str(x).replace("_", "\n-"))(df.columns.values)
-        v_header = np.vectorize(lambda x: str(x))(df.index.values)
+        v_header = np.vectorize(lambda x: str(x))(df.index + '  ' + df['name'])
 
         self.setHorizontalHeaderLabels(h_header)
         self.setVerticalHeaderLabels(v_header)
@@ -196,16 +204,20 @@ class QDataFrameTable(QTableWidget):
         row = self.code_df.current_index
         self.resizeColumnsToContents()
 
-        for i in range(6):
+        self.setColumnWidth(0, 40)
+        self.setColumnWidth(1, 140)
+        for i in range(2, 6):
             self.setColumnWidth(i, 100)
 
         for i in range(6, 12):
             self.setColumnWidth(i, 60)
 
-        columns, conditions = self.code_df.sort_list[self.code_df.group_flag]
-        for i in range(column_size):
-            if i in columns:
-                condition = conditions[columns.index(i)]
+        table = self.code_df.groups[self.code_df.group_flag]
+        columns, conditions = table['sort_cnd']
+        # for i in range(column_size):
+        for i, column in enumerate(df.columns):
+            if column in columns:
+                condition = conditions[columns.index(column)]
                 if condition is True:
                     color = Qt.GlobalColor.red
                 else:
@@ -219,44 +231,64 @@ class QDataFrameTable(QTableWidget):
         self.selectRow(row)
 
     def on_double_clicked(self, item):
-        row = item.row()
-        column = item.column()
+        df = self.code_df.df
+        column = df.columns.values[item.column()]
 
-        level = column - 1
-        if level in [1, 2, 3]:
-            name = self.code_df.df.iloc[row, column]
-            code = self.code_df.df.iloc[row, 0]
+        columns = [
+            'level1',
+            'level2',
+            'level3',
+            'reg_place',
+            'area',
+            'exchange',
+            'board',
+            'mutual_markets',
+            'security_type',
+            'fs_type',
+            'controller_type',
+        ]
 
-            src = 'ids:%s:%s' % (level, name)
-            code_list = sift_codes(source=src)
+        if column in columns:
+            val = df.iloc[item.row(), item.column()]
+            code = df.index.values[item.row()]
+
+            s0 = self.code_df.df_all[column]
+            code_list = s0[s0 == val].index.to_list()
 
             if len(code_list) > 0:
-                MainLog.add_log('show industry --> %s' % src)
-                self.load_code_list(code_list, code)
+                MainLog.add_log('show %s --> %s' % (column, val))
+                self.add_code_group(code_list, code)
                 return
 
         MainLog.add_log('move to row --> %s' % item.row())
         self.change_signal.emit(item.row())
 
-    def load_code_list(self, code_list, code_index):
-        self.code_df.load_code_list(code_list, code_index)
+    def add_code_group(self, code_list, code):
+        flag = self.code_df.add_code_group(code_list, code)
+        if flag is False:
+            return
+        self.code_df.load_flag()
         self.load_code_df()
         self.change_signal.emit(self.code_df.current_index)
 
     def backward(self):
-        self.code_df.backward()
+        flag = self.code_df.backward()
+        if flag is False:
+            return
         self.load_code_df()
         self.change_signal.emit(self.code_df.current_index)
 
     def forward(self):
-        self.code_df.forward()
+        flag = self.code_df.forward()
+        if flag is False:
+            return
         self.load_code_df()
         self.change_signal.emit(self.code_df.current_index)
 
-    def sort_df(self, column):
+    def sort_df(self, col_num):
         pos = self.horizontalScrollBar().sliderPosition()
 
-        self.code_df.sort_column(column)
+        self.code_df.sort_column(col_num)
         self.load_code_df()
         self.verticalScrollBar().setSliderPosition(0)
         self.horizontalScrollBar().setSliderPosition(pos)
@@ -293,12 +325,16 @@ class QStockListView(QWidget):
         self.button4 = QPushButton('选择')
         self.button5 = QPushButton('添加')
         self.button6 = QPushButton('删除')
+        self.button7 = QPushButton('导入')
+        self.button8 = QPushButton('导出')
 
         layout0.addWidget(self.button1, 0)
         layout0.addWidget(self.button4, 0)
         layout0.addWidget(self.button3, 0)
         layout0.addWidget(self.button5, 0)
         layout0.addWidget(self.button6, 0)
+        layout0.addWidget(self.button7, 0)
+        layout0.addWidget(self.button8, 0)
         layout0.addWidget(self.button2, 0)
 
         layout0.addStretch(1)
@@ -315,23 +351,27 @@ class QStockListView(QWidget):
         self.button5.clicked.connect(self.add_codes)
         self.button6.clicked.connect(self.del_codes)
 
-        self.generate_widget.generate_signal.connect(self.table_view.load_code_list)
+        self.button7.clicked.connect(self.import_codes)
+        self.button8.clicked.connect(self.export_codes)
+
+        self.generate_widget.generate_signal.connect(self.table_view.add_code_group)
 
         self.setLayout(layout)
 
     def select_code(self):
         txt, _ = QInputDialog.getText(self, '选择', '请输入:')
-
-        name_dict = load_json_txt('..\\basicData\\code_names_dict.txt')
-
-        if txt in name_dict.keys():
-            self.table_view.load_code_list([txt], 0)
+        if txt == '':
             return
-        if txt in name_dict.values():
-            for key, value in name_dict.items():
-                if value == txt:
-                    self.table_view.load_code_list([key], 0)
-                    return
+        s0 = self.table_view.code_df.df_all['name']
+
+        s0.index = s0.index.astype(str)
+        lst1 = s0[s0.index.str.contains(txt)].index.to_list()
+
+        s0 = s0.astype(str)
+        lst2 = s0[s0.str.contains(txt)].index.to_list()
+
+        lst = lst1 + lst2
+        self.table_view.add_code_group(lst, '')
 
     def get_tag(self):
         items = [
@@ -353,6 +393,33 @@ class QStockListView(QWidget):
         # codes = self.table_view.selected_codes()
         # tag = self.get_tag()
         # tags_operate(codes, tag, 'del')
+        return
+
+    def import_codes(self):
+        return
+
+    def export_codes(self):
+        codes = self.table_view.code_df.df.index.tolist()
+
+        items = [
+            'json',
+            'choice',
+        ]
+        typ, _ = QInputDialog.getItem(self, '获取列表中的选项', '列表', items, editable=False)
+
+        default_path = "D:\\Downloads\\CodeList"
+        default_type = "文本文件 (*.txt);;所有文件 (*.*)"
+        file_path, _ = QFileDialog.getSaveFileName(self, "保存文件", default_path, default_type)
+
+        if typ == 'json':
+            res = json.dumps(codes, indent=4, ensure_ascii=False)
+        elif typ == 'choice':
+            res = '\n'.join(codes)
+        else:
+            return
+        with open(file_path, "w", encoding='utf-8') as f:
+            f.write(res)
+
         return
 
     def closeEvent(self, event):
@@ -560,7 +627,7 @@ class GenerateCodeListWidget(QWidget):
         }
 
         try:
-            ret = sift_codes(**kw)
+            ret = SiftCode(**kw).code_list
             # print(ret, code_index)
 
             if len(ret) == 0:
@@ -616,8 +683,11 @@ def test_code_list_view():
 
     app = QApplication(sys.argv)
 
-    code_list = sift_codes(source='hold')
-    codes_df = CodesDataFrame(code_list, 0)
+    path = '..\\basicData\\foreignCodes\\code_list_foreign.txt'
+    code_list = load_json_txt(path)
+    # code_list = sift_codes(source='hold')
+    code_list = code_list[:100]
+    codes_df = CodesDataFrame(code_list, '')
 
     main = QStockListView(codes_df)
     # main = GenerateCodeListWidget()
