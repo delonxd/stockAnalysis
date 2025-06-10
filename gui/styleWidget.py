@@ -3,6 +3,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from method.mainMethod import get_units_dict
 # from gui.priorityTable import PriorityTable
+from method.fileMethod import load_json_txt
+# from method.fileMethod import write_json_txt
 
 import pandas as pd
 import pickle
@@ -24,13 +26,11 @@ class StyleTable(QTableWidget):
             'scale_max': 'digit',
             'scale_div': 'digit',
             'logarithmic': 'bool',
-            'units': 'str',
-            'txt_CN': 'str',
-            'default_ds': 'bool',
-            'info_priority': 'digit',
-            'ds_type': 'str',
             'delta_mode': 'bool',
             'ma_mode': 'digit',
+            'units': 'str',
+            'txt_CN': 'str',
+            'info_priority': 'digit',
             'pix1': 'bool',
             'pix2': 'bool',
             'pix3': 'bool',
@@ -39,6 +39,8 @@ class StyleTable(QTableWidget):
             'info2': 'bool',
             'info3': 'bool',
             'info4': 'bool',
+            'default_ds': 'bool',
+            'ds_type': 'str',
             'frequency': 'str',
         }
 
@@ -94,9 +96,11 @@ class StyleTable(QTableWidget):
 
         self.resizeColumnsToContents()
         self.setHorizontalHeaderLabels(self.column_type.keys())
-        self.setColumnWidth(0, 120)
-        self.setColumnWidth(2, 160)
-        self.setColumnWidth(11, 160)
+        self.setColumnWidth(0, 160)
+        self.setColumnWidth(2, 180)
+        self.setColumnWidth(13, 120)
+        self.setColumnWidth(6, 60)
+        self.setColumnWidth(7, 60)
 
     def get_item(self, index, column):
         df = self.style_df
@@ -165,11 +169,11 @@ class StyleTable(QTableWidget):
                     if not row['show_name']:
                         df.loc[index, 'show_name'] = row['txt_CN']
                         self.show_data(index, 'show_name')
-                    pr = df['info_priority'].max() + 1
-                else:
-                    pr = 0
-                df.loc[index, 'info_priority'] = pr
-                self.show_data(index, 'info_priority')
+                #     pr = df['info_priority'].max() + 1
+                # else:
+                #     pr = 0
+                # df.loc[index, 'info_priority'] = pr
+                # self.show_data(index, 'info_priority')
                 value = flag
 
             elif column == 'default_ds':
@@ -210,7 +214,7 @@ class StyleTable(QTableWidget):
         if column in ['color']:
             value = QColorDialog.getColor(initial=ini)
 
-        elif column in ['line_thick', 'scale_div', 'info_priority', 'ma_mode']:
+        elif column in ['line_thick', 'scale_div', 'ma_mode']:
             text, _ = QInputDialog.getText(self, title, label)
             if text.isdigit():
                 value = int(text)
@@ -356,11 +360,12 @@ class StyleWidget(QWidget):
         if index_name in df.index:
             return
         items = [
-            'id_001_bs_ta',
-            'id_041_mvs_mc',
+            'bs-资产合计',
+            'mvs-市值',
             's_016_roe_parent',
             's_027_pe_return_rate',
             's_040_profit_adjust2',
+            's_051_core_profit',
         ]
 
         src, _ = QInputDialog.getItem(self, '', '', items, 0, False)
@@ -376,9 +381,13 @@ class StyleWidget(QWidget):
         row['index_name'] = index_name
 
         row['txt_CN'] = index_name
-        row['sql_type'] = ''
-        row['sheet_name'] = ''
-        row['api'] = ''
+
+        pr = df['info_priority'].max() + 1
+        row['info_priority'] = pr
+
+        # row['sql_type'] = ''
+        # row['sheet_name'] = ''
+        # row['api'] = ''
 
         row.index = [index_name]
 
@@ -407,7 +416,7 @@ class PriorityTable(QDialog):
         df = style_df.copy()
         df = df.loc[df['selected'].isin([True]), :].copy()
 
-        self.columns = ['index_name', 'show_name', 'info_priority']
+        self.columns = ['index_name', 'show_name', 'info_priority', 'txt_CN']
         self.df = df.loc[:, self.columns].copy()
 
         self.table_view = QTableView()
@@ -423,7 +432,7 @@ class PriorityTable(QDialog):
 
     def init_ui(self):
         self.setWindowTitle('QTableViewDemo')
-        self.resize(500, 800)
+        self.resize(1200, 800)
 
         layout1 = QVBoxLayout()
         layout1.addWidget(self.button4)
@@ -445,6 +454,11 @@ class PriorityTable(QDialog):
         self.button3.clicked.connect(self.on_button3_clicked)
         self.button4.clicked.connect(self.on_button4_clicked)
         self.button5.clicked.connect(self.on_button5_clicked)
+
+        self.table_view.setColumnWidth(0, 200)
+        self.table_view.setColumnWidth(1, 400)
+        self.table_view.setColumnWidth(2, 30)
+        self.table_view.setColumnWidth(3, 400)
 
     def load_df(self):
         self.df = self.df.sort_values('info_priority')
@@ -577,7 +591,7 @@ class IndexTable(QDialog):
         for _ in range(10):
             self.on_button3_clicked()
 
-    def exchange_index(self, row1, row2):
+    def exchange_index(self, row1: int, row2: int):
         index = list(self.df.index)
 
         index_name = index.pop(row1)
@@ -592,22 +606,66 @@ class IndexTable(QDialog):
         self.update_style.emit(index)
 
 
-def load_default_style():
+def load_default_style() -> pd.DataFrame:
     path = '../gui/styles/style_default.pkl'
     with open(path, 'rb') as pk_f:
         df = pickle.load(pk_f)
     return df
 
 
-def save_default_style(df):
+def save_default_style(df: pd.DataFrame):
+    check_style_df(df)
+
     timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
-    path1 = '../gui/styles/style_%s.pkl' % timestamp
+    path1 = '../gui/styles/style_backups/style_%s.pkl' % timestamp
     with open(path1, 'wb') as pk_f:
         pickle.dump(df, pk_f)
 
     path2 = '../gui/styles/style_default.pkl'
     with open(path2, 'wb') as pk_f:
         pickle.dump(df, pk_f)
+
+
+def check_style_df(df: pd.DataFrame):
+
+    default_df = df.loc[df['default_ds'].isin([True]), :].copy()
+    if default_df.shape[0] != 1:
+        raise KeyboardInterrupt('style_df格式错误：存在两个default_ds')
+
+    dup_index = df.loc[df.index.duplicated()].copy()
+    if dup_index.shape[0] > 0:
+        raise KeyboardInterrupt('style_df格式错误：重复的index名称')
+
+    df0 = df.loc[df['info_priority'].duplicated()].copy()
+    if df0.shape[0] > 0:
+        raise KeyboardInterrupt('style_df格式错误：重复的info_priority')
+
+    col = df['info_priority'].copy()
+    if not col.apply(lambda x: isinstance(x, int)).all():
+        raise KeyboardInterrupt('style_df格式错误：info_priority存在非整数项')
+    # print(df)
+
+
+def resort_info_priority():
+    df = load_default_style()
+    df1 = df.loc[df['selected'].isin([True]), :].copy()
+
+    table = df1['info_priority'].copy().to_dict()
+    lst = []
+    for key, val in table.items():
+        lst.append([val, key])
+    lst.sort()
+    lst = list(zip(*lst))
+    lst = list(lst[1])
+
+    df2 = df.loc[df['selected'].isin([False]), :].copy()
+    lst2 = df2.index.to_list()
+    lst.extend(lst2)
+
+    df_pr = pd.Series(range(1, len(lst)+1), index=lst)
+    df['info_priority'] = df_pr
+
+    # check_style_df(df)
 
 
 def add_futures_style_df():
@@ -652,7 +710,8 @@ def add_futures_style_df():
             row = futures_style['V0']
             row['default_ds'] = False
             row['selected'] = False
-            row['info_priority'] = 0
+            # todo
+            row['info_priority'] = None
 
         row['show_name'] = show_name
         row['index_name'] = index_name
@@ -668,9 +727,236 @@ def add_futures_style_df():
         if index == 'eq_002_rate':
             reindex_list.extend(index_list)
 
-    df = df.reindex(index=reindex_list)
+    # df = df.reindex(index=reindex_list)
 
-    save_default_style(df)
+
+# def config_data_method2_style():
+#     from method.fileMethod import load_json_txt
+#     df = load_default_style()
+#     # print(df)
+#
+#     d_total = dict()
+#     path = '../basicData/mappingTable/fs_m_table_cn_non_financial.txt'
+#     d1 = load_json_txt(path, log=False)
+#     for key, value in d1.items():
+#         d_total[value] = key
+#
+#     path = '../basicData/mappingTable/mvs_m_table_cn.txt'
+#     d2 = load_json_txt(path, log=False)
+#
+#     for key, value in d2.items():
+#         d_total[value] = key
+#
+#     # key_list = df.index.tolist()
+#     del_list = [
+#         'first_update_fs',
+#         'last_update_fs',
+#         'stockCode_fs',
+#         'currency',
+#         'standardDate',
+#         'reportDate',
+#         'reportType',
+#         'date_fs',
+#         'first_update_mvs',
+#         'last_update_mvs',
+#         'stockCode_mvs',
+#         'date_mvs',
+#     ]
+#
+#     row_list = []
+#     for index in df.index.tolist():
+#         row = df.loc[[index], :].copy()
+#         if index[:3] == 'id_':
+#             index_name = row['index_name'].iloc[0]
+#
+#             if index_name in d_total.keys():
+#                 row['index_name'] = d_total[index_name]
+#                 row_list.append(row)
+#         else:
+#             if index not in del_list:
+#                 row_list.append(row)
+#     ret = pd.concat(row_list)
+#     ret.index = ret['index_name'].values
+#     save_default_style(ret)
+
+
+# def config_data_method3_style():
+#     from method.fileMethod import load_json_txt, write_json_txt
+#
+#     df = load_default_style()
+#
+#     # path = '../gui/styles/style_df_index3.txt'
+#     # index = load_json_txt(path)
+#     # df.index = index
+#     # df['index_name'] = index
+#     #
+#     # save_default_style(df)
+#
+#     index = list(df.index)
+#     path = '../gui/styles/style_df_index.txt'
+#     write_json_txt(path, index)
+
+
+# def config_data_style_index():
+#     from method.fileMethod import load_json_txt, write_json_txt
+#     path = '../gui/styles/style_df_index.txt'
+#     index = load_json_txt(path)
+#
+#     path = '../basicData/mappingTable/fs_m_table_cn_bank.txt'
+#     m_table = load_json_txt(path)
+#
+#     ret = []
+#     for key in m_table.keys():
+#         if key not in index:
+#             ret.append(key)
+#     path = '../gui/styles/style_df_index_add_bank.txt'
+#     write_json_txt(path, ret)
+
+
+# def add_style_df_bank():
+#     from method.fileMethod import load_json_txt, write_json_txt
+#     df = load_default_style()
+#     df = df.drop(['sql_type', 'sheet_name', 'api'], axis=1)
+#
+#     path = '../gui/styles/style_df_index.txt'
+#     index_list = load_json_txt(path)
+#
+#     row_default = df.loc[['cfs-附注'], :].copy()
+#
+#     ret = pd.DataFrame(columns=df.columns)
+#     for index in index_list:
+#         if index in df.index:
+#             row_df = df.loc[[index], :].copy()
+#         else:
+#             row_df = row_default.copy()
+#             row_df.index = [index]
+#             row_df.loc[index, 'index_name'] = index
+#
+#             show_name = index.split('-')[-1]
+#             show_name = '(银行)%s' % show_name
+#             row_df.loc[index, 'show_name'] = show_name
+#             row_df.loc[index, 'txt_CN'] = show_name
+#
+#             # print(row_df)
+#
+#         ret = pd.concat([ret, row_df], axis=0)
+#     # print(ret)
+#     # print(row_default)
+
+
+# def test():
+#     from method.fileMethod import load_pkl
+#     path = '../gui/styles/style_tmp/style_default_data_method1.pkl'
+#     df = load_pkl(path)
+#     print(df)
+#     # for index, row in df.iterrows():
+#     #     if row['selected'] == True:
+#     #         print(row['index_name'], row['show_name'])
+
+def add_style_df_hk():
+    df = load_default_style()
+
+    path = '../basicData/mappingTable/fs_m_table_hk_004.txt'
+    table = load_json_txt(path)
+
+    row_default = df.loc[['cfs-附注'], :].copy()
+
+    # print(df.index)
+
+    add_df = pd.DataFrame(columns=df.columns)
+    for index in table.keys():
+        if index in df.index:
+            # row_df = df.loc[[index], :].copy()
+            # print(index)
+            continue
+        else:
+            row_df = row_default.copy()
+            row_df.index = [index]
+            row_df.loc[index, 'index_name'] = index
+
+            lst = index.split('-')
+            sheet = lst[0]
+
+            if sheet not in ['bs', 'ps', 'cfs']:
+                continue
+
+            show_name = '-'.join(lst[1:])
+            show_name = '(HK)%s' % show_name
+
+            row_df.loc[index, 'show_name'] = show_name
+            row_df.loc[index, 'txt_CN'] = show_name
+
+            # print(row_df)
+
+        add_df = pd.concat([add_df, row_df], axis=0)
+
+    ret = pd.DataFrame(columns=df.columns)
+    for index in df.index:
+        row = df.loc[[index], :].copy()
+        ret = pd.concat([ret, row], axis=0)
+
+        if index == 'cfs-融资租入固定资产':
+            ret = pd.concat([ret, add_df], axis=0)
+
+    print(ret)
+
+    # save_default_style(ret)
+
+
+def copy_row_style():
+    # table = {
+    #     'bs-物业厂房及设备': 'bs-固定资产',
+    # }
+
+    path = '../gui/styles/copy_row_style_table.txt'
+    table = load_json_txt(path)
+
+    df = load_default_style()
+    for index1, index2 in table.items():
+        if index2 is None:
+            continue
+        row1 = df.loc[index1, :].copy()
+        row2 = df.loc[index2, :].copy()
+
+        for col_name in row1.index:
+            if col_name not in [
+                'default_ds',
+                'show_name',
+                'index_name',
+                'info_priority',
+                'txt_CN',
+            ]:
+                row1[col_name] = row2[col_name]
+        print(index1, index2)
+
+        df.loc[index1, :] = row1
+
+    pr_lst = df.sort_values(by='info_priority').index.tolist()
+
+    for index1, index2 in table.items():
+        if index2 is None:
+            continue
+        print(index1, index2)
+
+        pr_lst.pop(pr_lst.index(index1))
+        pos = pr_lst.index(index2) + 1
+        pr_lst.insert(pos, index1)
+
+    df_pr = pd.Series(range(1, len(pr_lst)+1), index=pr_lst)
+    df['info_priority'] = df_pr
+
+
+# def test001():
+#     df = load_default_style()
+#
+#     ret = dict()
+#     for index, row in df.iterrows():
+#         txt = row['txt_CN']
+#         if txt[:4] == '(HK)':
+#             ret[index] = None
+#
+#     path = '../gui/styles/copy_row_style_table.txt'
+#     write_json_txt(path, ret)
 
 
 if __name__ == '__main__':
@@ -686,6 +972,4 @@ if __name__ == '__main__':
     # main.showMinimized()
     main.load_default()
     sys.exit(app.exec_())
-
-    # add_futures_style_df()
     pass
