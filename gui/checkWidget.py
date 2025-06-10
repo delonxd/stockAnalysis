@@ -1,10 +1,11 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from method.fileMethod import *
+from method.fileMethod import load_json_txt
+from method.fileMethod import write_json_txt
+from method.sqlMethod import mysql2df
 
 import sys
-import json
 
 
 class CheckWidget(QWidget):
@@ -17,7 +18,15 @@ class CheckWidget(QWidget):
 
         self.setGeometry(660, 120, 600, 850)
         self.main_widget = main_widget
+
         self._code = code
+        self._code_df = None
+
+        if main_widget is None:
+            self._code_df = mysql2df(
+                database='stock_profile_data',
+                table='code_profile_combine',
+            )
 
         self.label = QLabel('000000: 测试')
         self.button1 = QPushButton('上传')
@@ -75,8 +84,10 @@ class CheckWidget(QWidget):
     def code_name(self):
         if self.main_widget is None:
             code = self._code
-            name_dict = load_json_txt('..\\basicData\\code_names_dict.txt', log=False)
-            ret = name_dict.get(code)
+            if code in self._code_df.index:
+                return self._code_df.loc[code, 'name']
+            else:
+                return
         else:
             ret = self.main_widget.stock_name
         return ret
@@ -176,15 +187,15 @@ class CheckWidget(QWidget):
         if self.main_widget is None:
             txt, _ = QInputDialog.getText(self, '选择', '请输入:')
 
-            name_dict = load_json_txt('..\\basicData\\code_names_dict.txt', log=False)
+            s0 = self._code_df['name']
 
-            if txt in name_dict.keys():
-                self._code = txt
-
-            if txt in name_dict.values():
-                for key, value in name_dict.items():
-                    if value == txt:
-                        self._code = key
+            lst1 = s0[s0.index == txt].index.to_list()
+            lst2 = s0[s0.values == txt].index.to_list()
+            lst = lst1 + lst2
+            if len(lst) > 0:
+                self._code = lst[0]
+            else:
+                self._code = None
 
             if self._code is not None:
                 self.download()
