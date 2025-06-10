@@ -225,6 +225,18 @@ def generate_all_code_info():
     df2mysql(df=ret, database=database, table=table, ini=False)
 
 
+def get_code_df_profile() -> pd.DataFrame:
+    df = mysql2df(
+        database='stock_profile_data',
+        table='code_profile_combine',
+    )
+    df['level1'] = df['industry_lv1']
+    df['level2'] = df['industry_lv2']
+    df['level3'] = df['industry_lv3']
+
+    return df
+
+
 # def test001():
 #     import re
 #
