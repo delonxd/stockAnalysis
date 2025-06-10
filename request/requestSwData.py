@@ -1,7 +1,59 @@
 from request.requestData import *
-from method.fileMethod import *
+from method.fileMethod import load_json_txt
+from method.fileMethod import write_json_txt
 
 import json
+import urllib.request
+from collections import defaultdict
+
+
+def request_industry_sample():
+    url = 'https://open.lixinger.com/api/a/industry/constituents/cni'
+
+    with open("..\\basicData\\industry\\industry3_list.txt", "r", encoding="utf-8", errors="ignore") as f:
+        industry3_list = json.loads(f.read())
+
+    data = dict()
+    data["token"] = "f819be3a-e030-4ff0-affe-764440759b5c"
+
+    data["date"] = "latest"
+    data["stockCodes"] = industry3_list
+
+    post_data = json.dumps(data)
+    header_dict = {'Content-Type': 'application/json'}
+
+    req = urllib.request.Request(url, data=bytes(post_data, 'gbk'), headers=header_dict)
+    res_txt = urllib.request.urlopen(req).read().decode()
+
+    data_list = json.loads(res_txt)['data']
+    dict0 = defaultdict(str)
+    for data in data_list:
+        sub_data = data["constituents"]
+        industry = data["stockCode"]
+        for val in sub_data:
+            if not val == {}:
+                dict0[val["stockCode"]] = industry
+
+    dict1 = dict()
+    for data in data_list:
+        sub_data = data["constituents"]
+        industry = data["stockCode"]
+        tmp = []
+        for val in sub_data:
+            if not val == {}:
+                tmp.append(val["stockCode"])
+
+        dict1[industry] = tmp
+
+    res = json.dumps(dict0, indent=4, ensure_ascii=False)
+    with open("../basicData/industry/code_industry_dict.txt", "w", encoding='utf-8') as f:
+        f.write(res)
+
+    res = json.dumps(dict1, indent=4, ensure_ascii=False)
+    with open("../basicData/industry/industry_code_dict.txt", "w", encoding='utf-8') as f:
+        f.write(res)
+
+    return dict0, dict1
 
 
 @try_request("HTTP Error 500: Internal Server Error")
