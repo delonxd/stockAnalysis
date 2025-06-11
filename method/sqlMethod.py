@@ -2,102 +2,114 @@ import json
 import time
 import pandas as pd
 import numpy as np
-from method.mainMethod import transpose_df
 from method.logMethod import MainLog, log_it
 from method.fileMethod import load_json_txt
 import mysql.connector
 
 
-def update_df2sql(cursor, table, df_data, check_field, ini=False):
-    df_data.insert(0, "last_update", np.NAN)
+# def update_df2sql(cursor, table, df_data, check_field, ini=False):
+#     df_data.insert(0, "last_update", np.NAN)
+#
+#     if ini:
+#         df_data.insert(0, "first_update", np.NAN)
+#         df_sql = pd.DataFrame()
+#     else:
+#         df_sql = get_data_frame(cursor, table)
+#         df_sql = df_sql.set_index(check_field, drop=False)
+#         df_org = df_sql.drop(df_data.columns, axis=1)
+#
+#         df_data = pd.concat([df_org, df_data], axis=1, sort=True).reindex(df_data.index)
+#         df_data = df_data.reindex(df_sql.columns, axis=1)
+#
+#         # df_sql = get_data_frame(cursor, table)
+#         # df_first = df_sql.set_index(check_field, drop=False).loc[:, ['first_update']]
+#         # df_data = pd.concat([df_first, df_data], axis=1, sort=True).reindex(df_data.index)
+#
+#     timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+#
+#     # print(dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
+#
+#     new_index = []
+#
+#     changed = set()
+#     for index in df_data.index:
+#         if index not in df_sql.index:
+#             # print(index)
+#             new_index.append(index)
+#             continue
+#
+#         flag = False
+#         for column in df_data.columns:
+#             if column in ['first_update', 'last_update']:
+#                 continue
+#             val1 = df_data.loc[index, column]
+#             val2 = df_sql.loc[index, column]
+#
+#             if val1 == val2:
+#                 pass
+#             elif pd.isna(val1) and pd.isna(val2):
+#                 pass
+#             else:
+#                 changed.add(column)
+#                 # print(index, column)
+#                 flag = True
+#                 # break
+#         if flag is True:
+#             new_index.append(index)
+#
+#     changed = list(changed)
+#     changed.sort()
+#
+#     MainLog.add_log('    changed columns --> %s' % changed)
+#
+#     # print(dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
+#
+#     new_data = df_data.loc[new_index, :]
+#     df_data = new_data.copy()
+#
+#     df_data.loc[:, 'first_update'].fillna(value=timestamp, inplace=True)
+#     df_data.loc[:, 'last_update'].fillna(value=timestamp, inplace=True)
+#
+#     sql_execute_multi(cursor, 'SET autocommit = 0;')
+#     sql_execute_multi(cursor, 'START TRANSACTION;')
+#
+#     # DELETE
+#     date_list = list(df_data[check_field].values)
+#     if date_list:
+#         date_str = json.dumps(date_list, ensure_ascii=False)
+#         date_str = '(%s)' % date_str[1:-1]
+#         condition = sql_format_condition(check_field, 'in', date_str)
+#         delete_str = sql_format_delete(table=table, where=condition)
+#
+#         sql_execute_multi(cursor, delete_str)
+#
+#     df_data = sql_format_df(df_data)
+#
+#     for index in range(df_data.shape[0]):
+#         row_data = list(df_data.iloc[index, :].values)
+#         insert_str = sql_format_insert(table, values=row_data)
+#
+#         sql_execute_multi(cursor, insert_str)
+#
+#     sql_execute_multi(cursor, 'COMMIT;')
+#
+#     return new_data
 
-    if ini:
-        df_data.insert(0, "first_update", np.NAN)
-        df_sql = pd.DataFrame()
-    else:
-        df_sql = get_data_frame(cursor, table)
-        df_sql = df_sql.set_index(check_field, drop=False)
-        df_org = df_sql.drop(df_data.columns, axis=1)
 
-        df_data = pd.concat([df_org, df_data], axis=1, sort=True).reindex(df_data.index)
-        df_data = df_data.reindex(df_sql.columns, axis=1)
-
-        # df_sql = get_data_frame(cursor, table)
-        # df_first = df_sql.set_index(check_field, drop=False).loc[:, ['first_update']]
-        # df_data = pd.concat([df_first, df_data], axis=1, sort=True).reindex(df_data.index)
-
-    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-
-    # print(dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
-
-    new_index = []
-
-    changed = set()
-    for index in df_data.index:
-        if index not in df_sql.index:
-            # print(index)
-            new_index.append(index)
-            continue
-
-        flag = False
-        for column in df_data.columns:
-            if column in ['first_update', 'last_update']:
-                continue
-            val1 = df_data.loc[index, column]
-            val2 = df_sql.loc[index, column]
-
-            if val1 == val2:
-                pass
-            elif pd.isna(val1) and pd.isna(val2):
-                pass
-            else:
-                changed.add(column)
-                # print(index, column)
-                flag = True
-                # break
-        if flag is True:
-            new_index.append(index)
-
-    changed = list(changed)
-    changed.sort()
-
-    MainLog.add_log('    changed columns --> %s' % changed)
-
-    # print(dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
-
-    new_data = df_data.loc[new_index, :]
-    df_data = new_data.copy()
-
-    df_data.loc[:, 'first_update'].fillna(value=timestamp, inplace=True)
-    df_data.loc[:, 'last_update'].fillna(value=timestamp, inplace=True)
-
-    sql_execute_multi(cursor, 'SET autocommit = 0;')
-    sql_execute_multi(cursor, 'START TRANSACTION;')
-
-    # DELETE
-    date_list = list(df_data[check_field].values)
-    if date_list:
-        date_str = json.dumps(date_list, ensure_ascii=False)
-        date_str = '(%s)' % date_str[1:-1]
-        condition = sql_format_condition(check_field, 'in', date_str)
-        delete_str = sql_format_delete(table=table, where=condition)
-
-        sql_execute_multi(cursor, delete_str)
-
-    df_data = sql_format_df(df_data)
-
-    for index in range(df_data.shape[0]):
-        row_data = list(df_data.iloc[index, :].values)
-        insert_str = sql_format_insert(table, values=row_data)
-
-        sql_execute_multi(cursor, insert_str)
-
-    sql_execute_multi(cursor, 'COMMIT;')
-
-    return new_data
+def get_cursor(database):
+    config = {
+        'user': 'root',
+        'password': 'aQLZciNTq4sx',
+        'host': 'localhost',
+        'port': '3306',
+        'database': database,
+    }
+    db = mysql.connector.connect(**config)
+    cursor = db.cursor()
+    return db, cursor
 
 
-def get_sql_indicator(df, database):
+def get_sql_indicator(df, database, table):
     if database == 'fsData':
         check_field = 'standardDate'
         field_ascending = True
@@ -126,7 +138,19 @@ def get_sql_indicator(df, database):
         check_field = 'STD_REPORT_DATE'
         field_ascending = True
 
-        path = "../basicData/sqlFieldType/sql_field_type_hk.txt"
+        path = "../basicData/sqlFieldType/sql_field_type_fs_hk.txt"
+        type_dict = load_json_txt(path, log=False)
+        pre_fields = list(type_dict.keys())
+
+        for key in df.columns:
+            if key not in type_dict.keys():
+                type_dict[key] = 'DOUBLE'
+
+    elif database == 'fsData_us':
+        check_field = 'STD_REPORT_DATE'
+        field_ascending = True
+
+        path = "../basicData/sqlFieldType/sql_field_type_fs_us.txt"
         type_dict = load_json_txt(path, log=False)
         pre_fields = list(type_dict.keys())
 
@@ -162,6 +186,58 @@ def get_sql_indicator(df, database):
         type_dict = load_json_txt(path, log=False)
         pre_fields = list(type_dict.keys())
 
+    elif database == 'stock_profile_data':
+        if table == 'code_profile_combine':
+            check_field = 'code'
+            field_ascending = False
+
+            path = "../basicData/sqlFieldType/sql_field_type_profile_combine.txt"
+            type_dict = load_json_txt(path, log=False)
+            pre_fields = list(type_dict.keys())
+
+        elif table == 'stock_profile_cn':
+            check_field = 'stockCode'
+            field_ascending = False
+
+            path = "../basicData/sqlFieldType/sql_field_type_profile_cn.txt"
+            type_dict = load_json_txt(path, log=False)
+            pre_fields = list(type_dict.keys())
+
+        elif table == 'security_profile_cn':
+            check_field = 'stockCode'
+            field_ascending = False
+
+            path = "../basicData/sqlFieldType/sql_field_type_security_profile_cn.txt"
+            type_dict = load_json_txt(path, log=False)
+            pre_fields = list(type_dict.keys())
+
+        elif table == 'stock_profile_hk':
+            check_field = 'SECUCODE'
+            field_ascending = False
+
+            path = "../basicData/sqlFieldType/sql_field_type_profile_hk.txt"
+            type_dict = load_json_txt(path, log=False)
+            pre_fields = list(type_dict.keys())
+
+        elif table == 'security_profile_hk':
+            check_field = 'SECUCODE'
+            field_ascending = False
+
+            path = "../basicData/sqlFieldType/sql_field_type_security_profile_hk.txt"
+            type_dict = load_json_txt(path, log=False)
+            pre_fields = list(type_dict.keys())
+
+        elif table == 'stock_profile_us':
+            check_field = 'SECUCODE'
+            field_ascending = False
+
+            path = "../basicData/sqlFieldType/sql_field_type_profile_us.txt"
+            type_dict = load_json_txt(path, log=False)
+            pre_fields = list(type_dict.keys())
+
+        else:
+            raise KeyboardInterrupt('table错误')
+
     # elif database == 'test20250521':
     #     check_field = 'standardDate'
     #     field_ascending = True
@@ -186,10 +262,10 @@ def get_sql_indicator(df, database):
 
 
 @log_it(None)
-def df2mysql(df, database, table, ini=False):
+def df2mysql(df: pd.DataFrame, database, table, ini=False, log=True):
 
     # 根据database获取check_field 还有数据起始列pre_fields 是否排序
-    indicator = get_sql_indicator(df, database)
+    indicator = get_sql_indicator(df, database, table)
     check_field = indicator[0]
     field_ascending = indicator[1]
     pre_fields = indicator[2]
@@ -198,7 +274,7 @@ def df2mysql(df, database, table, ini=False):
     # 检查df应该包含所有的pre_field
     for field in pre_fields:
         if field not in df.columns:
-            raise KeyboardInterrupt('pre_fields not in df.columns')
+            raise KeyboardInterrupt('%s not in df.columns' % field)
     # 设置index
     df = df.set_index(check_field, drop=False)
 
@@ -217,19 +293,12 @@ def df2mysql(df, database, table, ini=False):
     l0 = pre_fields + l1
     df = df.reindex(l0, axis=1)
 
-    # MainLog.add_log('%20s --> %s' % ('database', database))
-    MainLog.add_log('%20s --> %s' % ('table', table))
+    if log:
+        # MainLog.add_log('%20s --> %s' % ('database', database))
+        MainLog.add_log('%20s --> %s' % ('table', table))
 
     # 连接database
-    config = {
-        'user': 'root',
-        'password': 'aQLZciNTq4sx',
-        'host': 'localhost',
-        'port': '3306',
-        'database': database,
-    }
-    db = mysql.connector.connect(**config)
-    cursor = db.cursor()
+    db, cursor = get_cursor(database)
 
     ########################################################################################
 
@@ -265,17 +334,19 @@ def df2mysql(df, database, table, ini=False):
                     db.commit()
                     fields.insert(counter, column)
         if len(new_columns) > 0:
-            MainLog.add_log('%20s --> %s' % ('add fields', new_columns))
+            if log:
+                MainLog.add_log('%20s --> %s' % ('add fields', new_columns))
 
     else:
         # 新建 table
         header_str = sql_format_fields_with_type(df.columns, type_dict)
         cursor.execute(sql_format_create_table(table, header_str))
         db.commit()
-        MainLog.add_log('%20s --> %s' % ('create table', table))
+        if log:
+            MainLog.add_log('%20s --> %s' % ('create table', table))
 
     # 获取new_index
-    new_columns = list(df.columns)
+    # new_columns = list(df.columns)
 
     df_sql = get_data_frame(cursor, table)
     df_sql = df_sql.set_index(check_field, drop=False)
@@ -324,86 +395,89 @@ def df2mysql(df, database, table, ini=False):
     changed = list(changed)
     changed.sort()
 
-    df_change = pd.DataFrame(change_list, columns=fields)
-    df_change.index = change_indexes
+    if len(change_indexes) == 0:
+        if len(add_indexes) == 0:
+            df = pd.DataFrame(columns=fields)
+        else:
+            df = df.loc[add_indexes, :].copy()
+            df = df.reindex(fields, axis=1)
+    else:
+        if len(add_indexes) == 0:
+            df = pd.DataFrame(change_list, columns=fields)
+            df.index = change_indexes
+        else:
+            df_change = pd.DataFrame(change_list, columns=fields)
+            df_change.index = change_indexes
 
-    df_add = df.loc[add_indexes, :].copy()
-    df_add = df_add.reindex(fields, axis=1)
-    df = pd.concat([df_change, df_add], sort=True)
-    df = df.reindex(fields, axis=1)
-    new_data = df[new_columns].copy()
+            df_add = df.loc[add_indexes, :].copy()
+            # df_add = df_add.reindex(fields, axis=1)
+            df = pd.concat([df_change, df_add], sort=True)
+            df = df.reindex(fields, axis=1)
 
-    # MainLog.add_log('%20s --> %s' % ('new_df columns', new_columns))
-    MainLog.add_log('%20s --> %s' % ('change fields', changed))
-    # MainLog.add_log('%20s --> %s' % ('change rows', change_indexes))
-    # MainLog.add_log('%20s --> %s' % ('add rows', add_indexes))
+    new_data = df.copy()
+
+    if log:
+        # MainLog.add_log('%20s --> %s' % ('new_df columns', new_columns))
+        MainLog.add_log('%20s --> %s' % ('change fields', changed))
+        # MainLog.add_log('%20s --> %s' % ('change rows', change_indexes))
+        # MainLog.add_log('%20s --> %s' % ('add rows', add_indexes))
 
     ########################################################################################
 
-    sql_execute_multi(cursor, 'SET autocommit = 0;')
-    sql_execute_multi(cursor, 'START TRANSACTION;')
-
-    # 删除行
-    date_list = list(df[check_field].values)
+    date_list = df[check_field].to_list()
     if date_list:
+        sql_execute_multi(cursor, 'SET autocommit = 0;')
+        sql_execute_multi(cursor, 'START TRANSACTION;')
+
+        # 删除行
         date_str = json.dumps(date_list, ensure_ascii=False)
         date_str = '(%s)' % date_str[1:-1]
         condition = sql_format_condition(check_field, 'in', date_str)
         delete_str = sql_format_delete(table=table, where=condition)
         sql_execute_multi(cursor, delete_str)
 
-    # 添加行
-    df = sql_format_df(df)
-    for index in range(df.shape[0]):
-        row_data = list(df.iloc[index, :].values)
-        insert_str = sql_format_insert(table, values=row_data)
-        sql_execute_multi(cursor, insert_str)
+        # 添加行
+        # todo 矢量操作
+        df = sql_format_df(df)
+        for index in range(df.shape[0]):
+            row_data = list(df.iloc[index, :].values)
+            insert_str = sql_format_insert(table, values=row_data)
+            sql_execute_multi(cursor, insert_str)
 
-    sql_execute_multi(cursor, 'COMMIT;')
-    db.close()
-
-    if len(new_data.index) == 0:
-        MainLog.add_log('%20s --> %s' % ('new_df', 'none'))
-        return
-    else:
-        MainLog.add_log('%20s --> \n%s' % ('new_df', repr(new_data)))
+        sql_execute_multi(cursor, 'COMMIT;')
+        db.close()
+        if log:
+            MainLog.add_log('%20s --> \n%s' % ('new_df', repr(new_data)))
         return new_data
+    else:
+        db.close()
+        if log:
+            MainLog.add_log('%20s --> %s' % ('new_df', 'none'))
+        return
 
 
-def mysql2df(database, table, fields=None):
-    # 连接database
-    config = {
-        'user': 'root',
-        'password': 'aQLZciNTq4sx',
-        'host': 'localhost',
-        'port': '3306',
-        'database': database,
-    }
-    db = mysql.connector.connect(**config)
-    cursor = db.cursor()
+def mysql2df(database, table, fields=None, where=None, sort=True):
+    db, cursor = get_cursor(database)
 
-    indicator = get_sql_indicator(pd.DataFrame(), database)
+    indicator = get_sql_indicator(pd.DataFrame(), database, table)
     check_field = indicator[0]
     type_dict = indicator[3]
 
     flag = sql_if_table_exists(cursor=cursor, table=table)
     if flag:
-        sql_df = get_data_frame(cursor=cursor, table=table)
-        sql_df = sql_df.set_index(check_field, drop=False)
-        sql_df.sort_index(inplace=True)
-        if 'Invalid date' in sql_df.index:
-            sql_df.drop('Invalid date', inplace=True)
-
-        if fields is not None:
-            sql_df = sql_df.reindex(fields, axis=1)
-        sql_df.index = sql_df.index.map(lambda x: x[:10])
-        return sql_df
+        ret = get_data_frame(cursor=cursor, table=table, fields=fields, where=where)
     else:
         if fields is None:
             columns = list(type_dict.keys())
-            return pd.DataFrame(columns=columns)
+            ret = pd.DataFrame(columns=columns)
         else:
-            return pd.DataFrame(columns=fields)
+            ret = pd.DataFrame(columns=fields)
+
+    ret = ret.set_index(check_field, drop=False)
+    if sort is True:
+        ret = ret.sort_index()
+
+    return ret
 
 
 def sql_execute_multi(cursor, instruct):
@@ -528,7 +602,11 @@ def sql_format_header_df(header: pd.DataFrame):
     if len(header.columns) == 0:
         raise KeyboardInterrupt('header至少拥有一个字段')
 
-    df = transpose_df(header)
+    df = pd.DataFrame(
+        header.values.T,
+        index=header.columns,
+        columns=header.index
+    )
 
     sub_str = list()
     for index, row in df.iterrows():
@@ -561,7 +639,7 @@ def get_sql_header(data_header, ini_header):
     return sql_header
 
 
-def get_data_frame(cursor, table, fields=None):
+def get_data_frame(cursor, table, fields=None, where=None):
     # check_str = sql_format_select(
     #     select='COLUMN_name',
     #     table='information_schema.COLUMNS',
@@ -575,7 +653,7 @@ def get_data_frame(cursor, table, fields=None):
 
         header_sql = [value[0] for value in res]
 
-        select_str = sql_format_select('*', table)
+        select_str = sql_format_select('*', table, where=where)
         # cursor.execute(select_str, multi=True)
         cursor.execute(select_str)
         tmp_res = cursor.fetchall()
@@ -585,7 +663,7 @@ def get_data_frame(cursor, table, fields=None):
 
     else:
         field_str = ','.join(fields)
-        select_str = sql_format_select(field_str, table)
+        select_str = sql_format_select(field_str, table, where=where)
         # cursor.execute(select_str, multi=True)
         cursor.execute(select_str)
         tmp_res = cursor.fetchall()
