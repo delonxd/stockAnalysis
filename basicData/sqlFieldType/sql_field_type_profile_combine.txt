@@ -4,6 +4,7 @@
 
     "code": "VARCHAR(30) PRIMARY KEY",
     "name": "VARCHAR(100)",
+    "company_name": "VARCHAR(255)",
 
     "reg_place": "VARCHAR(255)",
     "found_date": "VARCHAR(30)",
