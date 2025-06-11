@@ -2,7 +2,7 @@ from method.recognitionMethod import RecognitionStr
 from method.fileMethod import load_json_txt
 from method.fileMethod import write_json_txt
 from method.logMethod import MainLog
-from method.profileMethod import get_code_df_profile
+from method.profileMethod import get_code_profile_df
 
 import datetime as dt
 import pandas as pd
@@ -20,7 +20,7 @@ class SiftCode:
             df_all: pd.DataFrame | None = None,
     ):
         if df_all is None:
-            self.df_all = get_code_df_profile()
+            self.df_all = get_code_profile_df()
         else:
             self.df_all = df_all
 
