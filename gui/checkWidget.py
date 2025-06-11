@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from method.fileMethod import load_json_txt
 from method.fileMethod import write_json_txt
-from method.sqlMethod import mysql2df
+from method.profileMethod import get_code_profile_df
 
 import sys
 
@@ -23,10 +23,7 @@ class CheckWidget(QWidget):
         self._code_df = None
 
         if main_widget is None:
-            self._code_df = mysql2df(
-                database='stock_profile_data',
-                table='code_profile_combine',
-            )
+            self._code_df = get_code_profile_df()
 
         self.label = QLabel('000000: 测试')
         self.button1 = QPushButton('上传')
