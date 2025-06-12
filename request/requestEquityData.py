@@ -1,9 +1,14 @@
-from request.requestData import *
-from method.fileMethod import *
+from request.requestData import data_request, try_request
+from method.fileMethod import load_json_txt
+from method.logMethod import MainLog
+from method.profileMethod import get_code_profile_df
+from method.sqlMethod import df2mysql
 
-import datetime as dt
-import json
 import pandas as pd
+import datetime as dt
+import requests
+import json
+import time
 
 
 @try_request(None)
@@ -27,6 +32,7 @@ def request_equity_change(code):
         res = data_request(url=url, api_dict=api)
         data = json.loads(res.decode())['data']
         if len(data) == 0:
+            print(code)
             break
         else:
             start = dt.date(start.year - 10, 1, 1)
@@ -35,6 +41,50 @@ def request_equity_change(code):
 
     # print(config_equity_change_data(data))
     return ret
+
+
+def request_equity_change_hk(code) -> pd.DataFrame | None:
+    time.sleep(1)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/135.0.0.0 Safari/537.36"
+    }
+
+    area = code[:2]
+    if area != 'hk':
+        return
+
+    symbol = code[3:] + '.HK'
+
+    url = "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+    params = {
+        "reportName": "RPT_HKF10_INFO_EQUITY",
+        "columns": "SECUCODE,CHANGE_DATE,TOTAL_SHARES,HK_SHARES,CHANGE_REASON,NOTICE_DATE",
+        "quoteColumns": "",
+        "filter": f'(SECUCODE="{symbol}")',
+        "pageNumber": "1",
+        "pageSize": "",
+        "sortTypes": "-1",
+        "sortColumns": "NOTICE_DATE",
+        "source": "F10",
+        "client": "PC",
+        "v": "034881457840342045"
+    }
+    r = requests.get(url, params=params, headers=headers)
+    data_json = r.json()
+
+    res = data_json.get("result")
+    if res is None:
+        return
+
+    df = pd.DataFrame(data_json['result']['data'])
+
+    df['CHANGE_DATE'] = df['CHANGE_DATE'].str[:10]
+    df['NOTICE_DATE'] = df['NOTICE_DATE'].str[:10]
+    df['date'] = df['CHANGE_DATE']
+    df = df.sort_values('date')
+    return df
 
 
 def eq_res2dataframe(data):
@@ -148,16 +198,46 @@ def request_eq2mysql(stock_codes, ini=False):
         MainLog.add_split('-')
 
 
+def request_eq2mysql_hk():
+    df = get_code_profile_df()
+    code_list = df[df['area'] == 'hk'].index.to_list()
+
+    database = 'eqData_hk'
+    path = '..\\basicData\\sqlFieldType\\sql_field_type_eq_hk.txt'
+    field_type = load_json_txt(path)
+    columns = list(field_type.keys())
+
+    code_list = code_list[100:]
+
+    counter = 0
+    size = len(code_list)
+    for code in code_list:
+        counter += 1
+        MainLog.add_log_accurate('%s %s / %s' % (code, counter, size))
+
+        df = request_equity_change_hk(code)
+        if df is None:
+            continue
+        table = 'eq_hk_%s' % code[3:]
+
+        df = df.reindex(columns, axis=1)
+        df2mysql(
+            df=df,
+            database=database,
+            table=table,
+            ini=True,
+            log=False
+        )
+
+        # break
+
+
 if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
-    # list1 = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
-    # list2 = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt")
-    # list3 = list(set(list1 + list2))
-    # request_eq2mysql(list3)
-    code_list = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
-    request_eq2mysql(code_list)
+    # request_equity_change_hk('hk-00003')
+    request_eq2mysql_hk()
     # request_eq2mysql(['002594'])
     pass
