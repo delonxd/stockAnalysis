@@ -1,0 +1,10 @@
+{
+    "首次上传日期": "first_update",
+    "最近上传日期": "last_update",
+    "代码": "code",
+    "日期": "date",
+    "开盘价": "OPEN",
+    "收盘价": "CLOSE",
+    "成交量": "TRADE_VOLUME",
+    "成交额": "TRADE_AMOUNT"
+}
