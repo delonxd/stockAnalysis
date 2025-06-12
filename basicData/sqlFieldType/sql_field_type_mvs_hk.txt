@@ -1,0 +1,9 @@
+{
+    "first_update": "VARCHAR(30)",
+    "last_update": "VARCHAR(30)",
+    "date": "VARCHAR(30)",
+    "OPEN": "DOUBLE",
+    "CLOSE": "DOUBLE",
+    "TRADE_VOLUME": "DOUBLE",
+    "TRADE_AMOUNT": "DOUBLE"
+}
