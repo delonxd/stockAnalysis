@@ -2,7 +2,7 @@
     "first_update": "VARCHAR(30)",
     "last_update": "VARCHAR(30)",
     "date": "VARCHAR(30)",
-    "id": "VARCHAR(30)",
+    "id": "VARCHAR(30) PRIMARY KEY",
     "bonusSharesFromProfit": "DOUBLE",
     "bonusSharesFromCapitalReserve": "DOUBLE",
     "dividend": "DOUBLE",

@@ -1,7 +1,7 @@
 {
     "first_update": "VARCHAR(30)",
     "last_update": "VARCHAR(30)",
-    "date": "VARCHAR(30)",
+    "date": "VARCHAR(30) PRIMARY KEY",
     "id_001_reason": "VARCHAR(30)",
     "id_002_rate": "DOUBLE",
     "id_003_changeRate": "DOUBLE",

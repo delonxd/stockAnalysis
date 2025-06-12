@@ -1,7 +1,7 @@
 {
     "first_update": "VARCHAR(30)",
     "last_update": "VARCHAR(30)",
-    "date": "VARCHAR(30)",
+    "date": "VARCHAR(30) PRIMARY KEY",
     "CHANGE_DATE": "VARCHAR(30)",
     "NOTICE_DATE": "VARCHAR(30)",
     "TOTAL_SHARES": "DOUBLE",
