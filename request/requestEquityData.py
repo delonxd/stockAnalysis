@@ -184,7 +184,13 @@ def eq_res2dataframe(data):
     return df
 
 
-def request_eq2mysql(stock_codes, ini=False):
+def request_eq2mysql_cn(stock_codes: list = None, ini=False):
+
+    if stock_codes is None:
+        df = get_code_profile_df()
+        df = df[df['area'] == 'cn']
+        stock_codes = df.index.to_list()
+
     for code in stock_codes:
         res = request_equity_change(code)
         df = eq_res2dataframe(res)

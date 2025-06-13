@@ -1,5 +1,6 @@
 from request.requestData import *
 from method.fileMethod import *
+from method.profileMethod import get_code_profile_df
 
 import datetime as dt
 import json
@@ -77,8 +78,16 @@ def dv_res2dataframe(data):
     return df
 
 
-def request_dv2mysql(stock_codes, ini=False):
-    ipo_dates = load_json_txt('..\\basicData\\ipo_date.txt')
+def request_dv2mysql_cn(stock_codes: list = None, ini=False):
+
+    df = get_code_profile_df()
+    df = df[df['area'] == 'cn']
+
+    if stock_codes is None:
+        stock_codes = df.index.to_list()
+
+    ipo_dates = df['ipo_date'].dropna().to_dict()
+
     for code in stock_codes:
         res = request_dividend(code, ipo_date=ipo_dates.get(code))
         df = dv_res2dataframe(res)
@@ -97,11 +106,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_rows', 3)
     pd.set_option('display.width', 10000)
 
-    # list1 = load_json_txt("..\\basicData\\self_selected\\gui_whitelist.txt")
-    # list2 = load_json_txt("..\\basicData\\dailyUpdate\\latest\\s004_code_latest_update.txt")
-    # list3 = list(set(list1 + list2))
-    list1 = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
-    request_dv2mysql(list1)
+    request_dv2mysql_cn()
     # request_dv2mysql(['600007'])
     # request_dv2mysql(['600071'])
     pass

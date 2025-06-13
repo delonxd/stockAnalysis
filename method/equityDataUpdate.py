@@ -10,10 +10,9 @@ def eq_update():
     import os
     os.chdir("D:\\PycharmProjects\\stockAnalysis\\method")
 
-    from method.fileMethod import load_json_txt
     from method.logMethod import MainLog
-    from request.requestEquityData import request_eq2mysql
-    from request.requestDividendData import request_dv2mysql
+    from request.requestEquityData import request_eq2mysql_cn
+    from request.requestDividendData import request_dv2mysql_cn
 
     from request.requestAkshareData import request_mir_ak
     from request.requestAkshareData import request_futures_data
@@ -23,9 +22,8 @@ def eq_update():
     from method.sortCode import sort_hold
     from method.sortCode import get_hold_position
 
-    code_list = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
-    request_eq2mysql(code_list)
-    request_dv2mysql(code_list)
+    request_eq2mysql_cn()
+    request_dv2mysql_cn()
 
     MainLog.write('..\\basicData\\dailyUpdate\\eq_update_log1.txt', init=True)
 
