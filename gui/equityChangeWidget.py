@@ -36,6 +36,12 @@ class EquityChangeWidget(QWidget):
         # request_eq2mysql([code])
         df = load_df_from_mysql(code, 'eq')
 
+        if code[:2] == 'hk':
+            self.load_df_hk(df)
+        else:
+            self.load_df_cn(df)
+
+    def load_df_cn(self, df):
         path = '../basicData/chineseComparison/zh_cmp_table_eq_cn.txt'
         src = load_json_txt(path, log=False)
         columns = list(src.keys())
@@ -118,6 +124,80 @@ class EquityChangeWidget(QWidget):
         self.table_widget.setColumnWidth(6, width)
         self.table_widget.setColumnWidth(7, width)
 
+    def load_df_hk(self, df):
+        df = df.drop(['first_update', 'last_update'], axis=1)
+
+        df = df[['date', 'CHANGE_REASON', 'TOTAL_SHARES', 'HK_SHARES', 'NOTICE_DATE']]
+
+        self.table_widget.setRowCount(df.index.size)
+        self.table_widget.setColumnCount(df.columns.size)
+        self.table_widget.setHorizontalHeaderLabels(df.columns)
+
+        for i, tup in enumerate(df.iterrows()):
+            row = tup[1].tolist()
+
+            # if abs(row[3]-1) > 0.03:
+            #     brush = QBrush(Qt.GlobalColor.red)
+            # else:
+            #     brush = QBrush(Qt.GlobalColor.black)
+            #
+            # # row[1] = get_reason_cn(row[1])
+            # row[5] = row[5] / row[4]
+            # row[6] = row[6] / row[4]
+            # row[7] = row[7] / row[4]
+            row[3] = row[3] / row[2]
+
+            for j, value in enumerate(row):
+                if j in [2]:
+                    if value == 0:
+                        txt = '-'
+                    else:
+                        txt = format(int(value), ',')
+                elif j in [3]:
+                    if value == 0:
+                        txt = '-'
+                    else:
+                        txt = format(value*100, '.2f') + '%'
+                # elif j == 2:
+                #     txt = '  ' + str(value)
+                # elif j == 3:
+                #     if value == 1:
+                #         txt = '-'
+                #     else:
+                #         txt = format(value*100-100, '.2f') + '%'
+                # elif j == 12:
+                #     if value == 0:
+                #         txt = '-'
+                #     else:
+                #         txt = format(value, '.2f') + '%'
+                else:
+                    txt = str(value)
+
+                item = QTableWidgetItem(txt)
+                # item.setForeground(brush)
+                #
+                # # if j == 2:
+                # #     item.setBackground(Qt.gray)
+                #
+                # if j > 7:
+                #     font = item.font()
+                #     font.setPointSize(8)
+                #     item.setFont(font)
+                #
+                if j > 1:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignCenter)
+                self.table_widget.setItem(i, j, item)
+
+        self.table_widget.resizeColumnsToContents()
+        self.table_widget.setColumnWidth(0, 90)
+
+        # width = 60
+        # self.table_widget.setColumnWidth(2, width)
+        # self.table_widget.setColumnWidth(3, width)
+        # self.table_widget.setColumnWidth(5, width)
+        # self.table_widget.setColumnWidth(6, width)
+        # self.table_widget.setColumnWidth(7, width)
+
     def closeEvent(self, event):
         self.close_signal.emit(self)
 
@@ -156,7 +236,8 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     main = EquityChangeWidget()
     main.show()
-    main.load_code('002594')
+    main.load_code('hk-01211')
+    # main.load_code('002594')
     sys.exit(app.exec_())
 
     # a = request_equity_change('600004')
