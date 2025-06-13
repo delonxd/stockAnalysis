@@ -1,11 +1,15 @@
-from method.fileMethod import *
+from method.fileMethod import load_json_txt
+from method.fileMethod import load_pkl
+# from method.logMethod import MainLog
+
 import re
+import json
 import pandas as pd
 import datetime as dt
 
 
 class RecognitionStr:
-    def __init__(self, src: str, df_all, tag_flag=True, log=True):
+    def __init__(self, src: str, df_all: pd.DataFrame, tag_flag=True, log=True):
         self.src = src
         self.tag_flag = tag_flag
         self.log = log
@@ -17,12 +21,13 @@ class RecognitionStr:
 
         self.df_all = df_all
         self.df_dict = dict()
-        self.code_all = None
-        self.sw_2021_name_dict = None
-        self.sw_2021_dict = None
 
         self.code_list = []
         self.sort_list = []
+
+    def show(self):
+        print(self.symbol)
+        print(self.values)
 
     @staticmethod
     def config_symbol_values(src):
@@ -79,7 +84,7 @@ class RecognitionStr:
 
         return symbol, values
 
-    def set_calculate(self, symbol, val_dict):
+    def calculate_set(self, symbol, val_dict) -> list:
         if symbol == '':
             if len(val_dict) == 0:
                 return []
@@ -129,7 +134,7 @@ class RecognitionStr:
 
         return values[0]
 
-    def get_code_list(self):
+    def get_code_list(self) -> list:
         symbol = self.symbol
         values = self.values
         # print(symbol, values)
@@ -141,7 +146,7 @@ class RecognitionStr:
                     raise KeyboardInterrupt('括号数量错误')
                 self.symbol = ''
                 self.values = dict()
-                self.values[0] = self.set_calculate(symbol, values)
+                self.values[0] = self.calculate_set(symbol, values)
                 break
             else:
                 end = m1.end()
@@ -166,7 +171,7 @@ class RecognitionStr:
                 # print('a', symbol1, values1)
                 # print('b', symbol2, values2)
 
-                values2[start] = self.set_calculate(symbol1, values1)
+                values2[start] = self.calculate_set(symbol1, values1)
 
                 symbol = symbol2
                 values = values2
@@ -175,19 +180,14 @@ class RecognitionStr:
         self.code_list = self.values[0]
         return self.code_list
 
-    def get_code_all(self):
-        if self.tag_flag is True:
-            self.code_all = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt", self.log)
-        else:
-            self.code_all = self.df_all.index.tolist()
-        return self.code_all
-
-    def str_to_list(self, src):
+    def str_to_list(self, src) -> list:
         ret = []
         if isinstance(src, str):
+            df = self.df_all
+
             src = src.strip('\n ')
             if src == 'all':
-                ret = self.get_code_all()
+                ret = self.df_all.index.tolist()
 
             elif src == 'hold':
                 if self.tag_flag is True:
@@ -228,7 +228,7 @@ class RecognitionStr:
                 str_list = []
                 for index in except_list:
                     if index != except_rec[index][0]:
-                        except_rec = refresh_except_recognition()
+                        except_rec = self.refresh_except_recognition()
                     if except_rec[index][1] is False:
                         continue
                     if index == 0:
@@ -277,7 +277,7 @@ class RecognitionStr:
 
             elif src[:4] == 'ids:':
                 ids_name = src[4:]
-                ret = self.industry_name2code(ids_name)
+                ret = self.industry2code(ids_name)
 
             elif src[:4] == 'cnd:':
                 condition = src[4:]
@@ -297,11 +297,21 @@ class RecognitionStr:
                 recognition = RecognitionStr(str2, tmp_df, tag_flag=False)
                 ret = recognition.get_code_list()
 
+            elif src[:5] == 'ctrl:':
+                condition = src[5:]
+                s0 = df['controller_type'].astype(str)
+                ret = s0[s0.str.contains(condition)].index.to_list()
+
             else:
-                if self.tag_flag is True:
-                    ret = code_list_from_tags(src, log=self.log)
+                if self.tag_flag is True or 'gui_tags' not in df.columns:
+                    path = "..\\basicData\\self_selected\\gui_tags.txt"
+                    gui_tags = load_json_txt(path, log=self.log)
+                    s0 = pd.Series(gui_tags)
                 else:
-                    ret = self.code_list_from_df(src)
+                    s0 = df['gui_tags'].astype(str)
+
+                txt = '#' + src
+                return s0[s0.str.contains(txt)].index.to_list()
 
         elif isinstance(src, list):
             ret = src
@@ -309,107 +319,6 @@ class RecognitionStr:
         #     ret = list(src)
         else:
             raise KeyboardInterrupt('src类型错误')
-
-        return ret
-
-    def code_list_from_df(self, column):
-        df = self.df_all
-        ret = []
-        if column in df.columns:
-            ret = df[df[column].isin([True])].index.tolist()
-        return ret
-
-    def show(self):
-        print(self.symbol)
-        print(self.values)
-
-    def get_sort_list(self, sort, ascending, ids_sort=False):
-
-        self.sort_list = self.code_list
-
-        if sort is None:
-            return self.sort_list
-
-        if not isinstance(sort, list):
-            sort = [sort]
-
-        if ascending is None:
-            ascending = []
-        elif not isinstance(ascending, list):
-            ascending = [ascending]
-
-        if self.df_all is not None:
-            columns = self.df_all.columns
-
-            df_sort = []
-            df_ascending = []
-            for index, kw in enumerate(sort):
-                if kw in columns:
-                    df_sort.append(kw)
-                    if index >= len(ascending):
-                        condition = True
-                    else:
-                        condition = ascending[index]
-                    df_ascending.append(condition)
-
-            df = self.df_all.loc[self.code_list, :].copy()
-            if len(df_sort) > 0:
-                df = df.sort_values(by=df_sort, ascending=df_ascending)
-
-            self.sort_list = df.index.tolist()
-
-        if ids_sort is True:
-            if self.df_all is not None:
-                s0 = self.df_all.loc[self.sort_list, 'level3'].copy()
-                s1 = s0.drop_duplicates()
-                new_list = []
-                for level3 in s1.values:
-                    s2 = s0[s0 == level3]
-                    new_list.extend(s2.keys().tolist())
-                s2 = s0[pd.isna(s0)]
-                new_list.extend(s2.keys().tolist())
-
-                if len(new_list) == len(self.sort_list):
-                    self.sort_list = new_list
-                else:
-                    print('len(new_list) != len(self.sort_list)')
-                    self.sort_list = []
-
-        return self.sort_list
-
-    def random(self, interval):
-
-        weight_dict = get_weight_dict(self.code_list)
-        random_list = generate_random_list(self.code_list, weight_dict)
-
-        ret = []
-        pick_list = []
-        counter = 0
-        group = 0
-        while True:
-
-            code = random_list.pop(0)
-            pick_list.append(code)
-            counter += 1
-
-            length = len(random_list)
-            if counter == interval or length == 0:
-                group += 1
-                sub_list = []
-                for key in self.sort_list:
-                    if key in pick_list:
-                        sub_list.append(key)
-                ret.extend(sub_list)
-
-                if length == 0:
-                    break
-                pick_list = []
-                counter = 0
-
-        MainLog.add_log('pick --> [%s] * %s, [%s]' % (interval, group, counter))
-
-        write_json_txt("..\\basicData\\tmp\\code_list_random.txt", ret)
-        MainLog.add_split('#')
 
         return ret
 
@@ -444,6 +353,7 @@ class RecognitionStr:
             return ret
 
         date_columns = [
+            'found_date',
             'counter_date',
             'recent_date',
             'ipo_date',
@@ -472,36 +382,34 @@ class RecognitionStr:
         tmp = eval(string)
 
         df1 = df[tmp].copy()
-        ret = df1['code'].to_list()
+        ret = df1.index.to_list()
         return ret
 
-    # pattern = r'>=|<=|==|!=|<|>'
-    # split = re.split(pattern, condition)
-    # if len(split) == 2:
-    #     symbol = re.search(pattern, condition).group(0)
-    #     tmp1, tmp2 = split
-    #     date_index = [
-    #         'counter_date',
-    #         'recent_date',
-    #         'ipo_date',
-    #         'report_date',
-    #         'counter_last_date',
-    #     ]
-    #     if tmp1 in date_index:
-    #         if len(tmp2) == 8:
-    #             tmp2 = "'%s-%s-%s'" % (tmp2[:4], tmp2[4:6], tmp2[6:8])
-    #
-    #     string = "bool(self.data['%s'] %s %s)" % (tmp1, symbol, tmp2)
-    #     try:
-    #         flag = eval(string)
-    #     finally:
-    #         pass
+        # pattern = r'>=|<=|==|!=|<|>'
+        # split = re.split(pattern, condition)
+        # if len(split) == 2:
+        #     symbol = re.search(pattern, condition).group(0)
+        #     tmp1, tmp2 = split
+        #     date_index = [
+        #         'counter_date',
+        #         'recent_date',
+        #         'ipo_date',
+        #         'report_date',
+        #         'counter_last_date',
+        #     ]
+        #     if tmp1 in date_index:
+        #         if len(tmp2) == 8:
+        #             tmp2 = "'%s-%s-%s'" % (tmp2[:4], tmp2[4:6], tmp2[6:8])
+        #
+        #     string = "bool(self.data['%s'] %s %s)" % (tmp1, symbol, tmp2)
+        #     try:
+        #         flag = eval(string)
+        #     finally:
+        #         pass
 
     def market2code(self, market):
         ret = []
-        if self.code_all is None:
-            self.get_code_all()
-        code_all = self.code_all
+        code_all = self.df_all.index.tolist()
 
         if market == 'all':
             ret = code_all
@@ -558,201 +466,36 @@ class RecognitionStr:
 
         return ret
 
-    def industry_name2code(self, ids_name):
-        if self.sw_2021_name_dict is None:
-            self.sw_2021_name_dict = load_json_txt('..\\basicData\\industry\\sw_2021_name_dict.txt', self.log)
+    def industry2code(self, ids_name):
+        df = self.df_all
+        lst = ids_name.split(':')
+        if len(lst) != 2:
+            return list()
 
-        if self.sw_2021_dict is None:
-            self.sw_2021_dict = load_json_txt('..\\basicData\\industry\\sw_2021_dict.txt', self.log)
+        column = 'level' + lst[0]
+        if column not in df.columns:
+            return list()
 
-        ids_codes = []
-        index = -1
-        for key, name in self.sw_2021_name_dict.items():
-            if key[-4:] == '0000':
-                flag = 1
-            elif key[-2:] == '00':
-                flag = 2
-            else:
-                flag = 3
+        return df[df[column] == lst[1]].index.to_list()
 
-            tmp_name = '%s:%s' % (flag, name)
-
-            if tmp_name == ids_name:
-                ids_codes.append(key)
-                index = flag * 2
-
+    @staticmethod
+    def refresh_except_recognition():
+        path = "..\\basicData\\except_recognition.txt"
+        except_recognition = load_json_txt(path)
         ret = []
-        for key, value in self.sw_2021_dict.items():
-            if value is None:
-                continue
+        for index, row in enumerate(except_recognition):
+            row[0] = index
+            ret.append(row)
 
-            for ids_code in ids_codes:
-                if value[:index] == ids_code[:index]:
-                    ret.append(key)
+        list0 = []
+        for row in ret:
+            tmp_txt = json.dumps(row, ensure_ascii=False)
+            list0.append(tmp_txt)
+        res = '[\n\t' + ',\n\t'.join(list0) + '\n]'
+
+        with open(path, "w", encoding='utf-8') as f:
+            f.write(res)
         return ret
-
-
-def get_weight_dict(set_all):
-    path = "..\\basicData\\dailyUpdate\\latest\\a003_report_date_dict.txt"
-    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-        report_date_dict = json.loads(f.read())
-
-    base_rate = 10000000
-    weight_dict = dict.fromkeys(set_all, base_rate * 3000)
-
-    # date1 = dt.date.today()
-    path = "..\\basicData\\dailyUpdate\\latest\\a000_log_data.txt"
-    date_txt = load_json_txt(path)['update_date']
-    date1 = dt.datetime.strptime(date_txt, '%Y-%m-%d').date()
-
-    with open("..\\basicData\\self_selected\\gui_counter.txt", "r", encoding="utf-8", errors="ignore") as f:
-        gui_counter = json.loads(f.read())
-
-    counter = 0
-    counter1 = 0
-    counter_new = len(weight_dict)
-    for key, value in gui_counter.items():
-        if key not in set_all:
-            continue
-
-        report_date = report_date_dict.get(key)
-        if report_date is None or report_date == 'Invalid da':
-            report_date = ''
-
-        flag = True if report_date > value[1] else False
-
-        date2 = dt.datetime.strptime(value[1], '%Y-%m-%d').date()
-        margin = (date1 - date2).days
-
-        if flag is True:
-            weight = margin ** 2 * base_rate
-            # MainLog.add_log('%s %s %s margin == 1' % (key, report_date, value[1]))
-            counter1 += 1
-        elif margin > 60:
-            weight = margin ** 2 * 100
-            # MainLog.add_log('%s %s margin > 60' % (key, value[1]))
-            counter += 1
-        else:
-            weight = margin ** 2
-
-        weight_dict[key] = weight
-        counter_new -= 1
-
-    weight_counter = dict()
-    for weight in weight_dict.values():
-        if weight in weight_counter:
-            weight_counter[weight] += 1
-        else:
-            weight_counter[weight] = 1
-
-    MainLog.add_split('-')
-
-    weight_list = list(weight_counter.keys())
-    weight_list.sort()
-    for weight in weight_list:
-        if weight % base_rate == 0:
-            margin = (weight / base_rate) ** 0.5
-        else:
-            margin = weight ** 0.5
-
-            if margin > 60:
-                margin = margin / 10
-
-        date2 = date1 - dt.timedelta(days=margin)
-        date_str = dt.date.strftime(date2, '%Y-%m-%d')
-
-        weight_str = '%s%18s%8s' % (date_str, weight, weight_counter[weight])
-        MainLog.add_log(weight_str)
-
-    MainLog.add_log('      total:  %10s' % len(set_all))
-    MainLog.add_log('        new:  %10s' % counter_new)
-    MainLog.add_log('margin < -1:  %10s' % counter1)
-    MainLog.add_log('margin > 60:  %10s' % counter)
-    MainLog.add_split('-')
-
-    return weight_dict
-
-
-def generate_random_list(src, weight_dict: dict):
-    length = len(src)
-    set_all = set(src)
-
-    ret = []
-    for _ in range(length):
-        code = random_by_weight(set_all, weight_dict)
-        set_all -= {code}
-        ret.append(code)
-    return ret
-
-
-def random_by_weight(src, weight_dict: dict):
-    import random
-
-    total = 0
-    for code in src:
-        total += weight_dict.get(code)
-    ra = random.uniform(0, total)
-
-    current = 0
-    for code in src:
-        current += weight_dict.get(code)
-        if ra <= current:
-            return code
-
-
-def industry_name2code(ids_names):
-    name_dict = load_json_txt('..\\basicData\\industry\\sw_2021_name_dict.txt')
-
-    ids_codes = []
-
-    for ids_code, name in name_dict.items():
-        if ids_code[-4:] == '0000':
-            ids_name = '1:' + name
-        elif ids_code[-2:] == '00':
-            ids_name = '2:' + name
-        else:
-            ids_name = '3:' + name
-
-        if ids_name in ids_names:
-            ids_codes.append(ids_code)
-
-    sw_2021_dict = load_json_txt('..\\basicData\\industry\\sw_2021_dict.txt')
-
-    ret = []
-    for code, ids_code1 in sw_2021_dict.items():
-        if ids_code1 is None:
-            continue
-
-        for ids_code2 in ids_codes:
-            if ids_code2[-4:] == '0000':
-                index = 2
-            elif ids_code2[-2:] == '00':
-                index = 4
-            else:
-                index = 6
-
-            if ids_code1[:index] == ids_code2[:index]:
-                ret.append(code)
-    return ret
-
-
-def refresh_except_recognition():
-    path = "..\\basicData\\except_recognition.txt"
-    except_recognition = load_json_txt(path)
-    ret = []
-    for index, row in enumerate(except_recognition):
-        row[0] = index
-        ret.append(row)
-
-    list0 = []
-    for row in ret:
-        tmp_txt = json.dumps(row, ensure_ascii=False)
-        list0.append(tmp_txt)
-    res = '[\n\t' + ',\n\t'.join(list0) + '\n]'
-
-    with open(path, "w", encoding='utf-8') as f:
-        f.write(res)
-    return ret
 
 
 def get_except_list(code, df_all, log=True):
@@ -785,5 +528,5 @@ if __name__ == '__main__':
     # print(len(code2))
     # l0.show()
     # print(get_except_list('600438', df0, log=False))
-    refresh_except_recognition()
+    # refresh_except_recognition()
     pass
