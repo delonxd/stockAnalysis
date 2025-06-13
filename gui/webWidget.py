@@ -22,9 +22,19 @@ class WebWidget(QMainWindow):
         if code == self.code:
             return
         self.code = code
-        url = 'http://basic.10jqka.com.cn/%s/operate.html' % code
-        # url = 'https://basic.10jqka.com.cn/%s/operate.html###' % code
-        # url = 'https://stockpage.10jqka.com.cn/%s/operate/' % code
+
+        if code[:2] == 'hk':
+            sub_code = code[3:]
+            if sub_code[:1] != '0':
+                txt = 'K' + sub_code
+            else:
+                txt = 'HK' + sub_code[1:]
+            url = 'http://basic.10jqka.com.cn/176/%s/operate.html' % txt
+
+        else:
+            url = 'http://basic.10jqka.com.cn/%s/operate.html' % code
+            # url = 'https://basic.10jqka.com.cn/%s/operate.html###' % code
+            # url = 'https://stockpage.10jqka.com.cn/%s/operate/' % code
         self.browser.load(QUrl(url))
 
     # def load_url(self, url):
