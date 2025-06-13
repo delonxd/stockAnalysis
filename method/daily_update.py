@@ -11,10 +11,13 @@ def daily_update():
     os.chdir("D:\\PycharmProjects\\stockAnalysis\\method")
 
     from method.logMethod import MainLog
-    from method.dailyMethod import basic_daily_update
-    from method.dailyMethod import actual_controller_update
-    from method.dailyMethod import mysql_daily_update2
-    from method.dailyMethod import daily_analysis
+
+    from method.dailyMethod import update_security_profile_cn
+    from method.dailyMethod import update_company_profile_cn
+    from method.dailyMethod import update_code_profile_combine
+    from method.dailyMethod import update_mysql_data_daily_cn
+
+    from method.dailyMethod import daily_analysis_cn
     from method.dailyMethod import generate_daily_table
     from method.dailyMethod import save_latest_list
     from method.dailyMethod import generate_log_data
@@ -40,16 +43,17 @@ def daily_update():
 
     ################################################################################################################
 
-    all_codes, name_dict, ipo_dates = basic_daily_update(dir_name)
-
-    actual_controller_update(all_codes)
-    mysql_daily_update2(dir_name, all_codes, ipo_dates)
-
+    update_security_profile_cn(dir_name)
+    update_company_profile_cn()
     update_sw_2021()
+    update_code_profile_combine()
+    MainLog.write('%s\\logs0.txt' % res_dir, init=True)
+
+    update_mysql_data_daily_cn(dir_name)
     MainLog.write('%s\\logs1.txt' % res_dir, init=True)
 
     generate_log_data(dir_name)
-    daily_analysis(dir_name, all_codes)
+    daily_analysis_cn(dir_name)
     MainLog.write('%s\\logs2.txt' % res_dir, init=True)
 
     generate_daily_table(dir_name)
