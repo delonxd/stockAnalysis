@@ -1,0 +1,6 @@
+{
+    "first_update": "VARCHAR(30)",
+    "last_update": "VARCHAR(30)",
+    "code": "VARCHAR(30) PRIMARY KEY",
+    "cmp_table_json": "TEXT"
+}
