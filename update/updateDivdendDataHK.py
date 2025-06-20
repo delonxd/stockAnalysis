@@ -1,9 +1,11 @@
+from method.logMethod import MainLog
 from method.profileMethod import get_code_profile_df
 from method.sqlMethod import df2mysql
 from method.sqlMethod import mysql2df
 from method.fileMethod import load_json_txt
 from method.fileMethod import dump_pkl
 from method.fileMethod import load_pkl
+from request.requestRoyalFlushData import request_dividend_hk_rf
 import pandas as pd
 import numpy as np
 import re
@@ -11,6 +13,73 @@ import re
 
 def update_dv_data_hk():
     pass
+
+########################################################################################################################
+
+
+def update_dv_data_hk_regular():
+    hk_dv_rf2hk_dv_data_tmp_pkl()
+
+    path = "..\\basicData\\tmp\\hk_dv_data_tmp.pkl"
+    dv_data: dict = load_pkl(path)
+
+    date_set = set()
+    for value in dv_data.values():
+        for date, _, _, _ in value:
+            date_set.add(date)
+    lst1 = list(date_set)
+
+    df = mysql2df(database='basicData', table='exchange_rate')
+    path = "..\\basicData\\chineseComparison\\zh_cmp_table_exchange_rate.txt"
+    cmp_table = load_json_txt(path)
+    df = df.reindex(columns=cmp_table.values())
+    df.columns = cmp_table.keys()
+
+    lst2 = df.index.to_list()
+
+    dates = list(set(lst1 + lst2))
+    dates.sort()
+    df_exchange = df.reindex(dates)
+    df_exchange['人民币'] = 1
+
+    outer_counter = 0
+    size = len(dv_data)
+    for code, dv_lst in dv_data.items():
+        outer_counter += 1
+        print(f'{code} {outer_counter}/{size}')
+
+        eq_df = mysql2df(database='eqData_hk', table=f'eq_hk_{code[3:]}')
+        eq_df = eq_df.sort_index()
+        eq_df['LAST_TOTAL_SHARES'] = eq_df['TOTAL_SHARES'].shift(1)
+        tmp = pd.concat([df_exchange, eq_df], axis=1, sort=True)
+        tmp = tmp.ffill(axis=0)
+
+        val_dict = dict()
+        for row in dv_lst:
+            date = row[0]
+            val = row[1]
+            currency = row[2]
+            report_type = row[3]
+
+            row_info = tmp.loc[date, :]
+            val2 = np.round(val * row_info[currency] * row_info['LAST_TOTAL_SHARES'])
+            val1 = val_dict.get(date)
+            if val1 is None:
+                val_dict[date] = [val2, report_type]
+            else:
+                if report_type == '其他':
+                    report_type = val1[1]
+                val_dict[date] = [val1[0] + val2, report_type]
+            # print(code, row, val2)
+
+        df = pd.DataFrame.from_dict(val_dict, orient='index', columns=['DIVIDEND', 'REPORT_TYPE'])
+        df = df.dropna(subset='DIVIDEND').sort_index()
+        df = df.reindex(columns=['first_update', 'last_update', 'date', 'DIVIDEND', 'REPORT_TYPE'])
+        df['date'] = df.index
+
+        df2mysql(df, database='dvData_hk_regular', table=f'df_hk_reg_{code[3:]}', ini=True, log=False)
+        # print(df)
+        # break
 
 
 def hk_dv_rf2hk_dv_data_tmp_pkl():
@@ -74,7 +143,7 @@ def hk_dv_rf2hk_dv_data_tmp_pkl():
 
             # print(sub_lst)
             for sub_txt in sub_lst:
-                val = re_dv_hk_rf_sub_txt(sub_txt)
+                val = regular_dv_hk_rf_sub_txt(sub_txt)
                 # if val is None:
                 #     MainLog.add_log_accurate(f'{code} {outer_counter}/{size} {sub_txt}')
 
@@ -124,70 +193,7 @@ def hk_dv_rf2hk_dv_data_tmp_pkl():
     dump_pkl(path, dv_data)
 
 
-def hk_dv_data_tmp_pkl2mysql():
-    path = "..\\basicData\\tmp\\hk_dv_data_tmp.pkl"
-    dv_data: dict = load_pkl(path)
-
-    date_set = set()
-    for value in dv_data.values():
-        for date, _, _, _ in value:
-            date_set.add(date)
-    lst1 = list(date_set)
-
-    df = mysql2df(database='basicData', table='exchange_rate')
-    path = "..\\basicData\\chineseComparison\\zh_cmp_table_exchange_rate.txt"
-    cmp_table = load_json_txt(path)
-    df = df.reindex(columns=cmp_table.values())
-    df.columns = cmp_table.keys()
-
-    lst2 = df.index.to_list()
-
-    dates = list(set(lst1 + lst2))
-    dates.sort()
-    df_exchange = df.reindex(dates)
-    df_exchange['人民币'] = 1
-
-    outer_counter = 0
-    size = len(dv_data)
-    for code, dv_lst in dv_data.items():
-        outer_counter += 1
-        print(f'{code} {outer_counter}/{size}')
-
-        eq_df = mysql2df(database='eqData_hk', table=f'eq_hk_{code[3:]}')
-        eq_df = eq_df.sort_index()
-        eq_df['LAST_TOTAL_SHARES'] = eq_df['TOTAL_SHARES'].shift(1)
-        tmp = pd.concat([df_exchange, eq_df], axis=1, sort=True)
-        tmp = tmp.ffill(axis=0)
-
-        val_dict = dict()
-        for row in dv_lst:
-            date = row[0]
-            val = row[1]
-            currency = row[2]
-            report_type = row[3]
-
-            row_info = tmp.loc[date, :]
-            val2 = np.round(val * row_info[currency] * row_info['LAST_TOTAL_SHARES'])
-            val1 = val_dict.get(date)
-            if val1 is None:
-                val_dict[date] = [val2, report_type]
-            else:
-                if report_type == '其他':
-                    report_type = val1[1]
-                val_dict[date] = [val1[0] + val2, report_type]
-            # print(code, row, val2)
-
-        df = pd.DataFrame.from_dict(val_dict, orient='index', columns=['DIVIDEND', 'REPORT_TYPE'])
-        df = df.dropna(subset='DIVIDEND').sort_index()
-        df = df.reindex(columns=['first_update', 'last_update', 'date', 'DIVIDEND', 'REPORT_TYPE'])
-        df['date'] = df.index
-
-        df2mysql(df, database='dvData_hk_regular', table=f'df_hk_reg_{code[3:]}', ini=True, log=False)
-        # print(df)
-        # break
-
-
-def re_dv_hk_rf_sub_txt(sub_txt):
+def regular_dv_hk_rf_sub_txt(sub_txt):
     # prefix1 = r'^每(1)?(股)?((本)?公司)?(已发行)?' \
     #           r'((合并后)?普通(股)?|H股|合并|拆细(前)?|合共|经调整|换股|股|每股)?(股份)?' \
     #           r'(普通股及(每股)?可换股优先股)?'
@@ -435,9 +441,108 @@ def convert_currency(value: float | int, unit, multi):
 
     return ret1, ret2
 
+########################################################################################################################
+
+
+def update_dv_data_hk_rf():
+    df = get_code_profile_df()
+    df = df[df['area'] == 'hk']
+    code_list = df.index.to_list()
+
+    index = code_list.index('hk-01578')
+    code_list = code_list[index:]
+
+    outer_counter = 0
+    size = len(code_list)
+    for code in code_list:
+        outer_counter += 1
+
+        MainLog.add_log_accurate(f"{code} {outer_counter}/{size}")
+
+        df = request_dividend_hk_rf(code)
+        df = regular_dv_data_hk_rf(df)
+
+        database = 'dvData_hk_rf'
+        table = f'dv_hk_{code[3:]}'
+
+        df2mysql(df=df, database=database, table=table, ini=True, log=False)
+
+
+def regular_dv_data_hk_rf(df: pd.DataFrame) -> pd.DataFrame:
+    # path = '..\\request\\tmp_bonus_HK1211.pkl'
+    # df: pd.DataFrame = load_pkl(path)
+
+    columns1 = df.columns.tolist()
+    columns1 = list(map(lambda x: x[1], columns1))
+
+    table = {
+        "公告日期": "announcementDate",
+        "方案": "content",
+        "除净日": "exDate",
+        "派息日": "paymentDate",
+        "起始": "registerDate",
+        "截止": "recordDate",
+        "类型": "reportType",
+        "进度": "status",
+        "以股代息": "stockDividend"
+    }
+    columns2 = list(table.keys())
+
+    # print(columns1)
+    # print(columns2)
+
+    if columns1 != columns2:
+        raise KeyboardInterrupt('错误表头')
+
+    df.columns = list(table.values())
+
+    path = '../basicData/chineseComparison/zh_cmp_table_dv_hk_rf.txt'
+    src = load_json_txt(path, log=False)
+    columns = list(src.values())
+    df = df.reindex(columns=columns)
+
+    df = df.replace('--', np.nan)
+    df['announcementDate'] = df['announcementDate'].fillna(df['exDate'])
+
+    df = df.dropna(subset='announcementDate')
+    df.index = df['announcementDate']
+
+    df = df[df.index.str.contains(r'^\d{4}-\d{2}-\d{2}', na=False)]
+
+    counts = df.index.value_counts()
+    new_index = []
+    counter = {k: 0 for k in counts.index}
+
+    # if '--' in counts.keys():
+    #     print('"--" in index')
+
+    # print(df)
+    # print(df.index.to_list())
+    for index in df.index:
+        if counts[index] > 1:
+            counter[index] += 1
+            new_index.append(f"{index}_{counter[index]}")
+        else:
+            new_index.append(index)
+
+    df.index = new_index
+    df = df.sort_index()
+    df['id'] = df.index
+
+    # for column in df.columns:
+    #     length = 0
+    #     for val in df[column].values:
+    #         if pd.isna(val):
+    #             continue
+    #         length = max(length, len(val.encode('utf-8')))
+    #     print(column, length)
+
+    return df
+
 
 if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', 10)
+    pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
-    hk_dv_data_tmp_pkl2mysql()
+
+    pass
