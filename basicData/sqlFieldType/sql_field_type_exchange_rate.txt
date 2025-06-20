@@ -1,0 +1,31 @@
+{
+    "first_update": "VARCHAR(30)",
+    "last_update": "VARCHAR(30)",
+    "date": "VARCHAR(30) PRIMARY KEY",
+
+    "USDCNYC": "DOUBLE",
+    "EURCNYC": "DOUBLE",
+    "JPYCNYC": "DOUBLE",
+    "HKDCNYC": "DOUBLE",
+    "GBPCNYC": "DOUBLE",
+    "AUDCNYC": "DOUBLE",
+    "CADCNYC": "DOUBLE",
+    "NZDCNYC": "DOUBLE",
+    "SGDCNYC": "DOUBLE",
+    "CHFCNYC": "DOUBLE",
+
+    "MYRCNYC": "DOUBLE",
+    "RUBCNYC": "DOUBLE",
+    "ZARCNYC": "DOUBLE",
+    "KRWCNYC": "DOUBLE",
+    "AEDCNYC": "DOUBLE",
+    "SARCNYC": "DOUBLE",
+    "HUFCNYC": "DOUBLE",
+    "PLNCNYC": "DOUBLE",
+    "DKKCNYC": "DOUBLE",
+    "SEKCNYC": "DOUBLE",
+    "NOKCNYC": "DOUBLE",
+    "TRYCNYC": "DOUBLE",
+    "MXNCNYC": "DOUBLE",
+    "THBCNYC": "DOUBLE"
+}

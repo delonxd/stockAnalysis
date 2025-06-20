@@ -1,0 +1,7 @@
+{
+    "first_update": "VARCHAR(30)",
+    "last_update": "VARCHAR(30)",
+    "date": "VARCHAR(30) PRIMARY KEY",
+    "DIVIDEND": "DOUBLE",
+    "REPORT_TYPE": "VARCHAR(30)"
+}
