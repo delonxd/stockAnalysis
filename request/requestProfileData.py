@@ -1,11 +1,13 @@
-import urllib.request
-import json
-import pandas as pd
-
 from request.requestData import split_metrics
 from method.logMethod import log_it, MainLog
 from method.sqlMethod import df2mysql
 from method.sqlMethod import mysql2df
+
+import urllib.request
+import requests
+import json
+import time
+import pandas as pd
 
 
 @log_it(None)
@@ -111,6 +113,105 @@ def request_company_profile_cn():
     df["last_update"] = pd.NA
 
     df2mysql(df=df, database=database, table=table, ini=True, log=False)
+
+
+def request_security_profile_hk():
+    page = 0
+    ret = pd.DataFrame()
+    while True:
+        time.sleep(1)
+        page += 1
+        url = 'https://datacenter.eastmoney.com/securities/api/data/v1/get'
+        params = {
+            'reportName': 'RPT_HKF10_INFO_SECURITYINFO',
+            'columns': 'SECUCODE,SECURITY_CODE,SECURITY_NAME_ABBR,'
+                       'SECURITY_TYPE,ISIN_CODE,BOARD,'
+                       'GANGGUTONGBIAODISHEN,GANGGUTONGBIAODIHU,'
+                       'TRADE_MARKET,TRADE_UNIT,LISTING_DATE,'
+                       'ISSUE_PRICE,ISSUE_NUM,PAR_VALUE,YEAR_SETTLE_DAY',
+            # 'columns': 'SECUCODE,SECURITY_CODE,SECURITY_NAME_ABBR,SECURITY_TYPE,LISTING_DATE,ISIN_CODE,BOARD,'
+            #            'TRADE_UNIT,TRADE_MARKET,GANGGUTONGBIAODISHEN,GANGGUTONGBIAODIHU,PAR_VALUE,'
+            #            'ISSUE_PRICE,ISSUE_NUM,YEAR_SETTLE_DAY',
+
+            'quoteColumns': '',
+            'filter': "",
+            # 'pageNumber': '1',
+            'pageNumber': str(page),
+            'pageSize': '',
+            'sortTypes': '1',
+            'sortColumns': 'SECUCODE',
+            'source': 'F10',
+            'client': 'PC',
+            'v': '04748497219912483'
+        }
+        r = requests.get(url, params=params)
+        data_json = r.json()
+        res = data_json.get("result")
+
+        if res is None:
+            break
+        print(page)
+        tmp = pd.DataFrame(res["data"])
+        ret = pd.concat([ret, tmp])
+
+    df = ret.copy()
+    database = 'stock_profile_data'
+    table = 'security_profile_hk'
+
+    df["first_update"] = pd.NA
+    df["last_update"] = pd.NA
+    df2mysql(df=df, database=database, table=table, ini=True)
+
+
+def request_company_profile_hk():
+    page = 0
+    ret = pd.DataFrame()
+    while True:
+        time.sleep(1)
+        page += 1
+        url = 'https://datacenter.eastmoney.com/securities/api/data/v1/get'
+        params = {
+            'reportName': 'RPT_HKF10_INFO_ORGPROFILE',
+            'columns': 'SECUCODE,SECURITY_CODE,SECURITY_INNER_CODE,SECURITY_NAME_ABBR,'
+                       'ORG_CODE,ORG_NAME,ORG_EN_ABBR,'
+                       'BELONG_INDUSTRY,FOUND_DATE,CHAIRMAN,SECRETARY,'
+                       'EMP_NUM,ORG_TEL,ORG_FAX,ORG_EMAIL,ORG_WEB,'
+                       'REG_PLACE,REG_ADDRESS,ADDRESS,ORG_PROFILE',
+            'quoteColumns': '',
+            'filter': "",
+            'pageNumber': str(page),
+            # 'pageNumber': "6",
+            'pageSize': "",
+            'sortTypes': '1',
+            'sortColumns': 'SECUCODE',
+            'source': 'F10',
+            'client': 'PC',
+            'v': '04748497219912483'
+        }
+        r = requests.get(url, params=params)
+        data_json = r.json()
+        res = data_json.get("result")
+
+        if res is None:
+            break
+        print(page)
+        tmp = pd.DataFrame(res["data"])
+        ret = pd.concat([ret, tmp])
+
+        print(ret)
+        return
+    df = ret.copy()
+    database = 'stock_profile_data'
+    table = 'stock_profile_hk'
+
+    df["first_update"] = pd.NA
+    df["last_update"] = pd.NA
+    df2mysql(df=df, database=database, table=table, ini=True)
+
+    # path = "../basicData/foreignCodes/all_hk_code_profile.pkl"
+    # dump_pkl(path, ret, log=True)
+    # stock_code = data_json["result"]["data"][0]["SECUCODE"]
+    # return stock_code
 
 
 if __name__ == '__main__':
