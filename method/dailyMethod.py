@@ -1,7 +1,4 @@
-from request.requestBasicData import request_security_profile_cn
-from request.requestBasicData import request_company_profile_cn
-
-from method.logMethod import MainLog, log_it
+from method.logMethod import MainLog
 from method.fileMethod import load_json_txt, write_json_txt
 from method.fileMethod import dump_pkl, load_pkl
 from method.fileMethod import copy_file, copy_dir, clear_dir
@@ -15,38 +12,12 @@ from method.siftMethod import SiftCode
 from method.showTable import add_bool_column, get_recent_val, get_recent_index
 from method.showTable import generate_show_table
 
-from method.profileMethod import generate_all_code_info
 from method.profileMethod import get_code_profile_df
 
 import numpy as np
 import os
 import pandas as pd
 import datetime as dt
-
-
-@log_it(None)
-def update_code_profile_combine():
-    generate_all_code_info()
-
-
-def update_security_profile_cn(dir_name):
-    all_codes, name_dict, ipo_dates, type_dict = request_security_profile_cn()
-    res_dir = '..\\basicData\\dailyUpdate\\%s' % dir_name
-
-    MainLog.add_split('#')
-    write_json_txt('%s\\a002_name_dict.txt' % res_dir, name_dict)
-    write_json_txt('..\\basicData\\code_names_dict.txt', name_dict)
-    write_json_txt('..\\basicData\\code_types_dict.txt', type_dict)
-    write_json_txt('%s\\a001_code_list.txt' % res_dir, all_codes)
-    write_json_txt('..\\basicData\\ipo_date.txt', ipo_dates)
-    write_json_txt('%s\\s004_code_latest_update.txt' % res_dir, [])
-
-    return all_codes, name_dict, ipo_dates
-
-
-def update_company_profile_cn():
-    MainLog.add_split('#')
-    request_company_profile_cn()
 
 
 def update_mysql_data_daily_cn(dir_name):

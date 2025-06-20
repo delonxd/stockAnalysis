@@ -12,9 +12,10 @@ def daily_update():
 
     from method.logMethod import MainLog
 
-    from method.dailyMethod import update_security_profile_cn
-    from method.dailyMethod import update_company_profile_cn
-    from method.dailyMethod import update_code_profile_combine
+    from update.updateProfileData import update_security_profile_cn
+    from update.updateProfileData import update_company_profile_cn
+    from update.updateProfileData import update_profile_combine
+
     from method.dailyMethod import update_mysql_data_daily_cn
 
     from method.dailyMethod import daily_analysis_cn
@@ -46,7 +47,7 @@ def daily_update():
     update_security_profile_cn(dir_name)
     update_company_profile_cn()
     update_sw_2021()
-    update_code_profile_combine()
+    update_profile_combine()
     MainLog.write('%s\\logs0.txt' % res_dir, init=True)
 
     update_mysql_data_daily_cn(dir_name)
