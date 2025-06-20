@@ -1,0 +1,14 @@
+{
+    "首次上传日期": "first_update",
+    "最近上传日期": "last_update",
+    "索引": "id",
+    "公告日期": "announcementDate",
+    "方案": "content",
+    "除净日": "exDate",
+    "派息日": "paymentDate",
+    "过户起始日": "registerDate",
+    "过户截止日": "recordDate",
+    "类型": "reportType",
+    "进度": "status",
+    "以股代息": "stockDividend"
+}

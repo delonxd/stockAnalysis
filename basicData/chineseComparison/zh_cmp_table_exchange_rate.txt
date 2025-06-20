@@ -1,0 +1,31 @@
+{
+    "首次上传日期": "first_update",
+    "最近上传日期": "last_update",
+    "日期": "date",
+
+    "美元": "USDCNYC",
+    "欧元": "EURCNYC",
+    "日元": "JPYCNYC",
+    "港元": "HKDCNYC",
+    "英镑": "GBPCNYC",
+    "澳元": "AUDCNYC",
+    "加元": "CADCNYC",
+    "新西兰元": "NZDCNYC",
+    "新加坡元": "SGDCNYC",
+    "瑞士法郎": "CHFCNYC",
+
+    "林吉特": "MYRCNYC",
+    "卢布": "RUBCNYC",
+    "兰特": "ZARCNYC",
+    "韩元": "KRWCNYC",
+    "迪拉姆": "AEDCNYC",
+    "里亚尔": "SARCNYC",
+    "福林": "HUFCNYC",
+    "兹罗提": "PLNCNYC",
+    "丹麦克朗": "DKKCNYC",
+    "瑞典克朗": "SEKCNYC",
+    "挪威克朗": "NOKCNYC",
+    "里拉": "TRYCNYC",
+    "比索": "MXNCNYC",
+    "泰铢": "THBCNYC"
+}
