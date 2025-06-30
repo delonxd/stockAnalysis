@@ -19,7 +19,6 @@ def eq_update():
     from request.requestAkshareData import request_sz000001
     from request.requestCryptoData import request_crypto_data
 
-    from method.sortCode import sort_hold
     from method.sortCode import get_hold_position
 
     request_eq2mysql_cn()
@@ -31,7 +30,6 @@ def eq_update():
     request_futures_data()
     request_sz000001()
     request_crypto_data()
-    sort_hold()
     get_hold_position()
 
     MainLog.write('..\\basicData\\dailyUpdate\\eq_update_log2.txt', init=True)
