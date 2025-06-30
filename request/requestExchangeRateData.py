@@ -1,14 +1,15 @@
 from method.fileMethod import dump_pkl
 import pandas as pd
 import akshare as ak
+import time
 
 
-def request_exchange_rate():
-    request_exchange_rate_sina()
+def request_exchange_rate(start_date):
+    request_exchange_rate_sina(start_date=start_date)
     request_exchange_rate_boc()
 
 
-def request_exchange_rate_sina():
+def request_exchange_rate_sina(start_date):
     lst = [
         '美元',
         '欧元',
@@ -32,7 +33,8 @@ def request_exchange_rate_sina():
 
     ret = pd.DataFrame()
     for column in lst:
-        df = ak.currency_boc_sina(symbol=column, start_date="19900101", end_date="20251110")
+        time.sleep(0.2)
+        df = ak.currency_boc_sina(symbol=column, start_date=start_date, end_date="20500101")
         df = df.set_index('日期')
         df = df.reindex(columns=['央行中间价'])
         df.columns = [column]
