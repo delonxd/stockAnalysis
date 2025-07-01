@@ -200,7 +200,7 @@ def update_profile_combine():
     ret["first_update"] = pd.NA
     ret["last_update"] = pd.NA
 
-    print(ret)
+    ret = ret.dropna(subset='code')
     df2mysql(df=ret, database=database, table=table, ini=True, log=False)
 
 
