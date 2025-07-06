@@ -1,4 +1,4 @@
-from request.requestData import data_request, try_request
+from request.requestData import try_request, data_request
 from method.fileMethod import load_json_txt
 from method.logMethod import MainLog
 from method.profileMethod import get_code_profile_df
@@ -7,13 +7,12 @@ from method.sqlMethod import df2mysql
 import pandas as pd
 import datetime as dt
 import requests
-import json
 import time
 
 
 @try_request(None)
 def request_equity_change(code):
-    token = "f819be3a-e030-4ff0-affe-764440759b5c"
+    token = load_json_txt("../request/lxr_token.txt", log=False)
     url = 'https://open.lixinger.com/api/cn/company/equity-change'
 
     ret = []
@@ -30,7 +29,7 @@ def request_equity_change(code):
         }
 
         res = data_request(url=url, api_dict=api)
-        data = json.loads(res.decode())['data']
+        data = res['data']
         if len(data) == 0:
             print(code)
             break
@@ -204,46 +203,10 @@ def request_eq2mysql_cn(stock_codes: list = None, ini=False):
         MainLog.add_split('-')
 
 
-def request_eq2mysql_hk():
-    df = get_code_profile_df()
-    code_list = df[df['area'] == 'hk'].index.to_list()
-
-    database = 'eqData_hk'
-    path = '..\\basicData\\sqlFieldType\\sql_field_type_eq_hk.txt'
-    field_type = load_json_txt(path)
-    columns = list(field_type.keys())
-
-    code_list = code_list[100:]
-
-    counter = 0
-    size = len(code_list)
-    for code in code_list:
-        counter += 1
-        MainLog.add_log_accurate('%s %s / %s' % (code, counter, size))
-
-        df = request_equity_change_hk(code)
-        if df is None:
-            continue
-        table = 'eq_hk_%s' % code[3:]
-
-        df = df.reindex(columns, axis=1)
-        df2mysql(
-            df=df,
-            database=database,
-            table=table,
-            ini=True,
-            log=False
-        )
-
-        # break
-
-
 if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.width', 10000)
 
     # request_equity_change_hk('hk-00003')
-    request_eq2mysql_hk()
-    # request_eq2mysql(['002594'])
     pass
