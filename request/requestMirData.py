@@ -1,8 +1,9 @@
-import datetime as dt
-import json
-import pandas as pd
 from method.urlMethod import data_request
-from method.fileMethod import *
+from method.logMethod import MainLog
+
+import datetime as dt
+import pandas as pd
+import json
 
 
 def request_mir_y10():
@@ -26,7 +27,7 @@ def request_mir_y10():
         }
 
         res = data_request(url=url, api_dict=api)
-        tmp = json.loads(res.decode())['data']
+        tmp = res['data']
         if len(tmp) == 0:
             break
         else:
@@ -64,4 +65,3 @@ if __name__ == '__main__':
 
     request_mir_y10()
     # load_mir_y10()
-
