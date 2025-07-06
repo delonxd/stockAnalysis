@@ -2,26 +2,23 @@ from request.requestData import split_metrics
 from method.logMethod import log_it, MainLog
 from method.sqlMethod import df2mysql
 from method.sqlMethod import mysql2df
+from method.fileMethod import load_json_txt
+from method.urlMethod import data_request
 
-import urllib.request
 import requests
-import json
 import time
 import pandas as pd
 
 
 @log_it(None)
 def request_security_profile_cn():
-    url = 'https://open.lixinger.com/api/a/company'
+    url = 'https://open.lixinger.com/api/cn/company'
 
-    data = {"token": "f819be3a-e030-4ff0-affe-764440759b5c"}
+    token = load_json_txt("../request/lxr_token.txt", log=False)
+    api_dict = {"token": token}
 
-    post_data = json.dumps(data)
-    header_dict = {'Content-Type': 'application/json'}
-
-    req = urllib.request.Request(url, data=bytes(post_data, 'gbk'), headers=header_dict)
-    res_txt = urllib.request.urlopen(req).read().decode()
-    res = json.loads(res_txt)['data']
+    res = data_request(url=url, api_dict=api_dict)
+    res = res['data']
 
     df = pd.DataFrame(res)
     df = df.set_index(keys='stockCode', drop=False)
@@ -62,24 +59,23 @@ def request_company_profile_cn():
     df = mysql2df(database, table, fields=['stockCode'])
     codes = df['stockCode'].tolist()
 
+    token = load_json_txt("../request/lxr_token.txt", log=False)
     url = 'https://open.lixinger.com/api/cn/company/profile'
 
     stock_codes_list = split_metrics(codes, 100)
     data_list = []
     for index, sub_codes in enumerate(stock_codes_list):
-        data = dict()
-        data["token"] = "f819be3a-e030-4ff0-affe-764440759b5c"
-        data["stockCodes"] = sub_codes
-
-        post_data = json.dumps(data)
-        header_dict = {'Content-Type': 'application/json'}
+        api_dict = {
+            "token": token,
+            "stockCodes": sub_codes,
+        }
 
         MainLog.add_log('    index --> %s/%s' % (index+1, len(stock_codes_list)))
         MainLog.add_log('    stock_codes --> %s' % sub_codes)
 
-        req = urllib.request.Request(url, data=bytes(post_data, 'gbk'), headers=header_dict)
-        res_txt = urllib.request.urlopen(req).read().decode()
-        data_list.extend(json.loads(res_txt)['data'])
+        res = data_request(url=url, api_dict=api_dict)
+        data_list.extend(res['data'])
+        time.sleep(0.5)
 
     df = pd.DataFrame(data_list)
     df = df.set_index(keys='stockCode', drop=False)
@@ -111,6 +107,7 @@ def request_company_profile_cn():
 
     df["first_update"] = pd.NA
     df["last_update"] = pd.NA
+    df['postalCode'] = df['postalCode'].where(df['postalCode'].str.isdigit(), '')
 
     df2mysql(df=df, database=database, table=table, ini=True, log=False)
 
