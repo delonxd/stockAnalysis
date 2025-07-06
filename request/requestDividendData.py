@@ -1,15 +1,16 @@
-from request.requestData import *
-from method.fileMethod import *
+from request.requestData import try_request, data_request
+from method.fileMethod import load_json_txt
 from method.profileMethod import get_code_profile_df
+from method.sqlMethod import df2mysql
+from method.logMethod import MainLog
 
 import datetime as dt
-import json
 import pandas as pd
 
 
 @try_request(None)
 def request_dividend(code, ipo_date=None):
-    token = "f819be3a-e030-4ff0-affe-764440759b5c"
+    token = load_json_txt("../request/lxr_token.txt", log=False)
     url = 'https://open.lixinger.com/api/cn/company/dividend'
 
     ret = []
@@ -28,9 +29,19 @@ def request_dividend(code, ipo_date=None):
             "endDate": end.strftime("%Y-%m-%d"),
             "stockCode": code,
         }
+        # res = data_request(url=url, api_dict=api)
+        # data = json.loads(res.decode())['data']
 
-        res = data_request(url=url, api_dict=api)
-        data = json.loads(res.decode())['data']
+        try:
+            res = data_request(url=url, api_dict=api)
+            data = res['data']
+
+        except BaseException as e:
+            if str(e) == 'HTTP Error 500: Internal Server Error':
+                MainLog.add_log(f'request错误：{code} --> {str(e)}')
+                break
+            else:
+                raise e
 
         if ipo_date is None:
             if len(data) == 0:
@@ -86,9 +97,11 @@ def request_dv2mysql_cn(stock_codes: list = None, ini=False):
     if stock_codes is None:
         stock_codes = df.index.to_list()
 
+    # stock_codes = stock_codes[1:]
     ipo_dates = df['ipo_date'].dropna().to_dict()
 
     for code in stock_codes:
+        MainLog.add_log(f'request_dividend code -> {code}')
         res = request_dividend(code, ipo_date=ipo_dates.get(code))
         df = dv_res2dataframe(res)
         table = 'dv_%s' % code
