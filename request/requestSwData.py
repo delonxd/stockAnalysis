@@ -1,6 +1,7 @@
-from request.requestData import *
-from method.fileMethod import load_json_txt
-from method.fileMethod import write_json_txt
+from request.requestData import try_request, data_request
+from method.fileMethod import load_json_txt, write_json_txt
+from method.logMethod import MainLog
+from method.profileMethod import get_code_profile_df
 
 import json
 import urllib.request
@@ -14,7 +15,8 @@ def request_industry_sample():
         industry3_list = json.loads(f.read())
 
     data = dict()
-    data["token"] = "f819be3a-e030-4ff0-affe-764440759b5c"
+    token = load_json_txt("../request/lxr_token.txt", log=False)
+    data["token"] = token
 
     data["date"] = "latest"
     data["stockCodes"] = industry3_list
@@ -56,18 +58,19 @@ def request_industry_sample():
     return dict0, dict1
 
 
-@try_request("HTTP Error 500: Internal Server Error")
+@try_request(None)
 def request_industry_sw_2021(code):
-    token = "f819be3a-e030-4ff0-affe-764440759b5c"
+    token = load_json_txt("../request/lxr_token.txt", log=False)
+
     url = 'https://open.lixinger.com/api/cn/company/industries'
 
-    api = {
+    api_dict = {
         "token": token,
         "stockCode": code,
     }
 
-    res = data_request(url=url, api_dict=api)
-    data = json.loads(res.decode())['data']
+    res = data_request(url=url, api_dict=api_dict)
+    data = res['data']
 
     ret = None
 
@@ -84,16 +87,17 @@ def request_industry_sw_2021(code):
 
 @try_request(None)
 def request_sw_2021_names():
-    token = "f819be3a-e030-4ff0-affe-764440759b5c"
+    token = load_json_txt("../request/lxr_token.txt", log=False)
+
     url = 'https://open.lixinger.com/api/cn/industry'
 
-    api = {
+    api_dict = {
         "token": token,
         "source": "sw_2021",
     }
 
-    res = data_request(url=url, api_dict=api)
-    data = json.loads(res.decode())['data']
+    res = data_request(url=url, api_dict=api_dict)
+    data = res['data']
 
     ret = dict()
 
@@ -110,8 +114,10 @@ def request_sw_2021_names():
 def update_sw_2021():
     MainLog.add_split('#')
 
-    code_list = load_json_txt("..\\basicData\\dailyUpdate\\latest\\a001_code_list.txt")
+    df = get_code_profile_df()
+    df = df[df['area'] == 'cn']
 
+    code_list = df.index.to_list()
     ret = dict()
     for code in code_list:
         MainLog.add_log('request_industry_sw_2021 --> %s' % code)
@@ -125,4 +131,4 @@ def update_sw_2021():
 
 
 if __name__ == '__main__':
-    request_sw_2021_names()
+    update_sw_2021()
