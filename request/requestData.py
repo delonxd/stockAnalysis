@@ -53,9 +53,9 @@ def get_cn_data_metrics(data_type, fs_type, metrics):
 
     path = ''
     if data_type == 'fs':
-        if fs_type == 'non_financial':
+        if fs_type == 'cn_non_financial':
             path = "../basicData/chineseComparison/zh_cmp_table_fs_cn_org.txt"
-        elif fs_type == 'bank':
+        elif fs_type == 'cn_bank':
             path = "../basicData/chineseComparison/zh_cmp_table_fs_cn_bank.txt"
 
     elif data_type == 'mvs':
@@ -81,7 +81,7 @@ def get_cn_data_metrics(data_type, fs_type, metrics):
             txt2 = '_'.join(tmp[3:])
 
             number = tmp[1]
-            if fs_type == 'non_financial':
+            if fs_type == 'cn_non_financial':
                 if number in ['156', '185']:
                     continue
                 if number == '316':
@@ -111,12 +111,12 @@ def request_data(
         fs_type=None
 ):
 
-    token = "f819be3a-e030-4ff0-affe-764440759b5c"
+    token = load_json_txt("../request/lxr_token.txt", log=False)
 
     if data_type == 'fs':
-        if fs_type == 'non_financial':
+        if fs_type == 'cn_non_financial':
             url = 'https://open.lixinger.com/api/cn/company/fs/non_financial'
-        elif fs_type == 'bank':
+        elif fs_type == 'cn_bank':
             url = 'https://open.lixinger.com/api/cn/company/fs/bank'
         else:
             raise KeyboardInterrupt('fs_type wrong')
@@ -150,14 +150,14 @@ def request_data(
         metrics_list = split_metrics(metrics, 48)
 
         for metrics in metrics_list:
-            api = {
+            api_dict = {
                 "token": token,
                 "date": date,
                 "stockCodes": stock_codes,
                 "metricsList": metrics,
             }
 
-            res = data_request(url=url, api_dict=api)
+            res = data_request(url=url, api_dict=api_dict)
             ret.append(res)
             time.sleep(0.2)
     else:
@@ -186,7 +186,7 @@ def request_data(
                 }
 
                 res = data_request(url=url, api_dict=api)
-                if len(json.loads(res.decode())['data']) == 0:
+                if len(res['data']) == 0:
                     start = start_dt
                     break
 
@@ -205,7 +205,7 @@ def request_data(
 def regular_res(res):
     ret = dict()
     for subRes in res:
-        for data in json.loads(subRes.decode())['data']:
+        for data in subRes['data']:
             code = data["stockCode"]
             tmp = dict()
             tmp["code"] = 1
@@ -553,26 +553,11 @@ def res2dataframe(res, data_type, header_table):
     return df
 
 
-def test_update_bank_fs_table():
-    path = '../basicData/code_types_dict.txt'
-    src = load_json_txt(path)
-    for code, value in src.items():
-        if value == 'bank':
-            request2mysql_new(
-                stock_code=code,
-                data_type='fs',
-                start_date="1970-01-01",
-                fs_type='bank',
-                ini=False,
-            )
-
-
 if __name__ == '__main__':
     # pd.set_option('display.max_columns', None)
     # pd.set_option('display.max_rows', None)
     # pd.set_option('display.width', 10000)
 
-    test_update_bank_fs_table()
     # request2mysql_daily_new(
     #     stock_codes=['603195'],
     #     data_type='fs',
